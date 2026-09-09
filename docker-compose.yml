@@ -1,0 +1,16 @@
+services:
+  wcs:
+    build: .
+    image: wcs:latest
+    container_name: wcs
+    ports:
+      - "8080:8080"
+    environment:
+      WCS_JWT_SECRET: "${WCS_JWT_SECRET:-change-me-in-production}"
+      WCS_ADDR: "0.0.0.0:8080"
+    volumes:
+      - wcs-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  wcs-data:

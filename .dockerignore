@@ -1,0 +1,15 @@
+**/node_modules/
+**/target/
+**/dist/
+**/*.sqlite*
+server/data/
+client/data/
+scrapper/
+.git/
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+docker-compose.yml
+*.log
+.DS_Store

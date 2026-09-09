@@ -18,6 +18,25 @@ A football World Cup simulation game.
 
 ## Quick start
 
+### 0. One-line deploy (Docker)
+
+The repo ships a multi-stage `Dockerfile` that builds the React frontend and
+the Rust backend into a single image serving **both** the SPA and the API on
+port `8080` (data persists in a named volume).
+
+```sh
+docker compose up --build -d      # → http://localhost:8080
+```
+
+or, without compose:
+
+```sh
+docker build -t wcs . && docker run -p 8080:8080 -e WCS_JWT_SECRET=your-secret wcs
+```
+
+Env vars: `WCS_ADDR` (bind address), `WCS_DATA_DIR` (SQLite location),
+`WCS_STATIC_DIR` (built frontend), `WCS_JWT_SECRET` (auth signing key).
+
 ### 1. Backend (`server/`)
 
 ```sh
