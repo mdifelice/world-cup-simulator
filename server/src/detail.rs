@@ -52,8 +52,13 @@ pub struct RunRequest {
     pub save: bool,
 }
 
-const BASE_GOALS: f64 = 1.32;
-const HOME_FACTOR: f64 = 1.10;
+// Expected-goals calibration. Equal-strength sides should produce ~2.7 total
+// goals (real World Cups average ~2.7, 2022 = 2.69). The strength factor is
+// deliberately flattened (diff / 20 instead of / 10): real favourites win by
+// control, not by running up basketball scores, so a big mismatch should reach
+// ~3.5 total xG, not 4.5+.
+const BASE_GOALS: f64 = 0.88;
+const HOME_FACTOR: f64 = 1.08;
 
 // ---------------------------------------------------------------------------
 // Formations
@@ -942,8 +947,8 @@ impl<'a> Engine<'a> {
         let a = self.strength(away, knockout)?;
         let home_support = sim::team_context(self.conn, home)?.home_support;
         let h = (h + (home_support as f64 - 50.0) * 0.04).min(99.0);
-        let hx = (BASE_GOALS * ((h - a) / 10.0).exp() * HOME_FACTOR).clamp(0.1, 4.5);
-        let ax = (BASE_GOALS * ((a - h) / 10.0).exp()).clamp(0.1, 4.5);
+        let hx = (BASE_GOALS * ((h - a) / 20.0).exp() * HOME_FACTOR).clamp(0.1, 4.5);
+        let ax = (BASE_GOALS * ((a - h) / 20.0).exp()).clamp(0.1, 4.5);
         Ok((hx, ax))
     }
 

@@ -365,8 +365,8 @@ pub(crate) fn base_strength(
 // Match engine
 // ---------------------------------------------------------------------------
 
-const BASE_GOALS: f64 = 1.32;
-const HOME_FACTOR: f64 = 1.10;
+const BASE_GOALS: f64 = 0.88;
+const HOME_FACTOR: f64 = 1.08;
 
 fn simulate_one(
     rng: &mut Rng,
@@ -402,8 +402,8 @@ pub(crate) fn expected_goals(
         + f64::from(away_boost))
         .min(99.0);
 
-    let home_xg = (BASE_GOALS * ((home - away) / 10.0).exp() * HOME_FACTOR).clamp(0.1, 4.5);
-    let away_xg = (BASE_GOALS * ((away - home) / 10.0).exp()).clamp(0.1, 4.5);
+    let home_xg = (BASE_GOALS * ((home - away) / 20.0).exp() * HOME_FACTOR).clamp(0.1, 4.5);
+    let away_xg = (BASE_GOALS * ((away - home) / 20.0).exp()).clamp(0.1, 4.5);
     Ok((home_xg, away_xg))
 }
 
