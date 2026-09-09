@@ -29,6 +29,13 @@ impl From<rusqlite::Error> for ApiError {
     }
 }
 
+impl From<serde_json::Error> for ApiError {
+    fn from(e: serde_json::Error) -> Self {
+        tracing::error!("json error: {e}");
+        ApiError::Internal("json error".into())
+    }
+}
+
 impl IntoResponse for ApiError {
     fn into_response(self) -> Response {
         let (status, message) = match self {

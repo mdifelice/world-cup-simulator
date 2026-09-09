@@ -2,12 +2,22 @@
 
 A football World Cup simulation game.
 
+## The new match-by-match flow
+
 - **Pick a World Cup** (1930 → 2026, each with its real format)
-- **Pick your national team** (any squad that participated in that edition)
-- **Choose a formation**, assign your 11 starters
-- **Simulate the tournament** following the real fixture. You play your matches
-  (with a tactical boost for a strong lineup); every other match is simulated
-  automatically.
+- **Pick your nation** (any squad that entered that edition)
+- **Browse your 26-man squad** — real imported call-ups are used when they
+  exist; editions that haven't been scraped get a deterministic fictional
+  squad, so every tournament is playable immediately
+- **Watch the whole cup**, day by day: group tables and top scorers update
+  live as results are revealed
+- **Your team's matches come with a momentum chart** (per-minute dominance,
+  goal spikes) and full match detail — goals, assists, extra time and penalty
+  shootouts
+- **Ceremonies** — Golden/Silver/Bronze Ball based on aggregate performance
+  plus a Golden Boot table
+- **Signed-in runs are saved** to your history and can be re-lived any time;
+  anonymous visitors play the same flow without leaving a trace
 
 ## Architecture
 
@@ -130,6 +140,25 @@ curl -s -X POST localhost:8080/api/tournaments/22/import \
 | POST   | `/teams`                                  | Upload a team (auth)                          |
 | GET    | `/teams/:id/players?tournament_id=`       | Squad of a team for a tournament              |
 | POST   | `/teams/:id/players`                      | Upload players with call-ups (auth)           |
+| POST   | `/tournaments/:id/run`                    | Full-run replay payload (reveal order, momentum, awards) — saved on disk only when signed in |
+| GET    | `/runs`                                   | Your saved runs (auth)                        |
+| GET    | `/runs/:id`                               | Reopen a saved run payload (auth)             |
+
+The `/run` endpoint simulates the *entire* tournament in memory and never writes
+to the `matches` table. It returns a `RunPayload`:
+
+- `order` — match ids in reveal order (one day per group round, then knockout),
+  so the front end can unveil results progressively
+- `matches` — full details per match (scores, `extra_time`, `penalties`,
+  goals with scorers/assists, and `momentum` only for the focus team's games)
+- `groups` — group membership used to render live group tables
+- `awards` — Golden/Silver/Bronze Ball + top scorers, computed from in-memory
+  player ratings across the whole run
+- `champion` — the winner
+
+When the caller sends a valid Bearer token the payload is archived in
+`sim_runs` and `run_id` is filled in; anonymous calls simply get a `null`
+`run_id`.
 
 ## Registering a real World Cup fixture & squads
 

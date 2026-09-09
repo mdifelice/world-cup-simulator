@@ -108,6 +108,24 @@ impl FromRequestParts<Db> for AuthUser {
     }
 }
 
+/// Auth that is optional: `None` for anonymous requests, `Some(user)` when a
+/// valid Bearer token is present. Used by run endpoints that work for both.
+pub struct OptionalUser(pub Option<AuthUser>);
+
+impl FromRequestParts<Db> for OptionalUser {
+    type Rejection = ApiError;
+
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &Db,
+    ) -> Result<Self, Self::Rejection> {
+        match AuthUser::from_request_parts(parts, state).await {
+            Ok(user) => Ok(OptionalUser(Some(user))),
+            Err(_) => Ok(OptionalUser(None)),
+        }
+    }
+}
+
 fn get_user_by_id(db: &rusqlite::Connection, id: i64) -> ApiResult<Option<User>> {
     let mut stmt = db.prepare(
         "SELECT id, provider, display_name, email, created_at FROM users WHERE id = ?1",

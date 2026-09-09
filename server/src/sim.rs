@@ -15,10 +15,10 @@ pub struct SimRequest {
 // ---------------------------------------------------------------------------
 // Simple PRNG (xorshift64), seeded from system time.
 // ---------------------------------------------------------------------------
-struct Rng(u64);
+pub(crate) struct Rng(u64);
 
 impl Rng {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         let seed = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_nanos() as u64)
@@ -26,7 +26,7 @@ impl Rng {
             | 1;
         Rng(seed)
     }
-    fn next(&mut self) -> u64 {
+    pub(crate) fn next(&mut self) -> u64 {
         let mut x = self.0;
         x ^= x << 13;
         x ^= x >> 7;
@@ -34,16 +34,16 @@ impl Rng {
         self.0 = x;
         x
     }
-    fn unit(&mut self) -> f64 {
+    pub(crate) fn unit(&mut self) -> f64 {
         (self.next() >> 11) as f64 / (1u64 << 53) as f64
     }
 }
 
-fn poisson(rng: &mut Rng, lambda: f64) -> i32 {
+pub(crate) fn poisson(rng: &mut Rng, lambda: f64) -> i32 {
     if lambda <= 0.0 {
         return 0;
     }
-    let l = lambda.exp();
+    let l = (-lambda).exp();
     let mut k = 0;
     let mut p = 1.0;
     loop {
@@ -286,11 +286,11 @@ fn team_rating(conn: &Connection, tournament_id: i64, team_id: i64) -> ApiResult
 }
 
 #[derive(Clone, Copy)]
-struct TeamContext {
-    pedigree: i32,
-    home_support: i32,
-    form: i32,
-    morale: i32,
+pub(crate) struct TeamContext {
+    pub(crate) pedigree: i32,
+    pub(crate) home_support: i32,
+    pub(crate) form: i32,
+    pub(crate) morale: i32,
 }
 
 impl Default for TeamContext {
@@ -304,7 +304,7 @@ impl Default for TeamContext {
     }
 }
 
-fn team_context(conn: &Connection, team_id: i64) -> ApiResult<TeamContext> {
+pub(crate) fn team_context(conn: &Connection, team_id: i64) -> ApiResult<TeamContext> {
     let row: Option<(i32, i32, i32, i32)> = conn
         .query_row(
             "SELECT pedigree, home_support, form, morale FROM teams WHERE id = ?1",
@@ -341,7 +341,7 @@ fn avg_leadership(conn: &Connection, tournament_id: i64, team_id: i64) -> ApiRes
 /// `teams.rating` column when no squad exists) folded with the team-level
 /// attributes. Pedigree matters more in knockouts; home support is applied on
 /// top for the home side in `simulate_one`.
-fn base_strength(
+pub(crate) fn base_strength(
     conn: &Connection,
     tournament_id: i64,
     team_id: i64,
@@ -374,6 +374,21 @@ fn simulate_one(
     away_boost: i32,
     knockout: bool,
 ) -> ApiResult<(i32, i32)> {
+    let (home_xg, away_xg) =
+        expected_goals(conn, tournament_id, home_id, away_id, home_boost, away_boost, knockout)?;
+    Ok((poisson(rng, home_xg), poisson(rng, away_xg)))
+}
+
+/// Expected goals for a pairing, shared with the detailed run engine.
+pub(crate) fn expected_goals(
+    conn: &Connection,
+    tournament_id: i64,
+    home_id: i64,
+    away_id: i64,
+    home_boost: i32,
+    away_boost: i32,
+    knockout: bool,
+) -> ApiResult<(f64, f64)> {
     let home_support = team_context(conn, home_id)?.home_support;
     let home = (base_strength(conn, tournament_id, home_id, knockout)?
         + f64::from(home_boost)
@@ -385,8 +400,7 @@ fn simulate_one(
 
     let home_xg = (BASE_GOALS * ((home - away) / 10.0).exp() * HOME_FACTOR).clamp(0.1, 4.5);
     let away_xg = (BASE_GOALS * ((away - home) / 10.0).exp()).clamp(0.1, 4.5);
-
-    Ok((poisson(rng, home_xg), poisson(rng, away_xg)))
+    Ok((home_xg, away_xg))
 }
 
 fn record(conn: &Connection, match_id: i64, hs: i32, as_: i32) -> ApiResult<()> {
@@ -421,7 +435,7 @@ fn apply_result(conn: &Connection, home: i64, away: i64, hs: i32, as_: i32) -> A
 // Phase helpers
 // ---------------------------------------------------------------------------
 
-fn load_phases(conn: &Connection, tournament_id: i64) -> ApiResult<Vec<Phase>> {
+pub(crate) fn load_phases(conn: &Connection, tournament_id: i64) -> ApiResult<Vec<Phase>> {
     let mut stmt = conn.prepare(
         "SELECT id, tournament_id, seq, key, name, phase_type, group_count, entry_teams
          FROM tournament_phases WHERE tournament_id = ?1 ORDER BY seq",
@@ -441,7 +455,7 @@ fn load_phases(conn: &Connection, tournament_id: i64) -> ApiResult<Vec<Phase>> {
     Ok(rows.collect::<Result<Vec<_>, _>>()?)
 }
 
-fn participants(conn: &Connection, tournament_id: i64) -> ApiResult<Vec<i64>> {
+pub(crate) fn participants(conn: &Connection, tournament_id: i64) -> ApiResult<Vec<i64>> {
     let mut stmt = conn.prepare(
         "SELECT t.id FROM tournament_teams tt
          JOIN teams t ON t.id = tt.team_id
@@ -450,6 +464,63 @@ fn participants(conn: &Connection, tournament_id: i64) -> ApiResult<Vec<i64>> {
     )?;
     let rows = stmt.query_map([tournament_id], |r| r.get(0))?;
     Ok(rows.collect::<Result<Vec<_>, _>>()?)
+}
+
+/// Resolves the groups for a group phase. Existing manual groups (from the
+/// fixture UI) are reused when present; otherwise the qualifiers are split
+/// evenly. When `persist` is set the fallback split is stored so the fixture
+/// UI stays consistent; the in-memory run engine leaves the DB untouched.
+pub(crate) fn group_assignments(
+    conn: &Connection,
+    tournament_id: i64,
+    phase: &Phase,
+    qualifiers: &[i64],
+    is_first_group: bool,
+    persist: bool,
+) -> ApiResult<Vec<Vec<i64>>> {
+    let groups: Vec<Vec<i64>> = if is_first_group {
+        let loaded = fixture::load_groups(conn, tournament_id)?
+            .into_iter()
+            .map(|(_, t)| t)
+            .filter(|t| !t.is_empty())
+            .collect::<Vec<_>>();
+        if !loaded.is_empty() {
+            loaded
+        } else {
+            let count = phase.group_count.unwrap_or(1).max(1) as usize;
+            let per = qualifiers.len().div_ceil(count);
+            let assigned: Vec<Vec<i64>> = qualifiers
+                .chunks(per.max(1))
+                .map(|c| c.to_vec())
+                .collect();
+            if persist {
+                for (gi, teams) in assigned.iter().enumerate() {
+                    let letter = format!("{}", (b'A' + gi as u8) as char);
+                    for t in teams {
+                        conn.execute(
+                            "INSERT OR IGNORE INTO tournament_groups (tournament_id, group_name, team_id) VALUES (?1, ?2, ?3)",
+                            params![tournament_id, letter, t],
+                        )?;
+                    }
+                }
+            }
+            assigned
+        }
+    } else if phase.group_count == Some(1) {
+        vec![qualifiers.to_vec()]
+    } else {
+        let count = phase.group_count.unwrap_or(1) as usize;
+        let per = qualifiers.len().div_ceil(count);
+        qualifiers
+            .chunks(per)
+            .map(|c| c.to_vec())
+            .filter(|c| !c.is_empty())
+            .collect()
+    };
+    if groups.is_empty() {
+        return Err(ApiError::bad_request("group phase has no assigned groups"));
+    }
+    Ok(groups)
 }
 
 /// Plays every group match of a phase. Returns the sorted table(s) (group order).
@@ -463,50 +534,8 @@ fn play_group_phase(
     focus: Option<i64>,
     boost: i32,
 ) -> ApiResult<(Vec<Vec<Standing>>, usize)> {
-let groups: Vec<Vec<i64>> = if is_first_group {
-    let loaded = fixture::load_groups(conn, tournament_id)?
-        .into_iter()
-        .map(|(_, t)| t)
-        .filter(|t| !t.is_empty())
-        .collect::<Vec<_>>();
-    if !loaded.is_empty() {
-        loaded
-    } else {
-        // No manual groups assigned yet (tournament created via phases +
-        // participants but never went through fixture generation): split the
-        // seeded qualifiers evenly and persist them for the UI.
-        let count = phase.group_count.unwrap_or(1).max(1) as usize;
-        let per = qualifiers.len().div_ceil(count);
-        let assigned: Vec<Vec<i64>> = qualifiers
-            .chunks(per.max(1))
-            .map(|c| c.to_vec())
-            .collect();
-        for (gi, teams) in assigned.iter().enumerate() {
-            let letter = format!("{}", (b'A' + gi as u8) as char);
-            for t in teams {
-                conn.execute(
-                    "INSERT OR IGNORE INTO tournament_groups (tournament_id, group_name, team_id) VALUES (?1, ?2, ?3)",
-                    params![tournament_id, letter, t],
-                )?;
-            }
-        }
-        assigned
-    }
-} else if phase.group_count == Some(1) {
-        vec![qualifiers.to_vec()]
-    } else {
-        // hypothetical second group stage: split the qualifiers evenly
-        let count = phase.group_count.unwrap_or(1) as usize;
-        let per = qualifiers.len().div_ceil(count);
-        qualifiers
-            .chunks(per)
-            .map(|c| c.to_vec())
-            .filter(|c| !c.is_empty())
-            .collect()
-    };
-    if groups.is_empty() {
-        return Err(ApiError::bad_request("group phase has no assigned groups"));
-    }
+    let groups: Vec<Vec<i64>> =
+        group_assignments(conn, tournament_id, phase, qualifiers, is_first_group, true)?;
 
     let mut tables = Vec::new();
     let mut simulated = 0usize;
@@ -541,9 +570,7 @@ let groups: Vec<Vec<i64>> = if is_first_group {
     Ok((tables, simulated))
 }
 
-/// Picks the teams advancing from a group phase: top `k` of each group, then
-/// best remaining (for e.g. the four best third-placed teams).
-fn advance(
+pub(crate) fn advance(
     tables: &[Vec<Standing>],
     entry: usize,
 ) -> (Vec<i64>, usize) {
@@ -581,7 +608,7 @@ fn advance(
 
 /// Pairings after a group phase: each group winner plays a runner-up from
 /// another group; stragglers (best thirds) pair among themselves.
-fn group_pairings(q: &[i64], m: usize) -> ApiResult<Vec<(i64, i64)>> {
+pub(crate) fn group_pairings(q: &[i64], m: usize) -> ApiResult<Vec<(i64, i64)>> {
     let n = q.len();
     if n % 2 != 0 {
         return Err(ApiError::bad_request("odd number of qualifiers for knockout"));
@@ -614,7 +641,7 @@ fn runner_for(i: usize, winners: usize, runners: &[i64]) -> Option<i64> {
 }
 
 /// Seeded bracket for a pure-knockout tournament: best vs worst, etc.
-fn seeded_pairings(q: &[i64]) -> ApiResult<Vec<(i64, i64)>> {
+pub(crate) fn seeded_pairings(q: &[i64]) -> ApiResult<Vec<(i64, i64)>> {
     let n = q.len();
     if n % 2 != 0 {
         return Err(ApiError::bad_request("odd number of participants for knockout"));
@@ -624,7 +651,7 @@ fn seeded_pairings(q: &[i64]) -> ApiResult<Vec<(i64, i64)>> {
         .collect())
 }
 
-fn next_pairings(winners: &[i64]) -> ApiResult<Vec<(i64, i64)>> {
+pub(crate) fn next_pairings(winners: &[i64]) -> ApiResult<Vec<(i64, i64)>> {
     if winners.len() % 2 != 0 {
         return Err(ApiError::bad_request("odd number of winners for knockout round"));
     }
@@ -883,11 +910,11 @@ fn simulate_tournament_inner(
     })
 }
 
-fn is_first_group_phase(phases: &[Phase], idx: usize) -> bool {
+pub(crate) fn is_first_group_phase(phases: &[Phase], idx: usize) -> bool {
     phases[..idx].iter().all(|p| p.phase_type != "GROUP")
 }
 
-fn next_entry(phases: &[Phase], idx: usize) -> i32 {
+pub(crate) fn next_entry(phases: &[Phase], idx: usize) -> i32 {
     phases
         .get(idx + 1)
         .and_then(|p| {
@@ -900,7 +927,7 @@ fn next_entry(phases: &[Phase], idx: usize) -> i32 {
         .unwrap_or(8)
 }
 
-fn team_name(conn: &Connection, team_id: i64) -> rusqlite::Result<String> {
+pub(crate) fn team_name(conn: &Connection, team_id: i64) -> rusqlite::Result<String> {
     conn.query_row("SELECT name FROM teams WHERE id = ?1", [team_id], |r| {
         r.get(0)
     })

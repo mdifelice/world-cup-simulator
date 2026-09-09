@@ -1,9 +1,11 @@
 pub mod auth;
 pub mod db;
+pub mod detail;
 pub mod error;
 pub mod fixture;
 pub mod handlers;
 pub mod models;
+pub mod names;
 pub mod sim;
 
 use std::sync::{Arc, Mutex};
@@ -70,6 +72,12 @@ async fn main() {
             "/api/tournaments/{id}/simulate",
             post(handlers::simulate_tournament),
         )
+        .route(
+            "/api/tournaments/{id}/run",
+            post(handlers::run_tournament_detail),
+        )
+        .route("/api/runs", get(handlers::list_runs))
+        .route("/api/runs/{id}", get(handlers::get_run))
         .route("/api/teams", get(handlers::list_teams).post(handlers::create_team))
         .route(
             "/api/teams/{id}/players",

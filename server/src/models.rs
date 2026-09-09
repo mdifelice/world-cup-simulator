@@ -13,6 +13,9 @@ pub struct Tournament {
     pub winner: Option<String>,
     pub start_date: Option<String>,
     pub end_date: Option<String>,
+    /// Whether players wore shirt numbers in this edition. Controls how the
+    /// roster is sorted and displayed (before 1954 squads were unnumbered).
+    pub shirt_numbers: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -26,6 +29,12 @@ pub struct CreateTournament {
     pub start_date: Option<String>,
     #[serde(default)]
     pub end_date: Option<String>,
+    #[serde(default = "default_shirt_numbers")]
+    pub shirt_numbers: bool,
+}
+
+fn default_shirt_numbers() -> bool {
+    true
 }
 
 /// A phase of a tournament (e.g. group stage, Round of 16, final).
@@ -223,6 +232,8 @@ pub struct Player {
     pub aggression: Option<i32>,
     pub concentration: Option<i32>,
     pub leadership: Option<i32>,
+    /// Position-weighted overall rating (mirrors `sim::composite_rating`).
+    pub overall: f64,
 }
 
 /// Individual attributes are optional; unset fields default to 60 on insert.
@@ -371,4 +382,139 @@ pub struct AuthOut {
 pub struct SimulateOut {
     pub simulated: usize,
     pub champion: Option<String>,
+}
+
+// ---------------------------------------------------------------------------
+// Full tournament run (the "play a cup" flow)
+// ---------------------------------------------------------------------------
+
+/// Everything needed to render and play back a full cup run. Computed
+/// anonymously on demand; only saved (as JSON in `sim_runs`) for logged-in
+/// users who ask to keep it.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RunPayload {
+    pub run_id: Option<i64>,
+    pub tournament_id: i64,
+    pub tournament_name: String,
+    pub year: i32,
+    pub host: String,
+    pub shirt_numbers: bool,
+    pub focus_team_id: Option<i64>,
+    /// Match ids in the order they should be revealed.
+    pub order: Vec<i64>,
+    pub matches: Vec<RunMatch>,
+    /// Group assignments used for the group phase (letter + team ids/names).
+    pub groups: Vec<GroupInfo>,
+    pub awards: Awards,
+    pub champion: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GroupInfo {
+    pub name: String,
+    pub teams: Vec<RunTeam>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct RunTeam {
+    pub id: i64,
+    pub name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct RunMatch {
+    pub id: i64,
+    /// 1-based chronological reveal step/day.
+    pub day: i32,
+    pub stage_key: String,
+    pub stage_name: String,
+    pub home_team_id: i64,
+    pub away_team_id: i64,
+    pub home_team_name: String,
+    pub away_team_name: String,
+    /// Regulation score (draws in knockouts are then settled).
+    pub home_score: i32,
+    pub away_score: i32,
+    /// True when a knockout tie went to extra time.
+    pub extra_time: bool,
+    pub penalties: Option<PenResult>,
+    /// Human-readable outcome, e.g. "2–1", "1–1 aet", "0–0 aet (5–4 pens)".
+    pub result_label: String,
+    pub goals: Vec<Goal>,
+    /// Minute-by-minute momentum (only present for the user's team's matches).
+    pub momentum: Option<Momentum>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PenResult {
+    pub home_score: i32,
+    pub away_score: i32,
+    pub winner_id: i64,
+    pub sudden_death: bool,
+    pub kicks: Vec<PenKick>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PenKick {
+    /// 1-based "team round"; rounds 1-5 are the set of five, 6+ sudden death.
+    pub round: i32,
+    pub team_id: i64,
+    pub taker: String,
+    pub scored: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Goal {
+    pub minute: i32,
+    /// 0 = penalty, 1 = extra time.
+    pub extra_time: bool,
+    pub team_id: i64,
+    pub scorer_id: i64,
+    pub scorer: String,
+    pub assist_id: Option<i64>,
+    pub assist: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Momentum {
+    /// Per-minute dominance (0..1) for home then away, length = regulation
+    /// minutes (90) or regulation + extra time (120).
+    pub home: Vec<f64>,
+    pub away: Vec<f64>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Awards {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub golden: Option<PlayerAward>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub silver: Option<PlayerAward>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bronze: Option<PlayerAward>,
+    pub top_scorers: Vec<TopScorer>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PlayerAward {
+    pub player_id: i64,
+    pub name: String,
+    pub team_id: i64,
+    pub team_name: String,
+    pub position: String,
+    pub games: i32,
+    pub goals: i32,
+    pub assists: i32,
+    /// Aggregate performance score used to rank the awards.
+    pub score: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct TopScorer {
+    pub player_id: i64,
+    pub name: String,
+    pub team_id: i64,
+    pub team_name: String,
+    pub position: String,
+    pub goals: i32,
+    pub assists: i32,
 }

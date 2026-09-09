@@ -54,6 +54,14 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ focus_team_id: focusTeamId, focus_boost: boost }),
     }),
+  run: (id: number, focusTeamId: number | null) =>
+    req<import("./types").RunPayload>(`/api/tournaments/${id}/run`, {
+      method: "POST",
+      body: JSON.stringify({ focus_team_id: focusTeamId }),
+    }),
+  runs: () => req<import("./types").RunListItem[]>("/api/runs"),
+  runById: (id: number) =>
+    req<import("./types").RunPayload>(`/api/runs/${id}`),
   me: () => req<import("./types").User>("/api/auth/me"),
 };
 

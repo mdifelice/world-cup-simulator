@@ -63,6 +63,7 @@ export function makePlaceholderSquad(team: Team): Player[] {
       position: pos,
       shirt_number: n + 1,
       rating: r,
+      overall: r,
       ...(attrs as Record<(typeof ATTRIBUTES)[number], number>),
     };
   };

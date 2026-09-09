@@ -7,13 +7,15 @@ use rusqlite::{params, OptionalExtension};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    auth::AuthUser,
+    auth::{AuthUser, OptionalUser},
+    detail::{self, RunRequest},
     error::{ApiError, ApiResult},
     fixture,
     models::{
         AddParticipants, CreateMatch, CreatePlayer, CreateTeam, CreateTournament, ImportPayload,
-        Match, Participant, Phase, Player, SimulateOut, Team, Tournament,
+        Match, Participant, Phase, Player, RunPayload, SimulateOut, Team, Tournament,
     },
+    names,
     sim::{self, SimRequest},
     Db,
 };
@@ -35,6 +37,7 @@ pub struct TournamentDetail {
     winner: Option<String>,
     start_date: Option<String>,
     end_date: Option<String>,
+    shirt_numbers: bool,
     phases: Vec<Phase>,
 }
 
@@ -48,6 +51,7 @@ impl TournamentDetail {
             winner: t.winner,
             start_date: t.start_date,
             end_date: t.end_date,
+            shirt_numbers: t.shirt_numbers,
             phases,
         }
     }
@@ -62,6 +66,7 @@ fn map_tournament(r: &rusqlite::Row) -> rusqlite::Result<Tournament> {
         winner: r.get(4)?,
         start_date: r.get(5)?,
         end_date: r.get(6)?,
+        shirt_numbers: r.get::<_, i32>(7)? != 0,
     })
 }
 
@@ -88,7 +93,7 @@ fn load_phases(conn: &rusqlite::Connection, id: i64) -> rusqlite::Result<Vec<Pha
 pub async fn list_tournaments(State(db): State<Db>) -> ApiResult<Json<Vec<Tournament>>> {
     let conn = db.lock().unwrap();
     let mut stmt = conn.prepare(
-        "SELECT id, name, year, host, winner, start_date, end_date FROM tournaments ORDER BY year",
+        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers FROM tournaments ORDER BY year",
     )?;
     let rows = stmt.query_map([], map_tournament)?;
     let mut out = Vec::new();
@@ -102,7 +107,7 @@ pub async fn get_tournament(State(db): State<Db>, Path(id): Path<i64>) -> ApiRes
     let conn = db.lock().unwrap();
     let t = conn
         .query_row(
-            "SELECT id, name, year, host, winner, start_date, end_date FROM tournaments WHERE id = ?1",
+            "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers FROM tournaments WHERE id = ?1",
             [id],
             map_tournament,
         )
@@ -119,8 +124,8 @@ pub async fn create_tournament(
 ) -> ApiResult<(StatusCode, Json<Tournament>)> {
     let conn = db.lock().unwrap();
     let res = conn.execute(
-        "INSERT INTO tournaments (name, year, host, winner, start_date, end_date) VALUES (?1,?2,?3,?4,?5,?6)",
-        params![input.name, input.year, input.host, input.winner, input.start_date, input.end_date],
+        "INSERT INTO tournaments (name, year, host, winner, start_date, end_date, shirt_numbers) VALUES (?1,?2,?3,?4,?5,?6,?7)",
+        params![input.name, input.year, input.host, input.winner, input.start_date, input.end_date, input.shirt_numbers],
     );
     match res {
         Ok(_) => {}
@@ -131,7 +136,7 @@ pub async fn create_tournament(
     }
     let id = conn.last_insert_rowid();
     let t: Tournament = conn.query_row(
-        "SELECT id, name, year, host, winner, start_date, end_date FROM tournaments WHERE id = ?1",
+        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers FROM tournaments WHERE id = ?1",
         [id],
         map_tournament,
     )?;
@@ -374,6 +379,14 @@ pub struct PlayersQuery {
     pub tournament_id: Option<i64>,
 }
 
+/// SQL fragment mapping a position to its display order (GK first, then
+/// defence, midfield, attack — matching the way rosters are laid out).
+const POS_ORDER_SQL: &str = "CASE c.position
+                 WHEN 'GK' THEN 0 WHEN 'CB' THEN 1 WHEN 'LB' THEN 2 WHEN 'RB' THEN 3
+                 WHEN 'LWB' THEN 4 WHEN 'RWB' THEN 5 WHEN 'CDM' THEN 6 WHEN 'CM' THEN 7
+                 WHEN 'CAM' THEN 8 WHEN 'LM' THEN 9 WHEN 'RM' THEN 10 WHEN 'LW' THEN 11
+                 WHEN 'RW' THEN 12 WHEN 'ST' THEN 13 WHEN 'CF' THEN 14 ELSE 15 END";
+
 /// Squad for a team. Optionally scoped to one tournament (`?tournament_id=`)
 /// so position/shirt number come from that edition's call-up.
 pub async fn list_players(
@@ -384,7 +397,22 @@ pub async fn list_players(
     let conn = db.lock().unwrap();
     let rows = match q.tournament_id {
         Some(tid) => {
-            let mut stmt = conn.prepare(
+            let numbered: bool = conn
+                .query_row(
+                    "SELECT shirt_numbers FROM tournaments WHERE id = ?1",
+                    [tid],
+                    |r| r.get::<_, i32>(0),
+                )
+                .unwrap_or(1)
+                != 0;
+            let order = if numbered {
+                format!(
+                    "{POS_ORDER_SQL}, c.shirt_number IS NULL, c.shirt_number, p.name"
+                )
+            } else {
+                format!("{POS_ORDER_SQL}, p.name")
+            };
+            let sql = format!(
                 "SELECT p.id, p.name, p.dob, p.nationality, c.position, c.shirt_number,
                         p.pace, p.stamina, p.strength, p.dribbling, p.passing,
                         p.shooting, p.tackling, p.vision, p.positioning, p.composure,
@@ -393,10 +421,20 @@ pub async fn list_players(
                  FROM player_callups c
                  JOIN players p ON p.id = c.player_id
                  WHERE c.tournament_id = ?1 AND c.team_id = ?2
-                 ORDER BY c.shirt_number IS NULL, c.shirt_number, p.name",
-            )?;
+                 ORDER BY {order}"
+            );
+            let mut stmt = conn.prepare(&sql)?;
             let rows = stmt.query_map(params![tid, team_id], map_player)?;
-            rows.collect::<Result<Vec<_>, _>>()?
+            let mut players = rows.collect::<Result<Vec<_>, _>>()?;
+            if players.is_empty() {
+                // No imported call-ups for this edition: fall back to the
+                // deterministic generated squad (same one the run engine uses).
+                players = names::squad_for_team(&conn, tid, team_id, numbered)?
+                    .into_iter()
+                    .map(generated_player)
+                    .collect();
+            }
+            players
         }
         None => {
             let mut stmt = conn.prepare(
@@ -409,7 +447,8 @@ pub async fn list_players(
                         p.decisions, p.aggression, p.concentration, p.leadership
                  FROM players p
                  JOIN player_callups c ON c.player_id = p.id
-                 WHERE c.team_id = ?1",
+                 WHERE c.team_id = ?1
+                 ORDER BY p.name",
             )?;
             let rows = stmt.query_map([team_id], map_player)?;
             rows.collect::<Result<Vec<_>, _>>()?
@@ -580,32 +619,88 @@ fn map_team(r: &rusqlite::Row) -> rusqlite::Result<Team> {
 
 #[allow(clippy::type_complexity)]
 fn map_player(r: &rusqlite::Row) -> rusqlite::Result<Player> {
+    let attrs = [
+        r.get::<_, Option<i32>>(6)?,
+        r.get::<_, Option<i32>>(7)?,
+        r.get::<_, Option<i32>>(8)?,
+        r.get::<_, Option<i32>>(9)?,
+        r.get::<_, Option<i32>>(10)?,
+        r.get::<_, Option<i32>>(11)?,
+        r.get::<_, Option<i32>>(12)?,
+        r.get::<_, Option<i32>>(13)?,
+        r.get::<_, Option<i32>>(14)?,
+        r.get::<_, Option<i32>>(15)?,
+        r.get::<_, Option<i32>>(16)?,
+        r.get::<_, Option<i32>>(17)?,
+        r.get::<_, Option<i32>>(18)?,
+        r.get::<_, Option<i32>>(19)?,
+        r.get::<_, Option<i32>>(20)?,
+        r.get::<_, Option<i32>>(21)?,
+        r.get::<_, Option<i32>>(22)?,
+        r.get::<_, Option<i32>>(23)?,
+    ];
+    let position: String = r.get(4)?;
+    let overall = crate::sim::composite_rating(&position, &attrs);
     Ok(Player {
         id: r.get(0)?,
         name: r.get(1)?,
         dob: r.get(2)?,
         nationality: r.get(3)?,
-        position: r.get(4)?,
+        position,
         shirt_number: r.get(5)?,
-        pace: r.get(6)?,
-        stamina: r.get(7)?,
-        strength: r.get(8)?,
-        dribbling: r.get(9)?,
-        passing: r.get(10)?,
-        shooting: r.get(11)?,
-        tackling: r.get(12)?,
-        vision: r.get(13)?,
-        positioning: r.get(14)?,
-        composure: r.get(15)?,
-        reflexes: r.get(16)?,
-        handling: r.get(17)?,
-        kicking: r.get(18)?,
-        aerial: r.get(19)?,
-        decisions: r.get(20)?,
-        aggression: r.get(21)?,
-        concentration: r.get(22)?,
-        leadership: r.get(23)?,
+        pace: attrs[0],
+        stamina: attrs[1],
+        strength: attrs[2],
+        dribbling: attrs[3],
+        passing: attrs[4],
+        shooting: attrs[5],
+        tackling: attrs[6],
+        vision: attrs[7],
+        positioning: attrs[8],
+        composure: attrs[9],
+        reflexes: attrs[10],
+        handling: attrs[11],
+        kicking: attrs[12],
+        aerial: attrs[13],
+        decisions: attrs[14],
+        aggression: attrs[15],
+        concentration: attrs[16],
+        leadership: attrs[17],
+        overall,
     })
+}
+
+/// Maps a generated `SquadPlayer` to the public `Player` shape (attributes are
+/// derived values in memory, so the granular ones stay unset for generated
+/// squads — only `overall` is meaningful).
+fn generated_player(s: crate::names::SquadPlayer) -> Player {
+    Player {
+        id: s.id,
+        name: s.name,
+        dob: None,
+        nationality: None,
+        position: s.position,
+        shirt_number: s.shirt_number,
+        pace: None,
+        stamina: None,
+        strength: None,
+        dribbling: None,
+        passing: None,
+        shooting: None,
+        tackling: None,
+        vision: None,
+        positioning: None,
+        composure: None,
+        reflexes: None,
+        handling: None,
+        kicking: None,
+        aerial: None,
+        decisions: None,
+        aggression: None,
+        concentration: None,
+        leadership: None,
+        overall: s.overall,
+    }
 }
 
 fn map_match(r: &rusqlite::Row) -> rusqlite::Result<Match> {
@@ -624,4 +719,121 @@ fn map_match(r: &rusqlite::Row) -> rusqlite::Result<Match> {
         home_team_name: r.get(11)?,
         away_team_name: r.get(12)?,
     })
+}
+
+// ---------------------------------------------------------------------------
+// Detailed runs
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, Deserialize)]
+pub struct RunRequestPayload {
+    #[serde(default)]
+    focus_team_id: Option<i64>,
+    #[serde(default)]
+    focus_boost: i32,
+}
+
+#[derive(Debug, Serialize)]
+pub struct RunListItem {
+    id: i64,
+    tournament_id: i64,
+    tournament_name: String,
+    year: i32,
+    champion: Option<String>,
+    created_at: String,
+}
+
+/// POST /api/tournaments/{id}/run
+///
+/// Computes (and, for logged-in users, optionally saves) the detailed replay
+/// payload for a full tournament run.
+pub async fn run_tournament_detail(
+    State(db): State<Db>,
+    Path(id): Path<i64>,
+    user: OptionalUser,
+    Json(body): Json<RunRequestPayload>,
+) -> ApiResult<Json<RunPayload>> {
+    let conn = db.lock().unwrap();
+    if info_ok(&conn, id).is_err() {
+        return Err(ApiError::not_found("tournament not found"));
+    }
+    let mut payload = detail::simulate_run(
+        &conn,
+        id,
+        &RunRequest {
+            focus_team_id: body.focus_team_id,
+            focus_boost: body.focus_boost,
+        },
+    )?;
+
+    if let Some(u) = &user.0 {
+        conn.execute(
+            "INSERT INTO sim_runs (user_id, tournament_id, payload) VALUES (?1, ?2, '{}')",
+            params![u.id, id],
+        )?;
+        let run_id = conn.last_insert_rowid();
+        payload.run_id = Some(run_id);
+        // Store the JSON including the id so reopened runs are self-describing.
+        let json = serde_json::to_string(&payload)?;
+        conn.execute(
+            "UPDATE sim_runs SET payload = ?1 WHERE id = ?2",
+            params![json, run_id],
+        )?;
+    }
+    Ok(Json(payload))
+}
+
+fn info_ok(conn: &rusqlite::Connection, id: i64) -> rusqlite::Result<()> {
+    conn.query_row(
+        "SELECT id FROM tournaments WHERE id = ?1",
+        [id],
+        |r| r.get::<_, i64>(0),
+    )?;
+    Ok(())
+}
+
+/// GET /api/runs — this user's saved runs (newest first).
+pub async fn list_runs(
+    State(db): State<Db>,
+    user: AuthUser,
+) -> ApiResult<Json<Vec<RunListItem>>> {
+    let conn = db.lock().unwrap();
+    let mut stmt = conn.prepare(
+        "SELECT r.id, r.tournament_id, t.name, t.year,
+                json_extract(r.payload, '$.champion'), r.created_at
+         FROM sim_runs r
+         JOIN tournaments t ON t.id = r.tournament_id
+         WHERE r.user_id = ?1
+         ORDER BY r.id DESC",
+    )?;
+    let rows = stmt.query_map([user.id], |r| {
+        Ok(RunListItem {
+            id: r.get(0)?,
+            tournament_id: r.get(1)?,
+            tournament_name: r.get(2)?,
+            year: r.get(3)?,
+            champion: r.get(4)?,
+            created_at: r.get(5)?,
+        })
+    })?;
+    Ok(Json(rows.collect::<Result<Vec<_>, _>>()?))
+}
+
+/// GET /api/runs/{id} — one saved run owned by this user.
+pub async fn get_run(
+    State(db): State<Db>,
+    Path(id): Path<i64>,
+    user: AuthUser,
+) -> ApiResult<Json<RunPayload>> {
+    let conn = db.lock().unwrap();
+    let payload: String = conn
+        .query_row(
+            "SELECT payload FROM sim_runs WHERE id = ?1 AND user_id = ?2",
+            params![id, user.id],
+            |r| r.get(0),
+        )
+        .optional()?
+        .ok_or_else(|| ApiError::not_found("saved run not found"))?;
+    let run: RunPayload = serde_json::from_str(&payload)?;
+    Ok(Json(run))
 }

@@ -228,8 +228,19 @@ fn schema(conn: &Connection) -> rusqlite::Result<()> {
             host TEXT NOT NULL,
             winner TEXT,
             start_date TEXT,
-            end_date TEXT
+            end_date TEXT,
+            shirt_numbers INTEGER NOT NULL DEFAULT 1
         );
+
+        CREATE TABLE IF NOT EXISTS sim_runs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            tournament_id INTEGER NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            payload TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_sim_runs_user ON sim_runs(user_id);
+        CREATE INDEX IF NOT EXISTS idx_sim_runs_tournament ON sim_runs(tournament_id);
 
         CREATE TABLE IF NOT EXISTS tournament_phases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -348,6 +359,14 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
             )?;
         }
     }
+    if !has("tournaments", "shirt_numbers")? {
+        conn.execute("ALTER TABLE tournaments ADD COLUMN shirt_numbers INTEGER NOT NULL DEFAULT 1", [])?;
+    }
+    // Historical editions didn't (regularly) use squad numbers.
+    conn.execute(
+        "UPDATE tournaments SET shirt_numbers = 0 WHERE year < 1954 AND shirt_numbers = 1",
+        [],
+    )?;
     Ok(())
 }
 
@@ -424,9 +443,10 @@ fn seed(conn: &Connection) -> rusqlite::Result<()> {
 
 fn seed_tournaments(conn: &Connection) -> rusqlite::Result<()> {
     for (year, host, winner) in WORLD_CUPS {
+        let shirt_numbers = if *year < 1954 { 0 } else { 1 };
         conn.execute(
-            "INSERT OR IGNORE INTO tournaments (name, year, host, winner) VALUES (?1, ?2, ?3, ?4)",
-            rusqlite::params!["FIFA World Cup", year, host, winner],
+            "INSERT OR IGNORE INTO tournaments (name, year, host, winner, shirt_numbers) VALUES (?1, ?2, ?3, ?4, ?5)",
+            rusqlite::params!["FIFA World Cup", year, host, winner, shirt_numbers],
         )?;
         let tournaments: i64 = conn.query_row(
             "SELECT COUNT(*) FROM tournament_phases WHERE tournament_id = (SELECT id FROM tournaments WHERE year = ?1)",
@@ -523,7 +543,7 @@ pub fn insert_team(
 
 pub fn tournament_by_year(conn: &Connection, year: i32) -> rusqlite::Result<Option<Tournament>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, year, host, winner, start_date, end_date FROM tournaments WHERE year = ?1",
+        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers FROM tournaments WHERE year = ?1",
     )?;
     let mut rows = stmt.query_map([year], |r| {
         Ok(Tournament {
@@ -534,6 +554,7 @@ pub fn tournament_by_year(conn: &Connection, year: i32) -> rusqlite::Result<Opti
             winner: r.get(4)?,
             start_date: r.get(5)?,
             end_date: r.get(6)?,
+            shirt_numbers: r.get::<_, i32>(7)? != 0,
         })
     })?;
     Ok(rows.next().map(|r| r).transpose()?)
