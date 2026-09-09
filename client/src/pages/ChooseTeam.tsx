@@ -1,24 +1,29 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import type { Participant, WorldCup } from "../types";
+import type { Participant, Phase, Tournament } from "../types";
 
 interface Props {
-  tournament: WorldCup;
+  tournament: Tournament;
   selected: Participant | null;
   onPick: (t: Participant, all: Participant[]) => void;
+  onPhases: (phases: Phase[]) => void;
 }
 
-export default function ChooseTeam({ tournament, selected, onPick }: Props) {
+export default function ChooseTeam({ tournament, selected, onPick, onPhases }: Props) {
   const [teams, setTeams] = useState<Participant[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setTeams(null);
     api
+      .tournament(tournament.id)
+      .then((d) => onPhases(d.phases))
+      .catch((e) => setError(e.message));
+    api
       .participants(tournament.id)
       .then(setTeams)
       .catch((e) => setError(e.message));
-  }, [tournament.id]);
+  }, [tournament.id, onPhases]);
 
   return (
     <section>

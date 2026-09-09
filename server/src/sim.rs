@@ -2,12 +2,12 @@ use rusqlite::{params, Connection, OptionalExtension};
 
 use crate::{
     error::{ApiError, ApiResult},
-    fixture::{self, R16_PAIRINGS},
-    models::SimulateOut,
+    fixture::{self, Standing},
+    models::{Phase, SimulateOut},
 };
 
 pub struct SimRequest {
-    /// Focus team (the user's pick). Receives a formation-based rating boost.
+    /// Focus team (the user's pick). Receives a tactical boost.
     pub focus_team_id: Option<i64>,
     pub focus_boost: i32,
 }
@@ -60,36 +60,205 @@ fn poisson(rng: &mut Rng, lambda: f64) -> i32 {
 }
 
 // ---------------------------------------------------------------------------
-// Team strength & match engine
+// Attribute model
 // ---------------------------------------------------------------------------
-fn team_rating(conn: &Connection, team_id: i64) -> ApiResult<f64> {
-    let team_rating: Option<i32> = conn
-        .query_row("SELECT rating FROM teams WHERE id = ?1", [team_id], |r| {
-            r.get(0)
-        })
-        .optional()?;
-    let Some(team_rating) = team_rating else {
-        return Err(ApiError::not_found("team"));
-    };
-    // If a real squad is loaded, prefer the average player rating.
-    let avg: Option<Option<f64>> = conn
-        .query_row(
-            "SELECT AVG(rating) FROM players WHERE team_id = ?1 AND rating IS NOT NULL",
-            [team_id],
-            |r| r.get(0),
-        )
-        .optional()?;
-    Ok(avg.flatten().unwrap_or(team_rating as f64))
+
+/// Attribute indexes — must line up with `models::ATTRIBUTES`.
+const PACE: usize = 0;
+const STAMINA: usize = 1;
+const STRENGTH: usize = 2;
+const DRIBBLING: usize = 3;
+const PASSING: usize = 4;
+const SHOOTING: usize = 5;
+const TACKLING: usize = 6;
+const VISION: usize = 7;
+const POSITIONING: usize = 8;
+const COMPOSURE: usize = 9;
+const REFLEXES: usize = 10;
+const HANDLING: usize = 11;
+const AERIAL: usize = 13;
+
+const DEFAULT_ATTR: f64 = 60.0;
+
+/// Attribute weights per granular position (manager-sim style). The weighted
+/// average of a player's attributes *is* their overall rating.
+fn position_weights(position: &str) -> &'static [(usize, f64)] {
+    match position {
+        "GK" => &[
+            (REFLEXES, 0.22),
+            (HANDLING, 0.18),
+            (AERIAL, 0.15),
+            (POSITIONING, 0.20),
+            (COMPOSURE, 0.25),
+        ],
+        "CB" => &[
+            (TACKLING, 0.30),
+            (POSITIONING, 0.20),
+            (STRENGTH, 0.20),
+            (PACE, 0.10),
+            (COMPOSURE, 0.10),
+            (PASSING, 0.10),
+        ],
+        "LB" | "RB" => &[
+            (STAMINA, 0.20),
+            (PACE, 0.20),
+            (TACKLING, 0.20),
+            (POSITIONING, 0.15),
+            (PASSING, 0.15),
+            (DRIBBLING, 0.10),
+        ],
+        "LWB" | "RWB" => &[
+            (PACE, 0.25),
+            (STAMINA, 0.20),
+            (PASSING, 0.15),
+            (DRIBBLING, 0.15),
+            (TACKLING, 0.15),
+            (POSITIONING, 0.10),
+        ],
+        "CDM" => &[
+            (TACKLING, 0.28),
+            (PASSING, 0.20),
+            (POSITIONING, 0.20),
+            (STAMINA, 0.12),
+            (COMPOSURE, 0.12),
+            (VISION, 0.08),
+        ],
+        "CM" => &[
+            (PASSING, 0.30),
+            (VISION, 0.20),
+            (STAMINA, 0.15),
+            (COMPOSURE, 0.15),
+            (DRIBBLING, 0.10),
+            (TACKLING, 0.10),
+        ],
+        "CAM" => &[
+            (PASSING, 0.25),
+            (VISION, 0.25),
+            (DRIBBLING, 0.20),
+            (COMPOSURE, 0.15),
+            (STAMINA, 0.15),
+        ],
+        "LM" | "RM" => &[
+            (PACE, 0.20),
+            (DRIBBLING, 0.20),
+            (PASSING, 0.20),
+            (STAMINA, 0.15),
+            (VISION, 0.15),
+            (SHOOTING, 0.10),
+        ],
+        "LW" | "RW" => &[
+            (PACE, 0.25),
+            (DRIBBLING, 0.25),
+            (SHOOTING, 0.20),
+            (PASSING, 0.10),
+            (COMPOSURE, 0.10),
+            (VISION, 0.10),
+        ],
+        "ST" | "CF" => &[
+            (SHOOTING, 0.30),
+            (PACE, 0.20),
+            (DRIBBLING, 0.15),
+            (POSITIONING, 0.15),
+            (STRENGTH, 0.10),
+            (COMPOSURE, 0.10),
+        ],
+        _ => &[(PASSING, 0.4), (VISION, 0.3), (COMPOSURE, 0.3)],
+    }
 }
+
+/// Position-weighted composite (0–100). Missing attributes default to 60.
+pub fn composite_rating(position: &str, attrs: &[Option<i32>]) -> f64 {
+    let mut num = 0.0;
+    let mut den = 0.0;
+    for (idx, w) in position_weights(position) {
+        let v = attrs.get(*idx).copied().flatten().unwrap_or(60) as f64;
+        num += v * w;
+        den += w;
+    }
+    if den == 0.0 {
+        DEFAULT_ATTR
+    } else {
+        num / den
+    }
+}
+
+/// Average squad rating for a team within a tournament, computed from the
+/// position-weighted attributes of its players. `None` if the team has no
+/// registered players (caller falls back to `teams.rating`).
+fn squad_rating(
+    conn: &Connection,
+    tournament_id: i64,
+    team_id: i64,
+) -> ApiResult<Option<f64>> {
+    let mut stmt = conn.prepare(
+        "SELECT c.position,
+                p.pace, p.stamina, p.strength, p.dribbling, p.passing,
+                p.shooting, p.tackling, p.vision, p.positioning, p.composure,
+                p.reflexes, p.handling, p.kicking, p.aerial
+         FROM player_callups c
+         JOIN players p ON p.id = c.player_id
+         WHERE c.tournament_id = ?1 AND c.team_id = ?2",
+    )?;
+    let rows = stmt
+        .query_map(params![tournament_id, team_id], |r| {
+            Ok((
+                r.get::<_, String>(0)?,
+                [
+                    r.get::<_, Option<i32>>(1)?,
+                    r.get::<_, Option<i32>>(2)?,
+                    r.get::<_, Option<i32>>(3)?,
+                    r.get::<_, Option<i32>>(4)?,
+                    r.get::<_, Option<i32>>(5)?,
+                    r.get::<_, Option<i32>>(6)?,
+                    r.get::<_, Option<i32>>(7)?,
+                    r.get::<_, Option<i32>>(8)?,
+                    r.get::<_, Option<i32>>(9)?,
+                    r.get::<_, Option<i32>>(10)?,
+                    r.get::<_, Option<i32>>(11)?,
+                    r.get::<_, Option<i32>>(12)?,
+                    r.get::<_, Option<i32>>(13)?,
+                    r.get::<_, Option<i32>>(14)?,
+                ],
+            ))
+        })?
+        .collect::<Result<Vec<_>, _>>()?;
+
+    if rows.is_empty() {
+        return Ok(None);
+    }
+    let sum: f64 = rows
+        .iter()
+        .map(|(pos, attrs)| composite_rating(pos, attrs.as_slice()))
+        .sum();
+    Ok(Some(sum / rows.len() as f64))
+}
+
+fn team_rating(conn: &Connection, tournament_id: i64, team_id: i64) -> ApiResult<f64> {
+    let base: Option<i32> = conn
+        .query_row("SELECT rating FROM teams WHERE id = ?1", [team_id], |r| r.get(0))
+        .optional()?;
+    Ok(squad_rating(conn, tournament_id, team_id)?.unwrap_or(base.unwrap_or(70) as f64))
+}
+
+// ---------------------------------------------------------------------------
+// Match engine
+// ---------------------------------------------------------------------------
 
 const BASE_GOALS: f64 = 1.32;
 const HOME_FACTOR: f64 = 1.10;
 
-fn simulate_one(rng: &mut Rng, conn: &Connection, home_id: i64, away_id: i64, home_boost: i32, away_boost: i32) -> ApiResult<(i32, i32)> {
-    let home = (team_rating(conn, home_id)? + f64::from(home_boost)).min(99.0);
-    let away = (team_rating(conn, away_id)? + f64::from(away_boost)).min(99.0);
+fn simulate_one(
+    rng: &mut Rng,
+    conn: &Connection,
+    tournament_id: i64,
+    home_id: i64,
+    away_id: i64,
+    home_boost: i32,
+    away_boost: i32,
+) -> ApiResult<(i32, i32)> {
+    let home = (team_rating(conn, tournament_id, home_id)? + f64::from(home_boost)).min(99.0);
+    let away = (team_rating(conn, tournament_id, away_id)? + f64::from(away_boost)).min(99.0);
 
-    // Expected goals model: logit-ish difference scaled, with home advantage.
     let home_xg = (BASE_GOALS * ((home - away) / 10.0).exp() * HOME_FACTOR).clamp(0.1, 4.5);
     let away_xg = (BASE_GOALS * ((away - home) / 10.0).exp()).clamp(0.1, 4.5);
 
@@ -104,50 +273,238 @@ fn record(conn: &Connection, match_id: i64, hs: i32, as_: i32) -> ApiResult<()> 
     Ok(())
 }
 
-fn sim_scheduled_matches(
-    rng: &mut Rng,
-    conn: &Connection,
-    wc_id: i64,
-    focus_team_id: Option<i64>,
-    boost: i32,
-) -> ApiResult<usize> {
-    let mut stmt = conn.prepare(
-        "SELECT id, home_team_id, away_team_id FROM matches
-         WHERE worldcup_id = ?1 AND status = 'scheduled' ORDER BY id",
-    )?;
-    let rows: Vec<(i64, i64, i64)> = stmt
-        .query_map([wc_id], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))?
-        .collect::<Result<_, _>>()?;
+// ---------------------------------------------------------------------------
+// Phase helpers
+// ---------------------------------------------------------------------------
 
-    for (id, h, a) in &rows {
-        let hb = if Some(*h) == focus_team_id { boost } else { 0 };
-        let ab = if Some(*a) == focus_team_id { boost } else { 0 };
-        let (hs, as_) = simulate_one(rng, conn, *h, *a, hb, ab)?;
-        record(conn, *id, hs, as_)?;
-    }
-    Ok(rows.len())
+fn load_phases(conn: &Connection, tournament_id: i64) -> ApiResult<Vec<Phase>> {
+    let mut stmt = conn.prepare(
+        "SELECT id, tournament_id, seq, key, name, phase_type, group_count, entry_teams
+         FROM tournament_phases WHERE tournament_id = ?1 ORDER BY seq",
+    )?;
+    let rows = stmt.query_map([tournament_id], |r| {
+        Ok(Phase {
+            id: r.get(0)?,
+            tournament_id: r.get(1)?,
+            seq: r.get(2)?,
+            key: r.get(3)?,
+            name: r.get(4)?,
+            phase_type: r.get(5)?,
+            group_count: r.get(6)?,
+            entry_teams: r.get(7)?,
+        })
+    })?;
+    Ok(rows.collect::<Result<Vec<_>, _>>()?)
 }
 
-/// Plays (or completes) a knockout stage. If a scheduled match already exists
-/// for a pairing it is updated in-place, otherwise it is inserted.
+fn participants(conn: &Connection, tournament_id: i64) -> ApiResult<Vec<i64>> {
+    let mut stmt = conn.prepare(
+        "SELECT t.id FROM tournament_teams tt
+         JOIN teams t ON t.id = tt.team_id
+         WHERE tt.tournament_id = ?1
+         ORDER BY t.rating DESC",
+    )?;
+    let rows = stmt.query_map([tournament_id], |r| r.get(0))?;
+    Ok(rows.collect::<Result<Vec<_>, _>>()?)
+}
+
+/// Plays every group match of a phase. Returns the sorted table(s) (group order).
+fn play_group_phase(
+    rng: &mut Rng,
+    conn: &Connection,
+    tournament_id: i64,
+    phase: &Phase,
+    qualifiers: &[i64],
+    is_first_group: bool,
+    focus: Option<i64>,
+    boost: i32,
+) -> ApiResult<(Vec<Vec<Standing>>, usize)> {
+let groups: Vec<Vec<i64>> = if is_first_group {
+    let loaded = fixture::load_groups(conn, tournament_id)?
+        .into_iter()
+        .map(|(_, t)| t)
+        .filter(|t| !t.is_empty())
+        .collect::<Vec<_>>();
+    if !loaded.is_empty() {
+        loaded
+    } else {
+        // No manual groups assigned yet (tournament created via phases +
+        // participants but never went through fixture generation): split the
+        // seeded qualifiers evenly and persist them for the UI.
+        let count = phase.group_count.unwrap_or(1).max(1) as usize;
+        let per = qualifiers.len().div_ceil(count);
+        let assigned: Vec<Vec<i64>> = qualifiers
+            .chunks(per.max(1))
+            .map(|c| c.to_vec())
+            .collect();
+        for (gi, teams) in assigned.iter().enumerate() {
+            let letter = format!("{}", (b'A' + gi as u8) as char);
+            for t in teams {
+                conn.execute(
+                    "INSERT OR IGNORE INTO tournament_groups (tournament_id, group_name, team_id) VALUES (?1, ?2, ?3)",
+                    params![tournament_id, letter, t],
+                )?;
+            }
+        }
+        assigned
+    }
+} else if phase.group_count == Some(1) {
+        vec![qualifiers.to_vec()]
+    } else {
+        // hypothetical second group stage: split the qualifiers evenly
+        let count = phase.group_count.unwrap_or(1) as usize;
+        let per = qualifiers.len().div_ceil(count);
+        qualifiers
+            .chunks(per)
+            .map(|c| c.to_vec())
+            .filter(|c| !c.is_empty())
+            .collect()
+    };
+    if groups.is_empty() {
+        return Err(ApiError::bad_request("group phase has no assigned groups"));
+    }
+
+    let mut tables = Vec::new();
+    let mut simulated = 0usize;
+    for teams in &groups {
+        for (home, away, round) in fixture::round_robin(teams) {
+            let hb = if Some(home) == focus { boost } else { 0 };
+            let ab = if Some(away) == focus { boost } else { 0 };
+            let (hs, as_) = simulate_one(rng, conn, tournament_id, home, away, hb, ab)?;
+            let existing: Option<i64> = conn
+                .query_row(
+                    "SELECT id FROM matches
+                     WHERE tournament_id = ?1 AND stage = ?2 AND home_team_id = ?3 AND away_team_id = ?4 AND status = 'scheduled'",
+                    params![tournament_id, phase.key, home, away],
+                    |r| r.get(0),
+                )
+                .optional()?;
+            match existing {
+                Some(mid) => record(conn, mid, hs, as_)?,
+                None => {
+                    conn.execute(
+                        "INSERT INTO matches (tournament_id, stage, round_num, matchday, home_team_id, away_team_id, home_score, away_score, status)
+                         VALUES (?1, ?2, 0, ?3, ?4, ?5, ?6, ?7, 'played')",
+                        params![tournament_id, phase.key, round as i32, home, away, hs, as_],
+                    )?;
+                }
+            }
+            simulated += 1;
+        }
+        tables.push(fixture::table_for(conn, tournament_id, &phase.key, teams)?);
+    }
+    Ok((tables, simulated))
+}
+
+/// Picks the teams advancing from a group phase: top `k` of each group, then
+/// best remaining (for e.g. the four best third-placed teams).
+fn advance(
+    tables: &[Vec<Standing>],
+    entry: usize,
+) -> (Vec<i64>, usize) {
+    let m = tables.len();
+    if m == 0 {
+        return (Vec::new(), 0);
+    }
+    let k = entry / m;
+    let mut q = Vec::new();
+    for rank in 0..k {
+        for t in tables {
+            if let Some(s) = t.get(rank) {
+                q.push(s.team_id);
+            }
+        }
+    }
+    let fill = entry.saturating_sub(q.len());
+    if fill > 0 {
+        let mut rest: Vec<Standing> = tables
+            .iter()
+            .flat_map(|t| t.iter().skip(k).cloned())
+            .collect();
+        rest.sort_by(|x, y| {
+            y.points
+                .cmp(&x.points)
+                .then(y.gd().cmp(&x.gd()))
+                .then(y.gf.cmp(&x.gf))
+        });
+        for s in rest.into_iter().take(fill) {
+            q.push(s.team_id);
+        }
+    }
+    (q, m)
+}
+
+/// Pairings after a group phase: each group winner plays a runner-up from
+/// another group; stragglers (best thirds) pair among themselves.
+fn group_pairings(q: &[i64], m: usize) -> ApiResult<Vec<(i64, i64)>> {
+    let n = q.len();
+    if n % 2 != 0 {
+        return Err(ApiError::bad_request("odd number of qualifiers for knockout"));
+    }
+    let winners = &q[..m.min(n)];
+    let runners = &q[m.min(n)..(2 * m).min(n)];
+    let rest = &q[2 * m.min(n)..];
+    let mut out = Vec::new();
+    for i in 0..winners.len() {
+        if let Some(r) = runner_for(i, winners.len(), runners) {
+            out.push((winners[i], r));
+        } else {
+            out.push((winners[i], winners[(i + 1) % winners.len()]));
+        }
+    }
+    for c in rest.chunks(2) {
+        if c.len() == 2 {
+            out.push((c[0], c[1]));
+        }
+    }
+    Ok(out)
+}
+
+/// Runner-up for group winner `i`, shifted so no winner faces its own group.
+fn runner_for(i: usize, winners: usize, runners: &[i64]) -> Option<i64> {
+    if runners.is_empty() {
+        return None;
+    }
+    Some(runners[(i + 1) % winners.min(runners.len())])
+}
+
+/// Seeded bracket for a pure-knockout tournament: best vs worst, etc.
+fn seeded_pairings(q: &[i64]) -> ApiResult<Vec<(i64, i64)>> {
+    let n = q.len();
+    if n % 2 != 0 {
+        return Err(ApiError::bad_request("odd number of participants for knockout"));
+    }
+    Ok((0..n / 2)
+        .map(|i| (q[i], q[n - 1 - i]))
+        .collect())
+}
+
+fn next_pairings(winners: &[i64]) -> ApiResult<Vec<(i64, i64)>> {
+    if winners.len() % 2 != 0 {
+        return Err(ApiError::bad_request("odd number of winners for knockout round"));
+    }
+    Ok(winners.chunks(2).map(|c| (c[0], c[1])).collect())
+}
+
+/// Plays a knockout round. Existing scheduled matches are updated in-place,
+/// otherwise new rows are created. Returns (winners, losers, count).
+#[allow(clippy::too_many_arguments)]
 fn knockout_stage(
     rng: &mut Rng,
     conn: &Connection,
-    wc_id: i64,
+    tournament_id: i64,
     stage: &str,
     pairings: &[(i64, i64)],
-    focus_team_id: Option<i64>,
+    focus: Option<i64>,
     boost: i32,
-) -> ApiResult<(Vec<i64>, Vec<i64>)> {
+) -> ApiResult<(Vec<i64>, Vec<i64>, usize)> {
     let mut winners = Vec::new();
     let mut losers = Vec::new();
-
     for &(h, a) in pairings {
-        let hb = if Some(h) == focus_team_id { boost } else { 0 };
-        let ab = if Some(a) == focus_team_id { boost } else { 0 };
-        let (hs, as_) = simulate_one(rng, conn, h, a, hb, ab)?;
+        let hb = if Some(h) == focus { boost } else { 0 };
+        let ab = if Some(a) == focus { boost } else { 0 };
+        let (hs, as_) = simulate_one(rng, conn, tournament_id, h, a, hb, ab)?;
 
-        // A drawn knockout tie is decided on penalties (score line preserved).
         let (winner, loser) = if hs == as_ {
             if rng.unit() < 0.515 {
                 (h, a)
@@ -165,8 +522,8 @@ fn knockout_stage(
         let existing: Option<i64> = conn
             .query_row(
                 "SELECT id FROM matches
-                 WHERE worldcup_id = ?1 AND stage = ?2 AND home_team_id = ?3 AND away_team_id = ?4 AND status = 'scheduled'",
-                params![wc_id, stage, h, a],
+                 WHERE tournament_id = ?1 AND stage = ?2 AND home_team_id = ?3 AND away_team_id = ?4 AND status = 'scheduled'",
+                params![tournament_id, stage, h, a],
                 |r| r.get(0),
             )
             .optional()?;
@@ -174,95 +531,226 @@ fn knockout_stage(
             Some(mid) => record(conn, mid, hs, as_)?,
             None => {
                 conn.execute(
-                    "INSERT INTO matches (worldcup_id, stage, round_num, home_team_id, away_team_id, home_score, away_score, status)
+                    "INSERT INTO matches (tournament_id, stage, round_num, home_team_id, away_team_id, home_score, away_score, status)
                      VALUES (?1, ?2, 0, ?3, ?4, ?5, ?6, 'played')",
-                    params![wc_id, stage, h, a, hs, as_],
+                    params![tournament_id, stage, h, a, hs, as_],
                 )?;
             }
         }
     }
-    Ok((winners, losers))
+    Ok((winners, losers, pairings.len()))
 }
 
-pub fn simulate_worldcup(conn: &Connection, wc_id: i64, req: &SimRequest) -> ApiResult<SimulateOut> {
-    let mut rng = Rng::new();
+// ---------------------------------------------------------------------------
+// Orchestration
+// ---------------------------------------------------------------------------
 
-    // Re-simulation: every match already played → reset the tournament.
+pub fn simulate_tournament(
+    conn: &Connection,
+    tournament_id: i64,
+    req: &SimRequest,
+) -> ApiResult<SimulateOut> {
+    let mut rng = Rng::new();
+    let phases = load_phases(conn, tournament_id)?;
+    if phases.is_empty() {
+        return Err(ApiError::bad_request("tournament has no phases defined"));
+    }
+
+    conn.execute("BEGIN", [])?;
+    let result = simulate_tournament_inner(conn, &mut rng, tournament_id, req, &phases);
+    match result {
+        Ok(out) => {
+            conn.execute("COMMIT", [])?;
+            Ok(out)
+        }
+        Err(e) => {
+            conn.execute("ROLLBACK", [])?;
+            Err(e)
+        }
+    }
+}
+
+fn simulate_tournament_inner(
+    conn: &Connection,
+    rng: &mut Rng,
+    tournament_id: i64,
+    req: &SimRequest,
+    phases: &[Phase],
+) -> ApiResult<SimulateOut> {
+
+    // Re-simulation: reset everything, drop previously-drawn knockout rows.
     let played: i64 = conn.query_row(
-        "SELECT COUNT(*) FROM matches WHERE worldcup_id = ?1 AND status = 'played'",
-        [wc_id],
+        "SELECT COUNT(*) FROM matches WHERE tournament_id = ?1 AND status = 'played'",
+        [tournament_id],
         |r| r.get(0),
     )?;
     let total: i64 = conn.query_row(
-        "SELECT COUNT(*) FROM matches WHERE worldcup_id = ?1",
-        [wc_id],
+        "SELECT COUNT(*) FROM matches WHERE tournament_id = ?1",
+        [tournament_id],
         |r| r.get(0),
     )?;
     if total > 0 && played == total {
+        let group_keys: Vec<String> = phases
+            .iter()
+            .filter(|p| p.phase_type == "GROUP")
+            .map(|p| p.key.clone())
+            .collect();
         conn.execute(
-            "DELETE FROM matches WHERE worldcup_id = ?1 AND stage != 'GROUP'",
-            [wc_id],
+            "UPDATE matches SET status = 'scheduled', home_score = NULL, away_score = NULL
+             WHERE tournament_id = ?1 AND status = 'played'",
+            [tournament_id],
         )?;
-        conn.execute(
-            "UPDATE matches SET status = 'scheduled', home_score = NULL, away_score = NULL WHERE worldcup_id = ?1",
-            [wc_id],
-        )?;
+        if !group_keys.is_empty() {
+            let placeholders: Vec<String> = (0..group_keys.len())
+                .map(|i| format!("?{}", i + 2))
+                .collect();
+            let sql = format!(
+                "DELETE FROM matches WHERE tournament_id = ?1 AND stage NOT IN ({})",
+                placeholders.join(",")
+            );
+            let mut stmt = conn.prepare(&sql)?;
+            let mut bind: Vec<&dyn rusqlite::ToSql> = vec![&tournament_id];
+            for k in &group_keys {
+                bind.push(k);
+            }
+            stmt.execute(rusqlite::params_from_iter(bind))?;
+        } else {
+            conn.execute("DELETE FROM matches WHERE tournament_id = ?1", [tournament_id])?;
+        }
+    }
+
+    let team_ids = participants(conn, tournament_id)?;
+    if team_ids.is_empty() {
+        return Err(ApiError::bad_request("tournament has no participants"));
     }
 
     let mut simulated = 0usize;
+    let mut qualifiers: Vec<i64> = team_ids.clone();
+    let mut prev_winners: Vec<i64> = Vec::new();
+    let mut prev_losers: Vec<i64> = Vec::new();
+    let mut champion: Option<String> = None;
+    let mut played_groups = false;
+    let mut group_count = 0usize;
 
-    // 1. Group stage.
-    simulated += sim_scheduled_matches(&mut rng, conn, wc_id, req.focus_team_id, req.focus_boost)?;
+    for (idx, p) in phases.iter().enumerate() {
+        if p.phase_type == "GROUP" {
+            played_groups = true;
+            let (tables, n) = play_group_phase(
+                rng,
+                conn,
+                tournament_id,
+                p,
+                &qualifiers,
+                is_first_group_phase(&phases, idx),
+                req.focus_team_id,
+                req.focus_boost,
+            )?;
+            simulated += n;
 
-    // 2. Standings → Round of 16 (real bracket: 1A-2B, 1C-2D, ...).
-    let standings = fixture::standings(conn, wc_id)?;
-    if standings.is_empty() {
-        return Err(ApiError::bad_request("no groups/standings available"));
-    }
-    let r16: Vec<(i64, i64)> = R16_PAIRINGS
-        .iter()
-        .map(|(w, r)| {
-            let winners = &standings[*w];
-            let runners = &standings[*r];
-            if winners.len() < 2 || runners.len() < 2 {
-                return Err(ApiError::bad_request("not enough teams per group"));
+            if p.group_count == Some(1) {
+                // League decider: the leader is the champion.
+                let top = tables.first().and_then(|t| t.first().cloned());
+                if let Some(s) = top {
+                    champion = Some(team_name(conn, s.team_id)?);
+                }
+                break;
             }
-            Ok((winners[0].team_id, runners[1].team_id))
-        })
-        .collect::<ApiResult<_>>()?;
 
-    let (r16w, _) = knockout_stage(&mut rng, conn, wc_id, "R16", &r16, req.focus_team_id, req.focus_boost)?;
-    simulated += r16.len();
+            let entry = next_entry(&phases, idx) as usize;
+            let (q, m) = advance(&tables, entry);
+            qualifiers = q;
+            group_count = m;
+            continue;
+        }
 
-    // 3. Quarter-finals.
-    let qf_pairs = next_pairings(&r16w);
-    simulated += qf_pairs.len();
-    let (qfw, _) = knockout_stage(&mut rng, conn, wc_id, "QF", &qf_pairs, req.focus_team_id, req.focus_boost)?;
+        // ---- KNOCKOUT phase ----
+        let stage_teams: Vec<i64> = if p.key == "THIRD" {
+            prev_losers.clone()
+        } else {
+            qualifiers.clone()
+        };
+        if stage_teams.is_empty() {
+            return Err(ApiError::bad_request("no teams to enter the knockout stage"));
+        }
 
-    // 4. Semi-finals (containers computed from QF winners).
-    let (sfw, sfl) = knockout_stage(&mut rng, conn, wc_id, "SF", &next_pairings(&qfw), req.focus_team_id, req.focus_boost)?;
-    simulated += 2;
+        // Knockout rounds must have an even number of teams; if the previous
+        // stage produced more (e.g. a sparsely-populated 2026 format), drop the
+        // weakest until the field is the largest power of two that fits.
+        let mut n = 1usize;
+        while n * 2 <= stage_teams.len() {
+            n *= 2;
+        }
+        let stage_teams = stage_teams[..n].to_vec();
+        if stage_teams.len() < 2 {
+            // Too few survivors left to field this round (degenerate field) —
+            // skip it without disturbing the qualifier pool.
+            continue;
+        }
 
-    // 5. Third-place match (the two SF losers).
-    simulated += knockout_stage(&mut rng, conn, wc_id, "ThirdPlace", &[(sfl[0], sfl[1])], req.focus_team_id, req.focus_boost)?.0.len();
+        let pairings: Vec<(i64, i64)> = if !played_groups && prev_winners.is_empty() {
+            seeded_pairings(&stage_teams)?
+        } else if group_count > 0 && prev_winners.is_empty() {
+            group_pairings(&stage_teams, group_count)?
+        } else {
+            next_pairings(&stage_teams)?
+        };
 
-    // 6. The Final.
-    let (fw, _) = knockout_stage(&mut rng, conn, wc_id, "Final", &[(sfw[0], sfw[1])], req.focus_team_id, req.focus_boost)?;
-    simulated += 1;
+        let (winners, losers, n) = knockout_stage(
+            rng,
+            conn,
+            tournament_id,
+            &p.key,
+            &pairings,
+            req.focus_team_id,
+            req.focus_boost,
+        )?;
+        simulated += n;
 
-    let champion_name: String = conn.query_row(
-        "SELECT t.name FROM teams t WHERE t.id = ?1",
-        [fw[0]],
-        |r| r.get(0),
-    )?;
-    conn.execute(
-        "UPDATE worldcups SET winner = ?1 WHERE id = ?2",
-        params![champion_name, wc_id],
-    )?;
+        if p.key == "F" {
+            if let Some(w) = winners.first() {
+                champion = Some(team_name(conn, *w)?);
+            }
+        }
 
-    Ok(SimulateOut { simulated, champion: Some(champion_name) })
+        prev_winners = winners.clone();
+        prev_losers = losers;
+        if p.key != "THIRD" {
+            qualifiers = prev_winners.clone();
+        }
+    }
+
+    if let Some(c) = &champion {
+        conn.execute(
+            "UPDATE tournaments SET winner = ?1 WHERE id = ?2",
+            params![c, tournament_id],
+        )?;
+    }
+
+    Ok(SimulateOut {
+        simulated,
+        champion,
+    })
 }
 
-fn next_pairings(winners: &[i64]) -> Vec<(i64, i64)> {
-    winners.chunks(2).map(|c| (c[0], c[1])).collect()
+fn is_first_group_phase(phases: &[Phase], idx: usize) -> bool {
+    phases[..idx].iter().all(|p| p.phase_type != "GROUP")
+}
+
+fn next_entry(phases: &[Phase], idx: usize) -> i32 {
+    phases
+        .get(idx + 1)
+        .and_then(|p| {
+            if p.entry_teams.is_some() {
+                p.entry_teams
+            } else {
+                p.group_count.map(|g| g * 4)
+            }
+        })
+        .unwrap_or(8)
+}
+
+fn team_name(conn: &Connection, team_id: i64) -> rusqlite::Result<String> {
+    conn.query_row("SELECT name FROM teams WHERE id = ?1", [team_id], |r| {
+        r.get(0)
+    })
 }

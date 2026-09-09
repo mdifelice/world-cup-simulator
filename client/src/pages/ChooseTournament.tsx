@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import type { WorldCup } from "../types";
+import type { Tournament } from "../types";
 
 interface Props {
-  selected: WorldCup | null;
-  onPick: (t: WorldCup) => void;
+  selected: Tournament | null;
+  onPick: (t: Tournament) => void;
 }
 
 export default function ChooseTournament({ selected, onPick }: Props) {
-  const [cups, setCups] = useState<WorldCup[] | null>(null);
+  const [cups, setCups] = useState<Tournament[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.worldcups().then(setCups).catch((e) => setError(e.message));
+    api.tournaments().then(setCups).catch((e) => setError(e.message));
   }, []);
 
   return (

@@ -2,11 +2,12 @@
 
 A football World Cup simulation game.
 
-- **Pick a World Cup** (1930 → 2026)
-- **Pick your national team** (any squad that participated, with the real players of that edition)
+- **Pick a World Cup** (1930 → 2026, each with its real format)
+- **Pick your national team** (any squad that participated in that edition)
 - **Choose a formation**, assign your 11 starters
-- **Simulate the tournament** following the real fixture. You can watch/intervene on your own matches; every other match is simulated automatically.
-- If your team survives, you advance through the real fixture until you lift the trophy.
+- **Simulate the tournament** following the real fixture. You play your matches
+  (with a tactical boost for a strong lineup); every other match is simulated
+  automatically.
 
 ## Architecture
 
@@ -15,6 +16,23 @@ A football World Cup simulation game.
 | `client/`          | React + TypeScript (Vite) front end                                |
 | `server/`          | Rust (axum + SQLite) REST API                                      |
 | `scrapper/`        | Rust side-tool that scrapes teams/squads from the Sofascore API    |
+
+## Data model
+
+- **Tournaments** are format-driven: every edition stores its *phases*
+  (`GROUP`/`KNOCKOUT`), so 1930 (4 groups → semis), 1934–1938 (pure knockout),
+  1950 (groups + a league decider), 1954–1978 (4 groups → QF), 1982–1994
+  (6 groups → R16 with best thirds), 1998–2026 (8 or 12 groups → R32/R16) all
+  work from the same schema.
+- **Teams** have an overall rating. **Players** have 14 attributes (10 outfield:
+  pace, stamina, strength, dribbling, passing, shooting, tackling, vision,
+  positioning, composure; 4 keeper: reflexes, handling, kicking, aerial) and a
+  granular position (GK, CB, LB, RB, LWB, RWB, CDM, CM, CAM, LM, RM, LW, RW,
+  ST, CF). Overall = position-weighted average of attributes.
+- **Call-ups** (`player_callups`) link a player to a team **and** a tournament,
+  so the same player can represent different nations in different editions.
+- **Auth** is Google-only (OAuth 2, no stored passwords). Reads are public;
+  writes require a `Bearer` JWT from the OAuth flow.
 
 ## Quick start
 
@@ -35,7 +53,9 @@ docker build -t wcs . && docker run -p 8080:8080 -e WCS_JWT_SECRET=your-secret w
 ```
 
 Env vars: `WCS_ADDR` (bind address), `WCS_DATA_DIR` (SQLite location),
-`WCS_STATIC_DIR` (built frontend), `WCS_JWT_SECRET` (auth signing key).
+`WCS_STATIC_DIR` (built frontend), `WCS_JWT_SECRET` (auth signing key),
+and for Google sign-in `WCS_GOOGLE_CLIENT_ID`, `WCS_GOOGLE_CLIENT_SECRET`,
+`WCS_BASE_URL` (the callback base, default `http://localhost:8080`).
 
 ### 1. Backend (`server/`)
 
@@ -45,8 +65,8 @@ cargo run           # serves http://localhost:8080
 ```
 
 Seeds a SQLite database (`server/data/wcs.sqlite`) with every World Cup
-(1930–2026) on first launch. Player/team data is added via the API or the
-scraper (see below).
+(1930–2026) on first launch, plus the full 2022 demo (32 squads + fixture).
+Player/team data is added via the API or the scraper (see below).
 
 ### 2. Frontend (`client/`)
 
@@ -73,36 +93,38 @@ cargo run -- --help
 > session to bypass it: `cargo run -- --year 2022 --cookie "sessionid=…"`.
 > The API base is configurable via `--base https://api.sofascore.com/api/v1`.
 
-The written file follows the backend's import schema and can be uploaded with
-a single call:
+The written file uses the import schema (teams/players with `rating`, which the
+backend spreads into the 14 attributes). Upload with a single call — sign in
+with Google first, then use the token from the URL (`#token=…`) or the browser:
 
 ```sh
-TOKEN=$(curl -s -X POST localhost:8080/api/auth/login -H 'Content-Type: application/json' \
-  -d '{"username":"demo","password":"demo123"}' | python3 -c "import json,sys;print(json.load(sys.stdin)['token'])")
-
-curl -s -X POST localhost:8080/api/worldcups/22/import \
+curl -s -X POST localhost:8080/api/tournaments/22/import \
   -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
   --data @output/wc2022.json
 ```
 
 ## API overview (server, base `/api`)
 
-| Method | Path                          | Description                          |
-| ------ | ----------------------------- | ------------------------------------ |
-| POST   | `/auth/register`              | Create a user                        |
-| POST   | `/auth/login`                 | Login, returns JWT                   |
-| GET    | `/worldcups`                  | List tournaments (1930–2026)         |
-| GET    | `/worldcups/:id`              | Tournament detail                    |
-| POST   | `/worldcups`                  | Upload a tournament (auth)           |
-| POST   | `/worldcups/:id/import`       | Batch-upload teams + squads (auth)   |
-| GET    | `/teams`                      | List teams                           |
-| POST   | `/teams`                      | Upload a team (auth)                 |
-| GET    | `/teams/:id/players`          | Squad of a team                      |
-| POST   | `/teams/:id/players`          | Upload players (auth)                |
-| GET    | `/worldcups/:id/participants` | Teams that joined a tournament       |
-| GET    | `/worldcups/:id/matches`      | Full fixture for a tournament (real) |
-| POST   | `/worldcups/:id/matches`      | Upload a fixture (auth)              |
-| POST   | `/worldcups/:id/simulate`     | Simulate the whole tournament        |
+| Method | Path                                      | Description                                   |
+| ------ | ----------------------------------------- | --------------------------------------------- |
+| GET    | `/auth/google`                            | Start Google OAuth flow (redirects to Google) |
+| GET    | `/auth/callback`                          | OAuth callback → redirects to `/#token=…`     |
+| GET    | `/auth/me`                                | Current user (Bearer)                         |
+| GET    | `/tournaments`                            | List tournaments (1930–2026)                  |
+| POST   | `/tournaments`                            | Create a tournament (auth)                    |
+| GET    | `/tournaments/:id`                        | Tournament + its phases                       |
+| POST   | `/tournaments/:id/phases`                 | Replace formats/phases (auth)                 |
+| GET    | `/tournaments/:id/participants`           | Teams that entered a tournament               |
+| POST   | `/tournaments/:id/participants`           | Add participants + optional groups (auth)     |
+| GET    | `/tournaments/:id/matches`                | Full fixture for a tournament                 |
+| POST   | `/tournaments/:id/matches`                | Upload a fixture (auth)                       |
+| POST   | `/tournaments/:id/fixture/generate`       | Generate the group fixture from a group draw  |
+| POST   | `/tournaments/:id/import`                 | Batch-upload teams + squads (auth)            |
+| POST   | `/tournaments/:id/simulate`               | Simulate the whole tournament                 |
+| GET    | `/teams`                                  | List teams                                    |
+| POST   | `/teams`                                  | Upload a team (auth)                          |
+| GET    | `/teams/:id/players?tournament_id=`       | Squad of a team for a tournament              |
+| POST   | `/teams/:id/players`                      | Upload players with call-ups (auth)           |
 
 ## Registering a real World Cup fixture & squads
 

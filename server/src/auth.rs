@@ -1,32 +1,61 @@
 use axum::{
     extract::{FromRequestParts, State},
     http::request::Parts,
+    response::Redirect,
     Json,
 };
-use bcrypt::{hash, verify, DEFAULT_COST};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
-use crate::{error::{ApiError, ApiResult}, models::{AuthOut, LoginIn, RegisterIn, User}, Db};
+use crate::{
+    error::{ApiError, ApiResult},
+    models::User,
+    Db,
+};
 
 const JWT_SECRET_ENV: &str = "WCS_JWT_SECRET";
+const GCLIENT_ENV: &str = "WCS_GOOGLE_CLIENT_ID";
+const GSECRET_ENV: &str = "WCS_GOOGLE_CLIENT_SECRET";
+const BASE_URL_ENV: &str = "WCS_BASE_URL";
 
 fn secret() -> String {
     std::env::var(JWT_SECRET_ENV).unwrap_or_else(|_| "dev-secret-change-me".into())
 }
 
+fn base_url() -> String {
+    std::env::var(BASE_URL_ENV).unwrap_or_else(|_| "http://localhost:8080".into())
+}
+
+fn google_client() -> ApiResult<(String, String)> {
+    let id = std::env::var(GCLIENT_ENV)
+        .map_err(|_| ApiError::bad_request("Google OAuth is not configured (WCS_GOOGLE_CLIENT_ID)"))?;
+    let secret = std::env::var(GSECRET_ENV)
+        .map_err(|_| ApiError::bad_request("Google OAuth is not configured (WCS_GOOGLE_CLIENT_SECRET)"))?;
+    if id.trim().is_empty() || secret.trim().is_empty() {
+        return Err(ApiError::bad_request(
+            "Google OAuth is not configured (set WCS_GOOGLE_CLIENT_ID and WCS_GOOGLE_CLIENT_SECRET)",
+        ));
+    }
+    Ok((id, secret))
+}
+
+// ---------------------------------------------------------------------------
+// JWT
+// ---------------------------------------------------------------------------
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: i64,
-    pub username: String,
+    pub name: String,
     pub exp: usize,
 }
 
-fn sign(sub: i64, username: &str) -> ApiResult<String> {
+fn sign(sub: i64, name: &str) -> ApiResult<String> {
     let exp = (chrono_now() + 60 * 60 * 24 * 30) as usize;
     let claims = Claims {
         sub,
-        username: username.to_string(),
+        name: name.to_string(),
         exp,
     };
     encode(
@@ -37,7 +66,7 @@ fn sign(sub: i64, username: &str) -> ApiResult<String> {
     .map_err(|e| ApiError::Internal(format!("token sign failed: {e}")))
 }
 
-pub fn verify_token(token: &str) -> ApiResult<Claims> {
+fn verify_token(token: &str) -> ApiResult<Claims> {
     decode::<Claims>(
         token,
         &DecodingKey::from_secret(secret().as_bytes()),
@@ -54,20 +83,17 @@ fn chrono_now() -> i64 {
         .unwrap_or(0)
 }
 
-/// Authenticated user info injected by the `AuthUser` extractor.
+/// Authenticated user injected by the `AuthUser` extractor.
 #[derive(Debug, Clone)]
 pub struct AuthUser {
     pub id: i64,
-    pub username: String,
+    pub name: String,
 }
 
 impl FromRequestParts<Db> for AuthUser {
     type Rejection = ApiError;
 
-    async fn from_request_parts(
-        parts: &mut Parts,
-        _state: &Db,
-    ) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(parts: &mut Parts, _state: &Db) -> Result<Self, Self::Rejection> {
         let token = parts
             .headers
             .get(axum::http::header::AUTHORIZATION)
@@ -77,91 +103,147 @@ impl FromRequestParts<Db> for AuthUser {
         let claims = verify_token(token)?;
         Ok(AuthUser {
             id: claims.sub,
-            username: claims.username,
+            name: claims.name,
         })
     }
 }
 
 fn get_user_by_id(db: &rusqlite::Connection, id: i64) -> ApiResult<Option<User>> {
-    let mut stmt = db
-        .prepare("SELECT id, username, created_at FROM users WHERE id = ?1")?;
+    let mut stmt = db.prepare(
+        "SELECT id, provider, display_name, email, created_at FROM users WHERE id = ?1",
+    )?;
     let mut rows = stmt.query_map([id], |r| {
         Ok(User {
             id: r.get(0)?,
-            username: r.get(1)?,
-            created_at: r.get(2)?,
+            provider: r.get(1)?,
+            display_name: r.get(2)?,
+            email: r.get(3)?,
+            created_at: r.get(4)?,
         })
     })?;
     Ok(rows.next().map(|r| r).transpose()?)
 }
 
-pub async fn register(State(db): State<Db>, Json(input): Json<RegisterIn>) -> ApiResult<Json<AuthOut>> {
-    let username = input.username.trim().to_string();
-    if username.len() < 3 {
-        return Err(ApiError::bad_request("username must be at least 3 chars"));
-    }
-    if input.password.len() < 6 {
-        return Err(ApiError::bad_request("password must be at least 6 chars"));
-    }
-    let password_hash = hash(&input.password, DEFAULT_COST)
-        .map_err(|e| ApiError::Internal(format!("bcrypt failed: {e}")))?;
+// ---------------------------------------------------------------------------
+// Google OAuth (authorization code flow, no passwords stored anywhere)
+// ---------------------------------------------------------------------------
 
-    let conn = db.lock().unwrap();
-    let res = conn.execute(
-        "INSERT INTO users (username, password_hash) VALUES (?1, ?2)",
-        rusqlite::params![username, password_hash],
+/// GET /api/auth/google — bounce the user over to Google.
+pub async fn google_authorize(State(db): State<Db>) -> ApiResult<Redirect> {
+    let (client_id, _) = google_client()?;
+    let state = random_state();
+    {
+        let conn = db.lock().unwrap();
+        conn.execute(
+            "INSERT INTO oauth_states (state, created_at) VALUES (?1, datetime('now'))",
+            rusqlite::params![state],
+        )?;
+    }
+    let redirect_uri = format!("{}/api/auth/callback", base_url());
+    let url = format!(
+        "https://accounts.google.com/o/oauth2/v2/auth?client_id={}&redirect_uri={}&response_type=code&scope={}&state={}&access_type=online",
+        urlencoding::encode(&client_id),
+        urlencoding::encode(&redirect_uri),
+        urlencoding::encode("openid email profile"),
+        urlencoding::encode(&state),
     );
-    match res {
-        Ok(_) => {}
-        Err(rusqlite::Error::SqliteFailure(e, _)) if e.code == rusqlite::ErrorCode::ConstraintViolation => {
-            return Err(ApiError::Conflict("username already taken".into()))
-        }
-        Err(e) => return Err(e.into()),
-    }
-    let id = conn.last_insert_rowid();
-    let user = get_user_by_id(&conn, id)?.unwrap();
-    drop(conn);
-
-    let token = sign(user.id, &user.username)?;
-    Ok(Json(AuthOut { token, user }))
+    Ok(Redirect::temporary(&url))
 }
 
-pub async fn login(State(db): State<Db>, Json(input): Json<LoginIn>) -> ApiResult<Json<AuthOut>> {
+#[derive(Debug, Deserialize)]
+pub struct CallbackQuery {
+    pub code: String,
+    pub state: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct TokenResponse {
+    access_token: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct UserInfo {
+    sub: String,
+    email: Option<String>,
+    name: Option<String>,
+}
+
+/// GET /api/auth/callback — Google redirects here after the user consents.
+pub async fn google_callback(
+    State(db): State<Db>,
+    axum::extract::Query(q): axum::extract::Query<CallbackQuery>,
+) -> ApiResult<Redirect> {
+    let (client_id, client_secret) = google_client()?;
     let conn = db.lock().unwrap();
-    let row = conn
+
+    // validate state
+    let valid: Option<bool> = conn
         .query_row(
-            "SELECT id, username, password_hash, created_at FROM users WHERE username = ?1",
-            [&input.username],
-            |r| {
-                Ok((
-                    r.get::<_, i64>(0)?,
-                    r.get::<_, String>(1)?,
-                    r.get::<_, String>(2)?,
-                    r.get::<_, String>(3)?,
-                ))
-            },
+            "SELECT created_at >= datetime('now', '-10 minutes') FROM oauth_states WHERE state = ?1",
+            [&q.state],
+            |r| r.get(0),
         )
-        .optional()?;
-
-    let Some((id, username, password_hash, created_at)) = row else {
-        return Err(ApiError::Unauthorized("invalid credentials".into()));
-    };
-    drop(conn);
-
-    let ok = verify(&input.password, &password_hash).unwrap_or(false);
-    if !ok {
-        return Err(ApiError::Unauthorized("invalid credentials".into()));
+        .ok();
+    conn.execute(
+        "DELETE FROM oauth_states WHERE state = ?1",
+        rusqlite::params![&q.state],
+    )?;
+    if !valid.unwrap_or(false) {
+        return Err(ApiError::Unauthorized("invalid oauth state".into()));
     }
 
-    let token = sign(id, &username)?;
-    Ok(Json(AuthOut {
-        token,
-        user: User {
-            id,
-            username,
-            created_at,
-        },
-    }))
+    // exchange the code for an access token
+    let redirect_uri = format!("{}/api/auth/callback", base_url());
+    let token_resp = ureq::post("https://oauth2.googleapis.com/token")
+        .send_form(&[
+            ("code", &q.code),
+            ("client_id", &client_id),
+            ("client_secret", &client_secret),
+            ("redirect_uri", &redirect_uri),
+            ("grant_type", "authorization_code"),
+        ])
+        .map_err(auth_err)?;
+    let tokens: TokenResponse = token_resp.into_json().map_err(|e| {
+        ApiError::Unauthorized(format!("oauth token exchange failed: {e}"))
+    })?;
+
+    // fetch the profile with the access token
+    let user_resp = ureq::get("https://openidconnect.googleapis.com/v1/userinfo")
+        .set("Authorization", &format!("Bearer {}", tokens.access_token))
+        .call()
+        .map_err(auth_err)?;
+    let info: UserInfo = user_resp
+        .into_json()
+        .map_err(|e| ApiError::Unauthorized(format!("oauth userinfo failed: {e}")))?;
+
+    let display_name = info
+        .name
+        .clone()
+        .or_else(|| info.email.clone())
+        .unwrap_or_else(|| "Google user".to_string());
+
+    // upsert (provider, provider_subject)
+    conn.execute(
+        "INSERT INTO users (provider, provider_subject, display_name, email)
+         VALUES ('google', ?1, ?2, ?3)
+         ON CONFLICT(provider, provider_subject) DO UPDATE SET
+            display_name = excluded.display_name,
+            email = excluded.email",
+        rusqlite::params![info.sub, display_name, info.email],
+    )?;
+    let user_id: i64 = conn.query_row(
+        "SELECT id FROM users WHERE provider = 'google' AND provider_subject = ?1",
+        [&info.sub],
+        |r| r.get(0),
+    )?;
+    drop(conn);
+
+    let token = sign(user_id, &display_name)?;
+    let app_url = base_url();
+    Ok(Redirect::temporary(&format!(
+        "{app_url}/#token={}",
+        urlencoding::encode(&token)
+    )))
 }
 
 pub async fn me(user: AuthUser, State(db): State<Db>) -> ApiResult<Json<User>> {
@@ -170,5 +252,26 @@ pub async fn me(user: AuthUser, State(db): State<Db>) -> ApiResult<Json<User>> {
     Ok(Json(user))
 }
 
-// small helper to keep rusqlite's OptionalExtension import available
-use rusqlite::OptionalExtension;
+/// Returns a 32-hex-char random state token.
+fn random_state() -> String {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    let v: Value = serde_json::json!({ "n": now });
+    format!("{:x}", v["n"].as_u64().unwrap_or(0) as u128)
+        .repeat(4)
+        .chars()
+        .take(32)
+        .collect()
+}
+
+fn auth_err(e: ureq::Error) -> ApiError {
+    match e {
+        ureq::Error::Status(code, resp) => {
+            let body = resp.into_string().unwrap_or_default();
+            ApiError::Unauthorized(format!("oauth upstream error {code}: {body}"))
+        }
+        e => ApiError::Internal(format!("oauth transport error: {e}")),
+    }
+}

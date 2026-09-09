@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { api } from "../api";
-import { STAGES, type SimMatch } from "../types";
+import type { Phase, SimMatch } from "../types";
 import type { GameState } from "../App";
 
 interface Props {
@@ -51,6 +51,15 @@ function standings(ms: SimMatch[]): Map<number, Row> {
   return map;
 }
 
+/** Phase keys order the rounds; group phases render as tables, the rest as bracket. */
+function stageList(phases: Phase[]): { key: string; label: string; group: boolean }[] {
+  return phases.map((p) => ({
+    key: p.key,
+    label: p.name,
+    group: p.phase_type === "GROUP",
+  }));
+}
+
 export default function Simulation({ state, setState, onRestart }: Props) {
   const [matches, setMatches] = useState<SimMatch[] | null>(null);
   const [simulating, setSimulating] = useState(false);
@@ -97,6 +106,12 @@ export default function Simulation({ state, setState, onRestart }: Props) {
     }
   };
 
+  const stages = useMemo(() => stageList(state.phases), [state.phases]);
+  const stageOrderOf = useCallback(
+    (s: string) => stages.findIndex((x) => x.key === s),
+    [stages],
+  );
+
   const byStage = useMemo(() => {
     const map = new Map<string, SimMatch[]>();
     matches?.forEach((m) => {
@@ -117,8 +132,8 @@ export default function Simulation({ state, setState, onRestart }: Props) {
   );
 
   const groupMatches = useMemo(
-    () => (matches ?? []).filter((m) => m.stage === "GROUP"),
-    [matches],
+    () => (matches ?? []).filter((m) => stages.find((s) => s.key === m.stage)?.group),
+    [matches, stages],
   );
 
   const groupNames = useMemo(
@@ -126,7 +141,6 @@ export default function Simulation({ state, setState, onRestart }: Props) {
     [groupMatches, groupLetter],
   );
 
-  // Build a group table of any group letter that has >0 matches.
   const groupTables = useMemo(() => {
     return groupNames
       .map((g) => {
@@ -143,21 +157,24 @@ export default function Simulation({ state, setState, onRestart }: Props) {
     () =>
       (matches ?? [])
         .filter((m) => m.home_team_id === userTeamId || m.away_team_id === userTeamId)
-        .sort((a, b) => stageOrder(a.stage) - stageOrder(b.stage)),
-    [matches, userTeamId],
+        .sort((a, b) => stageOrderOf(a.stage) - stageOrderOf(b.stage)),
+    [matches, userTeamId, stageOrderOf],
   );
 
   const userEliminated = useMemo(() => {
     if (!userTeamId || !matches) return false;
     const inKnockout = matches.some(
-      (m) => m.stage !== "GROUP" && (m.home_team_id === userTeamId || m.away_team_id === userTeamId),
+      (m) => !(stages.find((s) => s.key === m.stage)?.group) &&
+        (m.home_team_id === userTeamId || m.away_team_id === userTeamId),
     );
     const played = userMatches.filter((m) => m.status === "played");
     if (!played.length && inKnockout) return true;
     return false;
-  }, [userTeamId, matches, userMatches]);
+  }, [userTeamId, matches, userMatches, stages]);
 
   if (!state.tournament) return null;
+
+  const knockoutStages = stages.filter((s) => !s.group).map((s) => s.key);
 
   return (
     <section className="sim">
@@ -204,7 +221,7 @@ export default function Simulation({ state, setState, onRestart }: Props) {
         <div className="journey">
           {userMatches.map((m) => (
             <div key={m.id} className={"jcard" + (m.status === "played" ? " played" : "")}>
-              <span className="stage">{stageLabel(m.stage)}</span>
+              <span className="stage">{stageName(stages, m.stage)}</span>
               <span className="score">
                 {m.status === "played"
                   ? `${m.home_team_name} ${m.home_score}–${m.away_score} ${m.away_team_name}`
@@ -218,7 +235,7 @@ export default function Simulation({ state, setState, onRestart }: Props) {
 
       {groupTables.length > 0 && (
         <div className="group-tables">
-          <h2>Groups</h2>
+          <h2>Group stage</h2>
           <div className="group-grid">
             {groupTables.map(({ g, ms, rows }) => (
               <table key={g} className="group-table">
@@ -268,12 +285,13 @@ export default function Simulation({ state, setState, onRestart }: Props) {
       <div className="bracket">
         <h2>Knockout bracket</h2>
         <div className="rounds">
-          {STAGES.filter((s) => s.stages[0] !== "GROUP")
+          {stages
+            .filter((s) => !s.group)
             .map((s) => {
-              const ms = s.stages.flatMap((st) => byStage.get(st) ?? []);
+              const ms = byStage.get(s.key) ?? [];
               if (!ms.length) return null;
               return (
-                <div key={s.label} className="round">
+                <div key={s.key} className="round">
                   <h3>{s.label}</h3>
                   {ms.map((m) => (
                     <div
@@ -295,7 +313,7 @@ export default function Simulation({ state, setState, onRestart }: Props) {
             })
             .filter(Boolean)}
         </div>
-        {!matches?.some((m) => m.stage !== "GROUP") && (
+        {!matches?.some((m) => knockoutStages.includes(m.stage)) && (
           <p className="hint">
             Knockout rounds are drawn from the real group standings and appear
             after the group stage is simulated.
@@ -310,12 +328,8 @@ function short(n: string): string {
   return n.length > 14 ? n.slice(0, 12) : n;
 }
 
-function stageOrder(s: string): number {
-  return STAGES.findIndex((x) => x.stages.includes(s));
-}
-
-function stageLabel(s: string): string {
-  return STAGES.find((x) => x.stages.includes(s))?.label ?? s;
+function stageName(stages: { key: string; label: string }[], s: string): string {
+  return stages.find((x) => x.key === s)?.label ?? s;
 }
 
 function isUserMatch(m: SimMatch, uid: number | null | undefined): boolean {

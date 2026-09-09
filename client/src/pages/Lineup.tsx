@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { api } from "../api";
-import { FORMATIONS, POSITION_ORDER } from "../formations";
+import { FORMATIONS } from "../formations";
 import type { Player, Team } from "../types";
+import { ATTRIBUTES, positionFamily } from "../types";
 import Pitch from "../components/Pitch";
 import { lineupStrength, playersForPosition } from "../App";
 import type { GameState } from "../App";
@@ -14,27 +15,62 @@ interface Props {
   onDone: () => void;
 }
 
-function makePlaceholderSquad(team: Team): Player[] {
-  const r = team.rating;
-  const mk = (i: number, pos: Player["position"], rating: number): Player => ({
-    id: -i,
-    team_id: team.id,
-    name: `${pos} Player ${i}`,
-    position: pos,
-    shirt_number: i,
-    rating,
-  });
-  const squad: Player[] = [];
-  let n = 0;
-  for (const pos of ["GK", "GK", "GK", "DF", "DF", "DF", "DF", "DF", "DF", "DF",
-                   "MF", "MF", "MF", "MF", "MF", "MF", "MF", "MF",
-                   "FW", "FW", "FW", "FW", "FW", "FW"] as Player["position"][]) {
-    const delta =
-      pos === "GK" ? 2 : pos === "DF" ? -2 : pos === "MF" ? 0 : 3;
-    squad.push(mk(++n, pos, Math.min(96, Math.max(40, r + delta + (n % 3)))));
-  }
-  return squad;
+/** Mirrors the backend position-weighted overall rating. */
+export function overall(player: Player): number {
+  const w = WEIGHTS[positionFamily(player.position)] ?? WEIGHTS.MF;
+  const sum = ATTRIBUTES.reduce(
+    (acc, a, i) => acc + (w[i] ?? 0) * (player[a] ?? player.rating),
+    0,
+  );
+  const total = w.reduce((a, b) => a + b, 0);
+  return total > 0 ? Math.round(sum / total) : player.rating;
 }
+
+// Position-weighted attribute indices (order matches ATTRIBUTES).
+const WEIGHTS: Record<string, number[]> = {
+  GK: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.25, 0.22, 0.18, 0, 0.15],
+  DF: [0, 0.08, 0.1, 0.14, 0.1, 0.1, 0.06, 0.32, 0.1, 0, 0, 0, 0, 0],
+  MF: [0, 0.1, 0.12, 0.12, 0.14, 0.22, 0.12, 0.12, 0.14, 0.04, 0, 0, 0, 0],
+  FW: [0, 0.1, 0.06, 0.14, 0.12, 0.14, 0.12, 0.09, 0.17, 0.06, 0, 0, 0, 0],
+};
+
+/** Build a plausible fictional squad from the team's rating. */
+export function makePlaceholderSquad(team: Team): Player[] {
+  const base = team.rating;
+  const roster: Player[] = [];
+  const layout = [
+    "GK", "GK", "GK",
+    "CB", "CB", "CB", "CB", "CB", "LB", "LB", "RB", "RB", "LWB", "RWB",
+    "CDM", "CDM", "CM", "CM", "CM", "CAM", "LM", "RM", "LW", "RW", "CF", "ST", "ST",
+  ];
+  let n = 0;
+  const mk = (pos: string, delta: number): Player => {
+    const r = Math.min(95, Math.max(42, base + delta + (n % 3)));
+    const family = positionFamily(pos);
+    const attrs: Partial<Record<(typeof ATTRIBUTES)[number], number>> = {};
+    const shift = (i: number, off: number) => {
+      const key = ATTRIBUTES[i];
+      attrs[key] = Math.min(99, Math.max(1, base - 4 + off + (n % 5)));
+    };
+    for (let i = 0; i < 14; i++) {
+      const w = (WEIGHTS[family] ?? WEIGHTS.MF)[i] ?? 0;
+      shift(i, w > 0 ? (pos === "GK" && i >= 10 ? 4 : 3) : -5);
+    }
+    return {
+      id: -(++n),
+      team_id: team.id,
+      name: `${pos} Player ${n}`,
+      position: pos,
+      shirt_number: n + 1,
+      rating: r,
+      ...(attrs as Record<(typeof ATTRIBUTES)[number], number>),
+    };
+  };
+  layout.forEach((pos, i) => roster.push(mk(pos, FAMILY_DELTA[positionFamily(pos)] + (i % 3) - 1)));
+  return roster;
+}
+
+const FAMILY_DELTA: Record<string, number> = { GK: 4, DF: -1, MF: 0, FW: 2 };
 
 export default function Lineup({ team, state, setState, onDone }: Props) {
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +80,7 @@ export default function Lineup({ team, state, setState, onDone }: Props) {
   useEffect(() => {
     setLoading(true);
     api
-      .players(team.id)
+      .players(team.id, state.tournament?.id)
       .then((players) => {
         const squad = players.length ? players : makePlaceholderSquad(team);
         const formation = state.formation ?? FORMATIONS[0];
@@ -151,14 +187,14 @@ export default function Lineup({ team, state, setState, onDone }: Props) {
                           {p.shirt_number != null ? `${p.shirt_number} · ` : ""}
                           {p.name}
                         </span>
-                        <span className="squad-rating">{p.rating}</span>
+                        <span className="squad-rating">{overall(p)}</span>
                       </button>
                     </li>
                   ))}
                 </ul>
                 <button
                   className="btn ghost"
-                  onClick={() => setState((st) => ({ ...st, lineup: st.lineup.map(() => null), boosting: false }))}
+                  onClick={() => setState((st) => ({ ...st, lineup: st.lineup.map(() => null) }))}
                 >
                   Clear lineup
                 </button>
@@ -176,7 +212,7 @@ export default function Lineup({ team, state, setState, onDone }: Props) {
       </div>
 
       <p className="pos-legend">
-        {POSITION_ORDER.map((p) => (
+        {["GK", "DF", "MF", "FW"].map((p) => (
           <span key={p}>{p}</span>
         ))}{" "}
         — squad roster by position

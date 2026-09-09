@@ -1,13 +1,15 @@
 import { useMemo, useState } from "react";
-import type { Participant, Player, SimMatch, WorldCup } from "./types";
-import { POSITION_ORDER, type Formation } from "./formations";
+import type { Participant, Phase, Player, SimMatch, Tournament } from "./types";
+import { positionFamily } from "./types";
+import { type Formation } from "./formations";
 import ChooseTournament from "./pages/ChooseTournament";
 import ChooseTeam from "./pages/ChooseTeam";
 import Lineup from "./pages/Lineup";
 import Simulation from "./pages/Simulation";
 
 export interface GameState {
-  tournament: WorldCup | null;
+  tournament: Tournament | null;
+  phases: Phase[];
   team: Participant | null;
   participants: Participant[];
   squad: Player[];
@@ -19,6 +21,7 @@ export interface GameState {
 
 const initialState: GameState = {
   tournament: null,
+  phases: [],
   team: null,
   participants: [],
   squad: [],
@@ -94,6 +97,7 @@ export default function App() {
           <ChooseTeam
             tournament={state.tournament}
             selected={state.team}
+            onPhases={(phases) => setState((st) => ({ ...st, phases }))}
             onPick={(t, all) => {
               setState({
                 ...state,
@@ -130,10 +134,13 @@ export default function App() {
   );
 }
 
-// shared helper: players of a given position, highest rated first
+// shared helpers: players for a formation family (or exact position), highest rated first
 export function playersForPosition(squad: Player[], pos: string): Player[] {
+  const isFamily = ["GK", "DF", "MF", "FW"].includes(pos);
   return squad
-    .filter((p) => p.position === pos)
+    .filter((p) =>
+      isFamily ? positionFamily(p.position) === pos : p.position === pos,
+    )
     .sort((a, b) => b.rating - a.rating);
 }
 
@@ -141,8 +148,4 @@ export function lineupStrength(lineup: (Player | null)[]): number {
   const filled = lineup.filter((p): p is Player => !!p);
   if (!filled.length) return 0;
   return Math.round(filled.reduce((s, p) => s + p.rating, 0) / filled.length);
-}
-
-export function positionLabel(pos: string): string {
-  return POSITION_ORDER.find((p) => p === pos) ?? "BK";
 }

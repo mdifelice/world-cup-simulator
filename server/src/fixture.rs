@@ -1,61 +1,90 @@
-use std::collections::HashMap;
-
 use rusqlite::Connection;
 
 /// Ordered participants per group for a tournament.
-pub struct Groups(pub HashMap<String, Vec<i64>>);
+pub type Groups = Vec<(String, Vec<i64>)>;
 
-/// Generates the group-stage fixture (groups → round-robin matchdays) for a
-/// tournament. Knockout rounds are generated on-the-fly during simulation,
-/// resolving from real group standings and the real bracket layout:
-/// 1A-2B | 1C-2D | 1B-2A | 1D-2C | 1E-2F | 1G-2H | 1F-2E | 1H-2G.
-pub fn generate(conn: &Connection, wc_id: i64) -> rusqlite::Result<usize> {
-    let groups = load_groups(conn, wc_id)?;
-    let mut inserted = 0usize;
-
-    for group in groups.values() {
-        // Round-robin with the real tournament schedule pattern:
-        //   MD1: 1v2, 3v4 | MD2: 1v3, 4v2 | MD3: 4v1, 2v3
-        let indices: &[(usize, usize)] = &[(1, 2), (3, 4), (1, 3), (4, 2), (4, 1), (2, 3)];
-        for (k, (i, j)) in indices.iter().enumerate() {
-            conn.execute(
-                "INSERT INTO matches (worldcup_id, stage, round_num, matchday, home_team_id, away_team_id, status)
-                 VALUES (?1, ?2, 0, ?3, ?4, ?5, 'scheduled')",
-                rusqlite::params![
-                    wc_id,
-                    "GROUP",
-                    (k as i32) / 2 + 1,
-                    group[*i - 1],
-                    group[*j - 1],
-                ],
-            )?;
-            inserted += 1;
-        }
-    }
-
-    Ok(inserted)
-}
-
-pub fn load_groups(conn: &Connection, wc_id: i64) -> rusqlite::Result<HashMap<String, Vec<i64>>> {
+/// Loads group assignments (only relevant when the tournament has a group phase).
+pub fn load_groups(conn: &Connection, tournament_id: i64) -> rusqlite::Result<Groups> {
     let mut stmt = conn.prepare(
-        "SELECT t.id, wc.group_letter
-         FROM worldcup_teams wc
-         JOIN teams t ON t.id = wc.team_id
-         WHERE wc.worldcup_id = ?1
-         ORDER BY wc.group_letter, t.name",
+        "SELECT g.group_name, t.id
+         FROM tournament_groups g
+         JOIN teams t ON t.id = g.team_id
+         WHERE g.tournament_id = ?1
+         ORDER BY g.group_name, t.name",
     )?;
-    let rows = stmt.query_map([wc_id], |r| {
-        Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?))
+    let rows = stmt.query_map([tournament_id], |r| {
+        Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?))
     })?;
-    let mut groups: HashMap<String, Vec<i64>> = HashMap::new();
+    let mut groups: Vec<(String, Vec<i64>)> = Vec::new();
     for row in rows {
-        let (tid, group) = row?;
-        groups.entry(group).or_default().push(tid);
+        let (name, tid) = row?;
+        match groups.iter_mut().find(|(n, _)| *n == name) {
+            Some((_, list)) => list.push(tid),
+            None => groups.push((name, vec![tid])),
+        }
     }
     Ok(groups)
 }
 
+/// Round-robin schedule: every pair plays once, split into `n-1` matchdays.
+/// Uses the standard circle method; returns (home, away, round).
+pub fn round_robin(teams: &[i64]) -> Vec<(i64, i64, usize)> {
+    let n = teams.len();
+    let mut out = Vec::new();
+    if n < 2 {
+        return out;
+    }
+    let mut list: Vec<usize> = (1..n).collect();
+    let rounds = if n % 2 == 0 { n - 1 } else { n };
+    let mut idx = 0usize;
+    while idx < rounds {
+        let mut pairs: Vec<(usize, usize)> = Vec::new();
+        pairs.push((0, list[0]));
+        let mut k = 1;
+        while k + 1 < list.len() {
+            pairs.push((list[k], list[k + 1]));
+            k += 2;
+        }
+        for (i, j) in pairs {
+            // alternate home/away across rounds for balance
+            let (h, a) = if idx % 2 == 0 { (i, j) } else { (j, i) };
+            out.push((teams[h], teams[a], idx + 1));
+        }
+        list.rotate_right(1);
+        idx += 1;
+    }
+    out
+}
+
+/// Generates the first group-phase fixture for a tournament (round-robin).
+/// Later phases (knockouts, league decider) are drawn on the fly in `sim`.
+pub fn generate(conn: &Connection, tournament_id: i64) -> rusqlite::Result<usize> {
+    let groups = load_groups(conn, tournament_id)?;
+    let mut inserted = 0usize;
+    for (_name, teams) in &groups {
+        for (home, away, round) in round_robin(teams) {
+            let existing: i64 = conn.query_row(
+                "SELECT COUNT(*) FROM matches
+                 WHERE tournament_id = ?1 AND stage = 'GROUP' AND home_team_id = ?2 AND away_team_id = ?3",
+                rusqlite::params![tournament_id, home, away],
+                |r| r.get(0),
+            )?;
+            if existing > 0 {
+                continue;
+            }
+            conn.execute(
+                "INSERT INTO matches (tournament_id, stage, round_num, matchday, home_team_id, away_team_id, status)
+                 VALUES (?1, 'GROUP', 0, ?2, ?3, ?4, 'scheduled')",
+                rusqlite::params![tournament_id, round as i32, home, away],
+            )?;
+            inserted += 1;
+        }
+    }
+    Ok(inserted)
+}
+
 /// Group standings: team_id, points, goals_for, goals_against.
+#[derive(Debug, Clone)]
 pub struct Standing {
     pub team_id: i64,
     pub points: i32,
@@ -63,88 +92,65 @@ pub struct Standing {
     pub ga: i32,
 }
 
-pub fn standings(conn: &Connection, wc_id: i64) -> rusqlite::Result<HashMap<String, Vec<Standing>>> {
-    let groups = load_groups(conn, wc_id)?;
-    let mut out: HashMap<String, Vec<Standing>> = HashMap::new();
-
-    for (letter, teams) in &groups {
-        let mut acc: HashMap<i64, Standing> = teams
-            .iter()
-            .map(|t| {
-                (
-                    *t,
-                    Standing {
-                        team_id: *t,
-                        points: 0,
-                        gf: 0,
-                        ga: 0,
-                    },
-                )
-            })
-            .collect();
-
-        let mut stmt = conn.prepare(
-            "SELECT home_team_id, away_team_id, home_score, away_score
-             FROM matches
-             WHERE worldcup_id = ?1 AND stage = 'GROUP' AND status = 'played'",
-        )?;
-        for row in stmt.query_map([wc_id], |r| {
-            Ok((
-                r.get::<_, i64>(0)?,
-                r.get::<_, i64>(1)?,
-                r.get::<_, i32>(2)?,
-                r.get::<_, i32>(3)?,
-            ))
-        })? {
-            let (h, a, hs, as_) = row?;
-            if groups[letter].contains(&h) && groups[letter].contains(&a) {
-                let entry = acc.get_mut(&h).unwrap();
-                entry.gf += hs;
-                entry.ga += as_;
-                entry.points += if hs > as_ {
-                    3
-                } else if hs == as_ {
-                    1
-                } else {
-                    0
-                };
-                let entry = acc.get_mut(&a).unwrap();
-                entry.gf += as_;
-                entry.ga += hs;
-                entry.points += if as_ > hs {
-                    3
-                } else if as_ == hs {
-                    1
-                } else {
-                    0
-                };
-            }
-        }
-
-        let mut list: Vec<Standing> = acc.into_values().collect();
-        // sort: points desc, goal diff desc, goals for desc
-        list.sort_by(|x, y| {
-            let xd = x.gf - x.ga;
-            let yd = y.gf - y.ga;
-            y.points
-                .cmp(&x.points)
-                .then(yd.cmp(&xd))
-                .then(y.gf.cmp(&x.gf))
-        });
-        out.insert(letter.clone(), list);
+impl Standing {
+    pub fn gd(&self) -> i32 {
+        self.gf - self.ga
     }
-    Ok(out)
 }
 
-/// Standard bracket pairings for the Round of 16, by group label.
-/// Index 0..8 → (winner_group, runner_group).
-pub const R16_PAIRINGS: &[(&str, &str)] = &[
-    ("A", "B"),
-    ("C", "D"),
-    ("B", "A"),
-    ("D", "C"),
-    ("E", "F"),
-    ("G", "H"),
-    ("F", "E"),
-    ("H", "G"),
-];
+/// Table for an arbitrary set of teams, computed from played matches of a stage.
+pub fn table_for(
+    conn: &Connection,
+    tournament_id: i64,
+    stage: &str,
+    teams: &[i64],
+) -> rusqlite::Result<Vec<Standing>> {
+    let mut acc: std::collections::HashMap<i64, Standing> = teams
+        .iter()
+        .map(|t| {
+            (
+                *t,
+                Standing {
+                    team_id: *t,
+                    points: 0,
+                    gf: 0,
+                    ga: 0,
+                },
+            )
+        })
+        .collect();
+
+    let mut stmt = conn.prepare(
+        "SELECT home_team_id, away_team_id, home_score, away_score
+         FROM matches
+         WHERE tournament_id = ?1 AND stage = ?2 AND status = 'played'",
+    )?;
+    for row in stmt.query_map(rusqlite::params![tournament_id, stage], |r| {
+        Ok((
+            r.get::<_, i64>(0)?,
+            r.get::<_, i64>(1)?,
+            r.get::<_, i32>(2)?,
+            r.get::<_, i32>(3)?,
+        ))
+    })? {
+        let (h, a, hs, as_) = row?;
+        let mut update = |team: i64, gf: i32, ga: i32, pts: i32| {
+            if let Some(e) = acc.get_mut(&team) {
+                e.gf += gf;
+                e.ga += ga;
+                e.points += pts;
+            }
+        };
+        update(h, hs, as_, if hs > as_ { 3 } else if hs == as_ { 1 } else { 0 });
+        update(a, as_, hs, if as_ > hs { 3 } else if as_ == hs { 1 } else { 0 });
+    }
+
+    let mut list: Vec<Standing> = acc.into_values().collect();
+    list.sort_by(|x, y| {
+        y.points
+            .cmp(&x.points)
+            .then(y.gd().cmp(&x.gd()))
+            .then(y.gf.cmp(&x.gf))
+    });
+    Ok(list)
+}

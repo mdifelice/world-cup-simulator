@@ -18,7 +18,7 @@ use tower_http::{
     services::{ServeDir, ServeFile},
 };
 
-use crate::auth::{login, me, register};
+use crate::auth::{google_authorize, google_callback, me};
 
 pub type Db = Arc<Mutex<Connection>>;
 
@@ -41,28 +41,35 @@ async fn main() {
 
     let app = Router::new()
         .route("/health", get(handlers::health))
-        .route("/api/auth/register", post(register))
-        .route("/api/auth/login", post(login))
-        .route("/api/users/me", get(me))
-        .route("/api/worldcups", get(handlers::list_worldcups).post(handlers::create_worldcup))
-        .route("/api/worldcups/{id}", get(handlers::get_worldcup))
+        .route("/api/auth/google", get(google_authorize))
+        .route("/api/auth/callback", get(google_callback))
+        .route("/api/auth/me", get(me))
+        .route("/api/tournaments", get(handlers::list_tournaments).post(handlers::create_tournament))
+        .route("/api/tournaments/{id}", get(handlers::get_tournament))
         .route(
-            "/api/worldcups/{id}/participants",
+            "/api/tournaments/{id}/phases",
+            post(handlers::set_tournament_phases),
+        )
+        .route(
+            "/api/tournaments/{id}/participants",
             get(handlers::list_participants).post(handlers::add_participants),
         )
         .route(
-            "/api/worldcups/{id}/matches",
+            "/api/tournaments/{id}/matches",
             get(handlers::list_matches).post(handlers::create_matches),
         )
         .route(
-            "/api/worldcups/{id}/fixture/generate",
+            "/api/tournaments/{id}/fixture/generate",
             post(handlers::generate_fixture),
         )
         .route(
-            "/api/worldcups/{id}/import",
-            post(handlers::import_worldcup),
+            "/api/tournaments/{id}/import",
+            post(handlers::import_tournament),
         )
-        .route("/api/worldcups/{id}/simulate", post(handlers::simulate_worldcup))
+        .route(
+            "/api/tournaments/{id}/simulate",
+            post(handlers::simulate_tournament),
+        )
         .route("/api/teams", get(handlers::list_teams).post(handlers::create_team))
         .route(
             "/api/teams/{id}/players",

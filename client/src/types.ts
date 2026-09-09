@@ -1,11 +1,26 @@
-export interface WorldCup {
+export interface Tournament {
   id: number;
+  name: string;
   year: number;
   host: string;
   winner: string | null;
   start_date: string | null;
   end_date: string | null;
-  group_count: number;
+}
+
+export interface Phase {
+  id: number;
+  tournament_id: number;
+  seq: number;
+  key: string;
+  name: string;
+  phase_type: "GROUP" | "KNOCKOUT" | string;
+  group_count: number | null;
+  entry_teams: number | null;
+}
+
+export interface TournamentDetail extends Tournament {
+  phases: Phase[];
 }
 
 export interface Team {
@@ -25,28 +40,68 @@ export interface Participant {
   group_letter: string | null;
 }
 
+export const POSITIONS = [
+  "GK",
+  "CB",
+  "LB",
+  "RB",
+  "LWB",
+  "RWB",
+  "CDM",
+  "CM",
+  "CAM",
+  "LM",
+  "RM",
+  "LW",
+  "RW",
+  "ST",
+  "CF",
+] as const;
+
+export const ATTRIBUTES = [
+  "pace",
+  "stamina",
+  "strength",
+  "dribbling",
+  "passing",
+  "shooting",
+  "tackling",
+  "vision",
+  "positioning",
+  "composure",
+  "reflexes",
+  "handling",
+  "kicking",
+  "aerial",
+] as const;
+
 export interface Player {
   id: number;
   team_id: number;
   name: string;
-  position: "GK" | "DF" | "MF" | "FW" | string;
+  position: (typeof POSITIONS)[number] | string;
   shirt_number: number | null;
   rating: number;
+  pace: number;
+  stamina: number;
+  strength: number;
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  tackling: number;
+  vision: number;
+  positioning: number;
+  composure: number;
+  reflexes: number;
+  handling: number;
+  kicking: number;
+  aerial: number;
 }
-
-export type MatchStage =
-  | "GROUP"
-  | "R16"
-  | "QF"
-  | "SF"
-  | "Final"
-  | "ThirdPlace"
-  | string;
 
 export interface SimMatch {
   id: number;
-  worldcup_id: number;
-  stage: MatchStage;
+  tournament_id: number;
+  stage: string;
   round_num: number;
   matchday: number | null;
   home_team_id: number;
@@ -59,9 +114,12 @@ export interface SimMatch {
   status: "scheduled" | "played" | string;
 }
 
-export interface AuthResponse {
-  token: string;
-  user: { id: number; username: string; created_at: string };
+export interface User {
+  id: number;
+  provider: string;
+  provider_subject: string;
+  display_name: string | null;
+  email: string | null;
 }
 
 export interface SimulateResponse {
@@ -69,11 +127,29 @@ export interface SimulateResponse {
   champion: string | null;
 }
 
-export const STAGES: { label: string; stages: string[] }[] = [
-  { label: "Group stage", stages: ["GROUP"] },
-  { label: "Round of 16", stages: ["R16"] },
-  { label: "Quarter-finals", stages: ["QF"] },
-  { label: "Semi-finals", stages: ["SF"] },
-  { label: "Third place", stages: ["ThirdPlace"] },
-  { label: "Final", stages: ["Final"] },
-];
+/** Maps a granular position to the coarse family used by formations/slots. */
+export function positionFamily(pos: string): "GK" | "DF" | "MF" | "FW" {
+  switch (pos) {
+    case "GK":
+      return "GK";
+    case "CB":
+    case "LB":
+    case "RB":
+    case "LWB":
+    case "RWB":
+      return "DF";
+    case "CDM":
+    case "CM":
+    case "CAM":
+    case "LM":
+    case "RM":
+      return "MF";
+    case "LW":
+    case "RW":
+    case "ST":
+    case "CF":
+      return "FW";
+    default:
+      return "MF";
+  }
+}
