@@ -335,7 +335,11 @@ export default function App() {
     { key: "history", label: t("step.history") },
   ];
 
-  const activeIndex = steps.findIndex((s) => s.key === step);
+  // The lineup step sits between overview and the rest of the flow.
+  const activeIndex =
+    step === "lineup"
+      ? steps.findIndex((s) => s.key === "overview")
+      : steps.findIndex((s) => s.key === step);
   const go = (s: Step) => {
     const idx = steps.findIndex((x) => x.key === s);
     if (idx < 0) return;
