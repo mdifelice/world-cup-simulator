@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useI18n } from "../i18n";
 import type { RunMatch, RunPayload } from "../types";
 
 interface Props {
@@ -43,6 +44,7 @@ export default function Overview({
 }: Props) {
   const focusId = run?.focus_team_id ?? null;
   const total = run?.matches.length ?? 0;
+  const { t, stage } = useI18n();
 
   const groups = useMemo(() => {
     const map = new Map<string, Row[]>();
@@ -142,24 +144,28 @@ export default function Overview({
     <section>
       <div className="page-head">
         <div>
-          <h1>{run?.year} {run?.host ? `· ${run.host}` : ""} World Cup</h1>
+          <h1>
+            {run
+              ? t("cup.title", { year: run.year, host: run.host ?? "" })
+              : t("step.tournament")}
+          </h1>
           <p className="hint">
-            {focusId ? `You are managing the tournament live.` : "Neutral view — no team in the dugout."}
-            {" "}Matchday {maxShownDay || 0} of {run ? `revealed ${revealed}/${total}` : ""}.
+            {focusId ? t("cup.managing") : t("cup.neutral")}{" "}
+            {run ? t("cup.revealed", { day: maxShownDay || 0, revealed, total }) : ""}
           </p>
         </div>
       </div>
 
       {runError && (
         <div className="empty bar">
-          <p className="error">Could not start the tournament: {runError}</p>
-          <button className="btn primary big" onClick={onStart}>Retry</button>
+          <p className="error">{t("cup.startError", { msg: runError })}</p>
+          <button className="btn primary big" onClick={onStart}>{t("cup.retry")}</button>
         </div>
       )}
       {!run && !runError && (
         <div className="bar">
-          <p className="hint">The draw is ready — time to kick off.</p>
-          <button className="btn primary big" onClick={onStart}>Start the tournament</button>
+          <p className="hint">{t("cup.startHint")}</p>
+          <button className="btn primary big" onClick={onStart}>{t("cup.start")}</button>
         </div>
       )}
 
@@ -169,19 +175,21 @@ export default function Overview({
             {!allRevealed && (
               <>
                 <button className="btn primary big" onClick={onNext}>
-                  {revealed === 0 ? "Play matchday 1" : `Play matchday ${maxShownDay + 1}`}
+                  {revealed === 0
+                    ? t("cup.playDay1")
+                    : t("cup.playDay", { day: maxShownDay + 1 })}
                 </button>
                 {focusId != null && (
-                  <button className="btn big" onClick={onJump}>⚡ Jump to your match</button>
+                  <button className="btn big" onClick={onJump}>{t("cup.jump")}</button>
                 )}
-                <button className="btn secondary big" onClick={onAll}>Play all</button>
+                <button className="btn secondary big" onClick={onAll}>{t("cup.playAll")}</button>
               </>
             )}
             {allRevealed && champion && (
-              <div className="champ-line">🏆 {champion} are champions!</div>
+              <div className="champ-line">🏆 {t("cup.champion", { team: champion })}</div>
             )}
             <button className="btn secondary big corners" onClick={onFinish}>
-              {allRevealed ? "🏆 Ceremonies →" : "Skip to ceremonies →"}
+              {allRevealed ? t("cup.ceremonies") : t("cup.skipCeremonies")}
             </button>
           </div>
 
@@ -189,12 +197,13 @@ export default function Overview({
             <div className="group-tables">
               {[...groups.entries()].map(([letter, rows]) => (
                 <div key={letter} className="table-card">
-                  <h2 className="table-title">{letter}</h2>
+                  <h2 className="table-title">{stage(letter)}</h2>
                   <table className="mini-table">
                     <thead>
                       <tr>
-                        <th></th><th className="l">Team</th><th>P</th><th>W</th><th>D</th><th>L</th>
-                        <th>GF</th><th>GA</th><th>GD</th><th>Pts</th>
+                        <th></th><th className="l">{t("cup.team")}</th>
+                        <th>{t("cup.p")}</th><th>{t("cup.w")}</th><th>{t("cup.d")}</th><th>{t("cup.l")}</th>
+                        <th>{t("cup.gf")}</th><th>{t("cup.ga")}</th><th>{t("cup.gd")}</th><th>{t("cup.pts")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -221,7 +230,7 @@ export default function Overview({
             <div className="side-col">
               {scorers.length > 0 && (
                 <div className="table-card">
-                  <h2 className="table-title">Top scorers</h2>
+                  <h2 className="table-title">{t("cup.scorers")}</h2>
                   <table className="mini-table">
                     <tbody>
                       {scorers.map((s, i) => (
@@ -239,23 +248,23 @@ export default function Overview({
             </div>
           </div>
 
-          <h2 className="sec-title">Recent results
-            {allRevealed && <span className="dim"> · tournament complete</span>}
+          <h2 className="sec-title">{t("cup.recent")}
+            {allRevealed && <span className="dim"> {t("cup.complete")}</span>}
           </h2>
-          {byDay.length === 0 && <p className="hint">No matches played yet.</p>}
+          {byDay.length === 0 && <p className="hint">{t("cup.noMatches")}</p>}
           {byDay.map(([day, ms]) => (
             <div key={day} className="day-block">
-              <h3 className="day-title">Matchday {day}</h3>
+              <h3 className="day-title">{t("match.day", { day })}</h3>
               {ms.map((m) => (
                 <button key={m.id} className="score-row" onClick={() => onOpen(m)}>
-                  <span className="score-stage">{m.stage_name}</span>
+                  <span className="score-stage">{stage(m.stage_name)}</span>
                   <span className="score-teams">
                     <span className={m.home_team_id === focusId ? "focus-tag" : ""}>{m.home_team_name}</span>
                     <span className="score">{m.home_score}–{m.away_score}</span>
                     <span className={m.away_team_id === focusId ? "focus-tag" : ""}>{m.away_team_name}</span>
                   </span>
                   <span className="score-note">
-                    {m.extra_time ? "AET" : m.penalties ? "Pens" : ""}
+                    {m.extra_time ? t("cup.noteAet") : m.penalties ? t("cup.notePens") : ""}
                     {(m.home_team_id === focusId || m.away_team_id === focusId) && m.momentum ? " ⚡" : ""}
                   </span>
                 </button>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
+import { useI18n } from "../i18n";
 import type { Player, Team, Tournament } from "../types";
 import { positionFamily } from "../types";
 
@@ -15,6 +16,7 @@ const FAMILIES = ["GK", "DF", "MF", "FW"] as const;
 export default function Roster({ tournament, team, onDone, onBack }: Props) {
   const [squad, setSquad] = useState<Player[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     setSquad(null);
@@ -45,18 +47,18 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
     <section>
       <div className="page-head">
         <div>
-          <h1>{team.flag ?? "🌍"} {team.name} — squad</h1>
+          <h1>{team.flag ?? "🌍"} {team.name} {t("squad.title")}</h1>
           <p className="hint">
-            {tournament.year} · 26 players · {squad?.length ?? "…"} on the list
-            {totalOvr != null ? <> · average ✦ {totalOvr}</> : ""}
+            {t("squad.hint", { year: tournament.year, count: squad?.length ?? "…" })}
+            {totalOvr != null ? <> · {t("squad.avg")} ✦ {totalOvr}</> : ""}
           </p>
         </div>
-        <button className="btn secondary" onClick={onBack}>← another team</button>
+        <button className="btn secondary" onClick={onBack}>{t("squad.back")}</button>
       </div>
       {error && <p className="error">{error}</p>}
-      {!squad && !error && <p className="hint">Loading squad…</p>}
+      {!squad && !error && <p className="hint">{t("squad.loading")}</p>}
       {squad && squad.length === 0 && (
-        <div className="empty"><p>No squad list for this team.</p></div>
+        <div className="empty"><p>{t("squad.empty")}</p></div>
       )}
       {squad && squad.length > 0 && (
         <>
@@ -65,7 +67,7 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
             if (!ps.length) return null;
             return (
               <div key={f} className="pos-block">
-                <h2 className="pos-title">{f}</h2>
+                <h2 className="pos-title">{t(`pos.${f}`)}</h2>
                 <div className="player-list">
                   {ps.map((p) => (
                     <div key={p.id} className="player-row">
@@ -83,7 +85,7 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
           })}
           <div className="bar-hint">
             <button className="btn primary big" onClick={onDone}>
-              Start the World Cup →
+              {t("squad.start")}
             </button>
           </div>
         </>

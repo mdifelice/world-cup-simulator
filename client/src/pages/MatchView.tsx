@@ -1,3 +1,4 @@
+import { useI18n } from "../i18n";
 import type { RunMatch } from "../types";
 
 interface Props {
@@ -11,6 +12,8 @@ interface Props {
 const GOLD = "#ffd75e";
 
 export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }: Props) {
+  const { t, stage } = useI18n();
+
   const isFocus =
     focusTeamId != null &&
     (m.home_team_id === focusTeamId || m.away_team_id === focusTeamId);
@@ -38,7 +41,7 @@ export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }:
     const x = (g.minute / lengthLabel) * W;
     const ownGoalColor =
       g.team_id === focusTeamId ? GOLD : "rgba(255,255,255,0.65)";
-    const note = g.extra_time ? " ET" : "";
+    const note = g.extra_time ? ` ${t("match.etShort")}` : "";
     return { x, g, ownGoalColor, note, key: i };
   });
 
@@ -54,20 +57,20 @@ export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }:
     );
   };
 
-  if (isFocus && momentum && isAwayFocusMomentum && m.momentum) {
-    // series already flipped to focus-team perspective; nothing else to do
-  }
+  const resultLabel = `${m.home_score}–${m.away_score}` +
+    (m.extra_time ? ` · ${t("match.aet")}` : "") +
+    (m.penalties ? ` · ${t("match.pens")}` : "");
 
   return (
     <section>
       <div className="page-head">
         <div>
-          <h1>{m.stage_name}</h1>
-          <p className="hint">Matchday {m.day}</p>
+          <h1>{stage(m.stage_name)}</h1>
+          <p className="hint">{t("match.day", { day: m.day })}</p>
         </div>
         <div className="btn-row">
-          <button className="btn secondary" onClick={onOpenPrev}>← prev</button>
-          <button className="btn" onClick={onBack}>Overview</button>
+          <button className="btn secondary" onClick={onOpenPrev}>{t("match.prev")}</button>
+          <button className="btn" onClick={onBack}>{t("match.back")}</button>
         </div>
       </div>
 
@@ -82,7 +85,7 @@ export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }:
           <span className="vs-score">{m.away_score}</span>
         </div>
       </div>
-      <p className="match-label">{m.result_label}</p>
+      <p className="match-label">{resultLabel}</p>
 
       {momentum && series && series.length > 0 && (
         <div className="chart-card">
@@ -90,18 +93,20 @@ export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }:
             <span className="dot" style={{ background: GOLD }}></span>
             {focusTeamId != null && (
               <span className="chart-title">
-                {m.home_team_id === focusTeamId
-                  ? m.home_team_name
-                  : m.away_team_name}{" "}
-                momentum
+                {t("match.momentum", {
+                  team:
+                    m.home_team_id === focusTeamId
+                      ? m.home_team_name
+                      : m.away_team_name,
+                })}
               </span>
             )}
           </div>
           <svg viewBox={`0 0 ${W} ${H}`} className="momentum" preserveAspectRatio="none">
             {tick(0, "0'")}
-            {tick(m.extra_time ? 45 : 45, "HT")}
-            {tick(m.extra_time ? 90 : 90, m.extra_time ? "90'" : "FT")}
-            {m.extra_time && tick(120, "120'")}
+            {tick(45, t("match.ht"))}
+            {tick(90, m.extra_time ? "90'" : t("match.ft"))}
+            {m.extra_time && tick(120, t("match.ft"))}
             <polygon
               points={`0,${H} ${pts.join(" ")} ${W},${H}`}
               fill={GOLD}
@@ -132,8 +137,14 @@ export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }:
 
       {m.penalties && (
         <div className="pens-card">
-          <h3>Penalty shootout — {m.penalties.home_score}–{m.penalties.away_score}
-            {" "}({m.penalties.winner_id === m.home_team_id ? m.home_team_name : m.away_team_name} win)
+          <h3>
+            {t("match.shootout", {
+              score: `${m.penalties.home_score}–${m.penalties.away_score}`,
+              winner:
+                m.penalties.winner_id === m.home_team_id
+                  ? m.home_team_name
+                  : m.away_team_name,
+            })}
           </h3>
           <div className="pen-grid">
             {m.penalties.kicks.map((k, i) => (
@@ -147,13 +158,13 @@ export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }:
 
       {m.goals.length > 0 && (
         <div className="goals-card">
-          <h3>Goals</h3>
+          <h3>{t("match.goals")}</h3>
           {m.goals.map((g, i) => (
             <div key={i} className="goal-row">
-              <span className="goal-min">{g.minute}'{g.extra_time ? " (ET)" : ""}</span>
+              <span className="goal-min">{g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}</span>
               <span className="goal-scorer">
                 {g.scorer}
-                {g.assist ? <span className="dim"> · assist {g.assist}</span> : null}
+                {g.assist ? <span className="dim"> · {t("match.assist", { name: g.assist })}</span> : null}
               </span>
               <span className="goal-team">
                 {m.home_team_id === g.team_id ? m.home_team_name : m.away_team_name}

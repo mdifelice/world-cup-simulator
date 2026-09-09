@@ -571,6 +571,20 @@ body {
   border-color: rgba(59, 191, 107, 0.5);
   cursor: default;
 }
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lang {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
 .link {
   background: none;
   border: none;

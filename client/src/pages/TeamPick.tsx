@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import { useI18n } from "../i18n";
 import type { Participant, Tournament } from "../types";
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 export default function TeamPick({ tournament, selected, onPick, onNeutral }: Props) {
   const [teams, setTeams] = useState<Participant[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     setTeams(null);
@@ -24,38 +26,33 @@ export default function TeamPick({ tournament, selected, onPick, onNeutral }: Pr
 
   return (
     <section>
-      <h1>{tournament.year} — pick your nation</h1>
-      <p className="hint">
-        Take the touchline for any team in the {tournament.year} World Cup. Your
-        nation's matches get live momentum charts as they happen.
-      </p>
+      <h1>{t("team.title", { year: tournament.year })}</h1>
+      <p className="hint">{t("team.hint", { year: tournament.year })}</p>
       {error && <p className="error">{error}</p>}
-      {!teams && !error && <p className="hint">Loading participants…</p>}
+      {!teams && !error && <p className="hint">{t("team.loading")}</p>}
       {teams && teams.length === 0 && (
         <div className="empty">
-          <p>No participants loaded for {tournament.year} yet.</p>
+          <p>{t("team.empty", { year: tournament.year })}</p>
         </div>
       )}
       <div className="card-grid">
-        {teams?.map((t) => (
+        {teams?.map((team) => (
           <button
-            key={t.id}
-            className={"card team-card" + (selected?.id === t.id ? " picked" : "")}
-            onClick={() => onPick(t, teams)}
+            key={team.id}
+            className={"card team-card" + (selected?.id === team.id ? " picked" : "")}
+            onClick={() => onPick(team, teams)}
           >
-            <span className="team-flag">{t.flag ?? "🌍"}</span>
-            <span className="team-name">{t.name}</span>
-            <span className="team-rating">OVR {t.rating}</span>
+            <span className="team-flag">{team.flag ?? "🌍"}</span>
+            <span className="team-name">{team.name}</span>
+            <span className="team-rating">OVR {team.rating}</span>
           </button>
         ))}
       </div>
       {teams && teams.length > 0 && (
         <p className="hint bar-hint">
-          …or{" "}
           <button className="link" onClick={onNeutral}>
-            watch the whole tournament as a neutral
+            {t("team.neutral")}
           </button>
-          .
         </p>
       )}
     </section>

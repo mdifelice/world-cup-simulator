@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import { useI18n } from "../i18n";
 import type { Tournament } from "../types";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 export default function ChooseTournament({ selected, onPick }: Props) {
   const [cups, setCups] = useState<Tournament[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     api.tournaments().then(setCups).catch((e) => setError(e.message));
@@ -17,12 +19,10 @@ export default function ChooseTournament({ selected, onPick }: Props) {
 
   return (
     <section>
-      <h1>Choose your World Cup</h1>
-      <p className="hint">
-        Every edition from 1930 (Uruguay) through 2026 (USA · Mexico · Canada).
-      </p>
-      {error && <p className="error">Cannot reach the backend: {error}</p>}
-      {!cups && !error && <p className="hint">Loading tournaments…</p>}
+      <h1>{t("choose.title")}</h1>
+      <p className="hint">{t("choose.hint")}</p>
+      {error && <p className="error">{t("choose.error")} {error}</p>}
+      {!cups && !error && <p className="hint">{t("choose.loading")}</p>}
       <div className="card-grid">
         {cups?.map((c) => (
           <button
@@ -33,7 +33,9 @@ export default function ChooseTournament({ selected, onPick }: Props) {
             <span className="cup-year">{c.year}</span>
             <span className="cup-host">{c.host}</span>
             <span className="cup-winner">
-              {c.winner ? `Winner: ${c.winner}` : "Winner pending (2026)"}
+              {c.winner
+                ? t("choose.winner", { name: c.winner })
+                : t("choose.winnerPending", { year: c.year })}
             </span>
           </button>
         ))}

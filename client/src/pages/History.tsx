@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import { useI18n } from "../i18n";
 import type { RunListItem, RunPayload } from "../types";
 
 interface Props {
@@ -11,6 +12,7 @@ export default function History({ onOpen, onStartFlow }: Props) {
   const [runs, setRuns] = useState<RunListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [opening, setOpening] = useState<number | null>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
     setRuns(null);
@@ -34,17 +36,17 @@ export default function History({ onOpen, onStartFlow }: Props) {
     <section>
       <div className="page-head">
         <div>
-          <h1>Your saved runs</h1>
-          <p className="hint">Every signed-in cup gets archived here so you can relive it.</p>
+          <h1>{t("history.title")}</h1>
+          <p className="hint">{t("history.hint")}</p>
         </div>
-        <button className="btn secondary" onClick={onStartFlow}>Back to the cup</button>
+        <button className="btn secondary" onClick={onStartFlow}>{t("history.back")}</button>
       </div>
 
       {error && <p className="error">{error}</p>}
-      {!runs && !error && <p className="hint">Loading history…</p>}
+      {!runs && !error && <p className="hint">{t("history.loading")}</p>}
       {runs && runs.length === 0 && (
         <div className="empty">
-          <p>No runs saved yet. Play a tournament while signed in and it will show up here.</p>
+          <p>{t("history.empty")}</p>
         </div>
       )}
       {runs && runs.length > 0 && (
@@ -60,7 +62,7 @@ export default function History({ onOpen, onStartFlow }: Props) {
                 disabled={opening === r.id}
                 onClick={() => open(r.id)}
               >
-                {opening === r.id ? "Loading…" : "Relive"}
+                {opening === r.id ? t("history.opening") : t("history.relive")}
               </button>
             </div>
           ))}

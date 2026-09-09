@@ -12,6 +12,7 @@ import type {
 import { positionFamily } from "./types";
 import { type Formation } from "./formations";
 import { api, readToken, setToken } from "./api";
+import { localeName, useI18n, type Locale } from "./i18n";
 import ChooseTournament from "./pages/ChooseTournament";
 import TeamPick from "./pages/TeamPick";
 import Roster from "./pages/Roster";
@@ -59,6 +60,7 @@ export default function App() {
   const [flow, setFlow] = useState<Flow>(emptyFlow);
   const [user, setUser] = useState<User | null>(null);
   const runGuard = useRef<number | null>(null);
+  const { t, locale, setLocale } = useI18n();
 
   // Silent #token= capture from the OAuth redirect (login stays hidden).
   useEffect(() => {
@@ -189,13 +191,13 @@ export default function App() {
   };
 
   const steps: { key: Step; label: string }[] = [
-    { key: "tournament", label: "World Cup" },
-    { key: "team", label: "Team" },
-    { key: "roster", label: "Squad" },
-    { key: "overview", label: "Verano" },
-    { key: "match", label: "Match" },
-    { key: "finish", label: "Ceremonies" },
-    { key: "history", label: "History" },
+    { key: "tournament", label: t("step.worldcup") },
+    { key: "team", label: t("step.team") },
+    { key: "roster", label: t("step.squad") },
+    { key: "overview", label: t("step.tournament") },
+    { key: "match", label: t("step.match") },
+    { key: "finish", label: t("step.ceremonies") },
+    { key: "history", label: t("step.history") },
   ];
 
   const activeIndex = steps.findIndex((s) => s.key === step);
@@ -209,7 +211,7 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand" onClick={reset}>
-          <span className="brand-ball">⚽</span> World Cup Simulator
+          <span className="brand-ball">⚽</span> {t("app.brand")}
         </div>
         <nav className="steps">
           {steps.map((s) => (
@@ -223,7 +225,18 @@ export default function App() {
             </button>
           ))}
         </nav>
-        {user && <span className="chip">{user.display_name ?? user.email ?? "Signed in"}</span>}
+        <div className="top-actions">
+          {user && <span className="chip">{user.display_name ?? user.email ?? t("app.signedin")}</span>}
+          <select
+            className="lang"
+            value={locale}
+            onChange={(e) => setLocale(e.target.value as Locale)}
+            title="Language / Idioma"
+          >
+            <option value="en">{localeName("en")}</option>
+            <option value="es">{localeName("es")}</option>
+          </select>
+        </div>
       </header>
 
       <main className="content">
@@ -284,7 +297,7 @@ export default function App() {
           })()
         }
         {step === "match" && (!flow.run || flow.openMatchId == null) && (
-          <p className="hint">No match open. Back to the overview.</p>
+          <p className="hint">{t("app.noMatchOpen")}</p>
         )}
         {step === "finish" && flow.run && (
           <Finals

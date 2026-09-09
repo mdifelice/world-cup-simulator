@@ -18,6 +18,10 @@ A football World Cup simulation game.
   plus a Golden Boot table
 - **Signed-in runs are saved** to your history and can be re-lived any time;
   anonymous visitors play the same flow without leaving a trace
+- **English & Español** — switch languages from the top bar whenever you like
+  (choice is remembered). Stage/rond names and match labels translate with the
+  UI; team, player and host names stay authentic. New languages are just a new
+  dictionary in `client/src/i18n.tsx`.
 
 ## Architecture
 
