@@ -28,10 +28,10 @@ export function overall(player: Player): number {
 
 // Position-weighted attribute indices (order matches ATTRIBUTES).
 const WEIGHTS: Record<string, number[]> = {
-  GK: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.25, 0.22, 0.18, 0, 0.15],
-  DF: [0, 0.08, 0.1, 0.14, 0.1, 0.1, 0.06, 0.32, 0.1, 0, 0, 0, 0, 0],
-  MF: [0, 0.1, 0.12, 0.12, 0.14, 0.22, 0.12, 0.12, 0.14, 0.04, 0, 0, 0, 0],
-  FW: [0, 0.1, 0.06, 0.14, 0.12, 0.14, 0.12, 0.09, 0.17, 0.06, 0, 0, 0, 0],
+  GK: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0.25, 0.22, 0.18, 0, 0.15, 0.05, 0, 0.06, 0.04],
+  DF: [0, 0.08, 0.1, 0.14, 0.1, 0.1, 0.06, 0.32, 0.1, 0, 0, 0, 0, 0, 0.06, 0.05, 0.07, 0.04],
+  MF: [0, 0.1, 0.12, 0.12, 0.14, 0.22, 0.12, 0.12, 0.14, 0.04, 0, 0, 0, 0, 0.07, 0.02, 0.05, 0.05],
+  FW: [0, 0.1, 0.06, 0.14, 0.12, 0.14, 0.12, 0.09, 0.17, 0.06, 0, 0, 0, 0, 0.07, 0, 0.05, 0.03],
 };
 
 /** Build a plausible fictional squad from the team's rating. */
@@ -52,7 +52,7 @@ export function makePlaceholderSquad(team: Team): Player[] {
       const key = ATTRIBUTES[i];
       attrs[key] = Math.min(99, Math.max(1, base - 4 + off + (n % 5)));
     };
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < ATTRIBUTES.length; i++) {
       const w = (WEIGHTS[family] ?? WEIGHTS.MF)[i] ?? 0;
       shift(i, w > 0 ? (pos === "GK" && i >= 10 ? 4 : 3) : -5);
     }

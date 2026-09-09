@@ -77,6 +77,10 @@ const COMPOSURE: usize = 9;
 const REFLEXES: usize = 10;
 const HANDLING: usize = 11;
 const AERIAL: usize = 13;
+const DECISIONS: usize = 14;
+const AGGRESSION: usize = 15;
+const CONCENTRATION: usize = 16;
+const LEADERSHIP: usize = 17;
 
 const DEFAULT_ATTR: f64 = 60.0;
 
@@ -90,6 +94,9 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (AERIAL, 0.15),
             (POSITIONING, 0.20),
             (COMPOSURE, 0.25),
+            (DECISIONS, 0.05),
+            (CONCENTRATION, 0.06),
+            (LEADERSHIP, 0.04),
         ],
         "CB" => &[
             (TACKLING, 0.30),
@@ -98,6 +105,10 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (PACE, 0.10),
             (COMPOSURE, 0.10),
             (PASSING, 0.10),
+            (DECISIONS, 0.06),
+            (AGGRESSION, 0.05),
+            (CONCENTRATION, 0.07),
+            (LEADERSHIP, 0.04),
         ],
         "LB" | "RB" => &[
             (STAMINA, 0.20),
@@ -106,6 +117,9 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (POSITIONING, 0.15),
             (PASSING, 0.15),
             (DRIBBLING, 0.10),
+            (DECISIONS, 0.05),
+            (AGGRESSION, 0.04),
+            (CONCENTRATION, 0.06),
         ],
         "LWB" | "RWB" => &[
             (PACE, 0.25),
@@ -114,6 +128,9 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (DRIBBLING, 0.15),
             (TACKLING, 0.15),
             (POSITIONING, 0.10),
+            (DECISIONS, 0.05),
+            (AGGRESSION, 0.04),
+            (CONCENTRATION, 0.05),
         ],
         "CDM" => &[
             (TACKLING, 0.28),
@@ -122,6 +139,10 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (STAMINA, 0.12),
             (COMPOSURE, 0.12),
             (VISION, 0.08),
+            (DECISIONS, 0.06),
+            (AGGRESSION, 0.07),
+            (CONCENTRATION, 0.06),
+            (LEADERSHIP, 0.05),
         ],
         "CM" => &[
             (PASSING, 0.30),
@@ -130,6 +151,9 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (COMPOSURE, 0.15),
             (DRIBBLING, 0.10),
             (TACKLING, 0.10),
+            (DECISIONS, 0.07),
+            (CONCENTRATION, 0.05),
+            (LEADERSHIP, 0.05),
         ],
         "CAM" => &[
             (PASSING, 0.25),
@@ -137,6 +161,8 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (DRIBBLING, 0.20),
             (COMPOSURE, 0.15),
             (STAMINA, 0.15),
+            (DECISIONS, 0.07),
+            (CONCENTRATION, 0.05),
         ],
         "LM" | "RM" => &[
             (PACE, 0.20),
@@ -145,6 +171,8 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (STAMINA, 0.15),
             (VISION, 0.15),
             (SHOOTING, 0.10),
+            (DECISIONS, 0.05),
+            (CONCENTRATION, 0.05),
         ],
         "LW" | "RW" => &[
             (PACE, 0.25),
@@ -153,6 +181,8 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (PASSING, 0.10),
             (COMPOSURE, 0.10),
             (VISION, 0.10),
+            (DECISIONS, 0.04),
+            (CONCENTRATION, 0.04),
         ],
         "ST" | "CF" => &[
             (SHOOTING, 0.30),
@@ -161,8 +191,18 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (POSITIONING, 0.15),
             (STRENGTH, 0.10),
             (COMPOSURE, 0.10),
+            (DECISIONS, 0.07),
+            (CONCENTRATION, 0.05),
+            (LEADERSHIP, 0.03),
         ],
-        _ => &[(PASSING, 0.4), (VISION, 0.3), (COMPOSURE, 0.3)],
+        _ => &[
+            (PASSING, 0.4),
+            (VISION, 0.3),
+            (COMPOSURE, 0.3),
+            (DECISIONS, 0.1),
+            (CONCENTRATION, 0.1),
+            (LEADERSHIP, 0.1),
+        ],
     }
 }
 
@@ -194,7 +234,8 @@ fn squad_rating(
         "SELECT c.position,
                 p.pace, p.stamina, p.strength, p.dribbling, p.passing,
                 p.shooting, p.tackling, p.vision, p.positioning, p.composure,
-                p.reflexes, p.handling, p.kicking, p.aerial
+                p.reflexes, p.handling, p.kicking, p.aerial,
+                p.decisions, p.aggression, p.concentration, p.leadership
          FROM player_callups c
          JOIN players p ON p.id = c.player_id
          WHERE c.tournament_id = ?1 AND c.team_id = ?2",
@@ -218,6 +259,10 @@ fn squad_rating(
                     r.get::<_, Option<i32>>(12)?,
                     r.get::<_, Option<i32>>(13)?,
                     r.get::<_, Option<i32>>(14)?,
+                    r.get::<_, Option<i32>>(15)?,
+                    r.get::<_, Option<i32>>(16)?,
+                    r.get::<_, Option<i32>>(17)?,
+                    r.get::<_, Option<i32>>(18)?,
                 ],
             ))
         })?
@@ -240,6 +285,78 @@ fn team_rating(conn: &Connection, tournament_id: i64, team_id: i64) -> ApiResult
     Ok(squad_rating(conn, tournament_id, team_id)?.unwrap_or(base.unwrap_or(70) as f64))
 }
 
+#[derive(Clone, Copy)]
+struct TeamContext {
+    pedigree: i32,
+    home_support: i32,
+    form: i32,
+    morale: i32,
+}
+
+impl Default for TeamContext {
+    fn default() -> Self {
+        TeamContext {
+            pedigree: 50,
+            home_support: 50,
+            form: 50,
+            morale: 55,
+        }
+    }
+}
+
+fn team_context(conn: &Connection, team_id: i64) -> ApiResult<TeamContext> {
+    let row: Option<(i32, i32, i32, i32)> = conn
+        .query_row(
+            "SELECT pedigree, home_support, form, morale FROM teams WHERE id = ?1",
+            [team_id],
+            |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)),
+        )
+        .optional()?;
+    Ok(row
+        .map(|(pedigree, home_support, form, morale)| TeamContext {
+            pedigree,
+            home_support,
+            form,
+            morale,
+        })
+        .unwrap_or_default())
+}
+
+/// Average leadership of the squad (a captain-style proxy, since the actual XI
+/// lives client-side). Defaults to 60 when no players are registered.
+fn avg_leadership(conn: &Connection, tournament_id: i64, team_id: i64) -> ApiResult<f64> {
+    let v: Option<f64> = conn
+        .query_row(
+            "SELECT COALESCE(AVG(COALESCE(p.leadership, 60)), 60) FROM player_callups c
+             JOIN players p ON p.id = c.player_id
+             WHERE c.tournament_id = ?1 AND c.team_id = ?2",
+            params![tournament_id, team_id],
+            |r| r.get(0),
+        )
+        .optional()?;
+    Ok(v.unwrap_or(60.0))
+}
+
+/// Base match strength for a team: position-weighted squad attributes (or the
+/// `teams.rating` column when no squad exists) folded with the team-level
+/// attributes. Pedigree matters more in knockouts; home support is applied on
+/// top for the home side in `simulate_one`.
+fn base_strength(
+    conn: &Connection,
+    tournament_id: i64,
+    team_id: i64,
+    knockout: bool,
+) -> ApiResult<f64> {
+    let base = team_rating(conn, tournament_id, team_id)?;
+    let ctx = team_context(conn, team_id)?;
+    let lead = avg_leadership(conn, tournament_id, team_id)?;
+    let form = (ctx.form as f64 - 50.0) * 0.06;
+    let morale = (ctx.morale as f64 - 55.0) * 0.04;
+    let pedigree = (ctx.pedigree as f64 - 50.0) * if knockout { 0.06 } else { 0.03 };
+    let leadership = (lead - 60.0) * 0.05;
+    Ok((base + form + morale + pedigree + leadership).clamp(40.0, 99.0))
+}
+
 // ---------------------------------------------------------------------------
 // Match engine
 // ---------------------------------------------------------------------------
@@ -255,9 +372,16 @@ fn simulate_one(
     away_id: i64,
     home_boost: i32,
     away_boost: i32,
+    knockout: bool,
 ) -> ApiResult<(i32, i32)> {
-    let home = (team_rating(conn, tournament_id, home_id)? + f64::from(home_boost)).min(99.0);
-    let away = (team_rating(conn, tournament_id, away_id)? + f64::from(away_boost)).min(99.0);
+    let home_support = team_context(conn, home_id)?.home_support;
+    let home = (base_strength(conn, tournament_id, home_id, knockout)?
+        + f64::from(home_boost)
+        + (home_support as f64 - 50.0) * 0.04)
+        .min(99.0);
+    let away = (base_strength(conn, tournament_id, away_id, knockout)?
+        + f64::from(away_boost))
+        .min(99.0);
 
     let home_xg = (BASE_GOALS * ((home - away) / 10.0).exp() * HOME_FACTOR).clamp(0.1, 4.5);
     let away_xg = (BASE_GOALS * ((away - home) / 10.0).exp()).clamp(0.1, 4.5);
@@ -269,6 +393,26 @@ fn record(conn: &Connection, match_id: i64, hs: i32, as_: i32) -> ApiResult<()> 
     conn.execute(
         "UPDATE matches SET home_score = ?1, away_score = ?2, status = 'played' WHERE id = ?3",
         params![hs, as_, match_id],
+    )?;
+    Ok(())
+}
+
+/// Updates the dynamic team attributes (form, morale) after a played match.
+fn apply_result(conn: &Connection, home: i64, away: i64, hs: i32, as_: i32) -> ApiResult<()> {
+    let (hf, hm, af, am) = if hs > as_ {
+        (3, 4, -3, -5)
+    } else if hs < as_ {
+        (-3, -5, 3, 4)
+    } else {
+        (0, 1, 0, 1)
+    };
+    conn.execute(
+        "UPDATE teams SET form = MIN(99, MAX(0, form + ?1)), morale = MIN(99, MAX(0, morale + ?2)) WHERE id = ?3",
+        params![hf, hm, home],
+    )?;
+    conn.execute(
+        "UPDATE teams SET form = MIN(99, MAX(0, form + ?1)), morale = MIN(99, MAX(0, morale + ?2)) WHERE id = ?3",
+        params![af, am, away],
     )?;
     Ok(())
 }
@@ -370,7 +514,7 @@ let groups: Vec<Vec<i64>> = if is_first_group {
         for (home, away, round) in fixture::round_robin(teams) {
             let hb = if Some(home) == focus { boost } else { 0 };
             let ab = if Some(away) == focus { boost } else { 0 };
-            let (hs, as_) = simulate_one(rng, conn, tournament_id, home, away, hb, ab)?;
+            let (hs, as_) = simulate_one(rng, conn, tournament_id, home, away, hb, ab, false)?;
             let existing: Option<i64> = conn
                 .query_row(
                     "SELECT id FROM matches
@@ -389,6 +533,7 @@ let groups: Vec<Vec<i64>> = if is_first_group {
                     )?;
                 }
             }
+            apply_result(conn, home, away, hs, as_)?;
             simulated += 1;
         }
         tables.push(fixture::table_for(conn, tournament_id, &phase.key, teams)?);
@@ -503,7 +648,7 @@ fn knockout_stage(
     for &(h, a) in pairings {
         let hb = if Some(h) == focus { boost } else { 0 };
         let ab = if Some(a) == focus { boost } else { 0 };
-        let (hs, as_) = simulate_one(rng, conn, tournament_id, h, a, hb, ab)?;
+        let (hs, as_) = simulate_one(rng, conn, tournament_id, h, a, hb, ab, true)?;
 
         let (winner, loser) = if hs == as_ {
             if rng.unit() < 0.515 {
@@ -537,6 +682,7 @@ fn knockout_stage(
                 )?;
             }
         }
+        apply_result(conn, h, a, hs, as_)?;
     }
     Ok((winners, losers, pairings.len()))
 }
@@ -598,6 +744,11 @@ fn simulate_tournament_inner(
         conn.execute(
             "UPDATE matches SET status = 'scheduled', home_score = NULL, away_score = NULL
              WHERE tournament_id = ?1 AND status = 'played'",
+            [tournament_id],
+        )?;
+        conn.execute(
+            "UPDATE teams SET form = 50, morale = 55
+             WHERE id IN (SELECT team_id FROM tournament_teams WHERE tournament_id = ?1)",
             [tournament_id],
         )?;
         if !group_keys.is_empty() {

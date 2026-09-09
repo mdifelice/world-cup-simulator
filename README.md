@@ -24,11 +24,16 @@ A football World Cup simulation game.
   1950 (groups + a league decider), 1954–1978 (4 groups → QF), 1982–1994
   (6 groups → R16 with best thirds), 1998–2026 (8 or 12 groups → R32/R16) all
   work from the same schema.
-- **Teams** have an overall rating. **Players** have 14 attributes (10 outfield:
-  pace, stamina, strength, dribbling, passing, shooting, tackling, vision,
-  positioning, composure; 4 keeper: reflexes, handling, kicking, aerial) and a
+- **Teams** have an overall rating plus team-level attributes: `pedigree`
+  (extra edge in knockouts), `home_support` (home advantage), and the dynamic
+  `form`/`morale` that drift with results during a tournament. **Players** have
+  18 attributes (10 outfield, 4 keeper, and 4 mental — decisions, aggression,
+  concentration, leadership — that apply to every position including GK) and a
   granular position (GK, CB, LB, RB, LWB, RWB, CDM, CM, CAM, LM, RM, LW, RW,
-  ST, CF). Overall = position-weighted average of attributes.
+  ST, CF). Overall = position-weighted average of attributes; match strength
+  folds in the team attributes plus a squad-leadership proxy, so the favourites
+  still win more often but upsets happen and winning a tournament is not a
+  coin-flip every edition.
 - **Call-ups** (`player_callups`) link a player to a team **and** a tournament,
   so the same player can represent different nations in different editions.
 - **Auth** is Google-only (OAuth 2, no stored passwords). Reads are public;
@@ -94,7 +99,7 @@ cargo run -- --help
 > The API base is configurable via `--base https://api.sofascore.com/api/v1`.
 
 The written file uses the import schema (teams/players with `rating`, which the
-backend spreads into the 14 attributes). Upload with a single call — sign in
+backend spreads into the 18 attributes). Upload with a single call — sign in
 with Google first, then use the token from the URL (`#token=…`) or the browser:
 
 ```sh

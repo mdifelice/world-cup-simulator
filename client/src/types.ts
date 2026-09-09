@@ -29,14 +29,13 @@ export interface Team {
   code: string | null;
   flag: string | null;
   rating: number;
+  pedigree: number;
+  home_support: number;
+  form: number;
+  morale: number;
 }
 
-export interface Participant {
-  id: number;
-  name: string;
-  code: string | null;
-  flag: string | null;
-  rating: number;
+export interface Participant extends Team {
   group_letter: string | null;
 }
 
@@ -73,6 +72,10 @@ export const ATTRIBUTES = [
   "handling",
   "kicking",
   "aerial",
+  "decisions",
+  "aggression",
+  "concentration",
+  "leadership",
 ] as const;
 
 export interface Player {
@@ -96,6 +99,10 @@ export interface Player {
   handling: number;
   kicking: number;
   aerial: number;
+  decisions: number;
+  aggression: number;
+  concentration: number;
+  leadership: number;
 }
 
 export interface SimMatch {

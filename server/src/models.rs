@@ -80,6 +80,35 @@ pub struct Team {
     pub flag: Option<String>,
     /// Base strength used to generate placeholder squads when no players exist.
     pub rating: i32,
+    /// Static "big-game gene": extra edge in knockouts.
+    pub pedigree: i32,
+    /// Static host/fan edge (only meaningful for the home side).
+    pub home_support: i32,
+    /// Dynamic form (0–99); drifts with results during a tournament.
+    pub form: i32,
+    /// Dynamic morale (0–99); reacts to results.
+    pub morale: i32,
+}
+
+/// Defaults for the team-level attributes when not supplied explicitly.
+/// `form`/`morale` are neutral at the start of a tournament; the static ones
+/// are derived from the base rating so high-rated nations are also clutch.
+pub fn team_defaults(rating: i32) -> TeamStatsFields {
+    let pedigree = (25 + (rating - 55) * 2).clamp(20, 95);
+    TeamStatsFields {
+        pedigree,
+        home_support: 50,
+        form: 50,
+        morale: 55,
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct TeamStatsFields {
+    pub pedigree: i32,
+    pub home_support: i32,
+    pub form: i32,
+    pub morale: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -90,6 +119,10 @@ pub struct Participant {
     pub flag: Option<String>,
     pub rating: i32,
     pub group_letter: Option<String>,
+    pub pedigree: i32,
+    pub home_support: i32,
+    pub form: i32,
+    pub morale: i32,
 }
 
 #[derive(Debug, Deserialize)]
@@ -101,6 +134,14 @@ pub struct CreateTeam {
     pub flag: Option<String>,
     #[serde(default = "default_rating")]
     pub rating: i32,
+    #[serde(default)]
+    pub pedigree: Option<i32>,
+    #[serde(default)]
+    pub home_support: Option<i32>,
+    #[serde(default)]
+    pub form: Option<i32>,
+    #[serde(default)]
+    pub morale: Option<i32>,
 }
 
 fn default_rating() -> i32 {
@@ -148,7 +189,7 @@ pub fn position_family(position: &str) -> &'static str {
 pub const ATTRIBUTES: &[&str] = &[
     "pace", "stamina", "strength", "dribbling", "passing", "shooting",
     "tackling", "vision", "positioning", "composure", "reflexes", "handling",
-    "kicking", "aerial",
+    "kicking", "aerial", "decisions", "aggression", "concentration", "leadership",
 ];
 
 // ---------------------------------------------------------------------------
@@ -178,6 +219,10 @@ pub struct Player {
     pub handling: Option<i32>,
     pub kicking: Option<i32>,
     pub aerial: Option<i32>,
+    pub decisions: Option<i32>,
+    pub aggression: Option<i32>,
+    pub concentration: Option<i32>,
+    pub leadership: Option<i32>,
 }
 
 /// Individual attributes are optional; unset fields default to 60 on insert.
@@ -220,6 +265,14 @@ pub struct CreatePlayer {
     pub kicking: i32,
     #[serde(default = "default_attr")]
     pub aerial: i32,
+    #[serde(default = "default_attr")]
+    pub decisions: i32,
+    #[serde(default = "default_attr")]
+    pub aggression: i32,
+    #[serde(default = "default_attr")]
+    pub concentration: i32,
+    #[serde(default = "default_attr")]
+    pub leadership: i32,
 }
 
 fn default_position() -> String {
@@ -248,6 +301,14 @@ pub struct ImportTeam {
     pub rating: i32,
     #[serde(default)]
     pub group_letter: Option<String>,
+    #[serde(default)]
+    pub pedigree: Option<i32>,
+    #[serde(default)]
+    pub home_support: Option<i32>,
+    #[serde(default)]
+    pub form: Option<i32>,
+    #[serde(default)]
+    pub morale: Option<i32>,
     #[serde(default)]
     pub players: Vec<CreatePlayer>,
 }

@@ -249,7 +249,11 @@ fn schema(conn: &Connection) -> rusqlite::Result<()> {
             name TEXT NOT NULL UNIQUE,
             code TEXT,
             flag TEXT,
-            rating INTEGER NOT NULL DEFAULT 70
+            rating INTEGER NOT NULL DEFAULT 70,
+            pedigree INTEGER NOT NULL DEFAULT 50,
+            home_support INTEGER NOT NULL DEFAULT 50,
+            form INTEGER NOT NULL DEFAULT 50,
+            morale INTEGER NOT NULL DEFAULT 55
         );
 
         CREATE TABLE IF NOT EXISTS tournament_teams (
@@ -276,7 +280,8 @@ fn schema(conn: &Connection) -> rusqlite::Result<()> {
             dribbling INTEGER, passing INTEGER, shooting INTEGER,
             tackling INTEGER, vision INTEGER, positioning INTEGER,
             composure INTEGER,
-            reflexes INTEGER, handling INTEGER, kicking INTEGER, aerial INTEGER
+            reflexes INTEGER, handling INTEGER, kicking INTEGER, aerial INTEGER,
+            decisions INTEGER, aggression INTEGER, concentration INTEGER, leadership INTEGER
         );
 
         /* player <-> team membership is tournament-scoped: a player can
@@ -313,12 +318,46 @@ fn schema(conn: &Connection) -> rusqlite::Result<()> {
     )
 }
 
+/// Adds columns introduced after the first release to databases that were
+/// created with the earlier `CREATE TABLE IF NOT EXISTS` schema.
+fn migrate(conn: &Connection) -> rusqlite::Result<()> {
+    let has = |table: &str, column: &str| -> rusqlite::Result<bool> {
+        let mut stmt = conn.prepare(&format!("PRAGMA table_info({table})"))?;
+        let mut rows = stmt.query([])?;
+        while let Some(r) = rows.next()? {
+            let name: String = r.get(1)?;
+            if name == column {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    };
+    for column in ["pedigree", "home_support", "form", "morale"] {
+        if !has("teams", column)? {
+            conn.execute(
+                &format!("ALTER TABLE teams ADD COLUMN {column} INTEGER NOT NULL DEFAULT 50"),
+                [],
+            )?;
+        }
+    }
+    for column in ["decisions", "aggression", "concentration", "leadership"] {
+        if !has("players", column)? {
+            conn.execute(
+                &format!("ALTER TABLE players ADD COLUMN {column} INTEGER NOT NULL DEFAULT 60"),
+                [],
+            )?;
+        }
+    }
+    Ok(())
+}
+
 pub fn open() -> rusqlite::Result<Connection> {
     let dir = std::env::var("WCS_DATA_DIR").unwrap_or_else(|_| "data".to_string());
     std::fs::create_dir_all(&dir).ok();
     let path = Path::new(&dir).join("wcs.sqlite");
     let conn = Connection::open(&path)?;
     schema(&conn)?;
+    migrate(&conn)?;
     seed(&conn)?;
     Ok(conn)
 }
@@ -425,13 +464,7 @@ fn seed_2022_demo(conn: &Connection) -> rusqlite::Result<()> {
     for &(_year, name, group, rating) in WC2022_GROUPS {
         let id = match team_by_name(conn, name)? {
             Some(id) => id,
-            None => {
-                conn.execute(
-                    "INSERT INTO teams (name, code, flag, rating) VALUES (?1, NULL, NULL, ?2)",
-                    rusqlite::params![name, rating],
-                )?;
-                conn.last_insert_rowid()
-            }
+            None => insert_team(conn, name, None, None, rating, None)?,
         };
         conn.execute(
             "INSERT OR IGNORE INTO tournament_teams (tournament_id, team_id) VALUES (?1, ?2)",
@@ -458,6 +491,34 @@ pub fn team_by_name(conn: &Connection, name: &str) -> rusqlite::Result<Option<i6
     let mut stmt = conn.prepare("SELECT id FROM teams WHERE name = ?1")?;
     let mut rows = stmt.query_map([name], |r| r.get(0))?;
     Ok(rows.next().map(|r| r).transpose()?)
+}
+
+/// Inserts a team, deriving the team-level attributes from `rating` unless
+/// `fields` overrides them.
+pub fn insert_team(
+    conn: &Connection,
+    name: &str,
+    code: Option<&str>,
+    flag: Option<&str>,
+    rating: i32,
+    fields: Option<crate::models::TeamStatsFields>,
+) -> rusqlite::Result<i64> {
+    let f = fields.unwrap_or_else(|| crate::models::team_defaults(rating));
+    conn.execute(
+        "INSERT INTO teams (name, code, flag, rating, pedigree, home_support, form, morale)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+        rusqlite::params![
+            name,
+            code,
+            flag,
+            rating,
+            f.pedigree,
+            f.home_support,
+            f.form,
+            f.morale
+        ],
+    )?;
+    Ok(conn.last_insert_rowid())
 }
 
 pub fn tournament_by_year(conn: &Connection, year: i32) -> rusqlite::Result<Option<Tournament>> {

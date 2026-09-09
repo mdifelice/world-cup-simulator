@@ -164,7 +164,8 @@ pub async fn set_tournament_phases(
 pub async fn list_participants(State(db): State<Db>, Path(id): Path<i64>) -> ApiResult<Json<Vec<Participant>>> {
     let conn = db.lock().unwrap();
     let mut stmt = conn.prepare(
-        "SELECT t.id, t.name, t.code, t.flag, t.rating, g.group_name
+        "SELECT t.id, t.name, t.code, t.flag, t.rating, g.group_name,
+                t.pedigree, t.home_support, t.form, t.morale
          FROM tournament_teams tt
          JOIN teams t ON t.id = tt.team_id
          LEFT JOIN tournament_groups g ON g.tournament_id = tt.tournament_id AND g.team_id = t.id
@@ -179,6 +180,10 @@ pub async fn list_participants(State(db): State<Db>, Path(id): Path<i64>) -> Api
             flag: r.get(3)?,
             rating: r.get(4)?,
             group_letter: r.get(5)?,
+            pedigree: r.get(6)?,
+            home_support: r.get(7)?,
+            form: r.get(8)?,
+            morale: r.get(9)?,
         })
     })?;
     let mut out = Vec::new();
@@ -277,11 +282,13 @@ pub async fn import_tournament(
         let team_id = match crate::db::team_by_name(&conn, &team.name)? {
             Some(id) => id,
             None => {
-                conn.execute(
-                    "INSERT INTO teams (name, code, flag, rating) VALUES (?1, ?2, ?3, ?4)",
-                    params![team.name, team.code, team.flag, team.rating],
-                )?;
-                conn.last_insert_rowid()
+                let fields = crate::models::TeamStatsFields {
+                    pedigree: team.pedigree.unwrap_or_else(|| crate::models::team_defaults(team.rating).pedigree),
+                    home_support: team.home_support.unwrap_or_else(|| crate::models::team_defaults(team.rating).home_support),
+                    form: team.form.unwrap_or_else(|| crate::models::team_defaults(team.rating).form),
+                    morale: team.morale.unwrap_or_else(|| crate::models::team_defaults(team.rating).morale),
+                };
+                crate::db::insert_team(&conn, &team.name, team.code.as_deref(), team.flag.as_deref(), team.rating, Some(fields))?
             }
         };
         conn.execute(
@@ -308,7 +315,7 @@ pub async fn import_tournament(
 
 pub async fn list_teams(State(db): State<Db>) -> ApiResult<Json<Vec<Team>>> {
     let conn = db.lock().unwrap();
-    let mut stmt = conn.prepare("SELECT id, name, code, flag, rating FROM teams ORDER BY name")?;
+    let mut stmt = conn.prepare("SELECT id, name, code, flag, rating, pedigree, home_support, form, morale FROM teams ORDER BY name")?;
     let rows = stmt.query_map([], map_team)?;
     let mut out = Vec::new();
     for r in rows {
@@ -323,9 +330,27 @@ pub async fn create_team(
     Json(input): Json<CreateTeam>,
 ) -> ApiResult<(StatusCode, Json<Team>)> {
     let conn = db.lock().unwrap();
-    let res = conn.execute(
-        "INSERT INTO teams (name, code, flag, rating) VALUES (?1,?2,?3,?4)",
-        params![input.name, input.code, input.flag, input.rating],
+    let fields = crate::models::TeamStatsFields {
+        pedigree: input
+            .pedigree
+            .unwrap_or_else(|| crate::models::team_defaults(input.rating).pedigree),
+        home_support: input
+            .home_support
+            .unwrap_or_else(|| crate::models::team_defaults(input.rating).home_support),
+        form: input
+            .form
+            .unwrap_or_else(|| crate::models::team_defaults(input.rating).form),
+        morale: input
+            .morale
+            .unwrap_or_else(|| crate::models::team_defaults(input.rating).morale),
+    };
+    let res = crate::db::insert_team(
+        &conn,
+        &input.name,
+        input.code.as_deref(),
+        input.flag.as_deref(),
+        input.rating,
+        Some(fields),
     );
     match res {
         Ok(_) => {}
@@ -336,7 +361,7 @@ pub async fn create_team(
     }
     let id = conn.last_insert_rowid();
     let team: Team = conn.query_row(
-        "SELECT id, name, code, flag, rating FROM teams WHERE id = ?1",
+        "SELECT id, name, code, flag, rating, pedigree, home_support, form, morale FROM teams WHERE id = ?1",
         [id],
         map_team,
     )?;
@@ -363,7 +388,8 @@ pub async fn list_players(
                 "SELECT p.id, p.name, p.dob, p.nationality, c.position, c.shirt_number,
                         p.pace, p.stamina, p.strength, p.dribbling, p.passing,
                         p.shooting, p.tackling, p.vision, p.positioning, p.composure,
-                        p.reflexes, p.handling, p.kicking, p.aerial
+                        p.reflexes, p.handling, p.kicking, p.aerial,
+                        p.decisions, p.aggression, p.concentration, p.leadership
                  FROM player_callups c
                  JOIN players p ON p.id = c.player_id
                  WHERE c.tournament_id = ?1 AND c.team_id = ?2
@@ -379,7 +405,8 @@ pub async fn list_players(
                         (SELECT c.shirt_number FROM player_callups c WHERE c.player_id = p.id ORDER BY c.id DESC LIMIT 1),
                         p.pace, p.stamina, p.strength, p.dribbling, p.passing,
                         p.shooting, p.tackling, p.vision, p.positioning, p.composure,
-                        p.reflexes, p.handling, p.kicking, p.aerial
+                        p.reflexes, p.handling, p.kicking, p.aerial,
+                        p.decisions, p.aggression, p.concentration, p.leadership
                  FROM players p
                  JOIN player_callups c ON c.player_id = p.id
                  WHERE c.team_id = ?1",
@@ -448,7 +475,7 @@ pub async fn simulate_tournament(
 // Helpers
 // ---------------------------------------------------------------------------
 
-fn expand_attrs(p: &CreatePlayer) -> [i32; 14] {
+fn expand_attrs(p: &CreatePlayer) -> [i32; 18] {
     if let Some(rating) = p.rating {
         // scraper back-compat: spread a scalar rating across the attributes
         let r = rating.clamp(35, 99);
@@ -467,6 +494,10 @@ fn expand_attrs(p: &CreatePlayer) -> [i32; 14] {
             (r + 1).clamp(30, 99),
             (r + 1).clamp(30, 99),
             r,
+            (r - 1).clamp(30, 99),
+            (r - 3).clamp(30, 99),
+            (r + 2).clamp(30, 99),
+            (r + 2).clamp(30, 99),
         ]
     } else {
         [
@@ -484,6 +515,10 @@ fn expand_attrs(p: &CreatePlayer) -> [i32; 14] {
             p.handling.clamp(1, 99),
             p.kicking.clamp(1, 99),
             p.aerial.clamp(1, 99),
+            p.decisions.clamp(1, 99),
+            p.aggression.clamp(1, 99),
+            p.concentration.clamp(1, 99),
+            p.leadership.clamp(1, 99),
         ]
     }
 }
@@ -496,9 +531,29 @@ fn insert_player(
 ) -> rusqlite::Result<()> {
     let attrs = expand_attrs(p);
     conn.execute(
-        "INSERT INTO players (name, pace, stamina, strength, dribbling, passing, shooting, tackling, vision, positioning, composure, reflexes, handling, kicking, aerial)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15)",
-        rusqlite::params![p.name, attrs[0], attrs[1], attrs[2], attrs[3], attrs[4], attrs[5], attrs[6], attrs[7], attrs[8], attrs[9], attrs[10], attrs[11], attrs[12], attrs[13]],
+        "INSERT INTO players (name, pace, stamina, strength, dribbling, passing, shooting, tackling, vision, positioning, composure, reflexes, handling, kicking, aerial, decisions, aggression, concentration, leadership)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19)",
+        rusqlite::params![
+            p.name,
+            attrs[0],
+            attrs[1],
+            attrs[2],
+            attrs[3],
+            attrs[4],
+            attrs[5],
+            attrs[6],
+            attrs[7],
+            attrs[8],
+            attrs[9],
+            attrs[10],
+            attrs[11],
+            attrs[12],
+            attrs[13],
+            attrs[14],
+            attrs[15],
+            attrs[16],
+            attrs[17],
+        ],
     )?;
     let player_id = conn.last_insert_rowid();
     conn.execute(
@@ -516,6 +571,10 @@ fn map_team(r: &rusqlite::Row) -> rusqlite::Result<Team> {
         code: r.get(2)?,
         flag: r.get(3)?,
         rating: r.get(4)?,
+        pedigree: r.get(5)?,
+        home_support: r.get(6)?,
+        form: r.get(7)?,
+        morale: r.get(8)?,
     })
 }
 
@@ -542,6 +601,10 @@ fn map_player(r: &rusqlite::Row) -> rusqlite::Result<Player> {
         handling: r.get(17)?,
         kicking: r.get(18)?,
         aerial: r.get(19)?,
+        decisions: r.get(20)?,
+        aggression: r.get(21)?,
+        concentration: r.get(22)?,
+        leadership: r.get(23)?,
     })
 }
 
