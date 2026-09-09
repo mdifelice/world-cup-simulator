@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use axum::{
     extract::{Path, Query, State},
     http::StatusCode,
@@ -731,6 +733,16 @@ pub struct RunRequestPayload {
     focus_team_id: Option<i64>,
     #[serde(default)]
     focus_boost: i32,
+    /// Deterministic seed (echoed back in the payload). Same seed + same
+    /// lineups → identical run.
+    #[serde(default)]
+    seed: Option<u64>,
+    /// Per-match lineup configs, keyed by "{stage}|{day}|{home}|{away}".
+    #[serde(default)]
+    lineups: HashMap<String, detail::LineupConfig>,
+    /// Persist the run to the user's history on this POST.
+    #[serde(default)]
+    save: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -763,22 +775,27 @@ pub async fn run_tournament_detail(
         &RunRequest {
             focus_team_id: body.focus_team_id,
             focus_boost: body.focus_boost,
+            seed: body.seed,
+            lineups: body.lineups,
+            save: body.save,
         },
     )?;
 
-    if let Some(u) = &user.0 {
-        conn.execute(
-            "INSERT INTO sim_runs (user_id, tournament_id, payload) VALUES (?1, ?2, '{}')",
-            params![u.id, id],
-        )?;
-        let run_id = conn.last_insert_rowid();
-        payload.run_id = Some(run_id);
-        // Store the JSON including the id so reopened runs are self-describing.
-        let json = serde_json::to_string(&payload)?;
-        conn.execute(
-            "UPDATE sim_runs SET payload = ?1 WHERE id = ?2",
-            params![json, run_id],
-        )?;
+    if body.save {
+        if let Some(u) = &user.0 {
+            conn.execute(
+                "INSERT INTO sim_runs (user_id, tournament_id, payload) VALUES (?1, ?2, '{}')",
+                params![u.id, id],
+            )?;
+            let run_id = conn.last_insert_rowid();
+            payload.run_id = Some(run_id);
+            // Store the JSON including the id so reopened runs are self-describing.
+            let json = serde_json::to_string(&payload)?;
+            conn.execute(
+                "UPDATE sim_runs SET payload = ?1 WHERE id = ?2",
+                params![json, run_id],
+            )?;
+        }
     }
     Ok(Json(payload))
 }

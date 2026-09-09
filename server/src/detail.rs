@@ -7,28 +7,129 @@
 //! awards. Nothing is written to the database; the resulting `RunPayload` is
 //! returned to the client and optionally saved as JSON for logged-in users.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use rusqlite::Connection;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     error::{ApiError, ApiResult},
     fixture,
     models::{
-        Awards, Goal, GroupInfo, Momentum, PenKick, PenResult, PlayerAward, RunMatch,
+        self, Awards, Goal, GroupInfo, Momentum, PenKick, PenResult, PlayerAward, RunMatch,
         RunPayload, RunTeam, TopScorer,
     },
     names::{self, SquadPlayer},
     sim,
 };
 
+/// A starting XI a user picked for one of their team's matches, keyed in
+/// `RunRequest.lineups` by `"{stage_key}|{day}|{home}|{away}"`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LineupConfig {
+    /// One of the formation keys shared with the client (e.g. "4-4-2").
+    pub formation: String,
+    #[serde(default = "default_strategy")]
+    pub strategy: String,
+    /// Slot -> player id. Missing slots are auto-filled; duplicate players are
+    /// ignored (first mention wins).
+    #[serde(default)]
+    pub starting: HashMap<String, i64>,
+}
+
+fn default_strategy() -> String {
+    "normal".to_string()
+}
+
 pub struct RunRequest {
     pub focus_team_id: Option<i64>,
     pub focus_boost: i32,
+    /// Deterministic base seed. `None` mints one (and the payload echoes it).
+    pub seed: Option<u64>,
+    /// Per-match lineups for the focus team; see [`LineupConfig`].
+    pub lineups: HashMap<String, LineupConfig>,
+    /// Whether to persist the run for the signed-in user.
+    pub save: bool,
 }
 
 const BASE_GOALS: f64 = 1.32;
 const HOME_FACTOR: f64 = 1.10;
+
+// ---------------------------------------------------------------------------
+// Formations
+// ---------------------------------------------------------------------------
+
+/// Canonical slot order per formation (defence line first, then midfield,
+/// then attack) — mirrored by the client's lineup screen.
+fn formation_slots(formation: &str) -> Option<&'static [&'static str]> {
+    match formation {
+        "5-3-2" => Some(&["GK", "RWB", "DF", "DF", "DF", "LWB", "DMF", "DMF", "AMF", "FW", "FW"]),
+        "5-4-1" => Some(&["GK", "RWB", "DF", "DF", "DF", "LWB", "RMF", "DMF", "LMF", "AMF", "FW"]),
+        "4-5-1" => Some(&["GK", "RWB", "DF", "DF", "LWB", "RMF", "DMF", "DMF", "LMF", "AMF", "FW"]),
+        "4-4-2" => Some(&["GK", "RWB", "DF", "DF", "LWB", "RMF", "DMF", "LMF", "AMF", "FW", "FW"]),
+        "4-3-3" => Some(&["GK", "RWB", "DF", "DF", "LWB", "DMF", "DMF", "AMF", "RFW", "FW", "LFW"]),
+        "3-5-2" => Some(&["GK", "DF", "DF", "DF", "RMF", "DMF", "DMF", "LMF", "AMF", "FW", "FW"]),
+        "3-4-3" => Some(&["GK", "DF", "DF", "DF", "RMF", "DMF", "DMF", "AMF", "RFW", "FW", "LFW"]),
+        _ => None,
+    }
+}
+
+/// Slot list after applying the strategy: defensive swaps the AMF for an
+/// extra DMF; attacking swaps the last DMF for an extra AMF.
+fn effective_slots(formation: &str, strategy: &str) -> Vec<&'static str> {
+    let base = formation_slots(formation).unwrap_or(four_four_two()).to_vec();
+    let mut slots = base;
+    if strategy == "defensive" {
+        if let Some(i) = slots.iter().position(|s| *s == "AMF") {
+            slots[i] = "DMF";
+        }
+    } else if strategy == "attacking" {
+        if let Some(i) = slots.iter().rposition(|s| *s == "DMF") {
+            slots[i] = "AMF";
+        }
+    }
+    slots
+}
+
+const fn four_four_two() -> &'static [&'static str] {
+    &["GK", "RWB", "DF", "DF", "LWB", "RMF", "DMF", "LMF", "AMF", "FW", "FW"]
+}
+
+/// How much a strategy nudges a team's expected goals (scoring vs conceding).
+fn strategy_adj(strategy: &str, scoring: bool) -> f64 {
+    match (strategy, scoring) {
+        ("attacking", true) => 0.14,
+        ("attacking", false) => 0.08,
+        ("defensive", true) => -0.08,
+        ("defensive", false) => -0.14,
+        _ => 0.0,
+    }
+}
+
+/// Deterministic per-match seed mixing: same base seed + identity yields the
+/// same match, so changing a lineup never reshuffles other fixtures.
+fn match_seed(run_seed: u64, key: &str, day: i32, home: i64, away: i64, knockout: bool) -> u64 {
+    let mut x = run_seed ^ str_key(key);
+    for v in [day as u64, home as u64, away as u64, knockout as u64] {
+        x ^= v;
+        x = splitmix64(x);
+    }
+    x | 1
+}
+
+fn splitmix64(x: u64) -> u64 {
+    let z = x.wrapping_add(0x9E3779B97F4A7C15);
+    let z = (z ^ (z >> 30)).wrapping_mul(0xBF58476D1CE4E5B9);
+    let z = (z ^ (z >> 27)).wrapping_mul(0x94D049BB133111EB);
+    z ^ (z >> 31)
+}
+
+/// Stable u64 fingerprint of a string (FNV-1a variant with rotation).
+fn str_key(s: &str) -> u64 {
+    s.bytes().fold(0x243F6A8885A308D3u64, |acc, b| {
+        acc.rotate_left(8).wrapping_add(b as u64).wrapping_mul(0x100000001B3)
+    })
+}
 
 /// Runs the whole tournament and returns the replay payload.
 pub fn simulate_run(
@@ -59,11 +160,21 @@ pub fn simulate_run(
         return Err(ApiError::bad_request("tournament has no participants"));
     }
 
+    let run_seed = req.seed.unwrap_or_else(|| {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos() as u64)
+            .unwrap_or(0x9E3779B97F4A7C15)
+            | 1
+    });
+
     let mut eng = Engine {
         conn,
         tournament_id,
         shirt_numbers,
         focus: req.focus_team_id,
+        run_seed,
+        lineups: req.lineups.clone(),
         rng: sim::Rng::new(),
         matches: Vec::new(),
         order: Vec::new(),
@@ -98,6 +209,7 @@ pub fn simulate_run(
         host,
         shirt_numbers,
         focus_team_id: req.focus_team_id,
+        seed: run_seed,
         order: eng.order,
         matches: eng.matches,
         groups: eng.groups,
@@ -138,6 +250,8 @@ struct Engine<'a> {
     tournament_id: i64,
     shirt_numbers: bool,
     focus: Option<i64>,
+    run_seed: u64,
+    lineups: HashMap<String, LineupConfig>,
     rng: sim::Rng,
     matches: Vec<RunMatch>,
     order: Vec<i64>,
@@ -288,6 +402,10 @@ impl<'a> Engine<'a> {
             sim::next_pairings(&stage_teams)?
         };
 
+        // Each knockout round is its own matchday so per-match day lookups
+        // stay unique (a team plays at most one match per day).
+        self.day += 1;
+
         let mut winners = Vec::new();
         let mut losers = Vec::new();
         for (h, a) in pairings {
@@ -344,7 +462,8 @@ impl<'a> Engine<'a> {
         Ok(s)
     }
 
-    /// Best XI (4-4-2) by overall within each position family.
+    /// Best XI (4-4-2) by overall within each position family — the default
+    /// used for the opponent and for focus matches with no config yet.
     fn pick_xi(&mut self, team_id: i64) -> ApiResult<Vec<SquadPlayer>> {
         let squad = self.squad(team_id)?;
         let mut chosen = Vec::new();
@@ -367,6 +486,79 @@ impl<'a> Engine<'a> {
             chosen = squad.into_iter().take(11).collect();
         }
         Ok(chosen)
+    }
+
+    /// XI for a side: the user's lineup when `cfg` is present (focus team
+    /// only), otherwise the default 4-4-2. Off-position players get their
+    /// slot penalty applied to their effective overall.
+    fn pick_xi_for(
+        &mut self,
+        team_id: i64,
+        cfg: Option<&LineupConfig>,
+    ) -> ApiResult<Vec<SquadPlayer>> {
+        match cfg {
+            Some(c) => self.xi_from_config(team_id, c),
+            None => self.pick_xi(team_id),
+        }
+    }
+
+    fn xi_from_config(&mut self, team_id: i64, cfg: &LineupConfig) -> ApiResult<Vec<SquadPlayer>> {
+        let squad = self.squad(team_id)?;
+        let slots = effective_slots(&cfg.formation, &cfg.strategy);
+        let mut used: HashSet<i64> = HashSet::new();
+        let mut xi = Vec::with_capacity(11);
+        for slot in &slots {
+            let assigned = cfg
+                .starting
+                .get(*slot)
+                .copied()
+                .filter(|pid| !used.contains(pid) && squad.iter().any(|p| p.id == *pid));
+            let pick = match assigned {
+                Some(pid) => squad.iter().find(|p| p.id == pid).cloned(),
+                None => self.best_for_slot(&squad, slot, &used),
+            };
+            if let Some(mut p) = pick {
+                let penalty = models::slot_penalty(&p.position, slot);
+                p.overall = (p.overall - penalty as f64 * 2.0).clamp(30.0, 99.0);
+                used.insert(p.id);
+                xi.push(p);
+            }
+        }
+        Ok(xi)
+    }
+
+    /// Best unused player for a slot, ranked by effective overall at that slot
+    /// (so natural fits naturally float to the top).
+    fn best_for_slot(
+        &self,
+        squad: &[SquadPlayer],
+        slot: &str,
+        used: &HashSet<i64>,
+    ) -> Option<SquadPlayer> {
+        let mut pool: Vec<SquadPlayer> = squad
+            .iter()
+            .filter(|p| !used.contains(&p.id))
+            .cloned()
+            .collect();
+        pool.sort_by(|a, b| {
+            let ea = a.overall - models::slot_penalty(&a.position, slot) as f64 * 2.0;
+            let eb = b.overall - models::slot_penalty(&b.position, slot) as f64 * 2.0;
+            eb.partial_cmp(&ea).unwrap_or(std::cmp::Ordering::Equal)
+        });
+        pool.into_iter().next()
+    }
+
+    /// Fractional xG edge from fielding a stronger/weaker XI than the squad
+    /// average (only meaningful for the focus team's picks, applied uniformly
+    /// so the auto XI baseline stays neutral).
+    fn xi_strength_adj(&mut self, team_id: i64, xi: &[SquadPlayer]) -> ApiResult<f64> {
+        let squad = self.squad(team_id)?;
+        if squad.is_empty() || xi.is_empty() {
+            return Ok(0.0);
+        }
+        let sq_avg: f64 = squad.iter().map(|p| p.overall).sum::<f64>() / squad.len() as f64;
+        let xi_avg: f64 = xi.iter().map(|p| p.overall).sum::<f64>() / xi.len() as f64;
+        Ok(((xi_avg - sq_avg) * 0.15).clamp(-1.2, 1.2))
     }
 
     fn perf(&mut self, p: &SquadPlayer, team_id: i64) -> &mut Perf {
@@ -585,9 +777,48 @@ impl<'a> Engine<'a> {
         stage_name: &str,
         knockout: bool,
     ) -> ApiResult<Option<i64>> {
-        let (h_xg, a_xg) = self.xg(home, away, knockout)?;
-        let home_xi = self.pick_xi(home)?;
-        let away_xi = self.pick_xi(away)?;
+        // Deterministic per-match RNG: same seed + identity → identical match.
+        // The day is assigned before group-phase matches (see
+        // `play_group_phase`); knockout rounds reuse the last day but differ
+        // by stage_key, so identities never collide.
+        let key = format!("{stage_key}|{}|{}|{}", self.day, home, away);
+        self.rng = sim::Rng::from_seed(match_seed(
+            self.run_seed,
+            &key,
+            self.day,
+            home,
+            away,
+            knockout,
+        ));
+
+        let cfg = self.lineups.get(&key).cloned();
+        let focus = self.focus;
+        let focus_cfg = |team: i64| {
+            if focus == Some(team) {
+                cfg.as_ref()
+            } else {
+                None
+            }
+        };
+        let cfg_strategy = |team: i64| -> String {
+            focus_cfg(team)
+                .map(|c| c.strategy.clone())
+                .unwrap_or_else(|| "normal".to_string())
+        };
+        let home_xi = self.pick_xi_for(home, focus_cfg(home))?;
+        let away_xi = self.pick_xi_for(away, focus_cfg(away))?;
+
+        let home_strat = cfg_strategy(home);
+        let away_strat = cfg_strategy(away);
+        let (h_xg0, a_xg0) = self.xg(home, away, knockout)?;
+        let h_xg = (h_xg0 + self.xi_strength_adj(home, &home_xi)?
+            + strategy_adj(&home_strat, true)
+            + strategy_adj(&away_strat, false))
+        .clamp(0.1, 4.5);
+        let a_xg = (a_xg0 + self.xi_strength_adj(away, &away_xi)?
+            + strategy_adj(&away_strat, true)
+            + strategy_adj(&home_strat, false))
+        .clamp(0.1, 4.5);
 
         let (hs0, aw0) = (
             sim::poisson(&mut self.rng, h_xg),

@@ -183,6 +183,62 @@ pub const POSITIONS: &[&str] = &[
 /// Formation families that pitch slots are drawn from.
 pub const FAMILIES: &[&str] = &["GK", "DF", "MF", "FW"];
 
+/// Coarse pitch slots a starting XI is assigned to (formation-dependent).
+pub const SLOTS: &[&str] = &[
+    "GK", "DF", "RWB", "LWB", "DMF", "RMF", "LMF", "AMF", "FW", "RFW", "LFW",
+];
+
+fn slot_family(slot: &str) -> &'static str {
+    match slot {
+        "GK" => "GK",
+        "DF" | "RWB" | "LWB" => "DF",
+        "DMF" | "RMF" | "LMF" | "AMF" => "MF",
+        "FW" | "RFW" | "LFW" => "FW",
+        _ => "MF",
+    }
+}
+
+/// (slot, penalty index) pairs a granular position can cover naturally.
+/// `0` means the position is a natural fit for the slot; higher means the
+/// player is out of position there. Positions missing a slot fall back to
+/// `slot_penalty`'s family-based default.
+pub fn position_slots(position: &str) -> Vec<(&'static str, i32)> {
+    match position {
+        "GK" => vec![("GK", 0)],
+        "CB" => vec![("DF", 0), ("LWB", 3), ("RWB", 3)],
+        "LB" => vec![("LWB", 0), ("DF", 1), ("LMF", 2)],
+        "RB" => vec![("RWB", 0), ("DF", 1), ("RMF", 2)],
+        "LWB" => vec![("LWB", 0), ("LMF", 1), ("DF", 2), ("RWB", 4)],
+        "RWB" => vec![("RWB", 0), ("RMF", 1), ("DF", 2), ("LWB", 4)],
+        "CDM" => vec![("DMF", 0), ("AMF", 4), ("DF", 6)],
+        "CM" => vec![("AMF", 0), ("DMF", 1), ("RMF", 1), ("LMF", 1)],
+        "CAM" => vec![("AMF", 0), ("RMF", 3), ("LMF", 3), ("FW", 4), ("DMF", 5)],
+        "LM" => vec![("LMF", 0), ("LFW", 1), ("AMF", 3), ("RMF", 3)],
+        "RM" => vec![("RMF", 0), ("RFW", 1), ("AMF", 3), ("LMF", 3)],
+        "LW" => vec![("LFW", 0), ("LMF", 1), ("FW", 2), ("RFW", 2)],
+        "RW" => vec![("RFW", 0), ("RMF", 1), ("FW", 2), ("LFW", 2)],
+        "ST" => vec![("FW", 0), ("RFW", 1), ("LFW", 1)],
+        "CF" => vec![("FW", 0), ("RFW", 1), ("LFW", 1), ("AMF", 4)],
+        _ => vec![("DMF", 6)],
+    }
+}
+
+/// Penalty index for a player (granular position) playing a given slot.
+pub fn slot_penalty(position: &str, slot: &str) -> i32 {
+    for &(s, p) in position_slots(position).iter() {
+        if s == slot {
+            return p;
+        }
+    }
+    if position == "GK" || slot == "GK" {
+        10
+    } else if position_family(position) == slot_family(slot) {
+        6
+    } else {
+        9
+    }
+}
+
 pub fn position_family(position: &str) -> &'static str {
     match position {
         "GK" => "GK",
@@ -400,6 +456,10 @@ pub struct RunPayload {
     pub host: String,
     pub shirt_numbers: bool,
     pub focus_team_id: Option<i64>,
+    /// Deterministic base seed for this run — re-POSTing the same seed and
+    /// lineups reproduces identical matches; configuring a new lineup only
+    /// changes the matches it is applied to.
+    pub seed: u64,
     /// Match ids in the order they should be revealed.
     pub order: Vec<i64>,
     pub matches: Vec<RunMatch>,

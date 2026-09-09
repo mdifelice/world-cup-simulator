@@ -26,6 +26,10 @@ impl Rng {
             | 1;
         Rng(seed)
     }
+    /// Deterministic PRNG for replayable, per-match seeding.
+    pub(crate) fn from_seed(seed: u64) -> Self {
+        Rng(seed | 1)
+    }
     pub(crate) fn next(&mut self) -> u64 {
         let mut x = self.0;
         x ^= x << 13;
