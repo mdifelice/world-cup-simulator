@@ -9,21 +9,6 @@ export interface Tournament {
   shirt_numbers: boolean;
 }
 
-export interface Phase {
-  id: number;
-  tournament_id: number;
-  seq: number;
-  key: string;
-  name: string;
-  phase_type: "GROUP" | "KNOCKOUT" | string;
-  group_count: number | null;
-  entry_teams: number | null;
-}
-
-export interface TournamentDetail extends Tournament {
-  phases: Phase[];
-}
-
 export interface Team {
   id: number;
   name: string;
@@ -58,69 +43,12 @@ export const POSITIONS = [
   "CF",
 ] as const;
 
-export const ATTRIBUTES = [
-  "pace",
-  "stamina",
-  "strength",
-  "dribbling",
-  "passing",
-  "shooting",
-  "tackling",
-  "vision",
-  "positioning",
-  "composure",
-  "reflexes",
-  "handling",
-  "kicking",
-  "aerial",
-  "decisions",
-  "aggression",
-  "concentration",
-  "leadership",
-] as const;
-
 export interface Player {
   id: number;
-  team_id: number;
   name: string;
   position: (typeof POSITIONS)[number] | string;
   shirt_number: number | null;
-  rating: number;
   overall: number;
-  pace: number;
-  stamina: number;
-  strength: number;
-  dribbling: number;
-  passing: number;
-  shooting: number;
-  tackling: number;
-  vision: number;
-  positioning: number;
-  composure: number;
-  reflexes: number;
-  handling: number;
-  kicking: number;
-  aerial: number;
-  decisions: number;
-  aggression: number;
-  concentration: number;
-  leadership: number;
-}
-
-export interface SimMatch {
-  id: number;
-  tournament_id: number;
-  stage: string;
-  round_num: number;
-  matchday: number | null;
-  home_team_id: number;
-  away_team_id: number;
-  kickoff: string | null;
-  home_team_name: string;
-  away_team_name: string;
-  home_score: number | null;
-  away_score: number | null;
-  status: "scheduled" | "played" | string;
 }
 
 export interface User {
@@ -129,11 +57,6 @@ export interface User {
   provider_subject: string;
   display_name: string | null;
   email: string | null;
-}
-
-export interface SimulateResponse {
-  simulated: number;
-  champion: string | null;
 }
 
 /** Maps a granular position to the coarse family used by formations/slots. */

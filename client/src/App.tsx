@@ -1,16 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type {
   Participant,
-  Phase,
-  Player,
   RunMatch,
   RunPayload,
-  SimMatch,
   Tournament,
   User,
 } from "./types";
-import { positionFamily } from "./types";
-import { type Formation } from "./formations";
 import { api, readToken, setToken } from "./api";
 import { localeName, useI18n, type Locale } from "./i18n";
 import ChooseTournament from "./pages/ChooseTournament";
@@ -20,18 +15,6 @@ import Overview from "./pages/Overview";
 import MatchView from "./pages/MatchView";
 import Finals from "./pages/Finals";
 import History from "./pages/History";
-
-export interface GameState {
-  tournament: Tournament | null;
-  phases: Phase[];
-  team: Participant | null;
-  participants: Participant[];
-  squad: Player[];
-  formation: Formation | null;
-  lineup: (Player | null)[];
-  results: SimMatch[] | null;
-  champion: string | null;
-}
 
 export type Step = "tournament" | "team" | "roster" | "overview" | "match" | "finish" | "history";
 
@@ -319,23 +302,5 @@ export default function App() {
         )}
       </main>
     </div>
-  );
-}
-
-// shared helpers: players for a formation family (or exact position), highest rated first
-export function playersForPosition(squad: Player[], pos: string): Player[] {
-  const isFamily = ["GK", "DF", "MF", "FW"].includes(pos);
-  return squad
-    .filter((p) =>
-      isFamily ? positionFamily(p.position) === pos : p.position === pos,
-    )
-    .sort((a, b) => (b.overall || b.rating) - (a.overall || a.rating));
-}
-
-export function lineupStrength(lineup: (Player | null)[]): number {
-  const filled = lineup.filter((p): p is Player => !!p);
-  if (!filled.length) return 0;
-  return Math.round(
-    filled.reduce((s, p) => s + (p.overall || p.rating), 0) / filled.length,
   );
 }
