@@ -1,0 +1,17 @@
+[package]
+name = "wcs-scrapper"
+version = "0.1.0"
+edition = "2021"
+description = "World Cup Simulator data scraper for the Sofascore API"
+default-run = "wcs-scrapper"
+
+[dependencies]
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+reqwest = { version = "0.12", features = ["json", "blocking"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[[bin]]
+name = "wcs-scrapper"
+path = "src/main.rs"
