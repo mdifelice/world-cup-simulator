@@ -87,7 +87,7 @@ async fn main() {
         .layer(cors);
 
     // Serve the built frontend (SPA) when present.
-    let app = with_frontend(app);
+    let app = with_frontend(app).layer(axum::middleware::from_fn(cache_control));
 
     let addr = std::env::var("WCS_ADDR").unwrap_or_else(|_| "0.0.0.0:8080".to_string());
     let listener = tokio::net::TcpListener::bind(&addr)
@@ -97,6 +97,28 @@ async fn main() {
     axum::serve(listener, app.into_make_service())
         .await
         .expect("server error");
+}
+
+/// Content-addressed assets (hashed file names) are immutable for their URL,
+/// so let browsers keep them; everything else (index.html / API) must be
+/// revalidated so deploys appear without a hard refresh.
+async fn cache_control(
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> axum::response::Response {
+    let asset = req
+        .uri()
+        .path()
+        .rsplit_once("/assets/")
+        .is_some();
+    let mut res = next.run(req).await;
+    let value = if asset {
+        "public, max-age=31536000, immutable"
+    } else {
+        "no-cache"
+    };
+    res.headers_mut().insert("cache-control", value.parse().unwrap());
+    res
 }
 
 /// Attaches static-file serving for `client/dist` (or `$WCS_STATIC_DIR`),

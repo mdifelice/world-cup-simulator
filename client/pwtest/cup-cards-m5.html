@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Cup card M5 — with current WC images</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/google-sans" />
+<style>
+  :root { --bg:#eef2f7; --panel:#fff; --line:#d9e1ec; --text:#1b2530; --muted:#5d6c7d; --accent:#189a55; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:36px 40px 70px; background:radial-gradient(1100px 560px at 70% -10%,#dbe5f1 0%,var(--bg) 55%); font-family:"Google Sans","Segoe UI",system-ui,-apple-system,Roboto,sans-serif; color:var(--text); }
+  .head { font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin:30px 0 14px; }
+  .head span { color:var(--accent); }
+  .sub { font-size:13px; color:var(--muted); margin:-10px 0 4px; }
+
+  .screen { border-radius:18px; padding:20px; outline:1px solid var(--line); background:rgba(255,255,255,.35); max-width:1180px; }
+  .shead { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; }
+  .shead .sel { color:var(--accent); font-weight:700; }
+
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(172px,1fr)); gap:16px; }
+
+  .cc { font-family:inherit; background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; padding:0 0 12px; text-align:center; cursor:pointer; transition:transform .12s ease, border-color .12s ease; padding:0; }
+  .cc:hover { transform:translateY(-3px); border-color:var(--accent); }
+  .cc.picked { border-color:#d8a418; box-shadow:0 0 0 2px #d8a418; }
+
+  .band { background:linear-gradient(160deg,#147044 0%,#0c5a33 100%); color:#fff; padding:12px 8px; }
+  .band .era { font-size:8.5px; letter-spacing:3px; color:#e9d9a0; text-transform:uppercase; }
+  .band .y { font-size:31px; font-weight:900; line-height:1.02; }
+  .mid { padding:11px 10px 4px; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .mid img, .mid svg { width:46px; height:46px; object-fit:contain; }
+  .mid img { filter: drop-shadow(0 2px 3px rgba(0,0,0,.18)); }
+  .w { font-size:13px; font-weight:800; color:#8a6d0b; }
+  .h { font-size:10.5px; color:var(--muted); margin-top:8px; display:flex; align-items:center; justify-content:center; gap:6px; padding:0 8px; }
+  .h .flags { font-size:15px; letter-spacing:.5px; white-space:nowrap; }
+  .h .names { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+</style>
+</head>
+<body>
+
+<div class="head"><span>M5</span> &middot; champion seal &mdash; rendered with the trophy images currently used in the app</div>
+<div class="sub">Jules Rimet cup image for &le;1970, modern FIFA cup image for 1978+. Winner data now reflects real history (2026 = Spain).</div>
+
+<div class="screen"><div class="shead"><span>World Cup Selector &middot; newest first</span><span class="sel">picked = 2026</span></div>
+  <div id="grid" class="grid"></div>
+</div>
+
+<script>
+  const OLD = "https://www.clipartmax.com/png/full/107-1079129_football-world-cup-jules-rimet-trophy-png.png";
+  const NEW_ = "https://upload.wikimedia.org/wikipedia/commons/1/13/World-g89b177785_1280.png?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=original";
+  const TROPHY_SVG = `<svg viewBox="0 0 64 64"><defs><linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d475"/><stop offset=".55" stop-color="#d4a017"/><stop offset="1" stop-color="#a97f10"/></linearGradient></defs><g fill="url(#tg)"><rect x="25" y="52" width="14" height="5" rx="2"/><rect x="20" y="48" width="24" height="4" rx="2"/><circle cx="32" cy="13" r="8"/><rect x="31" y="13" width="2" height="28" rx="1"/><path d="M27 46 c-1 -9 -1 -16 3 -25 c0 8 1 15 1 25 Z"/><path d="M37 46 c1 -9 1 -16 -3 -25 c0 8 -1 15 -1 25 Z"/></g></svg>`;
+
+  const CUPS = [
+    [1930,"Uruguay","🇺🇾","Uruguay"],
+    [1934,"Italy","🇮🇹","Italy"],
+    [1938,"France","🇫🇷","Italy"],
+    [1950,"Brazil","🇧🇷","Uruguay"],
+    [1954,"Switzerland","🇨🇭","West Germany"],
+    [1958,"Sweden","🇸🇪","Brazil"],
+    [1962,"Chile","🇨🇱","Brazil"],
+    [1966,"England","🏴󠁧󠁢󠁥󠁮󠁧󠁿","England"],
+    [1970,"Mexico","🇲🇽","Brazil"],
+    [1978,"Argentina","🇦🇷","Argentina"],
+    [1982,"Spain","🇪🇸","Italy"],
+    [1986,"Mexico","🇲🇽","Argentina"],
+    [1990,"Italy","🇮🇹","West Germany"],
+    [1994,"United States","🇺🇸","Brazil"],
+    [1998,"France","🇫🇷","France"],
+    [2002,"South Korea / Japan","🇰🇷🇯🇵","Brazil"],
+    [2006,"Germany","🇩🇪","Italy"],
+    [2010,"South Africa","🇿🇦","Spain"],
+    [2014,"Brazil","🇧🇷","Germany"],
+    [2018,"Russia","🇷🇺","France"],
+    [2022,"Qatar","🇶🇦","Argentina"],
+    [2026,"United States / Mexico / Canada","🇺🇸🇲🇽🇨🇦","Spain"],
+  ];
+
+  const grid = document.getElementById("grid");
+  window.fallbackTrophy = (el) => { el.outerHTML = TROPHY_SVG; };
+  for (const [year, host, flags, winner] of CUPS) {
+    const b = document.createElement("button");
+    b.className = "cc" + (year === 2026 ? " picked" : "");
+    b.title = host;
+    const url = year <= 1970 ? OLD : NEW_;
+    b.innerHTML = `
+      <div class="band"><div class="era">FIFA WORLD CUP</div><div class="y">${year}</div></div>
+      <div class="mid"><img src="${url}" alt="" loading="lazy" onerror="window.fallbackTrophy(this)"/><div class="w">${winner}</div></div>
+      <div class="h"><span class="flags">${flags}</span><span class="names">${host}</span></div>`;
+    grid.appendChild(b);
+  }
+</script>
+
+<p class="sub" style="margin-top:16px">Note: the older editions render the Jules Rimet source image (their trophy PNG has a white background), which may need a small white/rounded chip behind it on the white card &mdash; happy to adjust when implementing.</p>
+
+</body>
+</html>

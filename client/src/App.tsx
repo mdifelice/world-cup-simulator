@@ -16,7 +16,7 @@ import Overview from "./pages/Overview";
 import MatchView from "./pages/MatchView";
 import Finals from "./pages/Finals";
 import History from "./pages/History";
-import LineupSetup from "./pages/LineupSetup";
+import LineupPitch from "./pages/LineupPitch";
 
 export type Step =
   | "tournament"
@@ -61,6 +61,9 @@ export default function App() {
   const [interactive, setInteractive] = useState(false);
   const [pendingTarget, setPendingTarget] = useState<{ day: number; open: boolean } | null>(null);
   const runGuard = useRef<number | null>(null);
+  const ffTimer = useRef<number | null>(null);
+  const [ffRunning, setFfRunning] = useState(false);
+  const [scrollToMatch, setScrollToMatch] = useState<number | null>(null);
   const { t, locale, setLocale } = useI18n();
 
   // Silent #token= capture from the OAuth redirect (login stays hidden).
@@ -255,6 +258,43 @@ export default function App() {
     });
   };
 
+  /** Reveal matches one by one (every 500ms), stopping the moment a focus-team
+   *  match is revealed — the results then scroll into view and open — or when
+   *  the whole tournament is out. */
+  const stopFF = () => {
+    if (ffTimer.current != null) {
+      window.clearInterval(ffTimer.current);
+      ffTimer.current = null;
+    }
+    setFfRunning(false);
+  };
+  const runFastForward = () => {
+    if (!flow.run || ffRunning) return;
+    if (focusId == null) {
+      setFlow((f) => (f.run ? { ...f, revealed: f.run.matches.length } : f));
+      return;
+    }
+    const run = flow.run;
+    const order = run.order;
+    let revealed = flow.revealed;
+    setFfRunning(true);
+    ffTimer.current = window.setInterval(() => {
+      if (revealed >= order.length) {
+        stopFF();
+        return;
+      }
+      const m = run.matches.find((x) => x.id === order[revealed]);
+      revealed += 1;
+      setFlow((f) => ({ ...f, revealed }));
+      if (m && (m.home_team_id === focusId || m.away_team_id === focusId)) {
+        stopFF();
+        setScrollToMatch(m.id);
+        setFlow((f) => ({ ...f, openMatchId: m.id }));
+      }
+    }, 500);
+  };
+  useEffect(() => () => stopFF(), []);
+
   const openMatch = (m: RunMatch) => setFlow((f) => ({ ...f, openMatchId: m.id }));
 
   const pickTournament = (t: Tournament) => {
@@ -350,7 +390,24 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand" onClick={reset}>
-          <span className="brand-ball">⚽</span> {t("app.brand")}
+          <svg className="brand-badge" width="40" height="40" viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <linearGradient id="brand-trophy" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#f0c840" />
+                <stop offset="1" stopColor="#a87912" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="46" fill="#fff" stroke="url(#brand-trophy)" strokeWidth="4" />
+            <rect x="37" y="66" width="26" height="5" rx="2" fill="#b8860b" />
+            <path d="M33 30 H67 V44 C67 56 60 65 50 68 C40 65 33 56 33 44 Z" fill="url(#brand-trophy)" />
+            <path d="M33 34 C21 40 18 52 23 63" stroke="url(#brand-trophy)" strokeWidth="5" fill="none" strokeLinecap="round" />
+            <path d="M67 34 C79 40 82 52 77 63" stroke="url(#brand-trophy)" strokeWidth="5" fill="none" strokeLinecap="round" />
+            <ellipse cx="50" cy="27" rx="17" ry="4" fill="#e8b62c" />
+          </svg>
+          <div>
+            <div className="wm-line1">WORLD CUP</div>
+            <div className="wm-line2">Simulator</div>
+          </div>
         </div>
         <nav className="steps">
           {steps.map((s) => (
@@ -411,6 +468,9 @@ export default function App() {
             onNext={nextMatchday}
             onAll={revealAll}
             onJump={jumpToFocus}
+            onFF={runFastForward}
+            ffRunning={ffRunning}
+            scrollToId={scrollToMatch}
             onOpen={openMatch}
             onStart={() => postRun(false, null, configs)}
             onFinish={goFinish}
@@ -440,10 +500,11 @@ export default function App() {
             }
             const key = matchKey(m);
             return (
-              <LineupSetup
+              <LineupPitch
                 tournament={flow.tournament}
                 team={flow.team}
                 match={m}
+                shirtNumbers={flow.run.shirt_numbers}
                 initial={configs[key]}
                 onConfirm={confirmLineup}
                 onBack={() => { setPendingTarget(null); setStep("overview"); }}

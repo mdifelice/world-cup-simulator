@@ -226,6 +226,27 @@ pub fn composite_rating(position: &str, attrs: &[Option<i32>]) -> f64 {
     }
 }
 
+/// Market-style star rating (0–100). Rolled back to a plain average — no
+/// attacking ponderations: outfielders use the position-weighted composite
+/// `overall` (their own position's mix, not an attack bias), keepers a plain
+/// mean of their shot-stopping fields. The average is then stretched toward
+/// 100 so the very best read close to their ceiling:
+///     overall 85 → ≈97, 80 → 90, 75 → 82, 70 → 75 — clamped to the 60–98 band.
+pub fn star_rating(position: &str, attrs: &[Option<i32>]) -> f64 {
+    let avg = if position == "GK" {
+        // Plain mean of the keeper-relevant fields (reflexes, handling,
+        // kicking, positioning, composure, aerial, strength, pace, decisions,
+        // concentration, leadership), equal weight, no sums-warping attrs.
+        let idx = [REFLEXES, HANDLING, 12, POSITIONING, COMPOSURE, AERIAL,
+            STRENGTH, PACE, DECISIONS, CONCENTRATION, LEADERSHIP];
+        let n = idx.len() as f64;
+        idx.iter().map(|&i| attrs.get(i).copied().flatten().unwrap_or(60) as f64).sum::<f64>() / n
+    } else {
+        composite_rating(position, attrs)
+    };
+    ((60.0 + (avg - 60.0) * 1.5) + 0.5).floor().clamp(60.0, 98.0)
+}
+
 /// Average squad rating for a team within a tournament, computed from the
 /// position-weighted attributes of its players. `None` if the team has no
 /// registered players (caller falls back to `teams.rating`).
@@ -543,31 +564,49 @@ fn play_group_phase(
 
     let mut tables = Vec::new();
     let mut simulated = 0usize;
-    for teams in &groups {
-        for (home, away, round) in fixture::round_robin(teams) {
-            let hb = if Some(home) == focus { boost } else { 0 };
-            let ab = if Some(away) == focus { boost } else { 0 };
-            let (hs, as_) = simulate_one(rng, conn, tournament_id, home, away, hb, ab, false)?;
-            let existing: Option<i64> = conn
-                .query_row(
-                    "SELECT id FROM matches
-                     WHERE tournament_id = ?1 AND stage = ?2 AND home_team_id = ?3 AND away_team_id = ?4 AND status = 'scheduled'",
-                    params![tournament_id, phase.key, home, away],
-                    |r| r.get(0),
-                )
-                .optional()?;
-            match existing {
-                Some(mid) => record(conn, mid, hs, as_)?,
-                None => {
-                    conn.execute(
-                        "INSERT INTO matches (tournament_id, stage, round_num, matchday, home_team_id, away_team_id, home_score, away_score, status)
-                         VALUES (?1, ?2, 0, ?3, ?4, ?5, ?6, ?7, 'played')",
-                        params![tournament_id, phase.key, round as i32, home, away, hs, as_],
-                    )?;
+    let schedule = fixture::real_group_schedule(conn, tournament_id)?;
+    for (gi, teams) in groups.iter().enumerate() {
+        let by_round: Vec<Vec<(i64, i64)>> = match &schedule {
+            Some(s) if gi < s.len() => s[gi].clone(),
+            _ => {
+                let mut br: Vec<Vec<(i64, i64)>> = Vec::new();
+                for (h, a, round) in fixture::round_robin(teams) {
+                    let r = round.max(1) as usize;
+                    while br.len() < r {
+                        br.push(Vec::new());
+                    }
+                    br[r - 1].push((h, a));
                 }
+                br
             }
-            apply_result(conn, home, away, hs, as_)?;
-            simulated += 1;
+        };
+        for (round, pairings) in by_round.iter().enumerate() {
+            for (home, away) in pairings {
+                let hb = if Some(*home) == focus { boost } else { 0 };
+                let ab = if Some(*away) == focus { boost } else { 0 };
+                let (hs, as_) =
+                    simulate_one(rng, conn, tournament_id, *home, *away, hb, ab, false)?;
+                let existing: Option<i64> = conn
+                    .query_row(
+                        "SELECT id FROM matches
+                         WHERE tournament_id = ?1 AND stage = ?2 AND home_team_id = ?3 AND away_team_id = ?4 AND status = 'scheduled'",
+                        params![tournament_id, phase.key, home, away],
+                        |r| r.get(0),
+                    )
+                    .optional()?;
+                match existing {
+                    Some(mid) => record(conn, mid, hs, as_)?,
+                    None => {
+                        conn.execute(
+                            "INSERT INTO matches (tournament_id, stage, round_num, matchday, home_team_id, away_team_id, home_score, away_score, status)
+                             VALUES (?1, ?2, 0, ?3, ?4, ?5, ?6, ?7, 'played')",
+                            params![tournament_id, phase.key, (round + 1) as i32, home, away, hs, as_],
+                        )?;
+                    }
+                }
+                apply_result(conn, *home, *away, hs, as_)?;
+                simulated += 1;
+            }
         }
         tables.push(fixture::table_for(conn, tournament_id, &phase.key, teams)?);
     }

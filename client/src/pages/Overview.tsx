@@ -1,5 +1,6 @@
-import { useMemo } from "react";
-import { useI18n } from "../i18n";
+import { useEffect, useMemo, useRef } from "react";
+import { useI18n, flagFor } from "../i18n";
+import PlayerCard from "../components/PlayerCard";
 import type { RunMatch, RunPayload } from "../types";
 
 interface Props {
@@ -11,6 +12,9 @@ interface Props {
   onNext: () => void;
   onAll: () => void;
   onJump: () => void;
+  onFF?: () => void;
+  ffRunning?: boolean;
+  scrollToId?: number | null;
   onOpen: (m: RunMatch) => void;
   onStart: () => void;
   onFinish: () => void;
@@ -38,13 +42,26 @@ export default function Overview({
   onNext,
   onAll,
   onJump,
+  onFF,
+  ffRunning,
+  scrollToId,
   onOpen,
   onStart,
   onFinish,
 }: Props) {
   const focusId = run?.focus_team_id ?? null;
   const total = run?.matches.length ?? 0;
-  const { t, stage } = useI18n();
+  const { t, stage, country } = useI18n();
+  const focusRef = useRef<HTMLButtonElement | null>(null);
+
+  // Scroll the target score-row into view whenever scrollToId changes.
+  useEffect(() => {
+    if (scrollToId == null) return;
+    const el = document.querySelector<HTMLButtonElement>(
+      `.score-row[data-id="${scrollToId}"]`,
+    );
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [scrollToId]);
 
   const groups = useMemo(() => {
     const map = new Map<string, Row[]>();
@@ -93,38 +110,44 @@ export default function Overview({
     return map;
   }, [run, revealedMatches]);
 
-  const scorers = useMemo(() => {
-    const by = new Map<number, { name: string; team_id: number; team_name: string; position?: string; goals: number; assists: number }>();
+  const table = useMemo(() => {
+    interface Entry {
+      id: number;
+      name: string;
+      team_id: number;
+      team_name: string;
+      photo?: string | null;
+      goals: number;
+      assists: number;
+    }
+    const by = new Map<number, Entry>();
+    const entry = (id: number, name: string, team_id: number, team_name: string, photo?: string | null) => {
+      let e = by.get(id);
+      if (!e) {
+        e = { id, name, team_id, team_name, photo, goals: 0, assists: 0 };
+        by.set(id, e);
+      }
+      return e;
+    };
     for (const m of revealedMatches) {
       for (const g of m.goals) {
-        let s = by.get(g.scorer_id);
-        if (!s) {
-          s = {
-            name: g.scorer,
-            team_id: g.team_id,
-            team_name: m.home_team_id === g.team_id ? m.home_team_name : m.away_team_name,
-            goals: 0,
-            assists: 0,
-          };
-          by.set(g.scorer_id, s);
-        }
-        s.goals += 1;
+        const teamName = m.home_team_id === g.team_id ? m.home_team_name : m.away_team_name;
+        entry(g.scorer_id, g.scorer, g.team_id, teamName, g.scorer_photo).goals += 1;
         if (g.assist_id != null && g.assist) {
-          let as = by.get(g.assist_id);
-          if (!as) {
-            as = {
-              name: g.assist,
-              team_id: g.team_id,
-              team_name: s.team_name,
-              goals: 0,
-              assists: 1,
-            };
-            by.set(g.assist_id, as);
-          } else as.assists += 1;
+          entry(g.assist_id, g.assist, g.team_id, teamName, g.assist_photo).assists += 1;
         }
       }
     }
-    return [...by.values()].sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name)).slice(0, 12);
+    const all = [...by.values()];
+    const scorers = all
+      .filter((e) => e.goals > 0)
+      .sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name))
+      .slice(0, 12);
+    const assisters = all
+      .filter((e) => e.assists > 0)
+      .sort((a, b) => b.assists - a.assists || b.goals - a.goals || a.name.localeCompare(b.name))
+      .slice(0, 12);
+    return { scorers, assisters };
   }, [revealedMatches]);
 
   const byDay = useMemo(() => {
@@ -180,7 +203,12 @@ export default function Overview({
                     : t("cup.playDay", { day: maxShownDay + 1 })}
                 </button>
                 {focusId != null && (
-                  <button className="btn big" onClick={onJump}>{t("cup.jump")}</button>
+                  <>
+                    <button className="btn big" onClick={onJump}>{t("cup.jump")}</button>
+                    <button className="btn big" onClick={onFF} disabled={ffRunning}>
+                      {ffRunning ? "⏳…" : t("cup.ff")}
+                    </button>
+                  </>
                 )}
                 <button className="btn secondary big" onClick={onAll}>{t("cup.playAll")}</button>
               </>
@@ -210,7 +238,7 @@ export default function Overview({
                       {rows.map((r, i) => (
                         <tr key={r.id} className={focusId === r.id ? "focus-row" : ""}>
                           <td className="num">{i + 1}</td>
-                          <td className="l team-cell">{r.name}</td>
+                          <td className="l team-cell">{flagFor(r.name)} {country(r.name)}</td>
                           <td className="num">{r.p}</td>
                           <td className="num">{r.w}</td>
                           <td className="num">{r.d}</td>
@@ -228,21 +256,40 @@ export default function Overview({
             </div>
 
             <div className="side-col">
-              {scorers.length > 0 && (
+              {table.scorers.length > 0 && (
                 <div className="table-card">
                   <h2 className="table-title">{t("cup.scorers")}</h2>
-                  <table className="mini-table">
-                    <tbody>
-                      {scorers.map((s, i) => (
-                        <tr key={i}>
-                          <td className="num">{i + 1}</td>
-                          <td className="l">{s.name}</td>
-                          <td className="l dim">{s.team_name}</td>
-                          <td className="num strong">{s.goals}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="stat-list">
+                    {table.scorers.map((s, i) => (
+                      <PlayerCard
+                        key={s.id}
+                        player={{ id: s.id, name: s.name, photo_url: s.photo }}
+                        variant="stat"
+                        tone={s.id % 4}
+                        number={i + 1}
+                        sub={country(s.team_name)}
+                        right={`${s.goals}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              {table.assisters.length > 0 && (
+                <div className="table-card">
+                  <h2 className="table-title">{t("cup.assisters")}</h2>
+                  <div className="stat-list">
+                    {table.assisters.map((s, i) => (
+                      <PlayerCard
+                        key={s.id}
+                        player={{ id: s.id, name: s.name, photo_url: s.photo }}
+                        variant="stat"
+                        tone={s.id % 4}
+                        number={i + 1}
+                        sub={country(s.team_name)}
+                        right={`${s.assists}`}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -256,12 +303,18 @@ export default function Overview({
             <div key={day} className="day-block">
               <h3 className="day-title">{t("match.day", { day })}</h3>
               {ms.map((m) => (
-                <button key={m.id} className="score-row" onClick={() => onOpen(m)}>
+                <button
+                  key={m.id}
+                  data-id={m.id}
+                  ref={m.id === scrollToId ? focusRef : undefined}
+                  className={"score-row" + (m.id === scrollToId ? " ff-target" : "")}
+                  onClick={() => onOpen(m)}
+                >
                   <span className="score-stage">{stage(m.stage_name)}</span>
                   <span className="score-teams">
-                    <span className={m.home_team_id === focusId ? "focus-tag" : ""}>{m.home_team_name}</span>
+                    <span className={m.home_team_id === focusId ? "focus-tag" : ""}>{flagFor(m.home_team_name)} {country(m.home_team_name)}</span>
                     <span className="score">{m.home_score}–{m.away_score}</span>
-                    <span className={m.away_team_id === focusId ? "focus-tag" : ""}>{m.away_team_name}</span>
+                    <span className={m.away_team_id === focusId ? "focus-tag" : ""}>{flagFor(m.away_team_name)} {country(m.away_team_name)}</span>
                   </span>
                   <span className="score-note">
                     {m.extra_time ? t("cup.noteAet") : m.penalties ? t("cup.notePens") : ""}

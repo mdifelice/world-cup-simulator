@@ -11,6 +11,8 @@ export interface I18n {
   setLocale: (l: Locale) => void;
   t: (key: string, vars?: Vars) => string;
   stage: (name: string, vars?: Vars) => string;
+  /** Localise a country/team name (e.g. "Brazil" → "Brasil" in es). */
+  country: (name: string) => string;
 }
 
 const en: Record<string, string> = {
@@ -32,6 +34,7 @@ const en: Record<string, string> = {
   "choose.error": "Cannot reach the backend:",
   "choose.winner": "Winner: {name}",
   "choose.winnerPending": "Winner pending ({year})",
+  "choose.era": "World Cup {year}",
 
   "team.title": "{year} — pick your nation",
   "team.hint":
@@ -65,6 +68,12 @@ const en: Record<string, string> = {
   "lineup.hint": "Out-of-position players take a rating penalty shown in the list.",
   "lineup.ready": "Lineup complete — go play it!",
   "lineup.pen": "{n} rating",
+  "lineup.armFirst": "Pick a player, then tap a pulsing slot",
+  "lineup.place": "Place {player} here",
+  "lineup.notThere": "{player} can't play this post",
+  "lineup.dblClear": "double-click to clear",
+  "lineup.picked": "in XI",
+  "lineup.tapSlot": "Now tap a pulsing slot on the pitch",
   "strategy.defensive": "Defensive",
   "strategy.normal": "Normal",
   "strategy.attacking": "Attacking",
@@ -80,6 +89,7 @@ const en: Record<string, string> = {
   "cup.playDay1": "Play matchday 1",
   "cup.playDay": "Play matchday {day}",
   "cup.playAll": "Play all",
+  "cup.ff": "▶▶ Play to my match",
   "cup.jump": "⚡ Jump to your match",
   "cup.ceremonies": "🏆 Ceremonies →",
   "cup.skipCeremonies": "Skip to ceremonies →",
@@ -94,6 +104,7 @@ const en: Record<string, string> = {
   "cup.gd": "GD",
   "cup.pts": "Pts",
   "cup.scorers": "Top scorers",
+  "cup.assisters": "Top assister",
   "cup.recent": "Recent results",
   "cup.complete": "· tournament complete",
   "cup.noMatches": "No matches played yet.",
@@ -175,6 +186,7 @@ const es: Record<string, string> = {
   "choose.error": "No se puede contactar con el servidor:",
   "choose.winner": "Campeón: {name}",
   "choose.winnerPending": "Campeón por decidir ({year})",
+  "choose.era": "Mundial {year}",
 
   "team.title": "{year} — elige a tu selección",
   "team.hint":
@@ -208,6 +220,12 @@ const es: Record<string, string> = {
   "lineup.hint": "Jugar en un puesto no natural resta valoración (se muestra en la lista).",
   "lineup.ready": "Once completo: ¡a jugar!",
   "lineup.pen": "{n} de valoración",
+  "lineup.armFirst": "Elige un jugador y luego toca un hueco que parpadee",
+  "lineup.place": "Colocar a {player} aquí",
+  "lineup.notThere": "{player} no juega en este puesto",
+  "lineup.dblClear": "doble clic para quitar",
+  "lineup.picked": "en el XI",
+  "lineup.tapSlot": "Ahora toca un hueco que parpadea en el campo",
   "strategy.defensive": "Defensivo",
   "strategy.normal": "Normal",
   "strategy.attacking": "Ofensivo",
@@ -223,6 +241,7 @@ const es: Record<string, string> = {
   "cup.playDay1": "Jugar jornada 1",
   "cup.playDay": "Jugar jornada {day}",
   "cup.playAll": "Jugar todo",
+  "cup.ff": "▶▶ Jugar hasta mi partido",
   "cup.jump": "⚡ Saltar a tu partido",
   "cup.ceremonies": "🏆 Ceremonias →",
   "cup.skipCeremonies": "Saltar a ceremonias →",
@@ -237,6 +256,7 @@ const es: Record<string, string> = {
   "cup.gd": "DG",
   "cup.pts": "Pts",
   "cup.scorers": "Máximos goleadores",
+  "cup.assisters": "Máximos asistentes",
   "cup.recent": "Resultados recientes",
   "cup.complete": "· torneo completo",
   "cup.noMatches": "Todavía no se ha jugado ningún partido.",
@@ -347,6 +367,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       setLocale: (l: Locale) => setLocale(l),
       t,
       stage,
+      country: (name: string): string => countryNames[locale]?.[name] ?? name,
     };
   }, [locale]);
 
@@ -361,4 +382,97 @@ export function useI18n(): I18n {
 
 export function localeName(l: Locale): string {
   return l === "es" ? "Español" : "English";
+}
+
+// ---------------------------------------------------------------------------
+// Localised country names and flag emojis
+// ---------------------------------------------------------------------------
+
+const countryNames: Record<Locale, Record<string, string>> = {
+  en: {},
+  es: {
+    Argentina: "Argentina",
+    Australia: "Australia",
+    Austria: "Austria",
+    Belgium: "Bélgica",
+    Brazil: "Brasil",
+    Cameroon: "Camerún",
+    Canada: "Canadá",
+    Chile: "Chile",
+    "Costa Rica": "Costa Rica",
+    Croatia: "Croacia",
+    Denmark: "Dinamarca",
+    Ecuador: "Ecuador",
+    England: "Inglaterra",
+    France: "Francia",
+    Germany: "Alemania",
+    Ghana: "Ghana",
+    Iran: "Irán",
+    Italy: "Italia",
+    Japan: "Japón",
+    Jordan: "Jordania",
+    Mexico: "México",
+    Morocco: "Marruecos",
+    Netherlands: "Países Bajos",
+    Poland: "Polonia",
+    Portugal: "Portugal",
+    Qatar: "Catar",
+    Russia: "Rusia",
+    "Saudi Arabia": "Arabia Saudita",
+    Senegal: "Senegal",
+    Serbia: "Serbia",
+    "South Africa": "Sudáfrica",
+    "South Korea": "Corea del Sur",
+    Spain: "España",
+    Sweden: "Suecia",
+    Switzerland: "Suiza",
+    Tunisia: "Túnez",
+    "United States": "Estados Unidos",
+    Uruguay: "Uruguay",
+    Wales: "Gales",
+    "West Germany": "Alemania Federal",
+  },
+};
+
+const FLAGS: Record<string, string> = {
+  Argentina: "🇦🇷",
+  Australia: "🇦🇺",
+  Austria: "🇦🇹",
+  Belgium: "🇧🇪",
+  Brazil: "🇧🇷",
+  Cameroon: "🇨🇲",
+  Canada: "🇨🇦",
+  "Costa Rica": "🇨🇷",
+  Croatia: "🇭🇷",
+  Denmark: "🇩🇰",
+  Ecuador: "🇪🇨",
+  England: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+  France: "🇫🇷",
+  Germany: "🇩🇪",
+  Ghana: "🇬🇭",
+  Iran: "🇮🇷",
+  Italy: "🇮🇹",
+  Japan: "🇯🇵",
+  Jordan: "🇯🇴",
+  Mexico: "🇲🇽",
+  Morocco: "🇲🇦",
+  Netherlands: "🇳🇱",
+  Poland: "🇵🇱",
+  Portugal: "🇵🇹",
+  Qatar: "🇶🇦",
+  "Saudi Arabia": "🇸🇦",
+  Senegal: "🇸🇳",
+  Serbia: "🇷🇸",
+  "South Korea": "🇰🇷",
+  Spain: "🇪🇸",
+  Switzerland: "🇨🇭",
+  Tunisia: "🇹🇳",
+  "United States": "🇺🇸",
+  Uruguay: "🇺🇾",
+  Wales: "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+};
+
+/** Emoji flag for a country name, or "" if unknown. */
+export function flagFor(name: string): string {
+  return FLAGS[name.trim()] ?? "";
 }

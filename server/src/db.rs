@@ -1,6 +1,8 @@
+use std::collections::HashMap;
 use std::path::Path;
 
 use rusqlite::Connection;
+use serde::Deserialize;
 
 use crate::{fixture, models::Tournament};
 
@@ -29,7 +31,7 @@ pub const WORLD_CUPS: &[(i32, &str, Option<&str>)] = &[
     (2014, "Brazil", Some("Germany")),
     (2018, "Russia", Some("France")),
     (2022, "Qatar", Some("Argentina")),
-    (2026, "United States / Mexico / Canada", None),
+    (2026, "United States / Mexico / Canada", Some("Spain")),
 ];
 
 /// Tournament structure per era — the format is fully data-driven.
@@ -229,7 +231,8 @@ fn schema(conn: &Connection) -> rusqlite::Result<()> {
             winner TEXT,
             start_date TEXT,
             end_date TEXT,
-            shirt_numbers INTEGER NOT NULL DEFAULT 1
+            shirt_numbers INTEGER NOT NULL DEFAULT 1,
+            logo TEXT
         );
 
         CREATE TABLE IF NOT EXISTS sim_runs (
@@ -292,7 +295,8 @@ fn schema(conn: &Connection) -> rusqlite::Result<()> {
             tackling INTEGER, vision INTEGER, positioning INTEGER,
             composure INTEGER,
             reflexes INTEGER, handling INTEGER, kicking INTEGER, aerial INTEGER,
-            decisions INTEGER, aggression INTEGER, concentration INTEGER, leadership INTEGER
+            decisions INTEGER, aggression INTEGER, concentration INTEGER, leadership INTEGER,
+            photo_url TEXT
         );
 
         /* player <-> team membership is tournament-scoped: a player can
@@ -303,6 +307,7 @@ fn schema(conn: &Connection) -> rusqlite::Result<()> {
             tournament_id INTEGER NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,
             team_id INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
             position TEXT NOT NULL DEFAULT 'CM',
+            positions TEXT,
             shirt_number INTEGER,
             UNIQUE (player_id, tournament_id)
         );
@@ -362,6 +367,15 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
     if !has("tournaments", "shirt_numbers")? {
         conn.execute("ALTER TABLE tournaments ADD COLUMN shirt_numbers INTEGER NOT NULL DEFAULT 1", [])?;
     }
+    if !has("tournaments", "logo")? {
+        conn.execute("ALTER TABLE tournaments ADD COLUMN logo TEXT", [])?;
+    }
+    if !has("players", "photo_url")? {
+        conn.execute("ALTER TABLE players ADD COLUMN photo_url TEXT", [])?;
+    }
+    if !has("player_callups", "positions")? {
+        conn.execute("ALTER TABLE player_callups ADD COLUMN positions TEXT", [])?;
+    }
     // Historical editions didn't (regularly) use squad numbers.
     conn.execute(
         "UPDATE tournaments SET shirt_numbers = 0 WHERE year < 1954 AND shirt_numbers = 1",
@@ -379,6 +393,229 @@ pub fn open() -> rusqlite::Result<Connection> {
     migrate(&conn)?;
     seed(&conn)?;
     Ok(conn)
+}
+
+// ---------------------------------------------------------------------------
+// Real 2026 World Cup seed (from Wikipedia, see scripts/scrape_wc2026.py).
+// When data/seed/2026.json is present it replaces the demo roster with the
+// real 48 qualifiers, their 26-man squads and the real group fixtures.
+// ---------------------------------------------------------------------------
+
+#[derive(Deserialize)]
+struct SeedPlayer {
+    name: String,
+    positions: Vec<String>,
+    shirt: Option<i32>,
+    #[serde(default)]
+    photo: Option<String>,
+    // Optional 18 values in the exact attribute order used by sim.rs and the
+    // INSERT below (PACE..LEADERSHIP). When absent, attrs_for() derives them
+    // deterministically from the team rating + name; when present they win.
+    #[serde(default)]
+    attrs: Option<Vec<i32>>,
+}
+
+#[derive(Deserialize)]
+struct SeedTeam {
+    name: String,
+    code: String,
+    flag: String,
+    rating: i32,
+    group: String,
+}
+
+#[derive(Deserialize)]
+struct SeedFixture {
+    home: String,
+    away: String,
+    matchday: i32,
+    kickoff: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct SeedFile {
+    teams: Vec<SeedTeam>,
+    squads: HashMap<String, Vec<SeedPlayer>>,
+    fixtures: Vec<SeedFixture>,
+}
+
+/// Position → family bucket (GK / DF / MF / FW) used for rating deltas and
+/// attribute templates.
+pub(crate) fn family_of(pos: &str) -> i32 {
+    match pos {
+        "GK" => 0,
+        "DF" | "CB" | "LB" | "RB" => 1,
+        "MF" | "CM" | "CDM" | "CAM" | "LM" | "RM" => 2,
+        _ => 3,
+    }
+}
+
+/// Spreads a team rating across the 18 attributes for players without explicit
+/// EA ratings, so fallback players read as solid-but-unspectacular (roughly the
+/// 60s-70s band) instead of outshining EA-rated stars. The rating is squashed
+/// into a modest quality band and then nudged per position family: forwards get
+/// pace/shooting/dribbling, defenders tackling/aerial, GKs the shot-stopping
+/// group, midfielders passing/vision.
+pub(crate) fn attrs_for(rating: i32, name_len: usize, family: i32) -> [i32; 18] {
+    let r = rating.clamp(35, 99);
+    let q = 40 + (r - 40) * 45 / 100;
+    let nl = name_len as i32;
+    let clamp = |v: i32| v.clamp(30, 99);
+    let j = |v: i32| clamp(v + q + nl % 5 - 2);
+    match family {
+        // GK: keepers hang on their shot-stopping + composure/aerial
+        0 => [
+            j(0), j(2), j(5), j(-8), j(-4), j(-8), j(-6), j(-3), j(-2), j(3),
+            j(11), j(13), j(11), j(7), j(1), j(0), j(3), j(2),
+        ],
+        // DF: defence-first, physical
+        1 => [
+            j(1), j(5), j(8), j(-2), j(0), j(-4), j(10), j(-1), j(3), j(3),
+            j(2), j(-8), j(-4), j(9), j(1), j(2), j(3), j(1),
+        ],
+        // MF: engine room
+        2 => [
+            j(2), j(5), j(3), j(5), j(8), j(1), j(2), j(7), j(3), j(3),
+            j(2), j(-8), j(-2), j(0), j(1), j(0), j(1), j(1),
+        ],
+        // FW: attackers lean into pace, finishing, dribbling
+        _ => [
+            j(11), j(2), j(1), j(9), j(3), j(9), j(-3), j(3), j(9), j(3),
+            j(2), j(-8), j(-4), j(4), j(1), j(0), j(1), j(2),
+        ],
+    }
+}
+
+fn upsert_team(
+    conn: &Connection,
+    name: &str,
+    code: &str,
+    flag: &str,
+    rating: i32,
+) -> rusqlite::Result<i64> {
+    match team_by_name(conn, name)? {
+        Some(id) => {
+            conn.execute(
+                "UPDATE teams SET code = ?2, flag = ?3, rating = ?4 WHERE id = ?1",
+                rusqlite::params![id, code, flag, rating],
+            )?;
+            Ok(id)
+        }
+        None => insert_team(conn, name, Some(code), Some(flag), rating, None),
+    }
+}
+
+/// Real 2026 data when the JSON seed exists, otherwise the 32-team demo.
+fn seed_2026(conn: &Connection) -> rusqlite::Result<()> {
+    let dir = std::env::var("WCS_DATA_DIR").unwrap_or_else(|_| "data".to_string());
+    let path = Path::new(&dir).join("seed").join("2026.json");
+    let text = match std::fs::read_to_string(&path) {
+        Ok(t) => t,
+        Err(_) => return seed_2026_demo(conn),
+    };
+    let file: SeedFile = serde_json::from_str(&text)
+        .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+
+    let tournament_id: i64 = conn.query_row(
+        "SELECT id FROM tournaments WHERE year = ?1",
+        [2026],
+        |r| r.get(0),
+    )?;
+
+    // Teams + group assignments.
+    let mut by_code: HashMap<String, i64> = HashMap::new();
+    let mut rating_by_code: HashMap<String, i32> = HashMap::new();
+    for t in &file.teams {
+        let tid = upsert_team(conn, &t.name, &t.code, &t.flag, t.rating)?;
+        by_code.insert(t.code.clone(), tid);
+        rating_by_code.insert(t.code.clone(), t.rating);
+        conn.execute(
+            "INSERT OR IGNORE INTO tournament_teams (tournament_id, team_id) VALUES (?1, ?2)",
+            rusqlite::params![tournament_id, tid],
+        )?;
+        conn.execute(
+            "INSERT OR IGNORE INTO tournament_groups (tournament_id, group_name, team_id)
+             VALUES (?1, ?2, ?3)",
+            rusqlite::params![tournament_id, t.group, tid],
+        )?;
+    }
+
+    // Real 26-man squads.
+    // Repeated boot seeds must not accumulate duplicate squad rows, so first
+    // drop the call-ups seeded for this edition and the players only they use.
+    let prev: Vec<i64> = {
+        let mut st = conn.prepare(
+            "SELECT player_id FROM player_callups WHERE tournament_id = ?1",
+        )?;
+        let rows = st.query_map([tournament_id], |r| r.get::<_, i64>(0))?;
+        rows.collect::<rusqlite::Result<Vec<_>>>()?
+    };
+    conn.execute(
+        "DELETE FROM player_callups WHERE tournament_id = ?1",
+        rusqlite::params![tournament_id],
+    )?;
+    for pid in prev {
+        conn.execute("DELETE FROM players WHERE id = ?1", [pid])?;
+    }
+    for (code, players) in &file.squads {
+        let Some(&team_id) = by_code.get(code) else { continue };
+        let base = rating_by_code.get(code).copied().unwrap_or(70);
+        for p in players {
+            let pos = p.positions.first().cloned().unwrap_or_else(|| "CM".to_string());
+            let delta = match family_of(&pos) {
+                0 => 3,
+                1 => -2,
+                2 => 0,
+                _ => 1,
+            };
+            let attrs: [i32; 18] = match &p.attrs {
+                Some(v) if v.len() == 18 => {
+                    let mut out = [0; 18];
+                    out.copy_from_slice(v);
+                    out
+                }
+                _ => attrs_for(base + delta, p.name.len(), family_of(&pos)),
+            };
+            conn.execute(
+                "INSERT INTO players (name, pace, stamina, strength, dribbling, passing, shooting,
+                                      tackling, vision, positioning, composure, reflexes, handling,
+                                      kicking, aerial, decisions, aggression, concentration, leadership, photo_url)
+                 VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20)",
+                rusqlite::params![
+                    p.name, attrs[0], attrs[1], attrs[2], attrs[3], attrs[4], attrs[5],
+                    attrs[6], attrs[7], attrs[8], attrs[9], attrs[10], attrs[11], attrs[12],
+                    attrs[13], attrs[14], attrs[15], attrs[16], attrs[17], p.photo
+                ],
+            )?;
+            let player_id = conn.last_insert_rowid();
+            let positions_str = p.positions.join(",");
+            conn.execute(
+                "INSERT OR IGNORE INTO player_callups (player_id, tournament_id, team_id, position, positions, shirt_number)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                rusqlite::params![player_id, tournament_id, team_id, pos, positions_str, p.shirt],
+            )?;
+        }
+    }
+
+    // Real group fixtures (with kickoff). Skips when already present.
+    let existing: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM matches WHERE tournament_id = ?1 AND stage = 'GROUP'",
+        [tournament_id],
+        |r| r.get(0),
+    )?;
+    if existing == 0 {
+        for f in &file.fixtures {
+            let Some(&home) = by_code.get(&f.home) else { continue };
+            let Some(&away) = by_code.get(&f.away) else { continue };
+            conn.execute(
+                "INSERT INTO matches (tournament_id, stage, round_num, matchday, home_team_id,
+                                      away_team_id, kickoff, status)
+                 VALUES (?1, 'GROUP', 0, ?2, ?3, ?4, ?5, 'scheduled')",
+                rusqlite::params![tournament_id, f.matchday, home, away, f.kickoff],
+            )?;
+        }
+    }
+    Ok(())
 }
 
 /// Reuses the 2022 demo rosters to populate a 12-group 2026 tournament (the
@@ -437,7 +674,7 @@ fn seed_2026_demo(conn: &Connection) -> rusqlite::Result<()> {
 fn seed(conn: &Connection) -> rusqlite::Result<()> {
     seed_tournaments(conn)?;
     seed_2022_demo(conn)?;
-    seed_2026_demo(conn)?;
+    seed_2026(conn)?;
     Ok(())
 }
 
@@ -543,7 +780,7 @@ pub fn insert_team(
 
 pub fn tournament_by_year(conn: &Connection, year: i32) -> rusqlite::Result<Option<Tournament>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers FROM tournaments WHERE year = ?1",
+        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo FROM tournaments WHERE year = ?1",
     )?;
     let mut rows = stmt.query_map([year], |r| {
         Ok(Tournament {
@@ -555,6 +792,8 @@ pub fn tournament_by_year(conn: &Connection, year: i32) -> rusqlite::Result<Opti
             start_date: r.get(5)?,
             end_date: r.get(6)?,
             shirt_numbers: r.get::<_, i32>(7)? != 0,
+            logo: r.get(8)?,
+            ready: false,
         })
     })?;
     Ok(rows.next().map(|r| r).transpose()?)

@@ -16,6 +16,8 @@ pub struct SquadPlayer {
     pub id: i64,
     pub name: String,
     pub position: String,
+    pub positions: Vec<String>,
+    pub photo_url: Option<String>,
     pub shirt_number: Option<i32>,
     pub overall: f64,
 }
@@ -62,7 +64,7 @@ fn read_callups(
     team_id: i64,
 ) -> rusqlite::Result<Vec<SquadPlayer>> {
     let mut stmt = conn.prepare(
-        "SELECT p.id, p.name, c.position, c.shirt_number,
+        "SELECT p.id, p.name, p.photo_url, c.position, c.positions, c.shirt_number,
                 p.pace, p.stamina, p.strength, p.dribbling, p.passing,
                 p.shooting, p.tackling, p.vision, p.positioning, p.composure,
                 p.reflexes, p.handling, p.kicking, p.aerial,
@@ -74,8 +76,6 @@ fn read_callups(
     )?;
     let rows = stmt.query_map(params![tournament_id, team_id], |r| {
         let attrs = [
-            r.get::<_, Option<i32>>(4)?,
-            r.get::<_, Option<i32>>(5)?,
             r.get::<_, Option<i32>>(6)?,
             r.get::<_, Option<i32>>(7)?,
             r.get::<_, Option<i32>>(8)?,
@@ -92,18 +92,39 @@ fn read_callups(
             r.get::<_, Option<i32>>(19)?,
             r.get::<_, Option<i32>>(20)?,
             r.get::<_, Option<i32>>(21)?,
+            r.get::<_, Option<i32>>(22)?,
+            r.get::<_, Option<i32>>(23)?,
         ];
-        let position: String = r.get(2)?;
+        let position: String = r.get(3)?;
+        let positions: Vec<String> = r
+            .get::<_, Option<String>>(4)?
+            .map(|s| parse_positions(&s))
+            .unwrap_or_else(|| vec![position.clone()]);
         let overall = sim::composite_rating(&position, &attrs);
         Ok(SquadPlayer {
             id: r.get(0)?,
             name: r.get(1)?,
+            photo_url: r.get(2)?,
             position,
-            shirt_number: r.get(3)?,
+            positions,
+            shirt_number: r.get(5)?,
             overall,
         })
     })?;
     rows.collect()
+}
+
+/// Splits a stored positions string ("CB,RB" or "CB RB") into a list of
+/// positions, trimming empties. Falls back to a single placeholder position.
+pub fn parse_positions(s: &str) -> Vec<String> {
+    let mut seen = Vec::new();
+    for part in s.split([',', ' ', '/']) {
+        let p = part.trim().to_uppercase();
+        if !p.is_empty() && !seen.contains(&p) {
+            seen.push(p);
+        }
+    }
+    seen
 }
 
 /// Deterministic fictional squad for an edition/team with no imported players.
@@ -144,6 +165,8 @@ fn generate(
                 id: -((team_id as i64) * 1000 + idx as i64 + 1),
                 name,
                 position: pos.to_string(),
+                positions: vec![pos.to_string()],
+                photo_url: None,
                 shirt_number: number,
                 overall,
             });

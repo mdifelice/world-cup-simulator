@@ -33,7 +33,7 @@ export default function LineupSetup({
   const [error, setError] = useState<string | null>(null);
   const [formation, setFormation] = useState<string>(initial?.formation ?? "4-4-2");
   const [strategy, setStrategy] = useState<Strategy>(initial?.strategy ?? "normal");
-  const [selection, setSelection] = useState<Record<string, number>>(
+  const [selection, setSelection] = useState<Record<string, number[]>>(
     initial?.starting ?? {},
   );
 
@@ -55,7 +55,7 @@ export default function LineupSetup({
   // When the formation/strategy changes, drop picks whose slot no longer exists.
   useEffect(() => {
     setSelection((sel) => {
-      const next: Record<string, number> = {};
+      const next: Record<string, number[]> = {};
       for (const s of slotsFor(formation, strategy)) {
         if (sel[s] != null) next[s] = sel[s];
       }
@@ -63,7 +63,7 @@ export default function LineupSetup({
     });
   }, [formation, strategy]);
 
-  const usedBySlot = (slot: string) => selection[slot] != null;
+  const usedBySlot = (slot: string) => (selection[slot]?.length ?? 0) > 0;
 
   const sortedForSlot = (slot: string): Player[] =>
     (squad ?? [])
@@ -75,7 +75,7 @@ export default function LineupSetup({
       );
 
   const pickAuto = () => {
-    const next: Record<string, number> = {};
+    const next: Record<string, number[]> = {};
     const used = new Set<number>();
     for (const slot of slots) {
       let best: Player | null = null;
@@ -89,7 +89,7 @@ export default function LineupSetup({
         }
       }
       if (best) {
-        next[slot] = best.id;
+        next[slot] = [best.id];
         used.add(best.id);
       }
     }
@@ -97,7 +97,7 @@ export default function LineupSetup({
   };
 
   const filled = squad
-    ? slots.every((s) => selection[s] != null) && new Set(Object.values(selection)).size === slots.length
+    ? slots.every((s) => (selection[s]?.length ?? 0) > 0) && new Set(Object.values(selection).flat()).size === slots.length
     : false;
 
   const assign = (slot: string, playerId: string) => {
@@ -112,19 +112,19 @@ export default function LineupSetup({
     }
     // A player can only appear once: remove them from any other slot.
     setSelection((sel) => {
-      const next: Record<string, number> = {};
-      for (const [s, pid] of Object.entries(sel)) {
-        if (pid === id) continue;
-        next[s] = pid;
+      const next: Record<string, number[]> = {};
+      for (const [s, pids] of Object.entries(sel)) {
+        if (pids.includes(id)) continue;
+        next[s] = pids;
       }
-      next[slot] = id;
+      next[slot] = [id];
       return next;
     });
   };
 
   const confirm = () => {
     if (!filled) return;
-    onConfirm({ formation, strategy, starting: { ...selection } });
+    onConfirm({ formation, strategy, starting: selection });
   };
 
   return (
@@ -182,7 +182,7 @@ export default function LineupSetup({
             <h2 className="pos-title">{t("lineup.slots")}</h2>
             <div className="slot-list">
               {slots.map((slot) => {
-                const chosen = selection[slot];
+                const chosen = selection[slot]?.[0];
                 const chosenPlayer = chosen != null ? squad.find((p) => p.id === chosen) : undefined;
                 return (
                   <div key={slot} className={"slot-row" + (usedBySlot(slot) ? " set" : "")}>

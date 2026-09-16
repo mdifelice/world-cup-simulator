@@ -36,7 +36,6 @@ A football World Cup simulation game.
 | ------------------ | ------------------------------------------------------------------ |
 | `client/`          | React + TypeScript (Vite) front end                                |
 | `server/`          | Rust (axum + SQLite) REST API                                      |
-| `scrapper/`        | Rust side-tool that scrapes teams/squads from the Sofascore API    |
 
 ## Data model
 
@@ -102,25 +101,10 @@ npm install
 npm run dev         # serves http://localhost:5173
 ```
 
-### 3. Scraper (`scrapper/`)
+### 3. Importing real squads
 
-Fetches real squads/teams for an edition from Sofascore's public API and
-outputs JSON ready to `POST` to the backend.
-
-```sh
-cd scrapper
-cargo run -- --year 2022              # auto-detects the Sofascore season
-cargo run -- --year 2022 --fetch-fixtures --out output
-cargo run -- --help
-```
-
-> **Note on Sofascore access.** The public API rejects anonymous requests in
-> most regions (`403 Forbidden`). Pass a cookie from a logged-in browser
-> session to bypass it: `cargo run -- --year 2022 --cookie "sessionid=…"`.
-> The API base is configurable via `--base https://api.sofascore.com/api/v1`.
-
-The written file uses the import schema (teams/players with `rating`, which the
-backend spreads into the 18 attributes). Upload with a single call — sign in
+The import schema uses teams/players with a `rating`, which the backend
+spreads into the 18 attributes. Upload with a single call — sign in
 with Google first, then use the token from the URL (`#token=…`) or the browser:
 
 ```sh
@@ -186,9 +170,5 @@ When the caller sends a valid Bearer token the payload is archived in
 
 ## Registering a real World Cup fixture & squads
 
-The real fixtures from 1930→2026 are large. Two ways to populate the data:
-
-1. **Scraper** — for modern editions, run `scrapper` to pull squads from
-   Sofascore and feed the output to the API.
-2. **Seed JSON** — POST a fixture payload (see `scrapper/output` examples and
-   the API docs in `server/src`).
+The real fixtures from 1930→2026 are large. Populate the data by POSTing a
+fixture payload (see the API docs in `server/src`).

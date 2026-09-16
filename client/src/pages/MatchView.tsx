@@ -9,7 +9,10 @@ interface Props {
   onOpenPrev: () => void;
 }
 
-const GOLD = "#ffd75e";
+const GOLD = "#d8a418";
+const INK = "rgba(27,37,48,0.75)";
+const INK_SOFT = "rgba(27,37,48,0.45)";
+const INK_FAINT = "rgba(27,37,48,0.15)";
 
 export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }: Props) {
   const { t, stage } = useI18n();
@@ -40,7 +43,7 @@ export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }:
   const goalMarks = m.goals.map((g, i) => {
     const x = (g.minute / lengthLabel) * W;
     const ownGoalColor =
-      g.team_id === focusTeamId ? GOLD : "rgba(255,255,255,0.65)";
+      g.team_id === focusTeamId ? GOLD : INK_SOFT;
     const note = g.extra_time ? ` ${t("match.etShort")}` : "";
     return { x, g, ownGoalColor, note, key: i };
   });
@@ -49,8 +52,8 @@ export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }:
     const x = (min / lengthLabel) * W;
     return (
       <g key={min}>
-        <line x1={x} y1={0} x2={x} y2={H} stroke="rgba(255,255,255,0.18)" strokeWidth="1" />
-        <text x={x + 3} y={H - 2} fill="rgba(255,255,255,0.45)" fontSize="11">
+        <line x1={x} y1={0} x2={x} y2={H} stroke={INK_FAINT} strokeWidth="1" />
+        <text x={x + 3} y={H - 2} fill={INK_SOFT} fontSize="11">
           {label}
         </text>
       </g>
@@ -123,8 +126,8 @@ export default function MatchView({ match: m, focusTeamId, onBack, onOpenPrev }:
               isFocus && !isAwayFocusMomentum && g.team_id !== focusTeamId ? null : (
                 <g key={key}>
                   <line x1={x} y1={12} x2={x} y2={H} stroke={ownGoalColor} strokeWidth="1" strokeDasharray="3 3" opacity="0.5" />
-                  <circle cx={x} cy={14} r={5} fill={ownGoalColor} stroke="#222" strokeWidth="1" />
-                  <text x={x + 8} y={16} fill="rgba(255,255,255,0.85)" fontSize="11">
+                  <circle cx={x} cy={14} r={5} fill={ownGoalColor} stroke="rgba(255,255,255,0.9)" strokeWidth="1" />
+                  <text x={x + 8} y={16} fill={INK} fontSize="11">
                     {g.minute}
                     {note}
                   </text>

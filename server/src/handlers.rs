@@ -40,6 +40,7 @@ pub struct TournamentDetail {
     start_date: Option<String>,
     end_date: Option<String>,
     shirt_numbers: bool,
+    logo: Option<String>,
     phases: Vec<Phase>,
 }
 
@@ -54,6 +55,7 @@ impl TournamentDetail {
             start_date: t.start_date,
             end_date: t.end_date,
             shirt_numbers: t.shirt_numbers,
+            logo: t.logo,
             phases,
         }
     }
@@ -69,6 +71,8 @@ fn map_tournament(r: &rusqlite::Row) -> rusqlite::Result<Tournament> {
         start_date: r.get(5)?,
         end_date: r.get(6)?,
         shirt_numbers: r.get::<_, i32>(7)? != 0,
+        logo: r.get(8)?,
+        ready: false,
     })
 }
 
@@ -95,9 +99,12 @@ fn load_phases(conn: &rusqlite::Connection, id: i64) -> rusqlite::Result<Vec<Pha
 pub async fn list_tournaments(State(db): State<Db>) -> ApiResult<Json<Vec<Tournament>>> {
     let conn = db.lock().unwrap();
     let mut stmt = conn.prepare(
-        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers FROM tournaments ORDER BY year",
+        "SELECT t.id, t.name, t.year, t.host, t.winner, t.start_date, t.end_date, t.shirt_numbers, t.logo,
+                (SELECT COUNT(*) FROM tournament_teams WHERE tournament_id = t.id) > 0
+            AND (SELECT COUNT(*) FROM matches WHERE tournament_id = t.id) > 0 AS ready
+         FROM tournaments t ORDER BY t.year DESC",
     )?;
-    let rows = stmt.query_map([], map_tournament)?;
+    let rows = stmt.query_map([], map_tournament_ready)?;
     let mut out = Vec::new();
     for r in rows {
         out.push(r?);
@@ -105,11 +112,26 @@ pub async fn list_tournaments(State(db): State<Db>) -> ApiResult<Json<Vec<Tourna
     Ok(Json(out))
 }
 
+fn map_tournament_ready(r: &rusqlite::Row) -> rusqlite::Result<Tournament> {
+    Ok(Tournament {
+        id: r.get(0)?,
+        name: r.get(1)?,
+        year: r.get(2)?,
+        host: r.get(3)?,
+        winner: r.get(4)?,
+        start_date: r.get(5)?,
+        end_date: r.get(6)?,
+        shirt_numbers: r.get(7)?,
+        logo: r.get(8)?,
+        ready: r.get(9)?,
+    })
+}
+
 pub async fn get_tournament(State(db): State<Db>, Path(id): Path<i64>) -> ApiResult<Json<TournamentDetail>> {
     let conn = db.lock().unwrap();
     let t = conn
         .query_row(
-            "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers FROM tournaments WHERE id = ?1",
+            "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo FROM tournaments WHERE id = ?1",
             [id],
             map_tournament,
         )
@@ -126,8 +148,8 @@ pub async fn create_tournament(
 ) -> ApiResult<(StatusCode, Json<Tournament>)> {
     let conn = db.lock().unwrap();
     let res = conn.execute(
-        "INSERT INTO tournaments (name, year, host, winner, start_date, end_date, shirt_numbers) VALUES (?1,?2,?3,?4,?5,?6,?7)",
-        params![input.name, input.year, input.host, input.winner, input.start_date, input.end_date, input.shirt_numbers],
+        "INSERT INTO tournaments (name, year, host, winner, start_date, end_date, shirt_numbers, logo) VALUES (?1,?2,?3,?4,?5,?6,?7,?8)",
+        params![input.name, input.year, input.host, input.winner, input.start_date, input.end_date, input.shirt_numbers, input.logo],
     );
     match res {
         Ok(_) => {}
@@ -138,7 +160,7 @@ pub async fn create_tournament(
     }
     let id = conn.last_insert_rowid();
     let t: Tournament = conn.query_row(
-        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers FROM tournaments WHERE id = ?1",
+        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo FROM tournaments WHERE id = ?1",
         [id],
         map_tournament,
     )?;
@@ -419,7 +441,8 @@ pub async fn list_players(
                         p.pace, p.stamina, p.strength, p.dribbling, p.passing,
                         p.shooting, p.tackling, p.vision, p.positioning, p.composure,
                         p.reflexes, p.handling, p.kicking, p.aerial,
-                        p.decisions, p.aggression, p.concentration, p.leadership
+                        p.decisions, p.aggression, p.concentration, p.leadership,
+                        c.positions, p.photo_url
                  FROM player_callups c
                  JOIN players p ON p.id = c.player_id
                  WHERE c.tournament_id = ?1 AND c.team_id = ?2
@@ -446,7 +469,9 @@ pub async fn list_players(
                         p.pace, p.stamina, p.strength, p.dribbling, p.passing,
                         p.shooting, p.tackling, p.vision, p.positioning, p.composure,
                         p.reflexes, p.handling, p.kicking, p.aerial,
-                        p.decisions, p.aggression, p.concentration, p.leadership
+                        p.decisions, p.aggression, p.concentration, p.leadership,
+                        (SELECT c.positions FROM player_callups c WHERE c.player_id = p.id ORDER BY c.id DESC LIMIT 1),
+                        p.photo_url
                  FROM players p
                  JOIN player_callups c ON c.player_id = p.id
                  WHERE c.team_id = ?1
@@ -518,28 +543,9 @@ pub async fn simulate_tournament(
 
 fn expand_attrs(p: &CreatePlayer) -> [i32; 18] {
     if let Some(rating) = p.rating {
-        // scraper back-compat: spread a scalar rating across the attributes
-        let r = rating.clamp(35, 99);
-        [
-            (r + p.name.len() as i32 % 9 - 4).clamp(30, 99),
-            (r + p.name.len() as i32 % 7 - 3).clamp(30, 99),
-            (r + 2).clamp(30, 99),
-            (r + p.name.len() as i32 % 11 - 5).clamp(30, 99),
-            r,
-            if p.position == "GK" { 40 } else { (r + 1).clamp(30, 99) },
-            if p.position == "GK" { 40 } else { (r - 1).clamp(30, 99) },
-            (r + 1).clamp(30, 99),
-            (r - 2).clamp(30, 99),
-            (r + 2).clamp(30, 99),
-            (r + 2).clamp(30, 99),
-            (r + 1).clamp(30, 99),
-            (r + 1).clamp(30, 99),
-            r,
-            (r - 1).clamp(30, 99),
-            (r - 3).clamp(30, 99),
-            (r + 2).clamp(30, 99),
-            (r + 2).clamp(30, 99),
-        ]
+        // scraper back-compat: spread a scalar rating using the same
+        // position-aware, band-squashed template as the seed fallback
+        crate::db::attrs_for(rating, p.name.len(), crate::db::family_of(&p.position))
     } else {
         [
             p.pace.clamp(1, 99),
@@ -572,8 +578,8 @@ fn insert_player(
 ) -> rusqlite::Result<()> {
     let attrs = expand_attrs(p);
     conn.execute(
-        "INSERT INTO players (name, pace, stamina, strength, dribbling, passing, shooting, tackling, vision, positioning, composure, reflexes, handling, kicking, aerial, decisions, aggression, concentration, leadership)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19)",
+        "INSERT INTO players (name, pace, stamina, strength, dribbling, passing, shooting, tackling, vision, positioning, composure, reflexes, handling, kicking, aerial, decisions, aggression, concentration, leadership, photo_url)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,?13,?14,?15,?16,?17,?18,?19,?20)",
         rusqlite::params![
             p.name,
             attrs[0],
@@ -594,13 +600,28 @@ fn insert_player(
             attrs[15],
             attrs[16],
             attrs[17],
+            p.photo_url,
         ],
     )?;
     let player_id = conn.last_insert_rowid();
+    let mut positions: Vec<String> = p
+        .positions
+        .iter()
+        .map(|s| s.trim().to_uppercase())
+        .filter(|s| !s.is_empty())
+        .collect();
+    positions.insert(0, p.position.to_uppercase());
+    let mut dedup: Vec<String> = Vec::new();
+    for pos in positions {
+        if !dedup.contains(&pos) {
+            dedup.push(pos);
+        }
+    }
+    let positions_str = dedup.join(",");
     conn.execute(
-        "INSERT OR IGNORE INTO player_callups (player_id, tournament_id, team_id, position, shirt_number)
-         VALUES (?1,?2,?3,?4,?5)",
-        params![player_id, tournament_id, team_id, p.position, p.shirt_number],
+        "INSERT OR IGNORE INTO player_callups (player_id, tournament_id, team_id, position, positions, shirt_number)
+         VALUES (?1,?2,?3,?4,?5,?6)",
+        params![player_id, tournament_id, team_id, p.position, positions_str, p.shirt_number],
     )?;
     Ok(())
 }
@@ -643,12 +664,19 @@ fn map_player(r: &rusqlite::Row) -> rusqlite::Result<Player> {
     ];
     let position: String = r.get(4)?;
     let overall = crate::sim::composite_rating(&position, &attrs);
+    let rating = crate::sim::star_rating(&position, &attrs);
+    let positions: Vec<String> = r
+        .get::<_, Option<String>>(24)?
+        .map(|s| crate::names::parse_positions(&s))
+        .unwrap_or_else(|| vec![position.clone()]);
     Ok(Player {
         id: r.get(0)?,
         name: r.get(1)?,
         dob: r.get(2)?,
         nationality: r.get(3)?,
         position,
+        positions,
+        photo_url: r.get(25)?,
         shirt_number: r.get(5)?,
         pace: attrs[0],
         stamina: attrs[1],
@@ -669,6 +697,7 @@ fn map_player(r: &rusqlite::Row) -> rusqlite::Result<Player> {
         concentration: attrs[16],
         leadership: attrs[17],
         overall,
+        rating,
     })
 }
 
@@ -682,6 +711,8 @@ fn generated_player(s: crate::names::SquadPlayer) -> Player {
         dob: None,
         nationality: None,
         position: s.position,
+        positions: s.positions,
+        photo_url: s.photo_url,
         shirt_number: s.shirt_number,
         pace: None,
         stamina: None,
@@ -702,6 +733,7 @@ fn generated_player(s: crate::names::SquadPlayer) -> Player {
         concentration: None,
         leadership: None,
         overall: s.overall,
+        rating: s.overall,
     }
 }
 

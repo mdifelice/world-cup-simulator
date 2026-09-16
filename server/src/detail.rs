@@ -31,10 +31,11 @@ pub struct LineupConfig {
     pub formation: String,
     #[serde(default = "default_strategy")]
     pub strategy: String,
-    /// Slot -> player id. Missing slots are auto-filled; duplicate players are
-    /// ignored (first mention wins).
+    /// Slot -> player ids, one per occurrence in the formation's slot order
+    /// (two "DF" slots take two ids). Missing slots are auto-filled; an id
+    /// already fielded is skipped.
     #[serde(default)]
-    pub starting: HashMap<String, i64>,
+    pub starting: HashMap<String, Vec<i64>>,
 }
 
 fn default_strategy() -> String {
@@ -74,16 +75,28 @@ fn formation_slots(formation: &str) -> Option<&'static [&'static str]> {
         "4-4-2" => Some(&["GK", "RWB", "DF", "DF", "LWB", "RMF", "DMF", "LMF", "AMF", "FW", "FW"]),
         "4-3-3" => Some(&["GK", "RWB", "DF", "DF", "LWB", "DMF", "DMF", "AMF", "RFW", "FW", "LFW"]),
         "3-5-2" => Some(&["GK", "DF", "DF", "DF", "RMF", "DMF", "DMF", "LMF", "AMF", "FW", "FW"]),
-        "3-4-3" => Some(&["GK", "DF", "DF", "DF", "RMF", "DMF", "DMF", "AMF", "RFW", "FW", "LFW"]),
+        "3-4-3" => Some(&["GK", "DF", "DF", "DF", "RMF", "DMF", "LMF", "AMF", "RFW", "FW", "LFW"]),
         _ => None,
     }
 }
 
-/// Slot list after applying the strategy: defensive swaps the AMF for an
-/// extra DMF; attacking swaps the last DMF for an extra AMF.
+/// Slot list after applying the strategy. In a 3-4-3 the four-man midfield
+/// reshapes completely: defensive → 3 DMF + 1 AMF, normal → 1 DMF + 1 RMF +
+/// 1 LMF + 1 AMF, attacking → 1 DMF + 3 AMF. Other formations keep the
+/// generic swap (defensive: AMF → DMF; attacking: last DMF → AMF).
 fn effective_slots(formation: &str, strategy: &str) -> Vec<&'static str> {
     let base = formation_slots(formation).unwrap_or(four_four_two()).to_vec();
     let mut slots = base;
+    if formation == "3-4-3" {
+        // Slots 4..8 are the midfield line after GK + three DF.
+        let mid: &[&'static str] = match strategy {
+            "defensive" => &["DMF", "DMF", "DMF", "AMF"],
+            "attacking" => &["DMF", "AMF", "AMF", "AMF"],
+            _ => &["RMF", "DMF", "LMF", "AMF"],
+        };
+        slots[4..8].copy_from_slice(mid);
+        return slots;
+    }
     if strategy == "defensive" {
         if let Some(i) = slots.iter().position(|s| *s == "AMF") {
             slots[i] = "DMF";
@@ -136,6 +149,70 @@ fn str_key(s: &str) -> u64 {
     })
 }
 
+/// `n` times the home team, then `n` times the away team (unshuffled).
+fn team_labels(home: i64, away: i64, home_n: i32, away_n: i32) -> Vec<i64> {
+    let mut v = Vec::with_capacity((home_n + away_n) as usize);
+    for _ in 0..home_n {
+        v.push(home);
+    }
+    for _ in 0..away_n {
+        v.push(away);
+    }
+    v
+}
+
+/// Fisher–Yates shuffle using the shared PRNG.
+fn shuffled(rng: &mut sim::Rng, mut v: Vec<i64>) -> Vec<i64> {
+    for i in (1..v.len()).rev() {
+        let j = (rng.unit() * (i + 1) as f64) as usize;
+        v.swap(i, j);
+    }
+    v
+}
+
+/// `n` minutes within `1..=max` that are — as much as an RNG can manage —
+/// far apart, so a match never clusters goals into one or two minutes.
+/// Two goals in the same (or an adjacent) minute is the exception, not the
+/// rule.
+fn spaced_minutes(rng: &mut sim::Rng, n: usize, max: i32) -> Vec<i32> {
+    const GAP: i32 = 8;
+    let mut mins: Vec<i32> = Vec::with_capacity(n);
+    let mut guard = 0;
+    while mins.len() < n {
+        let m = 1 + (rng.unit() * max as f64) as i32;
+        if mins.iter().all(|&x| (x - m).abs() >= GAP) {
+            mins.push(m);
+        }
+        guard += 1;
+        if guard > 3000 {
+            // Unlucky RNG path: sprinkle any missing minutes evenly (kept
+            // distinct from the ones already drawn).
+            mins.sort_unstable();
+            let mut fill = 0usize;
+            while mins.len() < n {
+                let m = ((fill + 1) * GAP as usize).min(max as usize) as i32;
+                if !mins.contains(&m) {
+                    mins.push(m);
+                } else {
+                    let mut m2 = m - 1;
+                    while m2 >= 1 && mins.contains(&m2) {
+                        m2 -= 1;
+                    }
+                    if m2 >= 1 {
+                        mins.push(m2);
+                    } else {
+                        mins.push(1);
+                    }
+                }
+                fill += 1;
+            }
+            break;
+        }
+    }
+    mins.sort_unstable();
+    mins
+}
+
 /// Runs the whole tournament and returns the replay payload.
 pub fn simulate_run(
     conn: &Connection,
@@ -186,6 +263,7 @@ pub fn simulate_run(
         groups: Vec::new(),
         perfs: HashMap::new(),
         team_names: HashMap::new(),
+        team_codes: HashMap::new(),
         squads: HashMap::new(),
         team_bonus: HashMap::new(),
         champion: None,
@@ -263,6 +341,7 @@ struct Engine<'a> {
     groups: Vec<GroupInfo>,
     perfs: HashMap<i64, Perf>,
     team_names: HashMap<i64, String>,
+    team_codes: HashMap<i64, String>,
     squads: HashMap<i64, Vec<SquadPlayer>>,
     team_bonus: HashMap<i64, f64>,
     champion: Option<String>,
@@ -321,17 +400,26 @@ impl<'a> Engine<'a> {
             self.group_meta_built = true;
         }
 
-        // One "day" per round across all groups (a real matchday).
+        // One "day" per round across all groups (a real matchday). Real
+        // imported fixtures are honoured when present, otherwise the
+        // round-robin schedule is generated.
+        let real = fixture::real_group_schedule(self.conn, self.tournament_id)?;
         let mut schedule: Vec<Vec<Vec<(i64, i64)>>> = Vec::new();
-        for teams in &self.current_groups {
-            let mut by_round: Vec<Vec<(i64, i64)>> = Vec::new();
-            for (h, a, round) in fixture::round_robin(teams) {
-                let r = round.max(1) as usize;
-                while by_round.len() < r {
-                    by_round.push(Vec::new());
+        for (gi, teams) in self.current_groups.iter().enumerate() {
+            let by_round: Vec<Vec<(i64, i64)>> = match &real {
+                Some(s) if gi < s.len() => s[gi].clone(),
+                _ => {
+                    let mut by_round: Vec<Vec<(i64, i64)>> = Vec::new();
+                    for (h, a, round) in fixture::round_robin(teams) {
+                        let r = round.max(1) as usize;
+                        while by_round.len() < r {
+                            by_round.push(Vec::new());
+                        }
+                        by_round[r - 1].push((h, a));
+                    }
+                    by_round
                 }
-                by_round[r - 1].push((h, a));
-            }
+            };
             schedule.push(by_round);
         }
         let max_rounds = schedule.iter().map(|s| s.len()).max().unwrap_or(0);
@@ -458,6 +546,19 @@ impl<'a> Engine<'a> {
         Ok(n)
     }
 
+    fn team_code(&mut self, team_id: i64) -> ApiResult<Option<String>> {
+        if let Some(c) = self.team_codes.get(&team_id) {
+            return Ok(Some(c.clone()));
+        }
+        let c: Option<String> = self
+            .conn
+            .query_row("SELECT code FROM teams WHERE id = ?1", [team_id], |r| r.get(0))?;
+        if let Some(ref c2) = c {
+            self.team_codes.insert(team_id, c2.clone());
+        }
+        Ok(c)
+    }
+
     fn squad(&mut self, team_id: i64) -> ApiResult<Vec<SquadPlayer>> {
         if let Some(s) = self.squads.get(&team_id) {
             return Ok(s.clone());
@@ -512,18 +613,23 @@ impl<'a> Engine<'a> {
         let slots = effective_slots(&cfg.formation, &cfg.strategy);
         let mut used: HashSet<i64> = HashSet::new();
         let mut xi = Vec::with_capacity(11);
+        // Repeated slots ("DF", "DF") each consume the next id for that slot.
+        let mut occurrence: HashMap<&'static str, usize> = HashMap::new();
         for slot in &slots {
+            let occ = occurrence.entry(slot).or_insert(0);
             let assigned = cfg
                 .starting
                 .get(*slot)
+                .and_then(|ids| ids.get(*occ))
                 .copied()
                 .filter(|pid| !used.contains(pid) && squad.iter().any(|p| p.id == *pid));
+            *occ += 1;
             let pick = match assigned {
                 Some(pid) => squad.iter().find(|p| p.id == pid).cloned(),
                 None => self.best_for_slot(&squad, slot, &used),
             };
             if let Some(mut p) = pick {
-                let penalty = models::slot_penalty(&p.position, slot);
+                let penalty = models::best_slot_penalty(&p.positions, slot);
                 p.overall = (p.overall - penalty as f64 * 2.0).clamp(30.0, 99.0);
                 used.insert(p.id);
                 xi.push(p);
@@ -546,8 +652,8 @@ impl<'a> Engine<'a> {
             .cloned()
             .collect();
         pool.sort_by(|a, b| {
-            let ea = a.overall - models::slot_penalty(&a.position, slot) as f64 * 2.0;
-            let eb = b.overall - models::slot_penalty(&b.position, slot) as f64 * 2.0;
+            let ea = a.overall - models::best_slot_penalty(&a.positions, slot) as f64 * 2.0;
+            let eb = b.overall - models::best_slot_penalty(&b.positions, slot) as f64 * 2.0;
             eb.partial_cmp(&ea).unwrap_or(std::cmp::Ordering::Equal)
         });
         pool.into_iter().next()
@@ -616,6 +722,7 @@ impl<'a> Engine<'a> {
                 run_teams.push(RunTeam {
                     id: t,
                     name: self.team_name(t)?,
+                    code: self.team_code(t)?,
                 });
             }
             out.push(GroupInfo {
@@ -830,16 +937,18 @@ impl<'a> Engine<'a> {
             sim::poisson(&mut self.rng, a_xg),
         );
 
+        // Goals are spread out so two goals never land on (or very near) the
+        // same minute — a burst of goals in one match minute is unrealistic.
         let mut goals = Vec::new();
-        for _ in 0..hs0 {
-            let minute = 1 + (self.rng.unit() * 90.0) as i32;
-            goals.push(self.make_goal(&home_xi, minute, false, home));
+        let total_reg = (hs0 + aw0) as usize;
+        let reg_minutes = spaced_minutes(&mut self.rng, total_reg, 90);
+        for (minute, team) in reg_minutes
+            .into_iter()
+            .zip(shuffled(&mut self.rng, team_labels(home, away, hs0, aw0)))
+        {
+            let xi = if team == home { &home_xi } else { &away_xi };
+            goals.push(self.make_goal(xi, minute, false, team));
         }
-        for _ in 0..aw0 {
-            let minute = 1 + (self.rng.unit() * 90.0) as i32;
-            goals.push(self.make_goal(&away_xi, minute, false, away));
-        }
-        goals.sort_by_key(|g| (g.minute, g.team_id));
 
         let mut extra_time = false;
         let mut penalties: Option<PenResult> = None;
@@ -859,13 +968,13 @@ impl<'a> Engine<'a> {
             let aex = (a_xg * 0.45).clamp(0.05, 2.5);
             let (eh, ea) = (sim::poisson(&mut self.rng, hex), sim::poisson(&mut self.rng, aex));
             extra_time = true;
-            for _ in 0..eh {
-                let minute = 91 + (self.rng.unit() * 30.0) as i32;
-                goals.push(self.make_goal(&home_xi, minute, true, home));
-            }
-            for _ in 0..ea {
-                let minute = 91 + (self.rng.unit() * 30.0) as i32;
-                goals.push(self.make_goal(&away_xi, minute, true, away));
+            let et_minutes = spaced_minutes(&mut self.rng, (eh + ea) as usize, 30);
+            for (minute, team) in et_minutes
+                .into_iter()
+                .zip(shuffled(&mut self.rng, team_labels(home, away, eh, ea)))
+            {
+                let xi = if team == home { &home_xi } else { &away_xi };
+                goals.push(self.make_goal(xi, 90 + minute, true, team));
             }
             goals.sort_by_key(|g| (g.minute, g.team_id));
             hs += eh;
@@ -988,7 +1097,17 @@ impl<'a> Engine<'a> {
         team_id: i64,
     ) -> Goal {
         let scorer = self.pick_scorer(xi);
-        let assist = if self.rng.unit() < 0.72 {
+        // Not every goal has an assist (headers, deflections, solo runs, and
+        // almost never a striker's own poached finishes). Defensive scorers in
+        // particular rack up more unassisted goals.
+        let family = models::position_family(&scorer.position);
+        let assist_prob = match family.as_ref() {
+            "GK" => 0.0,
+            "DF" => 0.6,
+            "MF" => 0.7,
+            _ => 0.72,
+        };
+        let assist = if self.rng.unit() < assist_prob {
             Some(self.pick_assist(xi, &scorer))
         } else {
             None
@@ -999,8 +1118,10 @@ impl<'a> Engine<'a> {
             team_id,
             scorer_id: scorer.id,
             scorer: scorer.name.clone(),
+            scorer_photo: scorer.photo_url.clone(),
             assist_id: assist.as_ref().map(|p| p.id),
-            assist: assist.map(|p| p.name),
+            assist: assist.as_ref().map(|p| p.name.clone()),
+            assist_photo: assist.as_ref().and_then(|p| p.photo_url.clone()),
         }
     }
 
@@ -1168,6 +1289,14 @@ impl<'a> Engine<'a> {
     }
 
     /// Per-minute dominance series (0..1) for the home team; away mirrors it.
+    ///
+    /// Dynamics:
+    ///  * a goal resets the flow — the game restarts from neutral;
+    ///  * the side chasing a lead then presses, so momentum swings toward the
+    ///    trailing team — scaled by how strong that team's attack is relative
+    ///    to the leader's, so a weak side can't bottle up a much stronger one;
+    ///  * the random walk is deliberately spiky: ordinary jitters plus
+    ///    occasional sudden swings, so momentum can change in a blink.
     fn build_momentum(
         &mut self,
         home: i64,
@@ -1177,22 +1306,60 @@ impl<'a> Engine<'a> {
         total_minutes: usize,
     ) -> Momentum {
         let base = (0.5 + (h_xg - a_xg).clamp(-2.0, 2.0) * 0.06).clamp(0.15, 0.85);
-        let mut cur = base;
+        // Keep some of the strength edge in the settling point once the game
+        // settles back to even, but 0.5 is where a goal drops it.
+        let neutral = 0.5 + (h_xg - a_xg).clamp(-2.0, 2.0) * 0.03;
+
+        let mut gs = goals.to_vec();
+        gs.sort_by_key(|g| g.minute);
+
         let mut home_series = Vec::with_capacity(total_minutes);
+        let mut cur = base;
+        let mut score_h = 0i32;
+        let mut score_a = 0i32;
+        let mut gi = 0usize;
         for m in 1..=total_minutes {
-            let b = if m > 90 { 0.5 + (h_xg - a_xg) * 0.03 } else { base };
-            cur = (cur + (b - cur) * 0.06 + (self.rng.unit() - 0.5) * 0.14).clamp(0.02, 0.98);
-            for g in goals {
-                let minute = g.minute as usize;
-                if g.team_id == home && m >= minute && m - minute < 7 {
-                    cur = (cur + 0.045).min(0.98);
+            let mut goal_now = false;
+            while gi < gs.len() && gs[gi].minute as usize <= m {
+                if gs[gi].team_id == home {
+                    score_h += 1;
+                } else {
+                    score_a += 1;
                 }
-                if g.team_id != home && m >= minute && m - minute < 7 {
-                    cur = (cur - 0.045).max(0.02);
-                }
+                goal_now = true;
+                gi += 1;
             }
+            if goal_now {
+                // Restart from neutral right after a goal goes in.
+                cur = neutral;
+            }
+
+            // Sway toward the trailing side while the score is not level.
+            let lead = score_h - score_a;
+            let target = if lead == 0 {
+                neutral
+            } else {
+                let trail_xg = if lead > 0 { a_xg } else { h_xg };
+                let lead_xg = if lead > 0 { h_xg } else { a_xg };
+                let rel = (trail_xg / lead_xg.max(0.05)).clamp(0.35, 2.0);
+                let amp = (0.06 + 0.10 * lead.unsigned_abs() as f64 * rel).min(0.42);
+                if lead > 0 {
+                    (neutral - amp).max(0.05)
+                } else {
+                    (neutral + amp).min(0.95)
+                }
+            };
+
+            cur += (target - cur) * 0.05;
+            // Normal jitter plus the occasional sharp swing in direction.
+            cur += (self.rng.unit() - 0.5) * 0.18;
+            if self.rng.unit() < 0.07 {
+                cur += (self.rng.unit() - 0.5) * 0.48;
+            }
+            cur = cur.clamp(0.05, 0.95);
             home_series.push(cur);
         }
+
         let away_series = home_series.iter().map(|v| 1.0 - v).collect();
         Momentum {
             home: home_series,

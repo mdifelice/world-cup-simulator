@@ -13,6 +13,10 @@ server/data/*.sqlite-shm
 server/data/*.sqlite-wal
 server/data/*.db
 server/data/*.sqlite3
+server/wcs.sqlite
+server/wcs.sqlite-shm
+server/wcs.sqlite-wal
+pwtest-shots/
 *.tmp
 
 # TS build info
@@ -23,9 +27,6 @@ server/data/*.sqlite3
 .env.local
 *.pem
 
-# Scraper output
-scrapper/output/
-
 # OS / editor
 .DS_Store
 .idea/
@@ -34,3 +35,6 @@ scrapper/output/
 
 # Logs
 *.log
+# Scraper caches / artifacts
+server/scripts/.cache/
+**/__pycache__/

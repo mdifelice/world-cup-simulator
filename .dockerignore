@@ -4,7 +4,6 @@
 **/*.sqlite*
 server/data/
 client/data/
-scrapper/
 .git/
 .gitignore
 README.md

@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Cup card selector mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://fonts.cdnfonts.com/css/google-sans" />
+<style>
+  :root {
+    --bg: #eef2f7; --panel: #fff; --line: #d9e1ec; --text: #1b2530;
+    --muted: #5d6c7d; --accent: #189a55; --gold: #d8a418; --gold2: #a87912;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:36px 46px 70px; background:var(--bg); font-family:"Google Sans","Segoe UI",system-ui,-apple-system,Roboto,sans-serif; color:var(--text); }
+  .head { font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin:38px 0 14px; }
+  .head:first-child { margin-top:0; }
+  .head span { color:var(--accent); }
+  .sub { font-size:13px; color:var(--muted); margin:-10px 0 6px; }
+  .ex-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:16px; max-width: 1000px; }
+
+  /* ---------- shared card base ---------- */
+  .cc { position:relative; border-radius:14px; padding:0; cursor:pointer; transition:transform .12s; font-family:inherit; }
+  .cc:hover { transform: translateY(-3px); }
+  .cc .lbl { position:absolute; top:-9px; left:10px; background:var(--text); color:#fff; font-size:10px; font-weight:700; letter-spacing:1px; padding:2px 8px; border-radius:999px; z-index:2; }
+
+  /* ---------- M1 current ---------- */
+  .m1 { background:var(--panel); border:2px solid var(--line); padding:16px 14px; text-align:left; display:flex; flex-direction:column; gap:3px; }
+  .m1 .t { width:44px; height:44px; margin:0 auto 4px; }
+  .m1 .y { font-size:26px; font-weight:800; }
+  .m1 .h { font-size:13px; color:var(--muted); }
+  .m1 .w { font-size:12px; color:#8a6d0b; opacity:.92; }
+
+  /* ---------- M2 gold crest ---------- */
+  .m2 { background:linear-gradient(160deg,#1a2734 0%,#10161f 100%); border:1px solid rgba(216,164,24,.35); padding:14px 16px 12px; color:#fff; }
+  .m2 .top { display:flex; align-items:center; gap:10px; }
+  .m2 .medal { width:40px; height:40px; border-radius:50%; background:rgba(216,164,24,.14); border:2px solid var(--gold); display:grid; place-items:center; }
+  .m2 .medal svg { width:26px; height:26px; }
+  .m2 .era { font-size:10px; letter-spacing:2px; color:#8fa0b1; text-transform:uppercase; }
+  .m2 .y { font-size:34px; font-weight:900; line-height:1; margin:8px 0 2px; letter-spacing:.5px; }
+  .m2 .host { font-size:12px; color:#b9c6d4; margin-top:6px; padding-top:8px; border-top:1px dashed rgba(255,255,255,.16); }
+  .m2 .w { margin-top:8px; background:linear-gradient(90deg,rgba(216,164,24,.22),rgba(240,200,64,.12)); border:1px solid rgba(240,200,64,.45); color:#f0c840; font-size:12px; font-weight:700; border-radius:8px; padding:5px 8px; display:inline-flex; align-items:center; gap:6px; }
+
+  /* ---------- M3 host flags banner ---------- */
+  .m3 { background:var(--panel); border:1px solid var(--line); overflow:hidden; padding:0 0 12px; border-radius:14px; }
+  .m3 .banner { height:6px; background:linear-gradient(90deg,#d8a418,#f0c840 50%,#a87912); }
+  .m3 .pad { padding:12px 14px 0; }
+  .m3 .era { font-size:10px; letter-spacing:2.6px; color:var(--muted); text-transform:uppercase; }
+  .m3 .y { font-size:36px; font-weight:900; line-height:1.05; margin-top:2px; }
+  .m3 .flags { font-size:20px; letter-spacing:2px; margin-top:6px; }
+  .m3 .host { font-size:11px; color:var(--muted); margin-top:5px; }
+  .m3 .w { margin:11px 14px 0; padding-top:8px; border-top:1px solid var(--line); font-size:12.5px; color:#8a6d0b; font-weight:600; display:flex; align-items:center; gap:6px; }
+
+  /* ---------- M4 ticket ---------- */
+  .m4 { background:var(--panel); border:2px dashed #c3cede; padding:14px 16px; border-radius:14px; }
+  .m4 .era { font-size:10px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; }
+  .m4 .y { font-size:30px; font-weight:900; margin-top:2px; }
+  .m4 .host { margin-top:6px; font-size:13px; }
+  .m4 .host b { font-weight:600; }
+  .m4 .perf { position:relative; height:16px; display:grid; place-items:center; }
+  .m4 .perf:before { content:""; width:100%; border-top:2px dotted #c3cede; }
+  .m4 .perf:after { content:""; position:absolute; left:-10px; top:50%; width:20px; height:20px; border-radius:50%; background:var(--bg); transform:translateY(-50%); box-shadow:inset 0 0 0 2px #c3cede; }
+  .m4 .perf.tick:after { left:auto; right:-10px; }
+  .m4 .stub { display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-top:2px; }
+  .m4 .w { color:#8a6d0b; font-weight:600; display:flex; gap:6px; align-items:center; }
+  .m4 .ticket { font-size:23px; opacity:.85; }
+
+  /* ---------- M5 champion seal ---------- */
+  .m5 { background:var(--panel); border:1px solid var(--line); overflow:hidden; padding:0 0 12px; text-align:center; }
+  .m5 .band { background:linear-gradient(160deg,#147044 0%,#0c5a33 100%); color:#fff; padding:12px 10px 12px; }
+  .m5 .band .era { font-size:9px; letter-spacing:3px; color:#e9d9a0; text-transform:uppercase; }
+  .m5 .band .y { font-size:32px; font-weight:900; line-height:1.05; }
+  .m5 .mid { padding:12px 12px 2px; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .m5 .mid svg { width:40px; height:40px; }
+  .m5 .w { font-size:13.5px; font-weight:800; color:#8a6d0b; }
+  .m5 .h { font-size:11px; color:var(--muted); margin-top:8px; display:flex; align-items:center; justify-content:center; gap:6px; }
+
+  /* ---------- M6 ball mark ---------- */
+  .m6 { background:var(--panel); border:1px solid var(--line); border-top:4px solid var(--accent); padding:14px 12px 12px; text-align:center; }
+  .m6 .ballwrap { width:46px; height:46px; border-radius:50%; background:linear-gradient(160deg,#2bb468,#147044); margin:0 auto; display:grid; place-items:center; font-size:26px; }
+  .m6 .y { font-size:30px; font-weight:900; margin-top:8px; }
+  .m6 .h { font-size:11px; color:var(--muted); margin-top:4px; }
+  .m6 .w { font-size:11.5px; color:#8a6d0b; margin-top:8px; font-weight:600; }
+
+  /* ---------- screen preview strip ---------- */
+  .screen { background:var(--bg); border-radius:16px; padding:18px; outline:1px solid var(--line); max-width:1180px; }
+  .screen .shead { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:14px; display:flex; justify-content:space-between; }
+  .screen .shot { background: radial-gradient(900px 460px at 70% -10%,#dbe5f1 0%,var(--bg) 55%); border-radius:12px; padding:8px; }
+  .screen .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(172px, 1fr)); gap:14px; }
+
+  .note { font-size:12px; color:var(--muted); margin-top:10px; }
+</style>
+</head>
+<body>
+
+<div class="head"><span>M1</span> &middot; current design &mdash; reference</div>
+<div class="ex-grid">
+  <button class="cc m1"><span class="lbl">M1</span>
+    <svg class="t" viewBox="0 0 64 64">
+      <defs><linearGradient id="tg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d475"/><stop offset=".55" stop-color="#d4a017"/><stop offset="1" stop-color="#a97f10"/></linearGradient></defs>
+      <g fill="url(#tg1)">
+        <rect x="25" y="52" width="14" height="5" rx="2"/><rect x="20" y="48" width="24" height="4" rx="2"/>
+        <circle cx="32" cy="13" r="8"/><rect x="31" y="13" width="2" height="28" rx="1"/>
+        <path d="M27 46 c-1 -9 -1 -16 3 -25 c0 8 1 15 1 25 Z"/><path d="M37 46 c1 -9 1 -16 -3 -25 c0 8 -1 15 -1 25 Z"/>
+      </g>
+    </svg>
+    <div class="y">2026</div><div class="h">United States / Mexico / Canada</div><div class="w">Champion Spain</div>
+  </button>
+</div>
+
+<div class="head"><span>M2</span> &middot; gold crest &mdash; dark luxe card</div>
+<div class="ex-grid">
+  <button class="cc m2"><span class="lbl">M2</span>
+    <div class="top">
+      <span class="medal">
+        <svg viewBox="0 0 64 64">
+          <defs><linearGradient id="tg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d475"/><stop offset=".55" stop-color="#d4a017"/><stop offset="1" stop-color="#a97f10"/></linearGradient></defs>
+          <g fill="url(#tg2)"><rect x="25" y="52" width="14" height="5" rx="2"/><rect x="20" y="48" width="24" height="4" rx="2"/><circle cx="32" cy="13" r="8"/><rect x="31" y="13" width="2" height="28" rx="1"/><path d="M27 46 c-1 -9 -1 -16 3 -25 c0 8 1 15 1 25 Z"/><path d="M37 46 c1 -9 1 -16 -3 -25 c0 8 -1 15 -1 25 Z"/></g>
+        </svg>
+      </span>
+      <span class="era">World Cup</span>
+    </div>
+    <div class="y">2026</div>
+    <div class="host">🇺🇸 🇲🇽 🇨🇦</div>
+    <div class="w">🏆 Spain</div>
+  </button>
+  <button class="cc m2"><span class="lbl">M2</span>
+    <div class="top"><span class="medal"><svg viewBox="0 0 64 64"><defs><linearGradient id="tg2b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d475"/><stop offset=".55" stop-color="#d4a017"/><stop offset="1" stop-color="#a97f10"/></linearGradient></defs><g fill="url(#tg2b)"><rect x="25" y="52" width="14" height="5" rx="2"/><rect x="20" y="48" width="24" height="4" rx="2"/><circle cx="32" cy="13" r="8"/><rect x="31" y="13" width="2" height="28" rx="1"/><path d="M27 46 c-1 -9 -1 -16 3 -25 c0 8 1 15 1 25 Z"/><path d="M37 46 c1 -9 1 -16 -3 -25 c0 8 -1 15 -1 25 Z"/></g></svg></span><span class="era">World Cup</span></div>
+    <div class="y">1998</div>
+    <div class="host">🇫🇷</div>
+    <div class="w">🏆 France</div>
+  </button>
+</div>
+
+<div class="head"><span>M3</span> &middot; host flags + gold banner &mdash; bright and lively</div>
+<div class="sub">Best for the 48-team/six-host era and clear era colors.</div>
+<div class="ex-grid">
+  <button class="cc m3"><span class="lbl">M3</span>
+    <div class="banner"></div>
+    <div class="pad"><div class="era">World Cup 2026</div><div class="y">2026</div>
+    <div class="flags">🇺🇸&nbsp;🇲🇽&nbsp;🇨🇦</div><div class="host">United States · Mexico · Canada</div></div>
+    <div class="w">🏆 Spain</div>
+  </button>
+  <button class="cc m3"><span class="lbl">M3</span>
+    <div class="banner"></div>
+    <div class="pad"><div class="era">World Cup 2018</div><div class="y">2018</div>
+    <div class="flags">🇷🇺</div><div class="host">Russia</div></div>
+    <div class="w">🏆 France</div>
+  </button>
+</div>
+
+<div class="head"><span>M4</span> &middot; ticket stub &mdash; collection vibe</div>
+<div class="ex-grid">
+  <button class="cc m4"><span class="lbl">M4</span>
+    <div class="era">Edition 22 · 2026</div>
+    <div class="y">2026</div>
+    <div class="host">Hosted in <b>United States / Mexico / Canada</b></div>
+    <div class="perf"></div>
+    <div class="stub"><span class="w">🏆 Spain</span><span class="ticket">🏟️</span></div>
+  </button>
+  <button class="cc m4"><span class="lbl">M4</span>
+    <div class="era">Edition 18 · 1986</div>
+    <div class="y">1986</div>
+    <div class="host">Hosted in <b>Mexico</b></div>
+    <div class="perf"></div>
+    <div class="stub"><span class="w">🏆 Argentina</span><span class="ticket">🏟️</span></div>
+  </button>
+</div>
+
+<div class="head"><span>M5</span> &middot; champion seal &mdash; trophy forward</div>
+<div class="ex-grid">
+  <button class="cc m5"><span class="lbl">M5</span>
+    <div class="band"><div class="era">FIFA World Cup</div><div class="y">2026</div></div>
+    <div class="mid">
+      <svg viewBox="0 0 64 64"><defs><linearGradient id="tg5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d475"/><stop offset=".55" stop-color="#d4a017"/><stop offset="1" stop-color="#a97f10"/></linearGradient></defs><g fill="url(#tg5)"><rect x="25" y="52" width="14" height="5" rx="2"/><rect x="20" y="48" width="24" height="4" rx="2"/><circle cx="32" cy="13" r="8"/><rect x="31" y="13" width="2" height="28" rx="1"/><path d="M27 46 c-1 -9 -1 -16 3 -25 c0 8 1 15 1 25 Z"/><path d="M37 46 c1 -9 1 -16 -3 -25 c0 8 -1 15 -1 25 Z"/></g></svg>
+      <div class="w">Spain</div>
+    </div>
+    <div class="h">🇺🇸 🇲🇽 🇨🇦 United States · Mexico · Canada</div>
+  </button>
+  <button class="cc m5"><span class="lbl">M5</span>
+    <div class="band"><div class="era">FIFA World Cup</div><div class="y">1982</div></div>
+    <div class="mid">
+      <svg viewBox="0 0 64 64"><defs><linearGradient id="tg5b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6d475"/><stop offset=".55" stop-color="#d4a017"/><stop offset="1" stop-color="#a97f10"/></linearGradient></defs><g fill="url(#tg5b)"><rect x="25" y="52" width="14" height="5" rx="2"/><rect x="20" y="48" width="24" height="4" rx="2"/><circle cx="32" cy="13" r="8"/><rect x="31" y="13" width="2" height="28" rx="1"/><path d="M27 46 c-1 -9 -1 -16 3 -25 c0 8 1 15 1 25 Z"/><path d="M37 46 c1 -9 1 -16 -3 -25 c0 8 -1 15 -1 25 Z"/></g></svg>
+      <div class="w">Italy</div>
+    </div>
+    <div class="h">🇪🇸 Spain</div>
+  </button>
+</div>
+
+<div class="head"><span>M6</span> &middot; ball mark &mdash; playful, brand-friendly</div>
+<div class="ex-grid">
+  <button class="cc m6"><span class="lbl">M6</span>
+    <div class="ballwrap">⚽</div>
+    <div class="y">2026</div>
+    <div class="h">United States / Mexico / Canada</div>
+    <div class="w">🏆 Spain</div>
+  </button>
+  <button class="cc m6"><span class="lbl">M6</span>
+    <div class="ballwrap">⚽</div>
+    <div class="y">1970</div>
+    <div class="h">Mexico</div>
+    <div class="w">🏆 Brazil</div>
+  </button>
+</div>
+
+<div class="head"><span>Screen</span> &middot; full selector preview &mdash; M3, sorted newest first</div>
+<div class="screen"><div class="shead"><span>World Cup Selector</span><span>Newest &rarr; oldest</span></div>
+  <div class="shot">
+    <div class="grid">
+      <button class="cc m3">
+        <div class="banner"></div><div class="pad"><div class="era">World Cup 2026</div><div class="y">2026</div><div class="flags">🇺🇸&nbsp;🇲🇽&nbsp;🇨🇦</div><div class="host">United States · Mexico · Canada</div></div><div class="w">🏆 Spain</div>
+      </button>
+      <button class="cc m3">
+        <div class="banner"></div><div class="pad"><div class="era">World Cup 2022</div><div class="y">2022</div><div class="flags">🇶🇦</div><div class="host">Qatar</div></div><div class="w">🏆 Argentina</div>
+      </button>
+      <button class="cc m3">
+        <div class="banner"></div><div class="pad"><div class="era">World Cup 2018</div><div class="y">2018</div><div class="flags">🇷🇺</div><div class="host">Russia</div></div><div class="w">🏆 France</div>
+      </button>
+      <button class="cc m3">
+        <div class="banner"></div><div class="pad"><div class="era">World Cup 2014</div><div class="y">2014</div><div class="flags">🇧🇷</div><div class="host">Brazil</div></div><div class="w">🏆 Germany</div>
+      </button>
+      <button class="cc m3">
+        <div class="banner"></div><div class="pad"><div class="era">World Cup 2010</div><div class="y">2010</div><div class="flags">🇿🇦</div><div class="host">South Africa</div></div><div class="w">🏆 Spain</div>
+      </button>
+    </div>
+  </div>
+</div>
+<p class="note">In the app, single-host editions show that country&rsquo;s flag.</p>
+
+</body>
+</html>

@@ -16,6 +16,12 @@ pub struct Tournament {
     /// Whether players wore shirt numbers in this edition. Controls how the
     /// roster is sorted and displayed (before 1954 squads were unnumbered).
     pub shirt_numbers: bool,
+    /// Optional branding image for this edition (trophy/logo URL).
+    #[serde(default)]
+    pub logo: Option<String>,
+    /// Whether participants and a fixture are loaded (the cup is playable).
+    #[serde(default)]
+    pub ready: bool,
 }
 
 #[derive(Debug, Deserialize)]
@@ -31,6 +37,8 @@ pub struct CreateTournament {
     pub end_date: Option<String>,
     #[serde(default = "default_shirt_numbers")]
     pub shirt_numbers: bool,
+    #[serde(default)]
+    pub logo: Option<String>,
 }
 
 fn default_shirt_numbers() -> bool {
@@ -239,6 +247,17 @@ pub fn slot_penalty(position: &str, slot: &str) -> i32 {
     }
 }
 
+/// Best (lowest) penalty across all of a player's positions: a multi-position
+/// player always slots in where they fit best. Empty `positions` counts as a
+/// 10-index (fully out of position) since there is nothing to fit.
+pub fn best_slot_penalty(positions: &[String], slot: &str) -> i32 {
+    positions
+        .iter()
+        .map(|p| slot_penalty(p, slot))
+        .min()
+        .unwrap_or(10)
+}
+
 pub fn position_family(position: &str) -> &'static str {
     match position {
         "GK" => "GK",
@@ -269,6 +288,13 @@ pub struct Player {
     pub nationality: Option<String>,
     /// Position in this call-up (granular, e.g. "CDM").
     pub position: String,
+    /// All positions the player can cover in this call-up (primary first;
+    /// always includes `position`). Comma- or space-separated in the DB.
+    #[serde(default)]
+    pub positions: Vec<String>,
+    /// Player portrait/badge image (a generic silhouette is shown when unset).
+    #[serde(default)]
+    pub photo_url: Option<String>,
     pub shirt_number: Option<i32>,
     pub pace: Option<i32>,
     pub stamina: Option<i32>,
@@ -290,6 +316,9 @@ pub struct Player {
     pub leadership: Option<i32>,
     /// Position-weighted overall rating (mirrors `sim::composite_rating`).
     pub overall: f64,
+    /// Star-showing market-style rating (attack-biased for outfielders,
+    /// shot-stopping profile for GKs; mirrors `sim::star_rating`).
+    pub rating: f64,
 }
 
 /// Individual attributes are optional; unset fields default to 60 on insert.
@@ -298,6 +327,11 @@ pub struct CreatePlayer {
     pub name: String,
     #[serde(default = "default_position")]
     pub position: String,
+    /// Extra positions besides `position` (e.g. ["RB", "RWB"]).
+    #[serde(default)]
+    pub positions: Vec<String>,
+    #[serde(default)]
+    pub photo_url: Option<String>,
     #[serde(default)]
     pub shirt_number: Option<i32>,
     /// Back-compat with scraper output: when set, all attributes are derived
@@ -479,6 +513,9 @@ pub struct GroupInfo {
 pub struct RunTeam {
     pub id: i64,
     pub name: String,
+    /// FIFA 3-letter code (e.g. "BRA"); older squads may have none.
+    #[serde(default)]
+    pub code: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -531,8 +568,12 @@ pub struct Goal {
     pub team_id: i64,
     pub scorer_id: i64,
     pub scorer: String,
+    #[serde(default)]
+    pub scorer_photo: Option<String>,
     pub assist_id: Option<i64>,
     pub assist: Option<String>,
+    #[serde(default)]
+    pub assist_photo: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
