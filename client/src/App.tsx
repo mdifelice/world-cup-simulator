@@ -359,25 +359,7 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand" onClick={reset}>
-          <svg className="brand-badge" width="40" height="40" viewBox="0 0 100 100" aria-hidden="true">
-            <defs>
-              <radialGradient id="ball-g" cx="35%" cy="28%" r="80%">
-                <stop offset="0" stopColor="#ffffff" />
-                <stop offset="1" stopColor="#d7e0ea" />
-              </radialGradient>
-              <clipPath id="ball-clip"><circle cx="50" cy="50" r="46" /></clipPath>
-              <path id="ball-pent" d="M0 -11 L10.46 -3.4 L6.47 8.9 L-6.47 8.9 L-10.46 -3.4 Z" />
-            </defs>
-            <circle cx="50" cy="50" r="46" fill="url(#ball-g)" stroke="#1b2530" strokeWidth="3" />
-            <g clipPath="url(#ball-clip)" fill="#1b2530">
-              <use href="#ball-pent" x="50" y="50" />
-              <use href="#ball-pent" transform="translate(50,10)" />
-              <use href="#ball-pent" transform="translate(90,42)" />
-              <use href="#ball-pent" transform="translate(74,86)" />
-              <use href="#ball-pent" transform="translate(26,86)" />
-              <use href="#ball-pent" transform="translate(10,42)" />
-            </g>
-          </svg>
+          <span className="brand-ball" aria-hidden="true">⚽</span>
           <div>
             <div className="wm-line1">WORLD CUP</div>
             <div className="wm-line2">Simulator</div>

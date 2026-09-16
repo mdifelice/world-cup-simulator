@@ -85,7 +85,7 @@ export default function PlayerCard({
   return (
     <div className={cls} title={title} onClick={onClick}>
       <div className="pc-photo">
-        {player.photo_url && (
+        {player.photo_url ? (
           <img
             src={player.photo_url}
             alt=""
@@ -93,6 +93,13 @@ export default function PlayerCard({
               (e.currentTarget as HTMLImageElement).style.display = "none";
             }}
           />
+        ) : (
+          <span className="pc-photo-empty" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5" />
+            </svg>
+          </span>
         )}
       </div>
       <div className="pc-scrim" />
