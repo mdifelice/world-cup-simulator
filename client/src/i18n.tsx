@@ -41,8 +41,7 @@ const en: Record<string, string> = {
     "Take the touchline for any team in the {year} World Cup. Your nation's matches get live momentum charts as they happen.",
   "team.loading": "Loading participants…",
   "team.empty": "No participants loaded for {year} yet.",
-  "team.neutral":
-    "…or watch the whole tournament as a spectator.",
+  "team.neutral": "Watch as a spectator",
 
   "squad.title": "— squad",
   "squad.hint": "{year} · {count} players listed",
@@ -62,6 +61,7 @@ const en: Record<string, string> = {
   "lineup.strategy": "Strategy",
   "lineup.slots": "Starting XI — one player per slot",
   "lineup.pick": "— pick a player —",
+  "lineup.players": "Players",
   "lineup.auto": "⚡ Auto-pick best XI",
   "lineup.confirm": "Save lineup & play →",
   "lineup.cancel": "← overview",
@@ -228,8 +228,7 @@ const es: Record<string, string> = {
     "Siéntate en el banquillo de cualquier equipo del Mundial {year}. Los partidos de tu selección añaden gráficos de dominio durante el partido.",
   "team.loading": "Cargando participantes…",
   "team.empty": "Todavía no hay participantes cargados para {year}.",
-  "team.neutral":
-    "…o sigue todo el torneo como espectador neutral.",
+  "team.neutral": "Ver como espectador",
 
   "squad.title": "— plantel",
   "squad.hint": "{year} · {count} jugadores convocados",
@@ -249,6 +248,7 @@ const es: Record<string, string> = {
   "lineup.strategy": "Estrategia",
   "lineup.slots": "Once inicial: un jugador por puesto",
   "lineup.pick": "— elegir jugador —",
+  "lineup.players": "Jugadores",
   "lineup.auto": "⚡ Alinear el mejor once",
   "lineup.confirm": "Guardar once y jugar →",
   "lineup.cancel": "← torneo",

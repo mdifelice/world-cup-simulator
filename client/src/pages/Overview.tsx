@@ -89,6 +89,13 @@ export default function Overview({
     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [scrollToId]);
 
+  // While fast-forwarding, keep the current match in view.
+  useEffect(() => {
+    if (revealed <= 0) return;
+    const el = document.querySelector<HTMLDivElement>(".match-row.next");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [revealed]);
+
   const runCodes = new Map<number, string>();
   for (const g of run?.groups ?? []) {
     for (const t of g.teams) {

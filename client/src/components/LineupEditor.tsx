@@ -266,37 +266,39 @@ export default function LineupEditor({
                       : t("lineup.armFirst")
                 }
               >
-                {chosen ? (
-                  <>
-                    <span className="marker-face">
-                      {chosen.photo_url ? (
-                        <img
-                          src={chosen.photo_url}
-                          alt=""
-                          onError={(e) => {
-                            (e.currentTarget as HTMLImageElement).style.display = "none";
-                          }}
-                        />
-                      ) : (
-                        <span className="marker-fallback" aria-hidden>
-                          <svg viewBox="0 0 24 24" width="20" height="20">
-                            <circle cx="12" cy="8" r="4.5" fill="currentColor" opacity="0.85" />
-                            <path
-                              d="M3.5 20.5c1.4-4.2 4.6-6 8.5-6s7.1 1.8 8.5 6"
-                              fill="currentColor"
-                              opacity="0.85"
-                            />
-                          </svg>
-                        </span>
-                      )}
-                      <small className="marker-num">
-                        {shirtNumbers && chosen.shirt_number != null ? chosen.shirt_number : "✓"}
-                      </small>
-                    </span>
-                    <span className="marker-name">{playerSurname(chosen.name)}</span>
-                  </>
-                ) : (
-                  <>{slot}</>
+                <span className="marker-face">
+                  {chosen ? (
+                    chosen.photo_url ? (
+                      <img
+                        src={chosen.photo_url}
+                        alt=""
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <span className="marker-fallback" aria-hidden>
+                        <svg viewBox="0 0 24 24" width="22" height="22">
+                          <circle cx="12" cy="8" r="4.5" fill="currentColor" opacity="0.85" />
+                          <path
+                            d="M3.5 20.5c1.4-4.2 4.6-6 8.5-6s7.1 1.8 8.5 6"
+                            fill="currentColor"
+                            opacity="0.85"
+                          />
+                        </svg>
+                      </span>
+                    )
+                  ) : (
+                    <span className="slot-tag">{slot}</span>
+                  )}
+                </span>
+                {chosen && (
+                  <span className="marker-cap">
+                    {playerSurname(chosen.name)} ·{" "}
+                    {shirtNumbers && chosen.shirt_number != null
+                      ? `#${chosen.shirt_number}`
+                      : positionFamily(slot)}
+                  </span>
                 )}
                 {chosen && (
                   <span
@@ -318,43 +320,34 @@ export default function LineupEditor({
 
         <div className="player-picks">
           <h2 className="pos-title" title={armedId != null ? t("lineup.tapSlot") : undefined}>
-            {t("lineup.pick")}
+            {t("lineup.players")}
           </h2>
-          {FAMILIES.map((fam) => {
-            const list = grouped.get(fam);
-            if (!list || list.length === 0) return null;
-            return (
-              <div key={fam} className="pick-group">
-                <h3 className="pick-group-title">{t(`fam.${fam}`)}</h3>
-                <div className="pc-grid-list pc-tight pick-grid">
-                  {list.map((p) => {
-                    const used = idsIn.has(p.id);
-                    const isArmed = armedId === p.id;
-                    return (
-                      <button
-                        key={p.id}
-                        className={"pc-pick" + (isArmed ? " armed" : "")}
-                        onClick={() => setArmedId((cur) => (cur === p.id ? null : p.id))}
-                        title={`${positionsLabel(p)} · ✦${Math.round(p.rating ?? p.overall)}`}
-                      >
-                        <PlayerCard
-                          player={p}
-                          variant="stat"
-                          tone={p.id % 4}
-                          stars={ratingStars(p.rating ?? p.overall)}
-                          number={shirtNumbers ? p.shirt_number : null}
-                          sub={p.position}
-                          selected={isArmed}
-                          dimmed={used}
-                          stamp={used ? t("lineup.picked") : null}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
+          <div className="pick-scroll">
+            {FAMILIES.flatMap((fam) => grouped.get(fam) ?? []).map((p) => {
+              const used = idsIn.has(p.id);
+              const isArmed = armedId === p.id;
+              return (
+                <button
+                  key={p.id}
+                  className={"pc-pick" + (isArmed ? " armed" : "")}
+                  onClick={() => setArmedId((cur) => (cur === p.id ? null : p.id))}
+                  title={`${positionsLabel(p)} · ✦${Math.round(p.rating ?? p.overall)}`}
+                >
+                  <PlayerCard
+                    player={p}
+                    variant="stat"
+                    tone={p.id % 4}
+                    stars={ratingStars(p.rating ?? p.overall)}
+                    number={shirtNumbers ? p.shirt_number : null}
+                    sub={p.position}
+                    selected={isArmed}
+                    dimmed={used}
+                    stamp={used ? t("lineup.picked") : null}
+                  />
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 

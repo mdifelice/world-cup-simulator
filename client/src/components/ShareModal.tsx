@@ -15,7 +15,8 @@ interface PodiumRow {
   sub: string;
 }
 
-const flagName = (n: string) => [flagFor(n), n].filter(Boolean).join(" ");
+const flagName = (country: (s: string) => string, n: string) =>
+  [flagFor(n), country(n)].filter(Boolean).join(" ");
 
 export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Props) {
   const { t, country } = useI18n();
@@ -123,19 +124,19 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
   const summaryText = useMemo(() => {
     const lines = [
       `${title} — ${host}`,
-      ...podium.map((p) => `${p.medal} ${flagName(p.name)} — ${p.sub}`),
+      ...podium.map((p) => `${p.medal} ${flagName(country, p.name)} — ${p.sub}`),
       yourPos ? t("share.yourPos", { pos: yourPos }) : null,
       best.length
-        ? `${t("share.bestPlayers")}: ${best.map((a) => flagName(a.name)).join(", ")}`
+        ? `${t("share.bestPlayers")}: ${best.map((a) => flagName(country, a.name)).join(", ")}`
         : null,
       scorers.length
         ? `${t("share.bestScorer")}: ${scorers
-            .map((a) => `${flagName(a.name)} (${a.goals})`)
+            .map((a) => `${flagName(country, a.name)} (${a.goals})`)
             .join(", ")}`
         : null,
       assists.length
         ? `${t("share.bestAssists")}: ${assists
-            .map((a) => `${flagName(a.name)} (${a.assists})`)
+            .map((a) => `${flagName(country, a.name)} (${a.assists})`)
             .join(", ")}`
         : null,
     ];
@@ -170,7 +171,7 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
             {podium.map((p) => (
               <div key={p.medal} className={"podium-row p" + (podium.indexOf(p) + 1)}>
                 <span className="podium-medal">{p.medal}</span>
-                <span className="podium-name">{flagName(p.name)}</span>
+                <span className="podium-name">{flagName(country, p.name)}</span>
                 <span className="podium-sub">{p.sub}</span>
               </div>
             ))}
@@ -188,8 +189,8 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
               {best.map((a, i) => (
                 <div key={a.player_id || i} className="share-row">
                   <span className="share-medal">{medals[i] ?? "⭐"}</span>
-                  <span className="share-name">{flagName(a.name)}</span>
-                  <span className="share-detail">{flagName(a.team_name)}</span>
+                  <span className="share-name">{flagName(country, a.name)}</span>
+                  <span className="share-detail">{flagName(country, a.team_name)}</span>
                 </div>
               ))}
             </div>
@@ -201,8 +202,8 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
               {scorers.map((a) => (
                 <div key={a.player_id} className="share-row">
                   <span className="share-medal">⚽</span>
-                  <span className="share-name">{flagName(a.name)}</span>
-                  <span className="share-detail">{flagName(a.team_name)}</span>
+                  <span className="share-name">{flagName(country, a.name)}</span>
+                  <span className="share-detail">{flagName(country, a.team_name)}</span>
                   <span className="share-num">{a.goals}</span>
                   <span className="share-tag">{t("final.goals")}</span>
                 </div>
@@ -216,8 +217,8 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
               {assists.map((a) => (
                 <div key={a.player_id} className="share-row">
                   <span className="share-medal">🎯</span>
-                  <span className="share-name">{flagName(a.name)}</span>
-                  <span className="share-detail">{flagName(a.team_name)}</span>
+                  <span className="share-name">{flagName(country, a.name)}</span>
+                  <span className="share-detail">{flagName(country, a.team_name)}</span>
                   <span className="share-num">{a.assists}</span>
                   <span className="share-tag">{t("final.assists")}</span>
                 </div>

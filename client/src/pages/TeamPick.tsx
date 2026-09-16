@@ -14,7 +14,7 @@ interface Props {
 export default function TeamPick({ tournament, selected, onPick, onNeutral }: Props) {
   const [teams, setTeams] = useState<Participant[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useI18n();
+  const { t, country } = useI18n();
 
   useEffect(() => {
     setTeams(null);
@@ -54,7 +54,7 @@ export default function TeamPick({ tournament, selected, onPick, onNeutral }: Pr
             onClick={() => onPick(team, sorted)}
           >
             <span className="team-flag">{team.flag ?? "🌍"}</span>
-            <span className="team-name">{team.name}</span>
+            <span className="team-name">{country(team.name)}</span>
             <span className="team-stars">{starsString(ratingStars(team.rating))}</span>
           </button>
         ))}

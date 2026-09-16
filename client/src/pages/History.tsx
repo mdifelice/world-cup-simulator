@@ -12,7 +12,7 @@ export default function History({ onOpen, onStartFlow }: Props) {
   const [runs, setRuns] = useState<RunListItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [opening, setOpening] = useState<number | null>(null);
-  const { t } = useI18n();
+  const { t, country } = useI18n();
 
   useEffect(() => {
     setRuns(null);
@@ -55,7 +55,7 @@ export default function History({ onOpen, onStartFlow }: Props) {
             <div key={r.id} className="card run-card">
               <span className="run-year">{r.year}</span>
               <span className="run-name">{r.tournament_name}</span>
-              {r.champion && <span className="run-champ">🏆 {r.champion}</span>}
+              {r.champion && <span className="run-champ">🏆 {country(r.champion)}</span>}
               <span className="run-date dim">{r.created_at}</span>
               <button
                 className="btn secondary"

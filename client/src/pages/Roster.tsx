@@ -17,7 +17,7 @@ const FAMILIES = ["GK", "DF", "MF", "FW"] as const;
 export default function Roster({ tournament, team, onDone, onBack }: Props) {
   const [squad, setSquad] = useState<Player[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useI18n();
+  const { t, country } = useI18n();
 
   useEffect(() => {
     setSquad(null);
@@ -42,7 +42,7 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
     <section>
       <div className="page-head">
         <div>
-          <h1>{team.flag ?? "🌍"} {team.name}</h1>
+          <h1>{team.flag ?? "🌍"} {country(team.name)}</h1>
           <p className="hint">
             {t("squad.hint", { year: tournament.year, count: squad?.length ?? "…" })}
           </p>

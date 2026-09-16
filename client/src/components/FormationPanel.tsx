@@ -23,7 +23,7 @@ export default function FormationPanel({
   initial,
   onConfirm,
 }: Props) {
-  const { t, stage } = useI18n();
+  const { t, stage, country } = useI18n();
   const [squad, setSquad] = useState<Player[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,10 +44,10 @@ export default function FormationPanel({
       <div className="form-head">
         <h2 className="sec-title">{t("hub.formation")}</h2>
         <p className="hint">
-          {teamName} · {t("lineup.subtitle", {
+          {country(teamName)} · {t("lineup.subtitle", {
             day: match.day,
             stage: stage(match.stage_name),
-            opponent,
+            opponent: country(opponent),
           })}
         </p>
       </div>
