@@ -9,6 +9,7 @@ import type {
 } from "./types";
 import { api, readToken, setToken } from "./api";
 import { localeName, useI18n, type Locale } from "./i18n";
+import { trophyForYear } from "./trophies";
 import ChooseTournament from "./pages/ChooseTournament";
 import TeamPick from "./pages/TeamPick";
 import Roster from "./pages/Roster";
@@ -400,7 +401,12 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <div className="brand" onClick={reset}>
-          <span className="brand-ball" aria-hidden="true">⚽</span>
+          <img
+            className="brand-ball"
+            src={trophyForYear(flow.tournament?.year)}
+            alt=""
+            aria-hidden="true"
+          />
           <div>
             <div className="wm-line1">WORLD CUP</div>
             <div className="wm-line2">Simulator</div>

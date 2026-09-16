@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { flagFor, useI18n } from "../i18n";
+import { trophyForYear } from "../trophies";
 import type { Tournament } from "../types";
 
 interface Props {
@@ -8,12 +9,6 @@ interface Props {
   onPick: (t: Tournament) => void;
   onHistory: () => void;
 }
-
-const TROPHY_IMAGES: Record<string, string> = {
-  fifa: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/FIFA_World_Cup_Trophy_%28Ank_Kumar%2C_Infosys_Limited%29_04.jpg/120px-FIFA_World_Cup_Trophy_%28Ank_Kumar%2C_Infosys_Limited%29_04.jpg",
-  jules:
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/FIFA_World_Cup_Trophy_at_National_Football_Museum%2C_Manchester_02.jpg/120px-FIFA_World_Cup_Trophy_at_National_Football_Museum%2C_Manchester_02.jpg",
-};
 
 const hostFlags = (host: string) =>
   host
@@ -61,7 +56,7 @@ export default function ChooseTournament({ selected, onPick, onHistory }: Props)
             <span className="cup-pad">
               <img
                 className="cup-trophy"
-                src={TROPHY_IMAGES[c.year >= 1974 ? "fifa" : "jules"]}
+                src={trophyForYear(c.year)}
                 alt=""
                 loading="lazy"
               />

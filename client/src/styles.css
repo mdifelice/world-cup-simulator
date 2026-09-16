@@ -245,12 +245,10 @@ body {
   text-align: center;
 }
 .cup-trophy {
-  width: 46px;
-  height: 62px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  box-shadow: 0 4px 12px rgba(20, 28, 38, 0.16);
+  height: 66px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(20, 28, 38, 0.22));
   margin-bottom: 8px;
 }
 .cup-era {
