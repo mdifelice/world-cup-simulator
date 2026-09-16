@@ -14,8 +14,8 @@ import TeamPick from "./pages/TeamPick";
 import Roster from "./pages/Roster";
 import Overview from "./pages/Overview";
 import History from "./pages/History";
-import LineupPitch from "./pages/LineupPitch";
 import LiveMatch from "./components/LiveMatch";
+import MatchDetail from "./components/MatchDetail";
 import ShareModal from "./components/ShareModal";
 
 export type Step =
@@ -23,7 +23,6 @@ export type Step =
   | "team"
   | "roster"
   | "overview"
-  | "lineup"
   | "history";
 
 interface Flow {
@@ -55,12 +54,15 @@ export default function App() {
   const [configs, setConfigs] = useState<Record<string, LineupConfig>>({});
   const [seed, setSeed] = useState<number | null>(null);
   const [interactive, setInteractive] = useState(false);
-  const [pendingTarget, setPendingTarget] = useState<{ day: number; open: boolean } | null>(null);
   const runGuard = useRef<number | null>(null);
   const [scrollToMatch, setScrollToMatch] = useState<number | null>(null);
   const [liveMatch, setLiveMatch] = useState<RunMatch | null>(null);
+  const [matchDetail, setMatchDetail] = useState<RunMatch | null>(null);
+  const [formationFlash, setFormationFlash] = useState(0);
+  const [ffRunning, setFfRunning] = useState(false);
+  const ffTimer = useRef<number | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
-  const { t, locale, setLocale } = useI18n();
+  const { locale, setLocale } = useI18n();
 
   // Silent #token= capture from the OAuth redirect (login stays hidden).
   useEffect(() => {
@@ -102,7 +104,21 @@ export default function App() {
     return out;
   }, [flow.run, focusId]);
 
-  const nextUnconfiguredFocus = focusMatches.find((m) => !configs[matchKey(m)]) ?? null;
+  /** The next focus match that still needs a lineup — drives the inline
+   *  formation panel on the hub and gates the Play button. */
+  const inlineMatch = focusMatches.find((m) => !configs[matchKey(m)]) ?? null;
+
+  /** Match helpers used by the match-by-match fast-forward. */
+  const isFocusMatch = (run: RunPayload, id: number) => {
+    if (run.focus_team_id == null) return false;
+    const m = run.matches.find((x) => x.id === id);
+    return !!m && (m.home_team_id === run.focus_team_id || m.away_team_id === run.focus_team_id);
+  };
+
+  const runRef = useRef<RunPayload | null>(flow.run);
+  runRef.current = flow.run;
+  const revealedRef = useRef(flow.revealed);
+  revealedRef.current = flow.revealed;
 
   const revealCountForDay = (run: RunPayload, day: number) => {
     let n = 0;
@@ -175,65 +191,90 @@ export default function App() {
       });
   };
 
-  const confirmLineup = (cfg: LineupConfig) => {
-    const target = pendingTarget;
-    setPendingTarget(null);
-    if (!target || !flow.run) {
-      setStep("overview");
-      return;
-    }
-    const m = flow.run.matches.find(
-      (x) => x.day === target.day && (x.home_team_id === focusId || x.away_team_id === focusId),
-    );
-    const key = m ? matchKey(m) : `day:${target.day}`;
+  /** The inline formation panel auto-submits the lineup once the XI is full.
+   *  Re-run the (deterministic) sim so only the configured match changes. */
+  const applyLineup = (cfg: LineupConfig) => {
+    if (!flow.run || !inlineMatch) return;
+    const key = matchKey(inlineMatch);
     const newConfigs = { ...configs, [key]: cfg };
     setConfigs(newConfigs);
     const remaining = focusMatches.filter((x) => !newConfigs[matchKey(x)]);
-    postRun(remaining.length === 0, target, newConfigs);
-    setStep("overview");
-  };
-
-  const gateToSetup = () => {
-    if (!nextUnconfiguredFocus) return false;
-    setPendingTarget({ day: nextUnconfiguredFocus.day, open: false });
-    setStep("lineup");
-    return true;
+    postRun(remaining.length === 0, { day: inlineMatch.day, open: false }, newConfigs);
   };
 
   const revealAll = () => {
-    if (interactive && gateToSetup()) return;
+    if (!flow.run) return;
+    if (interactive && inlineMatch) {
+      const idx = flow.run.order.indexOf(inlineMatch.id);
+      setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, idx) } : f));
+      setFormationFlash((n) => n + 1);
+      return;
+    }
     setFlow((f) => (f.run ? { ...f, revealed: f.run.matches.length } : f));
     if (interactive && flow.run?.run_id == null && user) saveRunSilently();
   };
 
   const jumpToFocus = () => {
-    if (interactive && nextUnconfiguredFocus) {
-      setPendingTarget({ day: nextUnconfiguredFocus.day, open: true });
-      setStep("lineup");
-      return;
-    }
     if (!flow.run || flow.run.focus_team_id == null) return;
     const run = flow.run;
-    const next = run.order.find((id, i) => {
-      if (i >= flow.revealed) {
-        const m = run.matches.find((x) => x.id === id);
-        return !!m && (m.home_team_id === run.focus_team_id || m.away_team_id === run.focus_team_id);
-      }
-      return false;
-    });
+    if (interactive && inlineMatch) {
+      const idx = run.order.indexOf(inlineMatch.id);
+      setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, idx) } : f));
+      setFormationFlash((n) => n + 1);
+      return;
+    }
+    const next = run.order.find((id, i) => i >= flow.revealed && isFocusMatch(run, id));
     if (!next) {
       setFlow((f) => (f.run ? { ...f, revealed: f.run.matches.length } : f));
       return;
     }
-    const m = run.matches.find((x) => x.id === next)!;
+    const m = run.matches.find((x) => x.id === next);
+    if (!m) return;
     let n = 0;
     for (const id of run.order) {
       const x = run.matches.find((y) => y.id === id);
       if (!x || x.day > m.day) break;
       n += 1;
     }
-    setFlow((f) => ({ ...f, revealed: Math.max(f.revealed, n) }));
-    setLiveMatch(m);
+    setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, n) } : f));
+  };
+
+  const stopFF = () => {
+    if (ffTimer.current != null) {
+      window.clearInterval(ffTimer.current);
+      ffTimer.current = null;
+    }
+    setFfRunning(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (ffTimer.current != null) window.clearInterval(ffTimer.current);
+    };
+  }, []);
+
+  /** Hub fast-forward: simulate match by match (result only, 500ms apart),
+   *  stopping right before the next focus match so it can be played. */
+  const runFastForward = () => {
+    if (!flow.run || ffRunning) return;
+    const run = flow.run;
+    const cur = flow.revealed;
+    const first = run.order[cur];
+    if (first == null || isFocusMatch(run, first)) return;
+    setFfRunning(true);
+    ffTimer.current = window.setInterval(() => {
+      const r = runRef.current;
+      const at = revealedRef.current;
+      if (!r) {
+        stopFF();
+        return;
+      }
+      if (at >= r.matches.length || isFocusMatch(r, r.order[at])) {
+        stopFF();
+        return;
+      }
+      setFlow((f) => (f.run ? { ...f, revealed: f.revealed + 1 } : f));
+    }, 500);
   };
 
   // Ask before abandoning an in-progress interactive run with a refresh.
@@ -251,6 +292,7 @@ export default function App() {
     setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, idx + 1) } : f));
 
   const replayMatch = (m: RunMatch) => {
+    stopFF();
     setScrollToMatch(m.id);
     setLiveMatch(m);
   };
@@ -262,6 +304,7 @@ export default function App() {
       setLiveMatch(null);
       return;
     }
+    stopFF();
     const run = flow.run;
     let last = 0;
     for (const id of run.order) {
@@ -278,7 +321,6 @@ export default function App() {
     setConfigs({});
     setSeed(null);
     setInteractive(false);
-    setPendingTarget(null);
     setLiveMatch(null);
     setShareOpen(false);
     runGuard.current = null;
@@ -333,7 +375,6 @@ export default function App() {
     setConfigs({});
     setSeed(null);
     setInteractive(false);
-    setPendingTarget(null);
     setLiveMatch(null);
     setShareOpen(false);
     runGuard.current = null;
@@ -412,50 +453,26 @@ export default function App() {
             runError={flow.runError}
             revealedMatches={revealedMatches}
             maxShownDay={maxShownDay}
+            interactive={interactive}
             onJump={jumpToFocus}
             onAll={revealAll}
+            onFF={runFastForward}
+            ffRunning={ffRunning}
             scrollToId={scrollToMatch}
             onSimulate={revealUpTo}
             onReplay={replayMatch}
+            onOpenDetail={setMatchDetail}
+            isConfigured={(m) => !!configs[matchKey(m)]}
+            formationMatch={inlineMatch}
+            formationInitial={
+              inlineMatch ? configs[matchKey(inlineMatch)] : undefined
+            }
+            onFormationConfirm={applyLineup}
+            formationFlash={formationFlash}
             onStart={() => postRun(false, null, configs)}
             onShare={openShare}
           />
         )}
-        {step === "lineup" &&
-          flow.tournament &&
-          flow.team &&
-          flow.run &&
-          (() => {
-            const targetDay = pendingTarget?.day;
-            const m =
-              targetDay == null
-                ? null
-                : flow.run.matches.find(
-                    (x) => x.day === targetDay && (x.home_team_id === focusId || x.away_team_id === focusId),
-                  );
-            if (!m) {
-              return (
-                <section>
-                  <p className="hint">{t("app.noMatchOpen")}</p>
-                  <button className="btn primary" onClick={() => { setPendingTarget(null); setStep("overview"); }}>
-                    {t("lineup.cancel")}
-                  </button>
-                </section>
-              );
-            }
-            const key = matchKey(m);
-            return (
-              <LineupPitch
-                tournament={flow.tournament}
-                team={flow.team}
-                match={m}
-                shirtNumbers={flow.run.shirt_numbers}
-                initial={configs[key]}
-                onConfirm={confirmLineup}
-                onBack={() => { setPendingTarget(null); setStep("overview"); }}
-              />
-            );
-          })()}
         {step === "history" && (
           <History
             onOpen={openRun}
@@ -473,6 +490,14 @@ export default function App() {
           focusTeamId={flow.run.focus_team_id}
           onReveal={liveReveal}
           onFF={ffFromLive}
+        />
+      )}
+
+      {matchDetail && (
+        <MatchDetail
+          match={matchDetail}
+          focusTeamId={flow.run?.focus_team_id}
+          onClose={() => setMatchDetail(null)}
         />
       )}
 

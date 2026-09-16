@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useI18n, flagFor } from "../i18n";
-import { api } from "../api";
 import PlayerCard from "../components/PlayerCard";
-import type { Player, RunMatch, RunPayload } from "../types";
-import { playerSurname, positionFamily } from "../types";
+import FormationPanel from "../components/FormationPanel";
+import type { LineupConfig, RunMatch, RunPayload } from "../types";
 
 interface Props {
   run: RunPayload | null;
@@ -11,11 +10,20 @@ interface Props {
   runError: string | null;
   revealedMatches: RunMatch[];
   maxShownDay: number;
+  interactive: boolean;
   onJump: () => void;
   onAll: () => void;
+  onFF: () => void;
+  ffRunning: boolean;
   scrollToId?: number | null;
   onSimulate: (idx: number) => void;
   onReplay: (m: RunMatch) => void;
+  onOpenDetail: (m: RunMatch) => void;
+  isConfigured: (m: RunMatch) => boolean;
+  formationMatch: RunMatch | null;
+  formationInitial?: LineupConfig;
+  onFormationConfirm: (cfg: LineupConfig) => void;
+  formationFlash: number;
   onStart: () => void;
   onShare: () => void;
 }
@@ -45,11 +53,20 @@ export default function Overview({
   runError,
   revealedMatches,
   maxShownDay,
+  interactive,
   onJump,
   onAll,
+  onFF,
+  ffRunning,
   scrollToId,
   onSimulate,
   onReplay,
+  onOpenDetail,
+  isConfigured,
+  formationMatch,
+  formationInitial,
+  onFormationConfirm,
+  formationFlash,
   onStart,
   onShare,
 }: Props) {
@@ -57,18 +74,12 @@ export default function Overview({
   const total = run?.matches.length ?? 0;
   const { t, stage, country } = useI18n();
 
-  const [squad, setSquad] = useState<Player[] | null>(null);
-
+  const panelRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    setSquad(null);
-    if (!run) return;
-    if (run.focus_team_id != null) {
-      api
-        .players(run.focus_team_id, run.tournament_id)
-        .then(setSquad)
-        .catch(() => setSquad([]));
+    if (formationFlash > 0) {
+      panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-  }, [run]);
+  }, [formationFlash]);
 
   useEffect(() => {
     if (scrollToId == null) return;
@@ -78,17 +89,14 @@ export default function Overview({
     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [scrollToId]);
 
-  const runCodes = useMemo(() => {
-    const m = new Map<number, string>();
-    for (const g of run?.groups ?? []) {
-      for (const t of g.teams) {
-        if (t.code) m.set(t.id, t.code);
-      }
+  const runCodes = new Map<number, string>();
+  for (const g of run?.groups ?? []) {
+    for (const t of g.teams) {
+      if (t.code) runCodes.set(t.id, t.code);
     }
-    return m;
-  }, [run]);
+  }
 
-  const groups = useMemo(() => {
+  const groups = (() => {
     const map = new Map<string, Row[]>();
     const letterOf = new Map<number, string>();
     for (const g of run?.groups ?? []) {
@@ -150,9 +158,9 @@ export default function Overview({
       );
     }
     return map;
-  }, [run, revealedMatches]);
+  })();
 
-  const scorers = useMemo(() => {
+  const scorers = (() => {
     interface Entry {
       id: number;
       name: string;
@@ -177,41 +185,12 @@ export default function Overview({
       .filter((e) => e.goals > 0)
       .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name))
       .slice(0, 10);
-  }, [revealedMatches]);
+  })();
 
   const allRevealed = total > 0 && revealed >= total;
   const champion = run?.champion ?? null;
 
-  const pages = useMemo(() => {
-    const out: RunMatch[][] = [];
-    for (let i = 0; i < (run?.matches.length ?? 0); i += 20) {
-      out.push(run!.matches.slice(i, i + 20));
-    }
-    return out;
-  }, [run]);
-
-  const [page, setPage] = useState(0);
-  useEffect(() => setPage(0), [run]);
-  const cur = pages[page] ?? [];
-
   const isMine = (m: RunMatch) => focusId != null && (m.home_team_id === focusId || m.away_team_id === focusId);
-  const idxOf = (m: RunMatch) => run!.order.indexOf(m.id);
-
-  const formation = useMemo(() => {
-    if (!squad || run == null || run.focus_team_id == null) return null;
-    const fam = ["GK", "DF", "MF", "FW"] as const;
-    const map = new Map<string, Player[]>();
-    for (const f of fam) map.set(f, []);
-    for (const p of squad) map.get(positionFamily(p.position))!.push(p);
-    return fam
-      .filter((f) => map.get(f)!.length > 0)
-      .map((f) => ({
-        f,
-        ps: (map.get(f) ?? [])
-          .slice()
-          .sort((a, b) => (b.rating ?? b.overall) - (a.rating ?? a.overall)),
-      }));
-  }, [squad, run]);
 
   return (
     <section>
@@ -227,6 +206,28 @@ export default function Overview({
             {run ? t("cup.revealed", { day: maxShownDay || 0, revealed, total }) : ""}
           </p>
         </div>
+        {run && !allRevealed && (
+          <div className="top-actions cmd">
+            {focusId != null && (
+              <button
+                className={"btn big" + (ffRunning ? " ff-on" : "")}
+                onClick={onFF}
+                disabled={ffRunning}
+                title={ffRunning ? t("hub.ffStop") : t("hub.ff")}
+              >
+                {ffRunning ? t("hub.ffStop") : t("hub.ff")}
+              </button>
+            )}
+            <button className="btn primary big" onClick={onAll}>
+              {t("cup.playAll")}
+            </button>
+            {focusId != null && (
+              <button className="btn big" onClick={onJump}>
+                {t("cup.jump")}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {runError && (
@@ -235,11 +236,14 @@ export default function Overview({
           <button className="btn primary big" onClick={onStart}>{t("cup.retry")}</button>
         </div>
       )}
-      {!run && !runError && (
+      {!run && !runError && !interactive && (
         <div className="bar">
           <p className="hint">{t("cup.startHint")}</p>
           <button className="btn primary big" onClick={onStart}>{t("cup.start")}</button>
         </div>
+      )}
+      {!run && !runError && interactive && (
+        <p className="hint">{t("squad.loading")}</p>
       )}
 
       {allRevealed && champion && (
@@ -255,123 +259,93 @@ export default function Overview({
 
       {run && (
         <>
-          <div className="cmd-bar bar">
-            {!allRevealed && (
-              <>
-                <button className="btn primary big" onClick={onAll}>{t("cup.playAll")}</button>
-                {focusId != null && (
-                  <button className="btn big" onClick={onJump}>{t("cup.jump")}</button>
-                )}
-              </>
-            )}
-          </div>
-
           <div className="hub-grid">
             <div className="hub-main">
-              {pages.length > 1 && (
-                <div className="hub-pager">
-                  {pages.map((_, i) => (
-                    <button
-                      key={i}
-                      className={"pg" + (i === page ? " on" : "")}
-                      onClick={() => setPage(i)}
+              <div className="match-scroll">
+                {run.matches.length === 0 && <p className="hint">{t("cup.noMatches")}</p>}
+                {run.matches.map((m) => {
+                  const idx = run.order.indexOf(m.id);
+                  const done = idx < revealed;
+                  const next = idx === revealed;
+                  const mine = isMine(m);
+                  const locked = idx > revealed;
+                  return (
+                    <div
+                      key={m.id}
+                      data-id={m.id}
+                      className={
+                        "match-row" +
+                        (done ? " done" : "") +
+                        (next ? " next" : "") +
+                        (locked ? " locked" : "") +
+                        (mine ? " mine" : "") +
+                        (m.id === scrollToId ? " ff-target" : "")
+                      }
+                      onClick={done ? () => onOpenDetail(m) : undefined}
+                      title={done ? t("hub.viewResult") : undefined}
+                      role={done ? "button" : undefined}
                     >
-                      {i === 0 ? t("hub.p1") : i === pages.length - 1 ? t("hub.pEnd") : `${i * 20 + 1}–${Math.min((i + 1) * 20, total)}`}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {cur.length === 0 && <p className="hint">{t("cup.noMatches")}</p>}
-              {cur.map((m) => {
-                const idx = idxOf(m);
-                const done = idx < revealed;
-                const next = idx === revealed;
-                const mine = isMine(m);
-                const locked = idx > revealed;
-                return (
-                  <div
-                    key={m.id}
-                    data-id={m.id}
-                    className={
-                      "match-row" +
-                      (done ? " done" : "") +
-                      (next ? " next" : "") +
-                      (locked ? " locked" : "") +
-                      (mine ? " mine" : "") +
-                      (m.id === scrollToId ? " ff-target" : "")
-                    }
-                  >
-                    <span className="mr-stage">
-                      {stage(m.stage_name)} · {t("match.day", { day: m.day })}
-                    </span>
-                    <span className={"mr-team home" + (m.home_team_id === focusId ? " focus-tag" : "")}>
-                      {flagFor(m.home_team_name)} {country(m.home_team_name)}
-                    </span>
-                    <span className="mr-score">
-                      {done
-                        ? `${m.home_score}–${m.away_score}${m.penalties ? ` · ${t("match.pensScore", { home: m.penalties.home_score, away: m.penalties.away_score })}` : ""}`
-                        : "–"}
-                    </span>
-                    <span className={"mr-team away" + (m.away_team_id === focusId ? " focus-tag" : "")}>
-                      {flagFor(m.away_team_name)} {country(m.away_team_name)}
-                    </span>
-                    <span className="mr-action">
-                      {next && mine && (
-                        <button className="btn play msg" onClick={() => onReplay(m)}>
-                          ▶ {t("hub.play")}
-                        </button>
-                      )}
-                      {next && !mine && (
-                        <button className="btn sim msg" onClick={() => onSimulate(idx)}>
-                          {t("hub.simulate")}
-                        </button>
-                      )}
-                      {done && <span className="mr-done">✓</span>}
-                    </span>
-                  </div>
-                );
-              })}
-              {pages.length > 1 && (
-                <div className="hub-pager">
-                  {pages.map((_, i) => (
-                    <button
-                      key={i}
-                      className={"pg" + (i === page ? " on" : "")}
-                      onClick={() => setPage(i)}
-                    >
-                      {i === 0 ? t("hub.p1") : i === pages.length - 1 ? t("hub.pEnd") : `${i * 20 + 1}–${Math.min((i + 1) * 20, total)}`}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {formation && (
-                <div className="form-panel">
-                  <h2 className="sec-title">{t("hub.formation")}</h2>
-                  {formation.map(({ f, ps }) => (
-                    <div key={f} className="pos-block">
-                      <h3 className="pos-title">{t(`pos.${f}`)}</h3>
-                      <div className="form-list">
-                        {ps.map((p, i) => (
-                          <PlayerCard
-                            key={p.id}
-                            player={p}
-                            variant="stat"
-                            tone={i % 4}
-                            sub={p.position}
-                            right={playerSurname(p.name)}
-                          />
-                        ))}
-                      </div>
+                      <span className="mr-stage">
+                        {stage(m.stage_name)} · {t("match.day", { day: m.day })}
+                      </span>
+                      <span className={"mr-team home" + (m.home_team_id === focusId ? " focus-tag" : "")}>
+                        {flagFor(m.home_team_name)} {country(m.home_team_name)}
+                      </span>
+                      <span className="mr-score">
+                        {done
+                          ? `${m.home_score}–${m.away_score}${m.penalties ? ` · ${t("match.pensScore", { home: m.penalties.home_score, away: m.penalties.away_score })}` : ""}`
+                          : "–"}
+                      </span>
+                      <span className={"mr-team away" + (m.away_team_id === focusId ? " focus-tag" : "")}>
+                        {flagFor(m.away_team_name)} {country(m.away_team_name)}
+                      </span>
+                      <span className="mr-action">
+                        {next && mine && interactive && (
+                          <button
+                            className="btn play msg"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onReplay(m);
+                            }}
+                            disabled={!isConfigured(m)}
+                            title={isConfigured(m) ? undefined : t("hub.playDisabled")}
+                          >
+                            ▶ {t("hub.play")}
+                          </button>
+                        )}
+                        {next && !mine && (
+                          <button className="btn sim msg" onClick={() => onSimulate(idx)}>
+                            {t("hub.simulate")}
+                          </button>
+                        )}
+                        {done && <span className="mr-done">✓</span>}
+                      </span>
                     </div>
-                  ))}
+                  );
+                })}
+              </div>
+
+              {interactive && focusId != null && formationMatch && run && (
+                <div ref={panelRef}>
+                  <FormationPanel
+                    tournamentId={run.tournament_id}
+                    teamId={focusId}
+                    teamName={
+                      formationMatch.home_team_id === focusId
+                        ? formationMatch.home_team_name
+                        : formationMatch.away_team_name
+                    }
+                    match={formationMatch}
+                    shirtNumbers={run.shirt_numbers}
+                    initial={formationInitial}
+                    onConfirm={onFormationConfirm}
+                  />
                 </div>
               )}
             </div>
 
             <aside className="hub-side">
-              <div className="group-tables">
+              <div className="group-scroll">
                 {[...groups.entries()].map(([letter, rows]) => (
                   <div key={letter} className="table-card">
                     <h2 className="table-title">{stage(letter)}</h2>

@@ -131,6 +131,7 @@ export default function LiveMatch({
 
   return (
     <div className="live-modal">
+      <div className="live-box">
       <div className="live-head">
         <span className="live-stage">
           {stage(m.stage_name)} · {t("match.day", { day: m.day })}
@@ -237,6 +238,7 @@ export default function LiveMatch({
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

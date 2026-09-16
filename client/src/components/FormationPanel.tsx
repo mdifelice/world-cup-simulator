@@ -1,27 +1,27 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { useI18n } from "../i18n";
-import LineupEditor from "../components/LineupEditor";
-import type { LineupConfig, Player, RunMatch, Team, Tournament } from "../types";
+import LineupEditor from "./LineupEditor";
+import type { LineupConfig, Player, RunMatch } from "../types";
 
 interface Props {
-  tournament: Tournament;
-  team: Team;
+  tournamentId: number;
+  teamId: number;
+  teamName: string;
   match: RunMatch;
   shirtNumbers: boolean;
   initial?: LineupConfig;
   onConfirm: (cfg: LineupConfig) => void;
-  onBack: () => void;
 }
 
-export default function LineupPitch({
-  tournament,
-  team,
+export default function FormationPanel({
+  tournamentId,
+  teamId,
+  teamName,
   match,
   shirtNumbers,
   initial,
   onConfirm,
-  onBack,
 }: Props) {
   const { t, stage } = useI18n();
   const [squad, setSquad] = useState<Player[] | null>(null);
@@ -31,35 +31,28 @@ export default function LineupPitch({
     setSquad(null);
     setError(null);
     api
-      .players(team.id, tournament.id)
+      .players(teamId, tournamentId)
       .then(setSquad)
       .catch((e) => setError(e.message));
-  }, [team.id, tournament.id]);
+  }, [teamId, tournamentId]);
 
   const opponent =
-    match.home_team_id === team.id ? match.away_team_name : match.home_team_name;
+    match.home_team_id === teamId ? match.away_team_name : match.home_team_name;
 
   return (
-    <section>
-      <div className="page-head">
-        <div>
-          <h1>
-            {team.flag ?? "🌍"} {team.name} {t("lineup.title")}
-          </h1>
-          <p className="hint">
-            {t("lineup.subtitle", {
-              day: match.day,
-              stage: stage(match.stage_name),
-              opponent,
-            })}
-          </p>
-        </div>
-        <button className="btn secondary" onClick={onBack}>{t("lineup.cancel")}</button>
+    <div className="form-panel form-wrap">
+      <div className="form-head">
+        <h2 className="sec-title">{t("hub.formation")}</h2>
+        <p className="hint">
+          {teamName} · {t("lineup.subtitle", {
+            day: match.day,
+            stage: stage(match.stage_name),
+            opponent,
+          })}
+        </p>
       </div>
-
       {error && <p className="error">{error}</p>}
       {!squad && !error && <p className="hint">{t("squad.loading")}</p>}
-
       {squad && (
         <LineupEditor
           shirtNumbers={shirtNumbers}
@@ -68,6 +61,6 @@ export default function LineupPitch({
           onConfirm={onConfirm}
         />
       )}
-    </section>
+    </div>
   );
 }
