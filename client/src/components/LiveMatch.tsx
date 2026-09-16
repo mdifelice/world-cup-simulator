@@ -6,7 +6,7 @@ interface Props {
   match: RunMatch;
   focusTeamId: number | null;
   onReveal: (m: RunMatch) => void;
-  onClose: () => void;
+  onFF: (m: RunMatch) => void;
 }
 
 const GOLD = "#d8a418";
@@ -18,7 +18,7 @@ export default function LiveMatch({
   match: m,
   focusTeamId,
   onReveal,
-  onClose,
+  onFF,
 }: Props) {
   const { t, stage, country } = useI18n();
 
@@ -135,11 +135,9 @@ export default function LiveMatch({
         <span className="live-stage">
           {stage(m.stage_name)} · {t("match.day", { day: m.day })}
         </span>
-        {done && (
-          <button className="live-x" onClick={onClose} title={t("match.back")}>
-            ✕
-          </button>
-        )}
+        <button className="live-ff" onClick={() => onFF(m)}>
+          ⏩ {t("hub.ff")}
+        </button>
       </div>
 
       <div className="match-vs">
@@ -237,14 +235,6 @@ export default function LiveMatch({
               </span>
             </div>
           ))}
-        </div>
-      )}
-
-      {done && (
-        <div className="cmd-bar bar match-actions">
-          <button className="btn primary big" onClick={onClose}>
-            {t("match.toTournament")}
-          </button>
         </div>
       )}
     </div>

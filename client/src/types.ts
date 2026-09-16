@@ -4,6 +4,7 @@ export interface Tournament {
   year: number;
   host: string;
   winner: string | null;
+  ready: boolean;
   start_date: string | null;
   end_date: string | null;
   shirt_numbers: boolean;
@@ -228,6 +229,8 @@ export function positionFamilies(positions: string[]): Set<"GK" | "DF" | "MF" | 
 export interface RunTeam {
   id: number;
   name: string;
+  tla?: string;
+  code?: string | null;
 }
 
 export interface GroupInfo {

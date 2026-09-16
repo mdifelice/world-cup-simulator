@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { useI18n } from "../i18n";
+import { ratingStars, starsString } from "../types";
 import type { Participant, Tournament } from "../types";
 
 interface Props {
@@ -24,10 +25,20 @@ export default function TeamPick({ tournament, selected, onPick, onNeutral }: Pr
       .catch((e) => setError(e.message));
   }, [tournament.id]);
 
+  const sorted = useMemo(
+    () => [...(teams ?? [])].sort((a, b) => b.rating - a.rating || a.name.localeCompare(b.name)),
+    [teams],
+  );
+
   return (
     <section>
-      <h1>{t("team.title", { year: tournament.year })}</h1>
-      <p className="hint">{t("team.hint", { year: tournament.year })}</p>
+      <div className="page-head">
+        <div>
+          <h1>{t("team.title", { year: tournament.year })}</h1>
+          <p className="hint">{t("team.hint", { year: tournament.year })}</p>
+        </div>
+        <button className="btn secondary" onClick={onNeutral}>{t("team.neutral")}</button>
+      </div>
       {error && <p className="error">{error}</p>}
       {!teams && !error && <p className="hint">{t("team.loading")}</p>}
       {teams && teams.length === 0 && (
@@ -35,26 +46,19 @@ export default function TeamPick({ tournament, selected, onPick, onNeutral }: Pr
           <p>{t("team.empty", { year: tournament.year })}</p>
         </div>
       )}
-      <div className="card-grid">
-        {teams?.map((team) => (
+      <div className="card-grid team-grid">
+        {sorted.map((team) => (
           <button
             key={team.id}
             className={"card team-card" + (selected?.id === team.id ? " picked" : "")}
-            onClick={() => onPick(team, teams)}
+            onClick={() => onPick(team, sorted)}
           >
             <span className="team-flag">{team.flag ?? "🌍"}</span>
             <span className="team-name">{team.name}</span>
-            <span className="team-rating">OVR {team.rating}</span>
+            <span className="team-stars">{starsString(ratingStars(team.rating))}</span>
           </button>
         ))}
       </div>
-      {teams && teams.length > 0 && (
-        <p className="hint bar-hint">
-          <button className="link" onClick={onNeutral}>
-            {t("team.neutral")}
-          </button>
-        </p>
-      )}
     </section>
   );
 }

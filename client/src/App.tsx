@@ -13,8 +13,6 @@ import ChooseTournament from "./pages/ChooseTournament";
 import TeamPick from "./pages/TeamPick";
 import Roster from "./pages/Roster";
 import Overview from "./pages/Overview";
-import MatchView from "./pages/MatchView";
-import Finals from "./pages/Finals";
 import History from "./pages/History";
 import LineupPitch from "./pages/LineupPitch";
 import LiveMatch from "./components/LiveMatch";
@@ -25,9 +23,7 @@ export type Step =
   | "team"
   | "roster"
   | "overview"
-  | "match"
   | "lineup"
-  | "finish"
   | "history";
 
 interface Flow {
@@ -36,7 +32,6 @@ interface Flow {
   participants: Participant[];
   run: RunPayload | null;
   revealed: number;
-  openMatchId: number | null;
   runError: string | null;
 }
 
@@ -46,7 +41,6 @@ const emptyFlow: Flow = {
   participants: [],
   run: null,
   revealed: 0,
-  openMatchId: null,
   runError: null,
 };
 
@@ -63,8 +57,6 @@ export default function App() {
   const [interactive, setInteractive] = useState(false);
   const [pendingTarget, setPendingTarget] = useState<{ day: number; open: boolean } | null>(null);
   const runGuard = useRef<number | null>(null);
-  const ffTimer = useRef<number | null>(null);
-  const [ffRunning, setFfRunning] = useState(false);
   const [scrollToMatch, setScrollToMatch] = useState<number | null>(null);
   const [liveMatch, setLiveMatch] = useState<RunMatch | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
@@ -147,7 +139,6 @@ export default function App() {
           ...f,
           run,
           revealed: target ? revealCountForDay(run, target.day) : 0,
-          openMatchId: null,
           runError: null,
         }));
         if (target?.open) {
@@ -209,38 +200,6 @@ export default function App() {
     return true;
   };
 
-  const revealThrough = (day: number) =>
-    setFlow((f) => {
-      if (!f.run) return f;
-      let n = 0;
-      for (const id of f.run.order) {
-        const m = f.run.matches.find((x) => x.id === id);
-        if (!m || m.day > day) break;
-        n += 1;
-      }
-      return { ...f, revealed: Math.max(f.revealed, n) };
-    });
-
-  const nextMatchday = () => {
-    if (interactive && nextUnconfiguredFocus && nextUnconfiguredFocus.day <= maxShownDay + 1) {
-      gateToSetup();
-      return;
-    }
-    if (interactive && flow.run && focusId != null) {
-      const fm = flow.run.matches.find(
-        (m) =>
-          m.day === maxShownDay + 1 &&
-          (m.home_team_id === focusId || m.away_team_id === focusId),
-      );
-      if (fm && configs[matchKey(fm)]) {
-        revealThrough(maxShownDay + 1);
-        setLiveMatch(fm);
-        return;
-      }
-    }
-    revealThrough(maxShownDay + 1);
-  };
-
   const revealAll = () => {
     if (interactive && gateToSetup()) return;
     setFlow((f) => (f.run ? { ...f, revealed: f.run.matches.length } : f));
@@ -273,55 +232,45 @@ export default function App() {
       if (!x || x.day > m.day) break;
       n += 1;
     }
-    if (interactive) {
-      setFlow((f) => ({ ...f, revealed: Math.max(f.revealed, n), openMatchId: null }));
-      setLiveMatch(m);
-    } else {
-      setFlow((f) => ({ ...f, revealed: Math.max(f.revealed, n), openMatchId: m.id }));
-      setStep("match");
-    }
+    setFlow((f) => ({ ...f, revealed: Math.max(f.revealed, n) }));
+    setLiveMatch(m);
   };
 
-  /** Reveal matches one by one (every 500ms), stopping the moment a focus-team
-   *  match is revealed — the results then scroll into view and open — or when
-   *  the whole tournament is out. */
-  const stopFF = () => {
-    if (ffTimer.current != null) {
-      window.clearInterval(ffTimer.current);
-      ffTimer.current = null;
-    }
-    setFfRunning(false);
+  // Ask before abandoning an in-progress interactive run with a refresh.
+  useEffect(() => {
+    if (!interactive || !flow.run || flow.revealed >= (flow.run.matches.length || 0)) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [interactive, flow.run, flow.revealed]);
+
+  const revealUpTo = (idx: number) =>
+    setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, idx + 1) } : f));
+
+  const replayMatch = (m: RunMatch) => {
+    setScrollToMatch(m.id);
+    setLiveMatch(m);
   };
-  const runFastForward = () => {
-    if (!flow.run || ffRunning) return;
-    if (focusId == null) {
-      setFlow((f) => (f.run ? { ...f, revealed: f.run.matches.length } : f));
+
+  /** Fast-forward from the live popup: simulate everything to the end of the
+   *  current round (same stage), then close back to the hub. */
+  const ffFromLive = (m: RunMatch) => {
+    if (!flow.run) {
+      setLiveMatch(null);
       return;
     }
     const run = flow.run;
-    const order = run.order;
-    let revealed = flow.revealed;
-    setFfRunning(true);
-    ffTimer.current = window.setInterval(() => {
-      if (revealed >= order.length) {
-        stopFF();
-        return;
-      }
-      const m = run.matches.find((x) => x.id === order[revealed]);
-      revealed += 1;
-      setFlow((f) => ({ ...f, revealed }));
-      if (m && (m.home_team_id === focusId || m.away_team_id === focusId)) {
-        stopFF();
-        setScrollToMatch(m.id);
-        setLiveMatch(m);
-      }
-    }, 500);
-  };
-  useEffect(() => () => stopFF(), []);
-
-  const openMatch = (m: RunMatch) => {
-    setFlow((f) => ({ ...f, openMatchId: m.id }));
-    setStep("match");
+    let last = 0;
+    for (const id of run.order) {
+      const x = run.matches.find((y) => y.id === id);
+      if (!x || x.stage_key !== m.stage_key) break;
+      last += 1;
+    }
+    setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, last) } : f));
+    setLiveMatch(null);
   };
 
   const pickTournament = (t: Tournament) => {
@@ -367,6 +316,7 @@ export default function App() {
       year: run.year,
       host: run.host,
       winner: run.champion,
+      ready: true,
       start_date: null,
       end_date: null,
       shirt_numbers: run.shirt_numbers,
@@ -374,7 +324,7 @@ export default function App() {
     setInteractive(false);
     setConfigs({});
     setSeed(run.seed);
-    setFlow((f) => ({ ...f, tournament: t, run, revealed: 0, openMatchId: null }));
+    setFlow((f) => ({ ...f, tournament: t, run, revealed: 0 }));
     setStep("overview");
   };
 
@@ -399,32 +349,10 @@ export default function App() {
     });
   };
 
-  const goFinish = () => {
-    if (interactive && gateToSetup()) return;
-    if (interactive && flow.run?.run_id == null && user) saveRunSilently();
+  /** Open the run-summary share popup; archive the completed run first. */
+  const openShare = () => {
+    if (interactive && user && flow.run?.run_id == null) saveRunSilently();
     setShareOpen(true);
-    setStep("finish");
-  };
-
-  const steps: { key: Step; label: string }[] = [
-    { key: "tournament", label: t("step.worldcup") },
-    { key: "team", label: t("step.team") },
-    { key: "roster", label: t("step.squad") },
-    { key: "overview", label: t("step.tournament") },
-    { key: "match", label: t("step.match") },
-    { key: "finish", label: t("step.ceremonies") },
-    { key: "history", label: t("step.history") },
-  ];
-
-  // The lineup step sits between overview and the rest of the flow.
-  const activeIndex =
-    step === "lineup"
-      ? steps.findIndex((s) => s.key === "overview")
-      : steps.findIndex((s) => s.key === step);
-  const go = (s: Step) => {
-    const idx = steps.findIndex((x) => x.key === s);
-    if (idx < 0) return;
-    if (idx < activeIndex) setStep(s);
   };
 
   return (
@@ -433,37 +361,29 @@ export default function App() {
         <div className="brand" onClick={reset}>
           <svg className="brand-badge" width="40" height="40" viewBox="0 0 100 100" aria-hidden="true">
             <defs>
-              <linearGradient id="brand-trophy" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#f0c840" />
-                <stop offset="1" stopColor="#a87912" />
-              </linearGradient>
+              <radialGradient id="ball-g" cx="35%" cy="28%" r="80%">
+                <stop offset="0" stopColor="#ffffff" />
+                <stop offset="1" stopColor="#d7e0ea" />
+              </radialGradient>
+              <clipPath id="ball-clip"><circle cx="50" cy="50" r="46" /></clipPath>
+              <path id="ball-pent" d="M0 -11 L10.46 -3.4 L6.47 8.9 L-6.47 8.9 L-10.46 -3.4 Z" />
             </defs>
-            <circle cx="50" cy="50" r="46" fill="#fff" stroke="url(#brand-trophy)" strokeWidth="4" />
-            <rect x="37" y="66" width="26" height="5" rx="2" fill="#b8860b" />
-            <path d="M33 30 H67 V44 C67 56 60 65 50 68 C40 65 33 56 33 44 Z" fill="url(#brand-trophy)" />
-            <path d="M33 34 C21 40 18 52 23 63" stroke="url(#brand-trophy)" strokeWidth="5" fill="none" strokeLinecap="round" />
-            <path d="M67 34 C79 40 82 52 77 63" stroke="url(#brand-trophy)" strokeWidth="5" fill="none" strokeLinecap="round" />
-            <ellipse cx="50" cy="27" rx="17" ry="4" fill="#e8b62c" />
+            <circle cx="50" cy="50" r="46" fill="url(#ball-g)" stroke="#1b2530" strokeWidth="3" />
+            <g clipPath="url(#ball-clip)" fill="#1b2530">
+              <use href="#ball-pent" x="50" y="50" />
+              <use href="#ball-pent" transform="translate(50,10)" />
+              <use href="#ball-pent" transform="translate(90,42)" />
+              <use href="#ball-pent" transform="translate(74,86)" />
+              <use href="#ball-pent" transform="translate(26,86)" />
+              <use href="#ball-pent" transform="translate(10,42)" />
+            </g>
           </svg>
           <div>
             <div className="wm-line1">WORLD CUP</div>
             <div className="wm-line2">Simulator</div>
           </div>
         </div>
-        <nav className="steps">
-          {steps.map((s) => (
-            <button
-              key={s.key}
-              className={"step" + (step === s.key ? " active" : "") + (s.key === "history" ? " side" : "")}
-              onClick={() => (s.key === "history" ? setStep("history") : go(s.key))}
-            >
-              <span className="step-num">{steps.findIndex((x) => x.key === s.key) + 1}</span>
-              {s.label}
-            </button>
-          ))}
-        </nav>
         <div className="top-actions">
-          {user && <span className="chip">{user.display_name ?? user.email ?? t("app.signedin")}</span>}
           <select
             className="lang"
             value={locale}
@@ -478,7 +398,11 @@ export default function App() {
 
       <main className="content">
         {step === "tournament" && (
-          <ChooseTournament selected={flow.tournament} onPick={pickTournament} />
+          <ChooseTournament
+            selected={flow.tournament}
+            onPick={pickTournament}
+            onHistory={() => setStep("history")}
+          />
         )}
         {step === "team" && flow.tournament && (
           <TeamPick
@@ -506,15 +430,13 @@ export default function App() {
             runError={flow.runError}
             revealedMatches={revealedMatches}
             maxShownDay={maxShownDay}
-            onNext={nextMatchday}
-            onAll={revealAll}
             onJump={jumpToFocus}
-            onFF={runFastForward}
-            ffRunning={ffRunning}
+            onAll={revealAll}
             scrollToId={scrollToMatch}
-            onOpen={openMatch}
+            onSimulate={revealUpTo}
+            onReplay={replayMatch}
             onStart={() => postRun(false, null, configs)}
-            onFinish={goFinish}
+            onShare={openShare}
           />
         )}
         {step === "lineup" &&
@@ -552,37 +474,6 @@ export default function App() {
               />
             );
           })()}
-        {step === "match" && flow.run && flow.openMatchId != null &&
-          (() => {
-            const m = flow.run.matches.find((x) => x.id === flow.openMatchId);
-            if (!m) return null;
-            return (
-              <MatchView
-                match={m}
-                focusTeamId={flow.run.focus_team_id}
-                shirtNumbers={flow.run.shirt_numbers}
-                onBack={() => setStep("overview")}
-                onOpenPrev={() => {
-                  const order = flow.run!.order;
-                  const idx = order.indexOf(m.id);
-                  if (idx > 0) openMatch(flow.run!.matches.find((x) => x.id === order[idx - 1])!);
-                  else setStep("overview");
-                }}
-              />);
-          })()
-        }
-        {step === "match" && (!flow.run || flow.openMatchId == null) && (
-          <p className="hint">{t("app.noMatchOpen")}</p>
-        )}
-        {step === "finish" && flow.run && (
-          <Finals
-            run={flow.run}
-            teamId={flow.team?.id ?? null}
-            onReplay={startCup}
-            onHistory={() => setStep("history")}
-            onHome={reset}
-          />
-        )}
         {step === "history" && (
           <History
             onOpen={openRun}
@@ -599,7 +490,7 @@ export default function App() {
           match={liveMatch}
           focusTeamId={flow.run.focus_team_id}
           onReveal={liveReveal}
-          onClose={() => setLiveMatch(null)}
+          onFF={ffFromLive}
         />
       )}
 

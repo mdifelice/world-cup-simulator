@@ -3,6 +3,7 @@ import { api } from "../api";
 import { useI18n } from "../i18n";
 import type { Player, Team, Tournament } from "../types";
 import { positionFamily } from "../types";
+import PlayerCard from "../components/PlayerCard";
 
 interface Props {
   tournament: Tournament;
@@ -37,23 +38,21 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
     return by;
   }, [squad]);
 
-  const totalOvr = useMemo(() => {
-    const s = squad ?? [];
-    if (!s.length) return null;
-    return Math.round(s.reduce((a, p) => a + (p.overall || 0), 0) / s.length);
-  }, [squad]);
-
   return (
     <section>
       <div className="page-head">
         <div>
-          <h1>{team.flag ?? "🌍"} {team.name} {t("squad.title")}</h1>
+          <h1>{team.flag ?? "🌍"} {team.name}</h1>
           <p className="hint">
             {t("squad.hint", { year: tournament.year, count: squad?.length ?? "…" })}
-            {totalOvr != null ? <> · {t("squad.avg")} ✦ {totalOvr}</> : ""}
           </p>
         </div>
-        <button className="btn secondary" onClick={onBack}>{t("squad.back")}</button>
+        <div className="page-actions">
+          <button className="btn secondary" onClick={onBack}>{t("squad.back")}</button>
+          <button className="btn primary big" onClick={onDone} disabled={!squad?.length}>
+            {t("squad.start")}
+          </button>
+        </div>
       </div>
       {error && <p className="error">{error}</p>}
       {!squad && !error && <p className="hint">{t("squad.loading")}</p>}
@@ -68,26 +67,32 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
             return (
               <div key={f} className="pos-block">
                 <h2 className="pos-title">{t(`pos.${f}`)}</h2>
-                <div className="player-list">
-                  {ps.map((p) => (
-                    <div key={p.id} className="player-row">
-                      <span className="player-num">
-                        {tournament.shirt_numbers ? p.shirt_number ?? "—" : p.position}
-                      </span>
-                      <span className="player-name">{p.name}</span>
-                      <span className="player-pos">{p.position}</span>
-                      <span className="player-ovr">✦ {Math.round(p.overall)}</span>
-                    </div>
+                <div className="squad-grid">
+                  {ps.map((p, i) => (
+                    <PlayerCard
+                      key={p.id}
+                      player={{
+                        id: p.id,
+                        name: p.name,
+                        position: p.position,
+                        photo_url: p.photo_url,
+                        shirt_number: p.shirt_number ?? undefined,
+                        overall: p.overall,
+                        rating: p.rating,
+                      }}
+                      variant="grid"
+                      tone={i}
+                      number={
+                        tournament.shirt_numbers
+                          ? p.shirt_number ?? null
+                          : p.position
+                      }
+                    />
                   ))}
                 </div>
               </div>
             );
           })}
-          <div className="bar-hint">
-            <button className="btn primary big" onClick={onDone}>
-              {t("squad.start")}
-            </button>
-          </div>
         </>
       )}
     </section>
