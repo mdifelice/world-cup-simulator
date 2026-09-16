@@ -533,6 +533,7 @@ const FLAGS: Record<string, string> = {
   Cameroon: "🇨🇲",
   Canada: "🇨🇦",
   "Cape Verde": "🇨🇻",
+  Chile: "🇨🇱",
   Colombia: "🇨🇴",
   "Costa Rica": "🇨🇷",
   Croatia: "🇭🇷",
@@ -563,6 +564,7 @@ const FLAGS: Record<string, string> = {
   Poland: "🇵🇱",
   Portugal: "🇵🇹",
   Qatar: "🇶🇦",
+  Russia: "🇷🇺",
   "Saudi Arabia": "🇸🇦",
   Scotland: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
   Senegal: "🇸🇳",
@@ -578,6 +580,7 @@ const FLAGS: Record<string, string> = {
   Uruguay: "🇺🇾",
   Uzbekistan: "🇺🇿",
   Wales: "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+  "West Germany": "🇩🇪",
 };
 
 /** Emoji flag for a country name, or "" if unknown. */

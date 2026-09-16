@@ -10,18 +10,16 @@ interface Props {
   onHistory: () => void;
 }
 
-const hostFlags = (host: string) =>
+const hostParts = (host: string) =>
   host
     .split(/[/·]+/)
     .map((h) => h.trim())
-    .filter(Boolean)
-    .map(flagFor)
-    .join(" ");
+    .filter(Boolean);
 
 export default function ChooseTournament({ selected, onPick, onHistory }: Props) {
   const [cups, setCups] = useState<Tournament[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useI18n();
+  const { t, country } = useI18n();
 
   useEffect(() => {
     api.tournaments().then(setCups).catch((e) => setError(e.message));
@@ -54,24 +52,34 @@ export default function ChooseTournament({ selected, onPick, onHistory }: Props)
           >
             <span className="cup-banner" />
             <span className="cup-pad">
-              <img
-                className="cup-trophy"
-                src={trophyForYear(c.year)}
-                alt=""
-                loading="lazy"
-              />
+              {c.winner ? (
+                <img
+                  className="cup-trophy"
+                  src={trophyForYear(c.year)}
+                  alt=""
+                  loading="lazy"
+                />
+              ) : (
+                <span className="cup-trophy-empty" aria-hidden="true" />
+              )}
               <span className="cup-era">{t("choose.era", { year: c.year })}</span>
               <span className="cup-year">{c.year}</span>
               <span className="cup-winner">
                 {c.winner
-                  ? <>🏆 {c.winner.toUpperCase()}</>
+                  ? <>🏆 {country(c.winner).toUpperCase()}</>
                   : c.ready
                     ? t("choose.winnerPending", { year: c.year })
                     : null}
               </span>
               <span className="cup-host">
-                {hostFlags(c.host) ? <span className="cup-flags">{hostFlags(c.host)}</span> : null}
-                <span className="cup-host-name">{c.host}</span>
+                {hostParts(c.host).length > 0 ? (
+                  <span className="cup-flags">
+                    {hostParts(c.host).map(flagFor).join(" ")}
+                  </span>
+                ) : null}
+                <span className="cup-host-name">
+                  {hostParts(c.host).map(country).join(" · ")}
+                </span>
               </span>
             </span>
           </button>
