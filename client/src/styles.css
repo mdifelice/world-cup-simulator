@@ -251,14 +251,6 @@ body {
   filter: drop-shadow(0 4px 8px rgba(20, 28, 38, 0.22));
   margin-bottom: 8px;
 }
-.cup-trophy-empty {
-  height: 66px;
-  width: 16px;
-  margin-bottom: 8px;
-  border-radius: 8px;
-  border: 2px dashed var(--line);
-  opacity: 0.6;
-}
 .cup-era {
   font-size: 10px;
   letter-spacing: 2.6px;

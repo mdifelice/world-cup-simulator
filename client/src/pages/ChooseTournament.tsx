@@ -52,21 +52,17 @@ export default function ChooseTournament({ selected, onPick, onHistory }: Props)
           >
             <span className="cup-banner" />
             <span className="cup-pad">
-              {c.winner ? (
-                <img
-                  className="cup-trophy"
-                  src={trophyForYear(c.year)}
-                  alt=""
-                  loading="lazy"
-                />
-              ) : (
-                <span className="cup-trophy-empty" aria-hidden="true" />
-              )}
+              <img
+                className="cup-trophy"
+                src={trophyForYear(c.year)}
+                alt=""
+                loading="lazy"
+              />
               <span className="cup-era">{t("choose.era", { year: c.year })}</span>
               <span className="cup-year">{c.year}</span>
               <span className="cup-winner">
                 {c.winner
-                  ? <>🏆 {country(c.winner).toUpperCase()}</>
+                  ? country(c.winner).toUpperCase()
                   : c.ready
                     ? t("choose.winnerPending", { year: c.year })
                     : null}
