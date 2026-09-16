@@ -456,7 +456,7 @@ export default function App() {
             interactive={interactive}
             onJump={jumpToFocus}
             onAll={revealAll}
-            onFF={runFastForward}
+            onFF={ffRunning ? stopFF : runFastForward}
             ffRunning={ffRunning}
             scrollToId={scrollToMatch}
             onSimulate={revealUpTo}

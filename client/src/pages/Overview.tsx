@@ -212,7 +212,6 @@ export default function Overview({
               <button
                 className={"btn big" + (ffRunning ? " ff-on" : "")}
                 onClick={onFF}
-                disabled={ffRunning}
                 title={ffRunning ? t("hub.ffStop") : t("hub.ff")}
               >
                 {ffRunning ? t("hub.ffStop") : t("hub.ff")}
