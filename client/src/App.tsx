@@ -17,6 +17,8 @@ import MatchView from "./pages/MatchView";
 import Finals from "./pages/Finals";
 import History from "./pages/History";
 import LineupPitch from "./pages/LineupPitch";
+import LiveMatch from "./components/LiveMatch";
+import ShareModal from "./components/ShareModal";
 
 export type Step =
   | "tournament"
@@ -64,6 +66,8 @@ export default function App() {
   const ffTimer = useRef<number | null>(null);
   const [ffRunning, setFfRunning] = useState(false);
   const [scrollToMatch, setScrollToMatch] = useState<number | null>(null);
+  const [liveMatch, setLiveMatch] = useState<RunMatch | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
   const { t, locale, setLocale } = useI18n();
 
   // Silent #token= capture from the OAuth redirect (login stays hidden).
@@ -143,16 +147,17 @@ export default function App() {
           ...f,
           run,
           revealed: target ? revealCountForDay(run, target.day) : 0,
-          openMatchId:
-            target?.open
-              ? (run.matches.find(
-                  (m) =>
-                    m.day === target.day &&
-                    (m.home_team_id === run.focus_team_id || m.away_team_id === run.focus_team_id),
-                )?.id ?? null)
-              : null,
+          openMatchId: null,
           runError: null,
         }));
+        if (target?.open) {
+          const fm = run.matches.find(
+            (m) =>
+              m.day === target.day &&
+              (m.home_team_id === run.focus_team_id || m.away_team_id === run.focus_team_id),
+          );
+          if (fm) setLiveMatch(fm);
+        }
       })
       .catch((e) => {
         runGuard.current = null;
@@ -194,7 +199,7 @@ export default function App() {
     setConfigs(newConfigs);
     const remaining = focusMatches.filter((x) => !newConfigs[matchKey(x)]);
     postRun(remaining.length === 0, target, newConfigs);
-    setStep(target.open ? "match" : "overview");
+    setStep("overview");
   };
 
   const gateToSetup = () => {
@@ -221,6 +226,18 @@ export default function App() {
       gateToSetup();
       return;
     }
+    if (interactive && flow.run && focusId != null) {
+      const fm = flow.run.matches.find(
+        (m) =>
+          m.day === maxShownDay + 1 &&
+          (m.home_team_id === focusId || m.away_team_id === focusId),
+      );
+      if (fm && configs[matchKey(fm)]) {
+        revealThrough(maxShownDay + 1);
+        setLiveMatch(fm);
+        return;
+      }
+    }
     revealThrough(maxShownDay + 1);
   };
 
@@ -236,26 +253,33 @@ export default function App() {
       setStep("lineup");
       return;
     }
-    setFlow((f) => {
-      if (!f.run || f.run.focus_team_id == null) return f;
-      const next = f.run.order.find((id, i) => {
-        if (i >= f.revealed) {
-          const m = f.run!.matches.find((x) => x.id === id);
-          return !!m && (m.home_team_id === f.run!.focus_team_id || m.away_team_id === f.run!.focus_team_id);
-        }
-        return false;
-      });
-      if (!next) return { ...f, revealed: f.run.matches.length };
-      const m = f.run.matches.find((x) => x.id === next)!;
-      const day = m.day;
-      let n = 0;
-      for (const id of f.run.order) {
-        const x = f.run.matches.find((y) => y.id === id);
-        if (!x || x.day > day) break;
-        n += 1;
+    if (!flow.run || flow.run.focus_team_id == null) return;
+    const run = flow.run;
+    const next = run.order.find((id, i) => {
+      if (i >= flow.revealed) {
+        const m = run.matches.find((x) => x.id === id);
+        return !!m && (m.home_team_id === run.focus_team_id || m.away_team_id === run.focus_team_id);
       }
-      return { ...f, revealed: Math.max(f.revealed, n), openMatchId: m.id };
+      return false;
     });
+    if (!next) {
+      setFlow((f) => (f.run ? { ...f, revealed: f.run.matches.length } : f));
+      return;
+    }
+    const m = run.matches.find((x) => x.id === next)!;
+    let n = 0;
+    for (const id of run.order) {
+      const x = run.matches.find((y) => y.id === id);
+      if (!x || x.day > m.day) break;
+      n += 1;
+    }
+    if (interactive) {
+      setFlow((f) => ({ ...f, revealed: Math.max(f.revealed, n), openMatchId: null }));
+      setLiveMatch(m);
+    } else {
+      setFlow((f) => ({ ...f, revealed: Math.max(f.revealed, n), openMatchId: m.id }));
+      setStep("match");
+    }
   };
 
   /** Reveal matches one by one (every 500ms), stopping the moment a focus-team
@@ -289,13 +313,16 @@ export default function App() {
       if (m && (m.home_team_id === focusId || m.away_team_id === focusId)) {
         stopFF();
         setScrollToMatch(m.id);
-        setFlow((f) => ({ ...f, openMatchId: m.id }));
+        setLiveMatch(m);
       }
     }, 500);
   };
   useEffect(() => () => stopFF(), []);
 
-  const openMatch = (m: RunMatch) => setFlow((f) => ({ ...f, openMatchId: m.id }));
+  const openMatch = (m: RunMatch) => {
+    setFlow((f) => ({ ...f, openMatchId: m.id }));
+    setStep("match");
+  };
 
   const pickTournament = (t: Tournament) => {
     setFlow({ ...emptyFlow, tournament: t });
@@ -303,6 +330,8 @@ export default function App() {
     setSeed(null);
     setInteractive(false);
     setPendingTarget(null);
+    setLiveMatch(null);
+    setShareOpen(false);
     runGuard.current = null;
     setStep("team");
   };
@@ -355,13 +384,25 @@ export default function App() {
     setSeed(null);
     setInteractive(false);
     setPendingTarget(null);
+    setLiveMatch(null);
+    setShareOpen(false);
     runGuard.current = null;
     setStep("tournament");
+  };
+
+  const liveReveal = (m: RunMatch) => {
+    setFlow((f) => {
+      if (!f.run) return f;
+      const idx = f.run.order.indexOf(m.id);
+      if (idx < 0 || idx + 1 <= f.revealed) return f;
+      return { ...f, revealed: idx + 1 };
+    });
   };
 
   const goFinish = () => {
     if (interactive && gateToSetup()) return;
     if (interactive && flow.run?.run_id == null && user) saveRunSilently();
+    setShareOpen(true);
     setStep("finish");
   };
 
@@ -552,6 +593,28 @@ export default function App() {
           />
         )}
       </main>
+
+      {liveMatch && flow.run && (
+        <LiveMatch
+          match={liveMatch}
+          focusTeamId={flow.run.focus_team_id}
+          onReveal={liveReveal}
+          onClose={() => setLiveMatch(null)}
+        />
+      )}
+
+      {shareOpen && flow.run && (
+        <ShareModal
+          run={flow.run}
+          focusTeam={
+            flow.team && flow.team.id === flow.run.focus_team_id
+              ? { id: flow.team.id, name: flow.team.name }
+              : null
+          }
+          onClose={() => setShareOpen(false)}
+          onPlayAgain={startCup}
+        />
+      )}
     </div>
   );
 }
