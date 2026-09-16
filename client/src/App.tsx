@@ -59,7 +59,7 @@ export default function App() {
   const [scrollToMatch, setScrollToMatch] = useState<number | null>(null);
   const [liveMatch, setLiveMatch] = useState<RunMatch | null>(null);
   const [matchDetail, setMatchDetail] = useState<RunMatch | null>(null);
-  const [formationFlash, setFormationFlash] = useState(0);
+  const [draft, setDraft] = useState<LineupConfig | null>(null);
   const [ffRunning, setFfRunning] = useState(false);
   const ffTimer = useRef<number | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
@@ -86,10 +86,6 @@ export default function App() {
   const revealedMatches = useMemo(
     () => (flow.run?.matches ?? []).filter((m) => revealedSet.has(m.id)),
     [flow.run, revealedSet],
-  );
-  const maxShownDay = useMemo(
-    () => revealedMatches.reduce((mx, m) => Math.max(mx, m.day), 0),
-    [revealedMatches],
   );
 
   const focusId = flow.run?.focus_team_id ?? null;
@@ -192,52 +188,28 @@ export default function App() {
       });
   };
 
-  /** The inline formation panel auto-submits the lineup once the XI is full.
-   *  Re-run the (deterministic) sim so only the configured match changes. */
-  const applyLineup = (cfg: LineupConfig) => {
+  /** Commit a drafted lineup and re-run the (deterministic) sim so only the
+   *  configured match changes, revealing up to that match day; `open` also
+   *  opens the live match popup once the run returns. */
+  const commitLineup = (cfg: LineupConfig, open: boolean) => {
     if (!flow.run || !inlineMatch) return;
     const key = matchKey(inlineMatch);
     const newConfigs = { ...configs, [key]: cfg };
     setConfigs(newConfigs);
+    setDraft(null);
     const remaining = focusMatches.filter((x) => !newConfigs[matchKey(x)]);
-    postRun(remaining.length === 0, { day: inlineMatch.day, open: false }, newConfigs);
+    postRun(remaining.length === 0, { day: inlineMatch.day, open }, newConfigs);
   };
 
-  const revealAll = () => {
-    if (!flow.run) return;
-    if (interactive && inlineMatch) {
-      const idx = flow.run.order.indexOf(inlineMatch.id);
-      setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, idx) } : f));
-      setFormationFlash((n) => n + 1);
+  const replayMatch = (m: RunMatch) => {
+    stopFF();
+    const key = matchKey(m);
+    if (!configs[key] && draft && inlineMatch?.id === m.id) {
+      commitLineup(draft, true);
       return;
     }
-    setFlow((f) => (f.run ? { ...f, revealed: f.run.matches.length } : f));
-    if (interactive && flow.run?.run_id == null && user) saveRunSilently();
-  };
-
-  const jumpToFocus = () => {
-    if (!flow.run || flow.run.focus_team_id == null) return;
-    const run = flow.run;
-    if (interactive && inlineMatch) {
-      const idx = run.order.indexOf(inlineMatch.id);
-      setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, idx) } : f));
-      setFormationFlash((n) => n + 1);
-      return;
-    }
-    const next = run.order.find((id, i) => i >= flow.revealed && isFocusMatch(run, id));
-    if (!next) {
-      setFlow((f) => (f.run ? { ...f, revealed: f.run.matches.length } : f));
-      return;
-    }
-    const m = run.matches.find((x) => x.id === next);
-    if (!m) return;
-    let n = 0;
-    for (const id of run.order) {
-      const x = run.matches.find((y) => y.id === id);
-      if (!x || x.day > m.day) break;
-      n += 1;
-    }
-    setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, n) } : f));
+    setScrollToMatch(m.id);
+    setLiveMatch(m);
   };
 
   const stopFF = () => {
@@ -291,12 +263,6 @@ export default function App() {
 
   const revealUpTo = (idx: number) =>
     setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, idx + 1) } : f));
-
-  const replayMatch = (m: RunMatch) => {
-    stopFF();
-    setScrollToMatch(m.id);
-    setLiveMatch(m);
-  };
 
   /** Fast-forward from the live popup: simulate everything to the end of the
    *  current round (same stage), then close back to the hub. */
@@ -458,10 +424,7 @@ export default function App() {
             revealed={flow.revealed}
             runError={flow.runError}
             revealedMatches={revealedMatches}
-            maxShownDay={maxShownDay}
             interactive={interactive}
-            onJump={jumpToFocus}
-            onAll={revealAll}
             onFF={ffRunning ? stopFF : runFastForward}
             ffRunning={ffRunning}
             scrollToId={scrollToMatch}
@@ -473,8 +436,8 @@ export default function App() {
             formationInitial={
               inlineMatch ? configs[matchKey(inlineMatch)] : undefined
             }
-            onFormationConfirm={applyLineup}
-            formationFlash={formationFlash}
+            draftReady={inlineMatch ? !configs[matchKey(inlineMatch)] && !!draft : false}
+            onDraft={setDraft}
             onStart={() => postRun(false, null, configs)}
             onShare={openShare}
           />

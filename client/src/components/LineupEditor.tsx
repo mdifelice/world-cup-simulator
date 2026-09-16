@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useI18n } from "../i18n";
+import { canonSlot, useI18n } from "../i18n";
 import PlayerCard from "../components/PlayerCard";
 import type { LineupConfig, Player, Strategy } from "../types";
 import {
   bestEffectiveIn,
   FORMATIONS,
   playerPositions,
-  playerSurname,
   positionFamilies,
   positionFamily,
   ratingStars,
@@ -18,9 +17,9 @@ export interface LineupEditorProps {
   shirtNumbers: boolean;
   squad: Player[];
   initial?: LineupConfig;
-  onConfirm: (cfg: LineupConfig) => void;
-  /** Reports whether every slot is filled (false → the XI is incomplete). */
-  onDirty?: (incomplete: boolean) => void;
+  /** Reports the current lineup every time it changes: the config when the XI
+   *  is complete, null otherwise. The parent decides when to commit/play. */
+  onReady?: (cfg: LineupConfig | null) => void;
 }
 
 /** Anchor (percent) of each slot on the pitch. The goal is at the top. */
@@ -38,7 +37,8 @@ const SLOT_POS: Record<string, { x: number; y: number }> = {
 };
 
 /** Lay the 11 slots out, spreading repeated slots (DF, or a second FW/DMF)
- *  horizontally so they don't overlap on the pitch. */
+ *  horizontally so their always-visible captions never stack on top of
+ *  each other. Captions sit below the marker, above it in the top third. */
 function layout(slots: string[]) {
   const anchors = slots.map((s) =>
     s === "DF" ? { x: 50, y: 70 } : SLOT_POS[s],
@@ -55,8 +55,9 @@ function layout(slots: string[]) {
     const j = seen.get(k) ?? 0;
     seen.set(k, j + 1);
     const n = counts.get(k)!;
-    const dx = (j - (n - 1) / 2) * 26;
-    return { slot, x: a.x + dx, y: a.y };
+    const dx = n > 1 ? (j - (n - 1) / 2) * 150 : 0;
+    const up = a.y < 50;
+    return { slot, x: a.x + dx, y: a.y, up };
   });
 }
 
@@ -66,10 +67,9 @@ export default function LineupEditor({
   shirtNumbers,
   squad,
   initial,
-  onConfirm,
-  onDirty,
+  onReady,
 }: LineupEditorProps) {
-  const { t } = useI18n();
+  const { t, pos } = useI18n();
   const [formation, setFormation] = useState<string>(initial?.formation ?? "4-4-2");
   const [strategy, setStrategy] = useState<Strategy>(initial?.strategy ?? "normal");
   const [armedId, setArmedId] = useState<number | null>(null);
@@ -120,7 +120,8 @@ export default function LineupEditor({
 
   const effFor = (p: Player, slot: string) =>
     bestEffectiveIn(playerPositions(p), p.rating ?? p.overall, slot);
-  const positionsLabel = (p: Player) => playerPositions(p).join(" / ");
+  const positionsLabel = (p: Player) =>
+    playerPositions(p).map((x) => pos(x)).join(" / ");
 
   const pickAuto = () => {
     const next: (number | null)[] = new Array(slots.length).fill(null);
@@ -161,32 +162,24 @@ export default function LineupEditor({
     return by;
   }, [squad]);
 
-  const confirm = () => {
-    if (!filled) return;
+  const buildCfg = (): LineupConfig | null => {
+    if (!filled) return null;
     const starting: Record<string, number[]> = {};
     slots.forEach((slot, i) => {
       const pid = assignments[i];
       if (pid == null) return;
       (starting[slot] ??= []).push(pid);
     });
-    onConfirm({ formation, strategy, starting });
+    return { formation, strategy, starting };
   };
 
   const chosenName = (i: number) =>
     assignments[i] != null ? squad.find((p) => p.id === assignments[i]) : undefined;
 
-  // The lineup applies by itself as soon as every slot has its own player —
-  // no confirm button any more. Skipped on first mount so an `initial` lineup
-  // isn't re-submitted (and re-simulated) for nothing. Incomplete edits are
-  // reported to the parent so the Play button can be gated on them.
-  const mounted = useRef(false);
+  // The editor only reports readiness — it never commits or simulates on its
+  // own. Filling the last slot (or clicking auto-pick) simply enables Play.
   useEffect(() => {
-    if (!mounted.current) {
-      mounted.current = true;
-      return;
-    }
-    if (filled) confirm();
-    onDirty?.(!filled);
+    onReady?.(buildCfg());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filled, assignments]);
 
@@ -235,13 +228,13 @@ export default function LineupEditor({
           <div className="pitch-line sgt bottom" />
           <div className="pitch-spot top" />
           <div className="pitch-spot bottom" />
-          {markers.map(({ slot, x, y }, i) => {
+          {markers.map(({ slot, x, y, up }, i) => {
             const chosen = chosenName(i);
             const armedPlayer =
               armedId != null ? squad.find((p) => p.id === armedId) : null;
-            // While a player is selected ("armed"), only their main positions
-            // (position families) pulse so you can see exactly where they fit.
-            const fillable =
+            // While a player is armed, only the slots matching one of their
+            // position families pulse; every other slot still accepts them.
+            const natural =
               armedPlayer != null &&
               positionFamilies(playerPositions(armedPlayer)).has(positionFamily(slot));
             return (
@@ -250,19 +243,17 @@ export default function LineupEditor({
                 className={
                   "slot-marker" +
                   (chosen ? " filled" : "") +
-                  (fillable ? " pulsing" : "") +
+                  (natural ? " pulsing" : "") +
                   (armedPlayer ? " arm-target" : "")
                 }
                 style={{ left: `${x}%`, top: `${y}%` }}
-                onClick={() => armedPlayer && fillable && assignTo(i, armedPlayer)}
+                onClick={() => armedPlayer && assignTo(i, armedPlayer)}
                 onDoubleClick={() => chosen && clearSlot(i)}
                 title={
                   chosen
                     ? `${chosen.name} — ${t("lineup.ready")} · ${t("lineup.dblClear")}`
                     : armedPlayer
-                      ? fillable
-                        ? t("lineup.place", { player: armedPlayer.name })
-                        : t("lineup.notThere", { player: armedPlayer.name })
+                      ? t("lineup.place", { player: armedPlayer.name })
                       : t("lineup.armFirst")
                 }
               >
@@ -289,15 +280,16 @@ export default function LineupEditor({
                       </span>
                     )
                   ) : (
-                    <span className="slot-tag">{slot}</span>
+                    <span className="slot-tag">{pos(canonSlot(slot))}</span>
                   )}
                 </span>
                 {chosen && (
-                  <span className="marker-cap">
-                    {playerSurname(chosen.name)} ·{" "}
+                  <span className={"marker-cap" + (up ? " up" : "")}>
+                    {chosen.name}
                     {shirtNumbers && chosen.shirt_number != null
-                      ? `#${chosen.shirt_number}`
-                      : positionFamily(slot)}
+                      ? ` · #${chosen.shirt_number}`
+                      : ""}
+                    {chosen.position ? ` · ${pos(chosen.position)}` : ""}
                   </span>
                 )}
                 {chosen && (
@@ -339,7 +331,7 @@ export default function LineupEditor({
                     tone={p.id % 4}
                     stars={ratingStars(p.rating ?? p.overall)}
                     number={shirtNumbers ? p.shirt_number : null}
-                    sub={p.position}
+                    sub={pos(p.position)}
                     selected={isArmed}
                     dimmed={used}
                     stamp={used ? t("lineup.picked") : null}
@@ -349,14 +341,6 @@ export default function LineupEditor({
             })}
           </div>
         </div>
-      </div>
-
-      <div className="form-confirm">
-        {filled ? (
-          <span className="chip ok">{t("lineup.ready")}</span>
-        ) : (
-          <p className="hint">{t("lineup.slots")}</p>
-        )}
       </div>
     </div>
   );

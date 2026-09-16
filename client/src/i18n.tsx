@@ -13,6 +13,9 @@ export interface I18n {
   stage: (name: string, vars?: Vars) => string;
   /** Localise a country/team name (e.g. "Brazil" → "Brasil" in es). */
   country: (name: string) => string;
+  /** Localise a position abbreviation, normalising it to the canonical set
+   *  (GK, RDF, DF, LDF, DMF, RMF, LMF, AMF, RFW, FW, LFW) first. */
+  pos: (code: string) => string;
 }
 
 const en: Record<string, string> = {
@@ -75,6 +78,17 @@ const en: Record<string, string> = {
   "lineup.picked": "in XI",
   "lineup.tapSlot": "Now tap a pulsing slot on the pitch",
   "strategy.defensive": "Defensive",
+  "abbr.GK": "GK",
+  "abbr.RDF": "RDF",
+  "abbr.DF": "DF",
+  "abbr.LDF": "LDF",
+  "abbr.DMF": "DMF",
+  "abbr.RMF": "RMF",
+  "abbr.LMF": "LMF",
+  "abbr.AMF": "AMF",
+  "abbr.RFW": "RFW",
+  "abbr.FW": "FW",
+  "abbr.LFW": "LFW",
   "strategy.normal": "Normal",
   "strategy.attacking": "Attacking",
 
@@ -264,6 +278,17 @@ const es: Record<string, string> = {
   "strategy.defensive": "Defensivo",
   "strategy.normal": "Normal",
   "strategy.attacking": "Ofensivo",
+  "abbr.GK": "POR",
+  "abbr.RDF": "LD",
+  "abbr.DF": "DFC",
+  "abbr.LDF": "LI",
+  "abbr.DMF": "MCD",
+  "abbr.RMF": "MD",
+  "abbr.LMF": "MI",
+  "abbr.AMF": "MP",
+  "abbr.RFW": "ED",
+  "abbr.FW": "DC",
+  "abbr.LFW": "EI",
 
   "cup.title": "Mundial {year} · {host}",
   "cup.managing": "Estás dirigiendo el torneo en directo.",
@@ -438,6 +463,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       t,
       stage,
       country: (name: string): string => countryNames[locale]?.[name] ?? name,
+      pos: (code: string): string => t("abbr." + normalizePos(code)),
     };
   }, [locale]);
 
@@ -453,6 +479,44 @@ export function useI18n(): I18n {
 export function localeName(l: Locale): string {
   return l === "es" ? "Español" : "English";
 }
+
+/** Granular server positions → the shared canonical set used on the pitch and
+ *  in every badge, so a player and a slot always speak the same vocabulary. */
+const NORMALIZE_POS: Record<string, string> = {
+  GK: "GK",
+  GF: "GK",
+  CB: "DF",
+  DF: "DF",
+  RB: "RDF",
+  RWB: "RDF",
+  RDF: "RDF",
+  LB: "LDF",
+  LWB: "LDF",
+  LDF: "LDF",
+  CDM: "DMF",
+  CM: "DMF",
+  DMF: "DMF",
+  RM: "RMF",
+  RMF: "RMF",
+  LM: "LMF",
+  LMF: "LMF",
+  CAM: "AMF",
+  AMF: "AMF",
+  RW: "RFW",
+  RFW: "RFW",
+  ST: "FW",
+  CF: "FW",
+  FW: "FW",
+  LW: "LFW",
+  LFW: "LFW",
+};
+
+export const normalizePos = (code: string): string => NORMALIZE_POS[code] ?? code;
+
+/** Internal pitch slot codes → canonical position codes (wing-backs read as
+ *  full-backs: RWB → RDF, LWB → LDF). */
+export const canonSlot = (slot: string): string =>
+  slot === "RWB" ? "RDF" : slot === "LWB" ? "LDF" : slot;
 
 // ---------------------------------------------------------------------------
 // Localised country names and flag emojis

@@ -11,7 +11,7 @@ interface Props {
   match: RunMatch;
   shirtNumbers: boolean;
   initial?: LineupConfig;
-  onConfirm: (cfg: LineupConfig) => void;
+  onReady?: (cfg: LineupConfig | null) => void;
 }
 
 export default function FormationPanel({
@@ -21,7 +21,7 @@ export default function FormationPanel({
   match,
   shirtNumbers,
   initial,
-  onConfirm,
+  onReady,
 }: Props) {
   const { t, stage, country } = useI18n();
   const [squad, setSquad] = useState<Player[] | null>(null);
@@ -58,7 +58,7 @@ export default function FormationPanel({
           shirtNumbers={shirtNumbers}
           squad={squad}
           initial={initial}
-          onConfirm={onConfirm}
+          onReady={onReady}
         />
       )}
     </div>

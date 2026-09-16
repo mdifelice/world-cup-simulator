@@ -17,7 +17,7 @@ const FAMILIES = ["GK", "DF", "MF", "FW"] as const;
 export default function Roster({ tournament, team, onDone, onBack }: Props) {
   const [squad, setSquad] = useState<Player[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { t, country } = useI18n();
+  const { t, country, pos } = useI18n();
 
   useEffect(() => {
     setSquad(null);
@@ -85,7 +85,7 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
                       number={
                         tournament.shirt_numbers
                           ? p.shirt_number ?? null
-                          : p.position
+                          : pos(p.position)
                       }
                     />
                   ))}

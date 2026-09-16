@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useI18n } from "../i18n";
 import { playerSurname, ratingStars, starsString } from "../types";
 
 /** Everything a card needs to render; callers may fill in gaps from aggregates. */
@@ -55,7 +56,8 @@ export default function PlayerCard({
   className,
   onClick,
 }: Props) {
-  const pos =
+  const { pos } = useI18n();
+  const posList =
     positions ??
     (player.positions && player.positions.length > 0
       ? player.positions
@@ -105,10 +107,10 @@ export default function PlayerCard({
       <div className="pc-scrim" />
       {band && <div className="pc-band">{band}</div>}
       {num != null && <span className="pc-num">{num}</span>}
-      {pos.length > 0 && (
+      {posList.length > 0 && (
         <div className="pc-pos">
-          {pos.map((p, i) => (
-            <span key={i}>{p}</span>
+          {posList.map((p, i) => (
+            <span key={i}>{pos(p)}</span>
           ))}
         </div>
       )}

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useI18n, flagFor } from "../i18n";
 import PlayerCard from "../components/PlayerCard";
 import FormationPanel from "../components/FormationPanel";
@@ -9,10 +9,7 @@ interface Props {
   revealed: number;
   runError: string | null;
   revealedMatches: RunMatch[];
-  maxShownDay: number;
   interactive: boolean;
-  onJump: () => void;
-  onAll: () => void;
   onFF: () => void;
   ffRunning: boolean;
   scrollToId?: number | null;
@@ -22,8 +19,9 @@ interface Props {
   isConfigured: (m: RunMatch) => boolean;
   formationMatch: RunMatch | null;
   formationInitial?: LineupConfig;
-  onFormationConfirm: (cfg: LineupConfig) => void;
-  formationFlash: number;
+  /** True when the inline editor's XI is complete and ready to play. */
+  draftReady: boolean;
+  onDraft?: (cfg: LineupConfig | null) => void;
   onStart: () => void;
   onShare: () => void;
 }
@@ -52,10 +50,7 @@ export default function Overview({
   revealed,
   runError,
   revealedMatches,
-  maxShownDay,
   interactive,
-  onJump,
-  onAll,
   onFF,
   ffRunning,
   scrollToId,
@@ -65,21 +60,14 @@ export default function Overview({
   isConfigured,
   formationMatch,
   formationInitial,
-  onFormationConfirm,
-  formationFlash,
+  draftReady,
+  onDraft,
   onStart,
   onShare,
 }: Props) {
   const focusId = run?.focus_team_id ?? null;
   const total = run?.matches.length ?? 0;
   const { t, stage, country } = useI18n();
-
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (formationFlash > 0) {
-      panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [formationFlash]);
 
   useEffect(() => {
     if (scrollToId == null) return;
@@ -209,29 +197,18 @@ export default function Overview({
               : t("step.tournament")}
           </h1>
           <p className="hint">
-            {focusId ? t("cup.managing") : t("cup.neutral")}{" "}
-            {run ? t("cup.revealed", { day: maxShownDay || 0, revealed, total }) : ""}
+            {focusId ? t("cup.managing") : t("cup.neutral")}
           </p>
         </div>
         {run && !allRevealed && (
           <div className="top-actions cmd">
-            {focusId != null && (
-              <button
-                className={"btn big" + (ffRunning ? " ff-on" : "")}
-                onClick={onFF}
-                title={ffRunning ? t("hub.ffStop") : t("hub.ff")}
-              >
-                {ffRunning ? t("hub.ffStop") : t("hub.ff")}
-              </button>
-            )}
-            <button className="btn primary big" onClick={onAll}>
-              {t("cup.playAll")}
+            <button
+              className={"btn big" + (ffRunning ? " ff-on" : "")}
+              onClick={onFF}
+              title={ffRunning ? t("hub.ffStop") : t("hub.ff")}
+            >
+              {ffRunning ? t("hub.ffStop") : t("hub.ff")}
             </button>
-            {focusId != null && (
-              <button className="btn big" onClick={onJump}>
-                {t("cup.jump")}
-              </button>
-            )}
           </div>
         )}
       </div>
@@ -313,8 +290,16 @@ export default function Overview({
                               e.stopPropagation();
                               onReplay(m);
                             }}
-                            disabled={!isConfigured(m)}
-                            title={isConfigured(m) ? undefined : t("hub.playDisabled")}
+                            disabled={
+                              !isConfigured(m) &&
+                              !(formationMatch?.id === m.id && draftReady)
+                            }
+                            title={
+                              isConfigured(m) ||
+                              (formationMatch?.id === m.id && draftReady)
+                                ? undefined
+                                : t("hub.playDisabled")
+                            }
                           >
                             ▶ {t("hub.play")}
                           </button>
@@ -332,8 +317,9 @@ export default function Overview({
               </div>
 
               {interactive && focusId != null && formationMatch && run && (
-                <div ref={panelRef}>
+                <div>
                   <FormationPanel
+                    key={formationMatch.id}
                     tournamentId={run.tournament_id}
                     teamId={focusId}
                     teamName={
@@ -344,7 +330,7 @@ export default function Overview({
                     match={formationMatch}
                     shirtNumbers={run.shirt_numbers}
                     initial={formationInitial}
-                    onConfirm={onFormationConfirm}
+                    onReady={onDraft}
                   />
                 </div>
               )}
