@@ -36,9 +36,14 @@ const SLOT_POS: Record<string, { x: number; y: number }> = {
   FW: { x: 50, y: 20 },
 };
 
+/** Horizontal distance (in % of pitch width) between repeated slots sharing an
+ *  anchor, e.g. the two central defenders. Wide enough for the captions. */
+const SLOT_SPREAD = 34;
+
 /** Lay the 11 slots out, spreading repeated slots (DF, or a second FW/DMF)
  *  horizontally so their always-visible captions never stack on top of
- *  each other. Captions sit below the marker, above it in the top third. */
+ *  each other and never leave the pitch. Captions sit above the marker in the
+ *  top half, below it in the bottom half. */
 function layout(slots: string[]) {
   const anchors = slots.map((s) =>
     s === "DF" ? { x: 50, y: 70 } : SLOT_POS[s],
@@ -55,7 +60,7 @@ function layout(slots: string[]) {
     const j = seen.get(k) ?? 0;
     seen.set(k, j + 1);
     const n = counts.get(k)!;
-    const dx = n > 1 ? (j - (n - 1) / 2) * 150 : 0;
+    const dx = n > 1 ? (j - (n - 1) / 2) * SLOT_SPREAD : 0;
     const up = a.y < 50;
     return { slot, x: a.x + dx, y: a.y, up };
   });
@@ -187,39 +192,40 @@ export default function LineupEditor({
 
   return (
     <div className="form-editor">
-      <div className="chip-grid">
-        {Object.keys(FORMATIONS).map((f) => (
-          <button
-            key={f}
-            className={"chip btn" + (formation === f ? " active" : "")}
-            onClick={() => setFormation(f)}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
-      <div className="chip-grid">
-        {STRATEGIES.map((s) => (
-          <button
-            key={s}
-            className={"chip btn" + (strategy === s ? " active" : "")}
-            onClick={() => setStrategy(s)}
-          >
-            {t(`strategy.${s}`)}
-          </button>
-        ))}
-        <button
-          className="btn secondary chip"
-          onClick={pickAuto}
-          title={t("lineup.auto")}
-          disabled={anyPicked}
-        >
-          ⚙ {t("lineup.auto")}
-        </button>
-      </div>
+      <div className="form-body">
+        <div className="form-left">
+          <div className="chip-grid">
+            {Object.keys(FORMATIONS).map((f) => (
+              <button
+                key={f}
+                className={"chip btn" + (formation === f ? " active" : "")}
+                onClick={() => setFormation(f)}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+          <div className="chip-grid">
+            {STRATEGIES.map((s) => (
+              <button
+                key={s}
+                className={"chip btn" + (strategy === s ? " active" : "")}
+                onClick={() => setStrategy(s)}
+              >
+                {t(`strategy.${s}`)}
+              </button>
+            ))}
+            <button
+              className="btn secondary chip"
+              onClick={pickAuto}
+              title={t("lineup.auto")}
+              disabled={anyPicked}
+            >
+              ⚙ {t("lineup.auto")}
+            </button>
+          </div>
 
-<div className="form-body">
-        <div className={"pitch" + (armedId != null ? " arm-mode" : "")}>
+          <div className={"pitch" + (armedId != null ? " arm-mode" : "")}>
           <div className="pitch-line mid" />
           <div className="pitch-line circle" />
           <div className="pitch-line pa top" />
@@ -308,6 +314,7 @@ export default function LineupEditor({
               </button>
             );
           })}
+          </div>
         </div>
 
         <div className="player-picks">

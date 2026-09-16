@@ -383,7 +383,7 @@ export default function Overview({
                         variant="stat"
                         tone={s.id % 4}
                         number={i + 1}
-                        sub={country(s.team_name)}
+                        sub={flagFor(s.team_name)}
                         right={`${s.goals}`}
                       />
                     ))}

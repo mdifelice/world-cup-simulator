@@ -15,7 +15,7 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
   const flagName = (n: string) => [flagFor(n), country(n)].filter(Boolean).join(" ");
 
   const sorted = useMemo(
-    () => [...m.goals].sort((a, b) => a.minute - b.minute || Number(a.extra_time) - Number(b.extra_time)),
+    () => [...m.goals].sort((a, b) => b.minute - a.minute || Number(b.extra_time) - Number(a.extra_time)),
     [m.goals],
   );
 
@@ -31,9 +31,6 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
           <div>
             <div className="share-title">
               {stage(m.stage_name)} · {t("match.day", { day: m.day })}
-            </div>
-            <div className="share-sub">
-              {m.result_label || t("match.ft")}
             </div>
           </div>
           <button className="live-x" onClick={onClose} aria-label="close">
@@ -68,10 +65,10 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
 
         {m.goals.length > 0 && (
           <div className="detail-goals">
-            <h3>{t("match.goals")}</h3>
             {sorted.map((g, i) => (
               <div key={i} className="goal-row">
                 <span className="goal-min">
+                  <span className="goal-ball" aria-hidden>⚽</span>
                   {g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}
                 </span>
                 <span className="goal-scorer">

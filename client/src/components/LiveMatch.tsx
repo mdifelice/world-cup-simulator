@@ -226,10 +226,12 @@ export default function LiveMatch({
 
       {goalsUpTo.length > 0 && (
         <div className="goals-card">
-          <h3>{t("match.goals")}</h3>
           {goalsSorted.map(({ g, i }) => (
             <div key={i} className="goal-row">
-              <span className="goal-min">{g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}</span>
+              <span className="goal-min">
+                <span className="goal-ball" aria-hidden>⚽</span>
+                {g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}
+              </span>
               <span className="goal-scorer">
                 {g.scorer}
                 {g.assist ? <span className="dim"> · {t("match.assist", { name: g.assist })}</span> : null}
