@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useI18n, flagFor } from "../i18n";
 import PlayerCard from "../components/PlayerCard";
 import FormationPanel from "../components/FormationPanel";
@@ -20,6 +20,10 @@ interface Props {
   isConfigured: (m: RunMatch) => boolean;
   formationMatch: RunMatch | null;
   formationInitial?: LineupConfig;
+  /** Read-only formation (team eliminated or cup finished). */
+  formationDisabled?: boolean;
+  /** Player ids suspended for the formation panel's match. */
+  formationUnavailable?: number[];
   /** True when the inline editor's XI is complete and ready to play. */
   draftReady: boolean;
   onDraft?: (cfg: LineupConfig | null) => void;
@@ -62,6 +66,8 @@ export default function Overview({
   isConfigured,
   formationMatch,
   formationInitial,
+  formationDisabled = false,
+  formationUnavailable,
   draftReady,
   onDraft,
   onStart,
@@ -226,10 +232,13 @@ export default function Overview({
       p.lastDay = Math.max(p.lastDay, m.day);
     }
     const out = [];
+    const firstKey = order[0]?.stage_key;
     for (const [key, p] of map.entries()) {
       const revealed = p.matches.filter((m) => revealedIds.has(m.id));
-      if (revealed.length === 0) continue;
       const groupType = key === "GROUP" || key === "FINAL";
+      // Show the opening group stage from kickoff (all-zero tables); every
+      // later phase only once its first match has been played.
+      if (revealed.length === 0 && !(key === firstKey && groupType)) continue;
       out.push({
         key,
         name: p.name,
@@ -247,6 +256,32 @@ export default function Overview({
     return out;
   })();
 
+  // Right-sidebar autoscroll: on the first paint reveal the focus team's group;
+  // when a brand-new round appears, jump back to the top.
+  const groupScrollRef = useRef<HTMLDivElement>(null);
+  const phaseCountRef = useRef(0);
+  useEffect(() => {
+    const el = groupScrollRef.current;
+    if (!el) return;
+    if (phases.length > phaseCountRef.current) {
+      if (phaseCountRef.current === 0 && focusId != null) {
+        const target = el.querySelector<HTMLElement>(".focus-row");
+        if (target) {
+          const top =
+            target.getBoundingClientRect().top -
+            el.getBoundingClientRect().top +
+            el.scrollTop;
+          el.scrollTo({ top: Math.max(0, top - 12), behavior: "smooth" });
+          phaseCountRef.current = phases.length;
+          return;
+        }
+      }
+      el.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    phaseCountRef.current = phases.length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phases.length, focusId]);
+
   const scorers = (() => {
     interface Entry {
       id: number;
@@ -259,6 +294,7 @@ export default function Overview({
     const by = new Map<number, Entry>();
     for (const m of revealedMatches) {
       for (const g of m.goals) {
+        if (g.own_goal) continue;
         const teamName = m.home_team_id === g.team_id ? m.home_team_name : m.away_team_name;
         let e = by.get(g.scorer_id);
         if (!e) {
@@ -435,6 +471,8 @@ export default function Overview({
                     match={formationMatch}
                     shirtNumbers={run.shirt_numbers}
                     initial={formationInitial}
+                    disabled={formationDisabled}
+                    unavailable={formationUnavailable}
                     onReady={onDraft}
                   />
                 </div>
@@ -442,7 +480,7 @@ export default function Overview({
             </div>
 
             <aside className="hub-side">
-              <div className="group-scroll">
+              <div className="group-scroll" ref={groupScrollRef}>
                 {phases.flatMap((p) =>
                   p.groupType
                     ? p.tables.map((tb) => (
@@ -490,10 +528,7 @@ export default function Overview({
                                   {played ? `${m.home_score}–${m.away_score}` : "–"}
                                   {played && m.penalties && (
                                     <span className="pens">
-                                      {t("match.pensScore", {
-                                        home: m.penalties.home_score,
-                                        away: m.penalties.away_score,
-                                      })}
+                                      {`(${m.penalties.home_score}–${m.penalties.away_score})`}
                                     </span>
                                   )}
                                 </span>

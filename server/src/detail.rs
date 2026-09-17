@@ -16,8 +16,8 @@ use crate::{
     error::{ApiError, ApiResult},
     fixture,
     models::{
-        self, Awards, Goal, GroupInfo, Momentum, PenKick, PenResult, PlayerAward, RunMatch,
-        RunPayload, RunTeam, TopScorer,
+        self, Awards, Goal, GroupInfo, Momentum, PenKick, PenResult, PlayerAward, RedCard,
+        RunMatch, RunPayload, RunTeam, TopScorer,
     },
     names::{self, SquadPlayer},
     sim,
@@ -279,6 +279,7 @@ pub fn simulate_run(
         group_meta_built: false,
         form_shift: HashMap::new(),
         morale_shift: HashMap::new(),
+        suspensions: HashMap::new(),
     };
     eng.run(&phases)?;
 
@@ -358,6 +359,10 @@ struct Engine<'a> {
     /// Cumulative form/morale drift, mirroring `sim::apply_result` in memory.
     form_shift: HashMap<i64, i32>,
     morale_shift: HashMap<i64, i32>,
+    /// Matches remaining for suspended players (red cards). A player with a
+    /// positive count is excluded from his team's XI and decremented once his
+    /// team plays.
+    suspensions: HashMap<i64, i32>,
 }
 
 impl<'a> Engine<'a> {
@@ -576,7 +581,10 @@ impl<'a> Engine<'a> {
         for (family, count) in [("GK", 1), ("DF", 4), ("MF", 4), ("FW", 2)] {
             let mut pool: Vec<SquadPlayer> = squad
                 .iter()
-                .filter(|p| crate::models::position_family(&p.position) == family)
+                .filter(|p| {
+                    crate::models::position_family(&p.position) == family
+                        && !self.suspended(p.id)
+                })
                 .cloned()
                 .collect();
             pool.sort_by(|a, b| {
@@ -589,7 +597,7 @@ impl<'a> Engine<'a> {
             }
         }
         if chosen.is_empty() {
-            chosen = squad.into_iter().take(11).collect();
+            chosen = squad.into_iter().filter(|p| !self.suspended(p.id)).take(11).collect();
         }
         Ok(chosen)
     }
@@ -622,7 +630,11 @@ impl<'a> Engine<'a> {
                 .get(*slot)
                 .and_then(|ids| ids.get(*occ))
                 .copied()
-                .filter(|pid| !used.contains(pid) && squad.iter().any(|p| p.id == *pid));
+                .filter(|pid| {
+                    !used.contains(pid)
+                        && !self.suspended(*pid)
+                        && squad.iter().any(|p| p.id == *pid)
+                });
             *occ += 1;
             let pick = match assigned {
                 Some(pid) => squad.iter().find(|p| p.id == pid).cloned(),
@@ -648,7 +660,7 @@ impl<'a> Engine<'a> {
     ) -> Option<SquadPlayer> {
         let mut pool: Vec<SquadPlayer> = squad
             .iter()
-            .filter(|p| !used.contains(&p.id))
+            .filter(|p| !used.contains(&p.id) && !self.suspended(p.id))
             .cloned()
             .collect();
         pool.sort_by(|a, b| {
@@ -683,6 +695,11 @@ impl<'a> Engine<'a> {
 
     fn bump(&mut self, team_id: i64, bonus: f64) {
         *self.team_bonus.entry(team_id).or_insert(0.0) += bonus;
+    }
+
+    /// True when a player is currently serving a suspension.
+    fn suspended(&self, player_id: i64) -> bool {
+        self.suspensions.get(&player_id).copied().unwrap_or(0) > 0
     }
 
     fn strength(&self, team_id: i64, knockout: bool) -> ApiResult<f64> {
@@ -932,6 +949,24 @@ impl<'a> Engine<'a> {
             + strategy_adj(&home_strat, false))
         .clamp(0.1, 4.5);
 
+        // Red cards are drawn before the goals so the sending-off can swing the
+        // rest of the match: the ten men create less and concede more, scaled by
+        // how much time is left to play.
+        let home_red = self.draw_red(&home_xi);
+        let away_red = self.draw_red(&away_xi);
+        let swing = |red: &Option<(i32, SquadPlayer)>, own: bool| -> f64 {
+            match red {
+                Some((minute, _)) => {
+                    let frac = ((90 - *minute).max(0) as f64) / 90.0;
+                    let factor = if own { 0.55 } else { 1.35 };
+                    1.0 + (factor - 1.0) * frac
+                }
+                None => 1.0,
+            }
+        };
+        let h_xg = (h_xg * swing(&home_red, true) * swing(&away_red, false)).clamp(0.05, 5.0);
+        let a_xg = (a_xg * swing(&away_red, true) * swing(&home_red, false)).clamp(0.05, 5.0);
+
         let (hs0, aw0) = (
             sim::poisson(&mut self.rng, h_xg),
             sim::poisson(&mut self.rng, a_xg),
@@ -946,8 +981,12 @@ impl<'a> Engine<'a> {
             .into_iter()
             .zip(shuffled(&mut self.rng, team_labels(home, away, hs0, aw0)))
         {
-            let xi = if team == home { &home_xi } else { &away_xi };
-            goals.push(self.make_goal(xi, minute, false, team));
+            let (xi, opp, red) = if team == home {
+                (&home_xi, &away_xi, &home_red)
+            } else {
+                (&away_xi, &home_xi, &away_red)
+            };
+            goals.push(self.make_goal(xi, opp, minute, false, team, red.as_ref()));
         }
 
         let mut extra_time = false;
@@ -973,8 +1012,12 @@ impl<'a> Engine<'a> {
                 .into_iter()
                 .zip(shuffled(&mut self.rng, team_labels(home, away, eh, ea)))
             {
-                let xi = if team == home { &home_xi } else { &away_xi };
-                goals.push(self.make_goal(xi, 90 + minute, true, team));
+                let (xi, opp, red) = if team == home {
+                    (&home_xi, &away_xi, &home_red)
+                } else {
+                    (&away_xi, &home_xi, &away_red)
+                };
+                goals.push(self.make_goal(xi, opp, 90 + minute, true, team, red.as_ref()));
             }
             goals.sort_by_key(|g| (g.minute, g.team_id));
             hs += eh;
@@ -1003,6 +1046,41 @@ impl<'a> Engine<'a> {
             }
         }
 
+        // Sending-offs, in minute order.
+        let mut reds = Vec::new();
+        if let Some((minute, p)) = &home_red {
+            reds.push(RedCard {
+                minute: *minute,
+                extra_time: false,
+                team_id: home,
+                player_id: p.id,
+                player: p.name.clone(),
+                player_photo: p.photo_url.clone(),
+            });
+        }
+        if let Some((minute, p)) = &away_red {
+            reds.push(RedCard {
+                minute: *minute,
+                extra_time: false,
+                team_id: away,
+                player_id: p.id,
+                player: p.name.clone(),
+                player_photo: p.photo_url.clone(),
+            });
+        }
+        reds.sort_by_key(|r| r.minute);
+
+        // Players already banned for this match (the focus team's, so the
+        // lineup editor can lock them). Captured before the bans tick down.
+        let mut unavailable: Vec<i64> = Vec::new();
+        if let Some(ft) = self.focus.filter(|t| *t == home || *t == away) {
+            for p in self.squad(ft)? {
+                if self.suspended(p.id) {
+                    unavailable.push(p.id);
+                }
+            }
+        }
+
         // Per-match ratings + per-player event stats.
         let (h_result, a_result) = match winner {
             Some(w) if w == home => (1.0, 0.2),
@@ -1016,6 +1094,21 @@ impl<'a> Engine<'a> {
             self.add_group_result(home, away, hs, aw);
         }
         self.apply_drift(home, away, hs, aw);
+
+        // Serve one match of the existing bans, then book this match's reds for
+        // the next one.
+        for team in [home, away] {
+            for p in self.squad(team)? {
+                if let Some(n) = self.suspensions.get_mut(&p.id) {
+                    if *n > 0 {
+                        *n -= 1;
+                    }
+                }
+            }
+        }
+        for r in &reds {
+            self.suspensions.insert(r.player_id, 1);
+        }
 
         let total_minutes = if extra_time { 120 } else { 90 };
         let momentum = if self.focus == Some(home) || self.focus == Some(away) {
@@ -1044,6 +1137,8 @@ impl<'a> Engine<'a> {
             penalties,
             result_label,
             goals,
+            reds,
+            unavailable,
             momentum,
         };
         self.order.push(match_id);
@@ -1070,7 +1165,12 @@ impl<'a> Engine<'a> {
         goals: &[Goal],
         conceded: i32,
     ) {
-        let team_goals: Vec<&Goal> = goals.iter().filter(|g| g.team_id == team_id).collect();
+        // Own goals are credited to the scoring team but never to a player, so
+        // they are excluded from both the scorer and assister tallies.
+        let team_goals: Vec<&Goal> = goals
+            .iter()
+            .filter(|g| g.team_id == team_id && !g.own_goal)
+            .collect();
         for p in xi {
             let perf = self.perf(p, team_id);
             perf.games += 1;
@@ -1081,22 +1181,104 @@ impl<'a> Engine<'a> {
             }
             let scored = team_goals.iter().filter(|g| g.scorer_id == p.id).count();
             let assisted = team_goals.iter().filter(|g| g.assist_id == Some(p.id)).count();
+            let own = goals
+                .iter()
+                .filter(|g| g.own_goal && g.scorer_id == p.id)
+                .count();
             perf.goals += scored as i32;
             perf.assists += assisted as i32;
-            rating += scored as f64 * 1.2 + assisted as f64 * 0.5;
+            rating += scored as f64 * 1.2 + assisted as f64 * 0.5 - own as f64 * 1.0;
             perf.rating_sum += rating.clamp(4.0, 10.0);
         }
     }
 
-    /// Weighted pick of scorer + optional assister from an XI.
+    /// Draws a red card for one team: `Some((minute, player))` when it happens.
+    /// Likelihood scales with the XI's average aggression (~1 red per 10
+    /// matches at average aggression), and the player is picked weighted by
+    /// aggression among the outfielders.
+    fn draw_red(&mut self, xi: &[SquadPlayer]) -> Option<(i32, SquadPlayer)> {
+        let pool: Vec<SquadPlayer> = xi
+            .iter()
+            .filter(|p| p.position != "GK")
+            .cloned()
+            .collect();
+        if pool.is_empty() {
+            return None;
+        }
+        let avg = xi.iter().map(|p| p.aggression as f64).sum::<f64>() / xi.len() as f64;
+        let prob = (0.045 * (avg / 60.0)).clamp(0.005, 0.18);
+        if self.rng.unit() >= prob {
+            return None;
+        }
+        let total: f64 = pool
+            .iter()
+            .map(|p| (p.aggression as f64).powi(2))
+            .sum();
+        let mut roll = self.rng.unit() * total;
+        let mut chosen = pool[pool.len() - 1].clone();
+        for p in &pool {
+            roll -= (p.aggression as f64).powi(2);
+            if roll <= 0.0 {
+                chosen = p.clone();
+                break;
+            }
+        }
+        let minute = 1 + (self.rng.unit() * 90.0) as i32;
+        Some((minute.min(90), chosen))
+    }
+
+    /// A defender (preferably) from the defending side to blame for an own goal.
+    fn pick_own_goal(&mut self, opp_xi: &[SquadPlayer]) -> Option<SquadPlayer> {
+        let mut pool: Vec<&SquadPlayer> = opp_xi
+            .iter()
+            .filter(|p| models::position_family(&p.position) == "DF")
+            .collect();
+        if pool.is_empty() {
+            pool = opp_xi.iter().filter(|p| p.position != "GK").collect();
+        }
+        if pool.is_empty() {
+            return None;
+        }
+        let idx = ((self.rng.unit() * pool.len() as f64) as usize).min(pool.len() - 1);
+        Some(pool[idx].clone())
+    }
+
+    /// Weighted pick of scorer + optional assister from an XI. A small share of
+    /// goals are own goals, credited to `team_id` but finished by a defender of
+    /// `opp_xi`. A player sent off before `minute` can no longer score.
     fn make_goal(
         &mut self,
         xi: &[SquadPlayer],
+        opp_xi: &[SquadPlayer],
         minute: i32,
         extra_time: bool,
         team_id: i64,
+        red: Option<&(i32, SquadPlayer)>,
     ) -> Goal {
-        let scorer = self.pick_scorer(xi);
+        // ~2% of goals are put into the wrong net.
+        if self.rng.unit() < 0.02 {
+            if let Some(og) = self.pick_own_goal(opp_xi) {
+                return Goal {
+                    minute,
+                    extra_time,
+                    team_id,
+                    scorer_id: og.id,
+                    scorer: og.name.clone(),
+                    scorer_photo: og.photo_url.clone(),
+                    assist_id: None,
+                    assist: None,
+                    assist_photo: None,
+                    own_goal: true,
+                };
+            }
+        }
+        let sent_off = red.filter(|(rm, _)| minute >= *rm).map(|(_, p)| p.id);
+        let eff: Vec<SquadPlayer> = xi
+            .iter()
+            .filter(|p| Some(p.id) != sent_off)
+            .cloned()
+            .collect();
+        let scorer = self.pick_scorer(&eff);
         // Not every goal has an assist (headers, deflections, solo runs, and
         // almost never a striker's own poached finishes). Defensive scorers in
         // particular rack up more unassisted goals.
@@ -1108,7 +1290,7 @@ impl<'a> Engine<'a> {
             _ => 0.72,
         };
         let assist = if self.rng.unit() < assist_prob {
-            Some(self.pick_assist(xi, &scorer))
+            Some(self.pick_assist(&eff, &scorer))
         } else {
             None
         };
@@ -1122,6 +1304,7 @@ impl<'a> Engine<'a> {
             assist_id: assist.as_ref().map(|p| p.id),
             assist: assist.as_ref().map(|p| p.name.clone()),
             assist_photo: assist.as_ref().and_then(|p| p.photo_url.clone()),
+            own_goal: false,
         }
     }
 

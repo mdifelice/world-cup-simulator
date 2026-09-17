@@ -718,6 +718,38 @@ body {
   color: var(--muted);
   font-size: 12px;
 }
+.goal-photo {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--panel2);
+}
+.og-badge {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px solid rgba(200, 67, 61, 0.5);
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--danger);
+  vertical-align: middle;
+}
+.red-card {
+  flex: 0 0 auto;
+  display: inline-block;
+  width: 11px;
+  height: 15px;
+  border-radius: 2px;
+  background: var(--danger);
+}
+.reds-card .goal-min {
+  color: var(--danger);
+}
 
 .champ-banner {
   display: flex;
@@ -1299,6 +1331,18 @@ body {
 .pc-pick.used {
   opacity: 0.55;
 }
+.pc-pick.suspended {
+  opacity: 0.5;
+}
+.pc-pick.suspended:hover {
+  border-color: var(--line);
+}
+.pitch.locked {
+  opacity: 0.85;
+}
+.pitch.locked .slot-marker {
+  cursor: default;
+}
 .pp-photo {
   flex: 0 0 34px;
   width: 34px;
@@ -1357,6 +1401,9 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.4px;
   color: var(--accent);
+}
+.pp-badge.sus {
+  color: var(--danger);
 }
 .pp-stars {
   flex: 0 0 auto;
@@ -1769,13 +1816,61 @@ body {
   font-size: 18px;
   color: var(--text);
 }
-.chart-legend {
-  margin-left: auto;
-  display: inline-flex;
+.mom-gauge {
+  margin-top: 10px;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  gap: 8px;
+  font-size: 11px;
   color: var(--muted);
+}
+.gauge-title {
+  flex: 0 0 auto;
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.mg-side {
+  flex: 0 0 auto;
+  max-width: 24%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mg-track {
+  position: relative;
+  flex: 1 1 auto;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+.mg-mid {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(27, 37, 48, 0.35);
+}
+.mg-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  transition: left 0.15s linear, width 0.15s linear;
+}
+.mg-fill.home {
+  background: #2da562;
+}
+.mg-fill.away {
+  background: #c8443a;
+}
+.live-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
 }
 .mom-bar.up {
   fill: #2da562;

@@ -19,6 +19,10 @@ export interface LineupEditorProps {
   shirtNumbers: boolean;
   squad: Player[];
   initial?: LineupConfig;
+  /** Read-only mode: the XI is shown but nothing can be changed. */
+  disabled?: boolean;
+  /** Player ids serving a suspension: locked out of the XI and auto-pick. */
+  unavailable?: number[];
   /** Reports the current lineup every time it changes: the config when the XI
    *  is complete, null otherwise. The parent decides when to commit/play. */
   onReady?: (cfg: LineupConfig | null) => void;
@@ -74,12 +78,16 @@ export default function LineupEditor({
   shirtNumbers,
   squad,
   initial,
+  disabled = false,
+  unavailable,
   onReady,
 }: LineupEditorProps) {
   const { t, pos } = useI18n();
   const [formation, setFormation] = useState<string>(initial?.formation ?? "4-4-2");
   const [strategy, setStrategy] = useState<Strategy>(initial?.strategy ?? "normal");
   const [armedId, setArmedId] = useState<number | null>(null);
+
+  const blocked = useMemo(() => new Set(unavailable ?? []), [unavailable]);
 
   const slots = useMemo(() => slotsFor(formation, strategy), [formation, strategy]);
   const markers = useMemo(() => layout(slots), [slots]);
@@ -92,7 +100,7 @@ export default function LineupEditor({
     const used = new Set<number>();
     for (const slot of slotsFor(initial?.formation ?? "4-4-2", initial?.strategy ?? "normal")) {
       const ids = lists[slot] ?? [];
-      const pid = ids.find((p) => !used.has(p));
+      const pid = ids.find((p) => !used.has(p) && !blocked.has(p));
       out.push(pid ?? null);
       if (pid != null) used.add(pid);
     }
@@ -115,6 +123,7 @@ export default function LineupEditor({
     assignments.every((p) => p != null) && idsIn.size === slots.length;
 
   const assignTo = (slotIndex: number, player: Player) => {
+    if (disabled || blocked.has(player.id)) return;
     setAssignments((cur) =>
       cur.map((pid, i) => (pid === player.id ? null : i === slotIndex ? player.id : pid)),
     );
@@ -122,6 +131,7 @@ export default function LineupEditor({
   };
 
   const clearSlot = (slotIndex: number) => {
+    if (disabled) return;
     setAssignments((cur) => cur.map((pid, i) => (i === slotIndex ? null : pid)));
   };
 
@@ -140,7 +150,7 @@ export default function LineupEditor({
     let best: Player | null = null;
     let bestEff = -Infinity;
     for (const p of squad) {
-      if (used.has(p.id)) continue;
+      if (used.has(p.id) || blocked.has(p.id)) continue;
       const eff = effFor(p, slot);
       if (eff > bestEff) {
         bestEff = eff;
@@ -151,9 +161,11 @@ export default function LineupEditor({
   };
 
   const pickAuto = () => {
+    if (disabled) return;
     const next: (number | null)[] = new Array(slots.length).fill(null);
     const used = new Set<number>();
-    const ownersOf = (slot: string) => squad.filter((p) => owns(p, slot));
+    const pool = squad.filter((p) => !blocked.has(p.id));
+    const ownersOf = (slot: string) => pool.filter((p) => owns(p, slot));
 
     // Match every slot to a different owner (maximum bipartite matching), so a
     // slot with no specialist left is the only one that can end up without an
@@ -239,6 +251,7 @@ export default function LineupEditor({
                 key={f}
                 className={"chip btn" + (formation === f ? " active" : "")}
                 onClick={() => setFormation(f)}
+                disabled={disabled}
               >
                 {f}
               </button>
@@ -250,6 +263,7 @@ export default function LineupEditor({
                 key={s}
                 className={"chip btn" + (strategy === s ? " active" : "")}
                 onClick={() => setStrategy(s)}
+                disabled={disabled}
               >
                 {t(`strategy.${s}`)}
               </button>
@@ -258,13 +272,13 @@ export default function LineupEditor({
               className="btn secondary chip"
               onClick={pickAuto}
               title={t("lineup.auto")}
-              disabled={anyPicked}
+              disabled={anyPicked || disabled}
             >
               ⚙ {t("lineup.auto")}
             </button>
           </div>
 
-          <div className={"pitch" + (armedId != null ? " arm-mode" : "")}>
+          <div className={"pitch" + (armedId != null ? " arm-mode" : "") + (disabled ? " locked" : "")}>
           <div className="pitch-line mid" />
           <div className="pitch-line circle" />
           <div className="pitch-line pa top" />
@@ -293,6 +307,7 @@ export default function LineupEditor({
                   (armedPlayer ? " arm-target" : "")
                 }
                 style={{ left: `${x}%`, top: `${y}%` }}
+                disabled={disabled}
                 onClick={() => armedPlayer && assignTo(i, armedPlayer)}
                 onDoubleClick={() => chosen && clearSlot(i)}
                 title={
@@ -366,14 +381,19 @@ export default function LineupEditor({
           <div className="pick-scroll">
             {FAMILIES.flatMap((fam) => grouped.get(fam) ?? []).map((p) => {
               const used = idsIn.has(p.id);
+              const sus = blocked.has(p.id);
               const isArmed = armedId === p.id;
               return (
                 <button
                   key={p.id}
                   className={
-                    "pc-pick" + (isArmed ? " armed" : "") + (used ? " used" : "")
+                    "pc-pick" +
+                    (isArmed ? " armed" : "") +
+                    (used ? " used" : "") +
+                    (sus ? " suspended" : "")
                   }
                   onClick={() => setArmedId((cur) => (cur === p.id ? null : p.id))}
+                  disabled={disabled || sus}
                   title={`${positionsLabel(p)} · ✦${Math.round(p.rating ?? p.overall)}`}
                 >
                   <span className="pp-photo">
@@ -398,7 +418,11 @@ export default function LineupEditor({
                     <span className="pp-name">{playerSurname(p.name)}</span>
                     <span className="pp-pos">{positionsLabel(p)}</span>
                   </span>
-                  {used && <span className="pp-badge">{t("lineup.picked")}</span>}
+                  {sus ? (
+                    <span className="pp-badge sus">{t("lineup.suspended")}</span>
+                  ) : used ? (
+                    <span className="pp-badge">{t("lineup.picked")}</span>
+                  ) : null}
                   <span className="pp-stars">
                     {starsString(ratingStars(p.rating ?? p.overall))}
                   </span>

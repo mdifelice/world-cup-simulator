@@ -538,8 +538,26 @@ pub struct RunMatch {
     /// Human-readable outcome, e.g. "2–1", "1–1 aet", "0–0 aet (5–4 pens)".
     pub result_label: String,
     pub goals: Vec<Goal>,
+    /// Players sent off during the match (red cards).
+    #[serde(default)]
+    pub reds: Vec<RedCard>,
+    /// Player ids unavailable for this match because of a suspension.
+    #[serde(default)]
+    pub unavailable: Vec<i64>,
     /// Minute-by-minute momentum (only present for the user's team's matches).
     pub momentum: Option<Momentum>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct RedCard {
+    pub minute: i32,
+    /// True when the sending-off happened in extra time.
+    pub extra_time: bool,
+    pub team_id: i64,
+    pub player_id: i64,
+    pub player: String,
+    #[serde(default)]
+    pub player_photo: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -574,6 +592,10 @@ pub struct Goal {
     pub assist: Option<String>,
     #[serde(default)]
     pub assist_photo: Option<String>,
+    /// True when the goal was put into their own net by the defending side
+    /// (credited to `team_id`, but not counted toward the scorer's tally).
+    #[serde(default)]
+    pub own_goal: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

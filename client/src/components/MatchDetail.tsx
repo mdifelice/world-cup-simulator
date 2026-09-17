@@ -71,8 +71,14 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                   <span className="goal-ball" aria-hidden>⚽</span>
                   {g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}
                 </span>
+                {g.scorer_photo ? (
+                  <img className="goal-photo" src={g.scorer_photo} alt="" />
+                ) : null}
                 <span className="goal-scorer">
                   {g.scorer}
+                  {g.own_goal ? (
+                    <span className="og-badge">{t("match.ownGoal")}</span>
+                  ) : null}
                   {g.assist ? <span className="dim"> · {t("match.assist", { name: g.assist })}</span> : null}
                 </span>
                 <span className={`goal-team${focused(g.team_id) ? " focus-tag" : ""}`}>
@@ -80,6 +86,28 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                 </span>
               </div>
             ))}
+          </div>
+        )}
+
+        {(m.reds ?? []).length > 0 && (
+          <div className="detail-goals reds-card">
+            {[...(m.reds ?? [])]
+              .sort((a, b) => a.minute - b.minute)
+              .map((r, i) => (
+                <div key={i} className="goal-row red-row">
+                  <span className="goal-min">
+                    <span className="red-card" aria-hidden />
+                    {r.minute}'{r.extra_time ? ` ${t("match.etShort")}` : ""}
+                  </span>
+                  {r.player_photo ? (
+                    <img className="goal-photo" src={r.player_photo} alt="" />
+                  ) : null}
+                  <span className="goal-scorer">{r.player}</span>
+                  <span className={`goal-team${focused(r.team_id) ? " focus-tag" : ""}`}>
+                    {flagFor(r.team_id === m.home_team_id ? m.home_team_name : m.away_team_name)}
+                  </span>
+                </div>
+              ))}
           </div>
         )}
 

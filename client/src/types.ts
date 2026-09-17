@@ -249,11 +249,21 @@ export interface Goal {
   assist_id: number | null;
   assist: string | null;
   assist_photo?: string | null;
+  own_goal?: boolean;
 }
 
 export interface Momentum {
   home: number[];
   away: number[];
+}
+
+export interface RedCard {
+  minute: number;
+  extra_time: boolean;
+  team_id: number;
+  player_id: number;
+  player: string;
+  player_photo?: string | null;
 }
 
 export interface RunMatch {
@@ -271,6 +281,8 @@ export interface RunMatch {
   penalties: PenResult | null;
   result_label: string;
   goals: Goal[];
+  reds?: RedCard[];
+  unavailable?: number[];
   momentum: Momentum | null;
 }
 

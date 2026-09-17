@@ -107,6 +107,26 @@ export default function App() {
    *  formation panel on the hub and gates the Play button. */
   const inlineMatch = focusMatches.find((m) => !configs[matchKey(m)]) ?? null;
 
+  // Once every focus match is configured (team eliminated or cup won/lost),
+  // keep showing the last formation read-only instead of hiding the panel.
+  const focusConfigured =
+    focusMatches.length > 0 && focusMatches.every((m) => configs[matchKey(m)]);
+  const panelMatch =
+    inlineMatch ?? (focusConfigured ? focusMatches[focusMatches.length - 1] ?? null : null);
+  const panelDisabled = inlineMatch == null && panelMatch != null;
+
+  // Players banned for the panel's match: for an upcoming match that is the
+  // red cards from the team's previous match (a one-match ban).
+  const panelUnavailable = (() => {
+    if (!panelMatch) return [] as number[];
+    if (!inlineMatch) return panelMatch.unavailable ?? [];
+    const i = focusMatches.indexOf(panelMatch);
+    const prev = i > 0 ? focusMatches[i - 1] : null;
+    return (prev?.reds ?? [])
+      .filter((r) => r.team_id === focusId)
+      .map((r) => r.player_id);
+  })();
+
   /** Match helpers used by the match-by-match fast-forward. */
   const isFocusMatch = (run: RunPayload, id: number) => {
     if (run.focus_team_id == null) return false;
@@ -131,7 +151,10 @@ export default function App() {
     if (!id) return;
     if (runGuard.current === id) return;
     runGuard.current = id;
-    setFlow((f) => ({ ...f, run: null, revealed: 0, runError: null }));
+    // Keep the previous run (and the scroll position) visible while the
+    // deterministic re-sim runs; the result is all but identical, so clearing
+    // it would flash the list empty and bounce the scroll back to the top.
+    setFlow((f) => ({ ...f, runError: null }));
     api
       .run(id, flow.team?.id ?? null, {
         seed: seed ?? undefined,
@@ -340,8 +363,9 @@ export default function App() {
       if (idx < 0 || idx + 1 <= f.revealed) return f;
       return { ...f, revealed: idx + 1 };
     });
-    setLiveMatch(null);
-  };
+  }
+
+  const closeLive = () => setLiveMatch(null);
 
   /** Open the run-summary share popup; archive the completed run first. */
   const openShare = () => {
@@ -419,12 +443,14 @@ export default function App() {
             onReplay={replayMatch}
             onOpenDetail={setMatchDetail}
             isConfigured={(m) => !!configs[matchKey(m)]}
-            formationMatch={inlineMatch}
+            formationMatch={panelMatch}
             formationInitial={
-              inlineMatch
-                ? configs[matchKey(inlineMatch)] ?? lastLineup ?? undefined
+              panelMatch
+                ? configs[matchKey(panelMatch)] ?? lastLineup ?? undefined
                 : undefined
             }
+            formationDisabled={panelDisabled}
+            formationUnavailable={panelUnavailable}
             draftReady={inlineMatch ? !configs[matchKey(inlineMatch)] && !!draft : false}
             onDraft={setDraft}
             onStart={() => postRun(false, null, configs)}
@@ -447,6 +473,7 @@ export default function App() {
           match={liveMatch}
           focusTeamId={flow.run.focus_team_id}
           onReveal={liveReveal}
+          onClose={closeLive}
         />
       )}
 

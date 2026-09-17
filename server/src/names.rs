@@ -20,6 +20,8 @@ pub struct SquadPlayer {
     pub photo_url: Option<String>,
     pub shirt_number: Option<i32>,
     pub overall: f64,
+    /// Aggression attribute (0–99); drives card likelihood. Defaults to 60.
+    pub aggression: i32,
 }
 
 /// 26-man squad layout: (position, number of players).
@@ -109,6 +111,7 @@ fn read_callups(
             positions,
             shirt_number: r.get(5)?,
             overall,
+            aggression: attrs[15].unwrap_or(60),
         })
     })?;
     rows.collect()
@@ -169,6 +172,9 @@ fn generate(
                 photo_url: None,
                 shirt_number: number,
                 overall,
+                // Deterministic spread that doesn't perturb the name/overall RNG.
+                aggression: (overall - 2.0 + ((idx * 37 % 23) as f64)).clamp(40.0, 96.0)
+                    as i32,
             });
             idx += 1;
         }

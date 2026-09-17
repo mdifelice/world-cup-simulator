@@ -21,7 +21,6 @@ const flagName = (country: (s: string) => string, n: string) =>
 
 export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Props) {
   const { t, country } = useI18n();
-  const [copied, setCopied] = useState(false);
   const [sharing, setSharing] = useState(false);
   const captureRef = useRef<HTMLDivElement>(null);
 
@@ -122,32 +121,8 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
 
   const medals = ["🥇", "🥈", "🥉"];
 
-  // Plain-text résumé of the whole run, so the modal can be "shared" without
-  // generating an image — copy the summary and paste it anywhere.
-  const summaryText = useMemo(() => {
-    const lines = [
-      `${title} — ${host}`,
-      ...podium.map((p) => `${p.medal} ${flagName(country, p.name)} — ${p.sub}`),
-      yourPos ? t("share.yourPos", { pos: yourPos }) : null,
-      best.length
-        ? `${t("share.bestPlayers")}: ${best.map((a) => flagName(country, a.name)).join(", ")}`
-        : null,
-      scorers.length
-        ? `${t("share.bestScorer")}: ${scorers
-            .map((a) => `${flagName(country, a.name)} (${a.goals})`)
-            .join(", ")}`
-        : null,
-      assists.length
-        ? `${t("share.bestAssists")}: ${assists
-            .map((a) => `${flagName(country, a.name)} (${a.assists})`)
-            .join(", ")}`
-        : null,
-    ];
-    return lines.filter(Boolean).join("\n");
-  }, [t, title, host, podium, yourPos, best, scorers, assists]);
-
-  /** Render the summary as a PNG and share it; fall back to downloading the
-   *  image, then to copying the text summary. */
+  /** Render the summary as a PNG and share it (image only); fall back to
+   *  downloading the image. */
   const share = async () => {
     const node = captureRef.current;
     if (!node || sharing) return;
@@ -157,6 +132,8 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
         pixelRatio: 2,
         cacheBust: true,
         backgroundColor: "#ffffff",
+        // White margin around the captured card.
+        style: { padding: "28px", background: "#ffffff" },
       });
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], `world-cup-${run.year}.png`, {
@@ -166,7 +143,7 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
         canShare?: (data: ShareData) => boolean;
       };
       if (nav.share && nav.canShare?.({ files: [file] })) {
-        await nav.share({ files: [file], title, text: summaryText });
+        await nav.share({ files: [file] });
       } else {
         const a = document.createElement("a");
         a.href = dataUrl;
@@ -174,14 +151,7 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
         a.click();
       }
     } catch {
-      // Last resort: copy the text summary.
-      try {
-        await navigator.clipboard.writeText(summaryText);
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 1500);
-      } catch {
-        // Clipboard may be unavailable — nothing else to do.
-      }
+      // Image generation failed — nothing else to do.
     } finally {
       setSharing(false);
     }
@@ -265,11 +235,7 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
 
         <div className="share-actions bar">
           <button className="btn primary big" onClick={share} disabled={sharing}>
-            {sharing
-              ? t("share.sharing")
-              : copied
-                ? t("share.copied")
-                : t("share.share")}
+            {sharing ? t("share.sharing") : t("share.share")}
           </button>
           <button className="btn big" onClick={onPlayAgain}>
             {t("share.playAgain")}

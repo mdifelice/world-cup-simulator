@@ -6,17 +6,21 @@ interface Props {
   match: RunMatch;
   focusTeamId: number | null;
   onReveal: (m: RunMatch) => void;
+  onClose: () => void;
 }
 
-const GOLD = "#d8a418";
 const UP = "#2da562";
 const DOWN = "#c8443a";
 const LIVE_MS = 150;
+// How many match-minutes a goal keeps the momentum gauge pegged before it
+// eases back to the centre.
+const MOM_WINDOW = 18;
 
 export default function LiveMatch({
   match: m,
   focusTeamId,
   onReveal,
+  onClose,
 }: Props) {
   const { t, stage, country } = useI18n();
 
@@ -33,12 +37,11 @@ export default function LiveMatch({
 
   const done = min >= lengthLabel;
 
-  // Reveal the result on the hub (and close) once the full match has played,
-  // holding the final score on screen for a moment first.
+  // Commit the result to the hub as soon as the match ends, but keep the dialog
+  // open so the user can watch the final score and close it manually.
   useEffect(() => {
     if (!done) return;
-    const t = window.setTimeout(() => onReveal(m), 1600);
-    return () => window.clearTimeout(t);
+    onReveal(m);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
@@ -59,6 +62,11 @@ export default function LiveMatch({
   );
   const homeGoals = goalsUpTo.filter((g) => g.team_id === m.home_team_id).length;
   const awayGoals = goalsUpTo.filter((g) => g.team_id === m.away_team_id).length;
+
+  const redsUpTo = useMemo(
+    () => (m.reds ?? []).filter((r) => r.minute <= min),
+    [m.reds, min],
+  );
 
   const W = 900;
   const H = 70;
@@ -110,11 +118,23 @@ export default function LiveMatch({
       focusTeamId != null && g.team_id === focusTeamId
         ? !isAwayFocusMomentum
         : isAwayFocusMomentum;
-    const y = isFocusGoal ? 8 : H - 8;
-    const color = isFocusGoal ? GOLD : "rgba(27,37,48,0.55)";
+    const y = isFocusGoal ? 9 : H - 9;
     const note = g.extra_time ? ` ${t("match.etShort")}` : "";
-    return { x, y, color, minute: g.minute, note, key: i };
+    return { x, y, minute: g.minute, note, key: i };
   });
+
+  // Horizontal momentum gauge: centre is neutral, a goal snaps the fill to that
+  // team's end (home = left, away = right) and it eases back to the centre over
+  // the following minutes.
+  const gauge = useMemo(() => {
+    if (goalsUpTo.length === 0) return 0;
+    let last = goalsUpTo[0];
+    for (const g of goalsUpTo) if (g.minute >= last.minute) last = g;
+    const age = min - last.minute;
+    if (age < 0 || age >= MOM_WINDOW) return 0;
+    const mag = 1 - age / MOM_WINDOW;
+    return (last.team_id === m.home_team_id ? -1 : 1) * mag;
+  }, [goalsUpTo, min, m.home_team_id]);
 
   const tick = (mmin: number, label: string) => {
     const x = (mmin / lengthLabel) * W;
@@ -192,12 +212,6 @@ export default function LiveMatch({
             <span className="chart-title">
               {t("match.momentum", { team: flagName(focusName) })}
             </span>
-            <span className="chart-legend">
-              <span className="dot" style={{ background: UP }}></span>
-              {t("match.we")}
-              <span className="dot" style={{ background: DOWN }}></span>
-              {t("match.opp")}
-            </span>
           </div>
           <svg
             ref={svgRef}
@@ -232,19 +246,26 @@ export default function LiveMatch({
                 fill={b.up ? UP : DOWN}
               />
             ))}
-            {goalMarks.map(({ x, y, color, minute, note, key }) => (
+            {goalMarks.map(({ x, y, minute, note, key }) => (
               <g key={key}>
                 <line
                   x1={x}
-                  y1={y === 8 ? 13 : H - 13}
+                  y1={y < midY ? 14 : H - 14}
                   x2={x}
                   y2={y}
-                  stroke={color}
+                  stroke="rgba(27,37,48,0.5)"
                   strokeWidth="1"
                   strokeDasharray="3 3"
                   opacity="0.6"
                 />
-                <circle cx={x} cy={y} r={4} fill={color} stroke="#fff" strokeWidth="1" />
+                <text
+                  transform={`translate(${x} ${y}) scale(${textSx} 1)`}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize="10"
+                >
+                  ⚽
+                </text>
                 <text
                   transform={`translate(${x + 7} ${y + 3}) scale(${textSx} 1)`}
                   fill="rgba(27,37,48,0.8)"
@@ -256,6 +277,22 @@ export default function LiveMatch({
               </g>
             ))}
           </svg>
+
+          <div className="mom-gauge">
+            <span className="gauge-title">{t("match.currentMomentum")}</span>
+            <span className="mg-side">{flagName(m.home_team_name)}</span>
+            <div className="mg-track">
+              <div className="mg-mid" />
+              <div
+                className={"mg-fill " + (gauge <= 0 ? "home" : "away")}
+                style={{
+                  left: gauge <= 0 ? `${50 + gauge * 50}%` : "50%",
+                  width: `${Math.abs(gauge) * 50}%`,
+                }}
+              />
+            </div>
+            <span className="mg-side">{flagName(m.away_team_name)}</span>
+          </div>
         </div>
       )}
 
@@ -267,12 +304,45 @@ export default function LiveMatch({
                 <span className="goal-ball" aria-hidden>⚽</span>
                 {g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}
               </span>
+              {g.scorer_photo ? (
+                <img className="goal-photo" src={g.scorer_photo} alt="" />
+              ) : null}
               <span className="goal-scorer">
                 {g.scorer}
-                {g.assist ? <span className="dim"> · {t("match.assist", { name: g.assist })}</span> : null}
+                {g.own_goal ? (
+                  <span className="og-badge">{t("match.ownGoal")}</span>
+                ) : null}
+                {g.assist ? (
+                  <span className="dim"> · {t("match.assist", { name: g.assist })}</span>
+                ) : null}
               </span>
             </div>
           ))}
+        </div>
+      )}
+
+      {redsUpTo.length > 0 && (
+        <div className="goals-card reds-card">
+          {redsUpTo.map((r, i) => (
+            <div key={i} className="goal-row red-row">
+              <span className="goal-min">
+                <span className="red-card" aria-hidden />
+                {r.minute}'{r.extra_time ? ` ${t("match.etShort")}` : ""}
+              </span>
+              {r.player_photo ? (
+                <img className="goal-photo" src={r.player_photo} alt="" />
+              ) : null}
+              <span className="goal-scorer">{r.player}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {done && (
+        <div className="live-actions">
+          <button className="btn primary" onClick={onClose}>
+            {t("match.close")}
+          </button>
         </div>
       )}
       </div>
