@@ -113,18 +113,16 @@ export default function Bracket({
       }
     }
 
-    // Third-place match: a side column fed by the two semi-final losers.
+    // Third-place match: drawn directly below the final, in the final's column,
+    // and fed by the two semi-final losers.
     let third: Col | null = null;
     const thirdMatches = byStage.get("THIRD") ?? [];
+    const finalCol = cols.find((c) => c.key === "F");
     const sfCol = cols.find((c) => c.key === "SF");
     if (thirdMatches.length > 0) {
-      const x = px;
-      const fy = sfCol?.centers[0];
-      const ly = sfCol?.centers[sfCol.centers.length - 1];
-      const cy =
-        sfCol && sfCol.centers.length >= 2 && fy != null && ly != null
-          ? Math.max(...sfCol.centers) + BOX_H + GAP_Y * 3
-          : top + BOX_H / 2;
+      const x = finalCol?.x ?? px;
+      const fy = finalCol?.centers[0];
+      const cy = (fy ?? top) + BOX_H + GAP_Y * 3;
       third = {
         key: "THIRD",
         name: thirdMatches[0]?.stage_name ?? "THIRD",
@@ -169,6 +167,25 @@ export default function Bracket({
       if (col) {
         const target = col.x + BOX_W + PAD - el.clientWidth;
         el.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+
+        // Vertical: bring the newest revealed box into view inside the sidebar.
+        const parent = el.closest(".group-scroll") as HTMLElement | null;
+        const revealedCol = col.matches.filter((m) => revealedIds.has(m.id));
+        const newest = revealedCol[revealedCol.length - 1];
+        const box = newest
+          ? el.querySelector<HTMLElement>(`.bk-box[data-id="${newest.id}"]`)
+          : null;
+        if (parent && box) {
+          const delta =
+            box.getBoundingClientRect().top -
+            parent.getBoundingClientRect().top;
+          if (delta < 8 || delta + box.offsetHeight > parent.clientHeight) {
+            parent.scrollTo({
+              top: parent.scrollTop + delta - 44,
+              behavior: "smooth",
+            });
+          }
+        }
       }
     }
     colCountRef.current = revealedCols;
@@ -217,6 +234,7 @@ export default function Bracket({
               return (
                 <div
                   key={m.id}
+                  data-id={m.id}
                   className={
                     "bk-box" +
                     (played ? " played" : "") +

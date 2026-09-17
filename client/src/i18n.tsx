@@ -164,7 +164,7 @@ const en: Record<string, string> = {
 
   "share.title": "{year} World Cup",
   "share.host": "Host: {host}",
-  "share.yourPos": "Your team: {pos}",
+  "share.yourPos": "Your team {team}: {pos}",
   "share.bestPlayers": "Best players",
   "share.bestScorer": "Top scorers",
   "share.bestAssists": "Top assister",
@@ -358,7 +358,7 @@ const es: Record<string, string> = {
 
   "share.title": "Mundial {year}",
   "share.host": "Sede: {host}",
-  "share.yourPos": "Tu equipo: {pos}",
+  "share.yourPos": "Tu equipo {team}: {pos}",
   "share.bestPlayers": "Mejores jugadores",
   "share.bestScorer": "Máximos goleadores",
   "share.bestAssists": "Máximos asistentes",

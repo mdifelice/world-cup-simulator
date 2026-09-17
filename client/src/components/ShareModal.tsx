@@ -170,6 +170,7 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="share-scroll">
         <div className="share-capture" ref={captureRef}>
         <div className="share-head">
           <div>
@@ -192,9 +193,12 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
             ))}
           </div>
 
-          {yourPos && (
+          {yourPos && focusTeam && (
             <div className="your-pos">
-              {t("share.yourPos", { pos: yourPos })}
+              {t("share.yourPos", {
+                team: flagName(country, focusTeam.name),
+                pos: yourPos,
+              })}
             </div>
           )}
 
@@ -222,7 +226,6 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
                   <span className="share-name">{a.name}</span>
                   <span className="share-detail">{flagFor(a.team_name)}</span>
                   <span className="share-num">{a.goals}</span>
-                  <span className="share-tag">{t("final.goals")}</span>
                 </div>
               ))}
             </div>
@@ -238,11 +241,11 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
                   <span className="share-name">{a.name}</span>
                   <span className="share-detail">{flagFor(a.team_name)}</span>
                   <span className="share-num">{a.assists}</span>
-                  <span className="share-tag">{t("final.assists")}</span>
                 </div>
               ))}
             </div>
           )}
+        </div>
         </div>
         </div>
 

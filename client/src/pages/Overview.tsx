@@ -78,19 +78,33 @@ export default function Overview({
   const total = run?.matches.length ?? 0;
   const { t, stage, country } = useI18n();
 
+  // Scroll a row into view inside the matches list only, never the page.
+  const matchScrollRef = useRef<HTMLDivElement>(null);
+  const scrollRowIntoView = (row: HTMLElement | null, behavior: ScrollBehavior) => {
+    const el = matchScrollRef.current;
+    if (!el || !row) return;
+    const delta =
+      row.getBoundingClientRect().top - el.getBoundingClientRect().top;
+    if (delta < 0 || delta + row.offsetHeight > el.clientHeight) {
+      el.scrollTo({ top: el.scrollTop + delta - 8, behavior });
+    }
+  };
+
   useEffect(() => {
     if (scrollToId == null) return;
-    const el = document.querySelector<HTMLDivElement>(
+    const row = matchScrollRef.current?.querySelector<HTMLElement>(
       `.match-row[data-id="${scrollToId}"]`,
     );
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    scrollRowIntoView(row ?? null, "smooth");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollToId]);
 
-  // While fast-forwarding, keep the current match in view.
+  // While fast-forwarding, keep the current match in view (list only).
   useEffect(() => {
     if (revealed <= 0) return;
-    const el = document.querySelector<HTMLDivElement>(".match-row.next");
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const row = matchScrollRef.current?.querySelector<HTMLElement>(".match-row.next");
+    scrollRowIntoView(row ?? null, "smooth");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revealed]);
 
   const runCodes = new Map<number, string>();
@@ -379,7 +393,7 @@ export default function Overview({
         <>
           <div className="hub-grid">
             <div className="hub-main">
-              <div className="match-scroll">
+              <div className="match-scroll" ref={matchScrollRef}>
                 {run.matches.length === 0 && <p className="hint">{t("cup.noMatches")}</p>}
                 {run.matches.map((m) => {
                   const idx = run.order.indexOf(m.id);
@@ -403,9 +417,7 @@ export default function Overview({
                       title={done ? t("hub.viewResult") : undefined}
                       role={done ? "button" : undefined}
                     >
-                      <span className="mr-stage">
-                        {stage(m.stage_name)} · {t("match.day", { day: m.day })}
-                      </span>
+                      <span className="mr-stage">{stage(m.stage_name)}</span>
                       <span className={"mr-team home" + (m.home_team_id === focusId ? " focus-tag" : "")}>
                         {flagFor(m.home_team_name)} {country(m.home_team_name)}
                       </span>

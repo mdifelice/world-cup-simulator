@@ -387,7 +387,6 @@ body {
   font-size: 13px;
   height: 42px;
   padding: 0 16px;
-  text-transform: uppercase;
   letter-spacing: 0.3px;
   display: inline-flex;
   align-items: center;
@@ -1253,8 +1252,8 @@ body {
 }
 .slot-clear {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: -2px;
+  right: -2px;
   width: 16px;
   height: 16px;
   display: grid;
@@ -1535,6 +1534,7 @@ body {
   content: "";
 }
 .mr-score {
+  position: relative;
   font-variant-numeric: tabular-nums;
   font-size: 16px;
   font-weight: 900;
@@ -1578,6 +1578,20 @@ body {
   background: rgba(24, 154, 85, 0.1);
   border-color: var(--accent);
   color: var(--accent);
+}
+.btn.play:hover:not(:disabled) {
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(216, 164, 24, 0.4);
+}
+.btn.sim:hover:not(:disabled) {
+  background: rgba(24, 154, 85, 0.2);
+  transform: translateY(-1px);
+}
+.btn.play:active:not(:disabled),
+.btn.sim:active:not(:disabled) {
+  transform: translateY(1px) scale(0.97);
+  filter: brightness(0.95);
 }
 .form-panel {
   margin-top: 8px;
@@ -1674,16 +1688,19 @@ body {
 }
 .bk-red {
   position: absolute;
-  top: -3px;
+  top: -2px;
   right: -3px;
+  width: 6px;
+  height: 9px;
 }
 .red-card.tiny {
-  width: 9px;
-  height: 12px;
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  width: 6px;
+  height: 9px;
   border-radius: 1.5px;
-  display: inline-block;
-  margin-left: 4px;
-  vertical-align: -2px;
+  display: block;
 }
 
 /* ------- full-match scrollable list ------- */
@@ -1940,9 +1957,18 @@ body {
   width: 100%;
   max-width: 520px;
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 22px;
+  display: flex;
+  flex-direction: column;
   box-shadow: 0 18px 50px rgba(20, 28, 38, 0.28);
+}
+.share-scroll {
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: -4px;
+  padding: 4px;
 }
 .share-head {
   display: flex;
@@ -2049,6 +2075,7 @@ body {
   color: var(--muted);
 }
 .share-actions {
+  flex: 0 0 auto;
   justify-content: center;
   flex-wrap: wrap;
   border-top: 1px solid var(--line);

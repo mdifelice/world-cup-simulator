@@ -42,6 +42,18 @@ export default function LiveMatch({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
+  // Hidden shortcut: Ctrl+Shift+F jumps the live match straight to full time.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === "F" || e.key === "f")) {
+        e.preventDefault();
+        setMin((cur) => (cur >= lengthLabel ? cur : lengthLabel));
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lengthLabel]);
+
   const isFocus =
     focusTeamId != null &&
     (m.home_team_id === focusTeamId || m.away_team_id === focusTeamId);
@@ -92,8 +104,17 @@ export default function LiveMatch({
   const bars = useMemo(() => {
     if (!series || series.length === 0) return [] as { m: number; x: number; up: boolean; h: number }[];
     const out: { m: number; x: number; up: boolean; h: number }[] = [];
+    // Each bar summarises the momentum of the last minute rather than a single
+    // sample, smoothing the chart while keeping goal spikes visible.
+    const ROLL = 1;
     for (let mm = 1; mm <= Math.min(min, lengthLabel); mm++) {
-      const s = series[Math.min(mm - 1, series.length - 1)];
+      let sum = 0;
+      let n = 0;
+      for (let j = Math.max(0, mm - ROLL); j < mm; j++) {
+        sum += series[Math.min(j, series.length - 1)];
+        n += 1;
+      }
+      const s = n > 0 ? sum / n : series[Math.min(mm - 1, series.length - 1)];
       const d = s - 0.5;
       out.push({
         m: mm,
@@ -173,9 +194,7 @@ export default function LiveMatch({
     <div className="live-modal">
       <div className="live-box">
       <div className="live-head">
-        <span className="live-stage">
-          {stage(m.stage_name)} · {t("match.day", { day: m.day })}
-        </span>
+        <span className="live-stage">{stage(m.stage_name)}</span>
         {done && (
           <button
             className="live-x"
@@ -183,7 +202,7 @@ export default function LiveMatch({
             aria-label={t("match.close")}
             title={t("match.close")}
           >
-            ×
+            ✕
           </button>
         )}
       </div>
@@ -263,7 +282,7 @@ export default function LiveMatch({
                   ⚽
                 </text>
                 <text
-                  transform={`translate(${x + 11} ${y + 3}) scale(${textSx} 1)`}
+                  transform={`translate(${x + 17} ${y + 3}) scale(${textSx} 1)`}
                   fill="rgba(27,37,48,0.8)"
                   fontSize="10"
                 >
@@ -275,8 +294,6 @@ export default function LiveMatch({
           </svg>
 
           <div className="mom-gauge">
-            <span className="gauge-title">{t("match.currentMomentum")}</span>
-            <span className="mg-side">{flagName(m.home_team_name)}</span>
             <div className="mg-track">
               <div className="mg-mid" />
               <div
@@ -287,7 +304,6 @@ export default function LiveMatch({
                 }}
               />
             </div>
-            <span className="mg-side">{flagName(m.away_team_name)}</span>
           </div>
         </div>
       )}

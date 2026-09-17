@@ -29,9 +29,7 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
       <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
         <div className="share-head">
           <div>
-            <div className="share-title">
-              {stage(m.stage_name)} · {t("match.day", { day: m.day })}
-            </div>
+            <div className="share-title">{stage(m.stage_name)}</div>
           </div>
           <button className="live-x" onClick={onClose} aria-label="close">
             ✕

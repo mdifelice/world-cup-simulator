@@ -1553,6 +1553,24 @@ impl<'a> Engine<'a> {
             home_series.push(cur);
         }
 
+        // Give the momentum shape around goals: pressure builds over the few
+        // minutes before a goal (a team getting "closer" to scoring) and the
+        // scoring minute itself pins the series to the edge of the chart.
+        const RAMP: usize = 5;
+        for g in &gs {
+            let minute = (g.minute as usize).clamp(1, total_minutes);
+            let target = if g.team_id == home { 1.0 } else { 0.0 };
+            home_series[minute - 1] = target;
+            for k in 1..=RAMP {
+                if minute <= k {
+                    break;
+                }
+                let idx = minute - 1 - k;
+                let w = 0.7 * (RAMP + 1 - k) as f64 / (RAMP + 1) as f64;
+                home_series[idx] = home_series[idx] * (1.0 - w) + target * w;
+            }
+        }
+
         let away_series = home_series.iter().map(|v| 1.0 - v).collect();
         Momentum {
             home: home_series,
