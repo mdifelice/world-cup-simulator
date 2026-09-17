@@ -107,20 +107,6 @@ export interface LineupConfig {
   starting: Record<string, number[]>;
 }
 
-export const SLOTS = [
-  "GK",
-  "DF",
-  "RWB",
-  "LWB",
-  "DMF",
-  "RMF",
-  "LMF",
-  "AMF",
-  "FW",
-  "RFW",
-  "LFW",
-] as const;
-
 export const FORMATIONS: Record<string, readonly string[]> = {
   "5-3-2": ["GK", "RWB", "DF", "DF", "DF", "LWB", "DMF", "DMF", "AMF", "FW", "FW"],
   "5-4-1": ["GK", "RWB", "DF", "DF", "DF", "LWB", "RMF", "DMF", "LMF", "AMF", "FW"],

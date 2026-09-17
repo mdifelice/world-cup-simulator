@@ -91,13 +91,58 @@ export default function Overview({
     }
   }
 
-  const groups = (() => {
+  const revealedIds = new Set(revealedMatches.map((m) => m.id));
+
+  /** Standings for a group/league phase: members come from the seeded groups
+   *  when available, otherwise from the phase's own fixtures (union-find). */
+  const groupTables = (
+    stageKey: string,
+    stageName: string,
+    all: RunMatch[],
+    revealed: RunMatch[],
+  ) => {
+    let members: { name: string; teams: { id: number; name: string }[] }[];
+    if (stageKey === "GROUP" && (run?.groups?.length ?? 0) > 0) {
+      members = run!.groups.map((g) => ({
+        name: g.name,
+        teams: g.teams.map((t) => ({ id: t.id, name: t.name })),
+      }));
+    } else {
+      const parent = new Map<number, number>();
+      const find = (x: number): number => {
+        while (parent.get(x) !== x) {
+          parent.set(x, parent.get(parent.get(x)!)!);
+          x = parent.get(x)!;
+        }
+        return x;
+      };
+      const nameOf = new Map<number, string>();
+      for (const m of all) {
+        nameOf.set(m.home_team_id, m.home_team_name);
+        nameOf.set(m.away_team_id, m.away_team_name);
+        for (const id of [m.home_team_id, m.away_team_id]) if (!parent.has(id)) parent.set(id, id);
+        const a = find(m.home_team_id);
+        const b = find(m.away_team_id);
+        if (a !== b) parent.set(a, b);
+      }
+      const comps = new Map<number, { id: number; name: string }[]>();
+      for (const id of parent.keys()) {
+        const root = find(id);
+        if (!comps.has(root)) comps.set(root, []);
+        comps.get(root)!.push({ id, name: nameOf.get(id) ?? "" });
+      }
+      const letters = "ABCDEFGHIJKL";
+      const list = [...comps.values()];
+      members = list.map((teams, i) => ({
+        name: list.length === 1 ? stageName : `Group ${letters[i] ?? i + 1}`,
+        teams,
+      }));
+    }
+
     const map = new Map<string, Row[]>();
     const letterOf = new Map<number, string>();
-    for (const g of run?.groups ?? []) {
+    for (const g of members) {
       for (const t of g.teams) letterOf.set(t.id, g.name);
-    }
-    for (const g of run?.groups ?? []) {
       map.set(
         g.name,
         g.teams.map((t) => ({
@@ -114,13 +159,9 @@ export default function Overview({
         })),
       );
     }
-    for (const m of revealedMatches) {
-      if (m.stage_key !== "GROUP") continue;
-      const homeA = letterOf.get(m.home_team_id);
-      const awayA = letterOf.get(m.away_team_id);
-      const letter =
-        homeA && awayA === homeA ? homeA : m.stage_name.endsWith(homeA ?? "") ? homeA : awayA;
-      const rows = letter ? map.get(letter) : undefined;
+    for (const m of revealed) {
+      if (m.stage_key !== stageKey) continue;
+      const rows = map.get(letterOf.get(m.home_team_id) ?? "");
       if (!rows) continue;
       const h = rows.find((r) => r.id === m.home_team_id);
       const a = rows.find((r) => r.id === m.away_team_id);
@@ -152,7 +193,56 @@ export default function Overview({
         (x, y) => y.pts - x.pts || y.gd - x.gd || y.gf - x.gf || x.name.localeCompare(y.name),
       );
     }
-    return map;
+    return members.map((g) => ({ name: g.name, rows: map.get(g.name) ?? [] }));
+  };
+
+  /** One card per phase that has started, newest first. Group/league phases
+   *  show their tables, knockout phases show the bracket for that round. */
+  const phases = (() => {
+    if (!run) return [] as {
+      key: string;
+      name: string;
+      groupType: boolean;
+      lastDay: number;
+      tables: { name: string; rows: Row[] }[];
+      ties: { m: RunMatch; played: boolean }[];
+    }[];
+    const byId = new Map(run.matches.map((m) => [m.id, m]));
+    const order: RunMatch[] = [];
+    for (const id of run.order) {
+      const m = byId.get(id);
+      if (m) order.push(m);
+    }
+    const map = new Map<string, { name: string; lastDay: number; matches: RunMatch[] }>();
+    for (const m of order) {
+      let p = map.get(m.stage_key);
+      if (!p) {
+        p = { name: m.stage_name, lastDay: m.day, matches: [] };
+        map.set(m.stage_key, p);
+      }
+      p.matches.push(m);
+      p.lastDay = Math.max(p.lastDay, m.day);
+    }
+    const out = [];
+    for (const [key, p] of map.entries()) {
+      const revealed = p.matches.filter((m) => revealedIds.has(m.id));
+      if (revealed.length === 0) continue;
+      const groupType = key === "GROUP" || key === "FINAL";
+      out.push({
+        key,
+        name: p.name,
+        groupType,
+        lastDay: p.lastDay,
+        tables: groupType ? groupTables(key, p.name, p.matches, revealed) : [],
+        ties: groupType
+          ? []
+          : [...p.matches]
+              .sort((a, b) => b.day - a.day || b.id - a.id)
+              .map((m) => ({ m, played: revealedIds.has(m.id) })),
+      });
+    }
+    out.sort((a, b) => b.lastDay - a.lastDay);
+    return out;
   })();
 
   const scorers = (() => {
@@ -338,38 +428,62 @@ export default function Overview({
 
             <aside className="hub-side">
               <div className="group-scroll">
-                {[...groups.entries()].map(([letter, rows]) => (
-                  <div key={letter} className="table-card">
-                    <h2 className="table-title">{stage(letter)}</h2>
-                    <table className="mini-table">
-                      <thead>
-                        <tr>
-                          <th></th><th className="l">{t("cup.team")}</th>
-                          <th>{t("cup.p")}</th><th>{t("cup.w")}</th><th>{t("cup.d")}</th><th>{t("cup.l")}</th>
-                          <th>{t("cup.gd")}</th><th>{t("cup.pts")}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rows.map((r, i) => (
-                          <tr key={r.id} className={focusId === r.id ? "focus-row" : ""}>
-                            <td className="num">{i + 1}</td>
-                            <td className="l team-cell">
-                              <span className="code-cell">
-                                {flagFor(r.name)} {codeOf(runCodes, r.id, r.name)}
-                              </span>
-                            </td>
-                            <td className="num">{r.p}</td>
-                            <td className="num">{r.w}</td>
-                            <td className="num">{r.d}</td>
-                            <td className="num">{r.l}</td>
-                            <td className="num">{r.gd > 0 ? `+${r.gd}` : r.gd}</td>
-                            <td className="num strong">{r.pts}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
+                {phases.flatMap((p) =>
+                  p.groupType
+                    ? p.tables.map((tb) => (
+                        <div key={p.key + tb.name} className="table-card">
+                          <h2 className="table-title">{stage(tb.name)}</h2>
+                          <table className="mini-table">
+                            <thead>
+                              <tr>
+                                <th></th><th className="l">{t("cup.team")}</th>
+                                <th>{t("cup.p")}</th><th>{t("cup.w")}</th><th>{t("cup.d")}</th><th>{t("cup.l")}</th>
+                                <th>{t("cup.gd")}</th><th>{t("cup.pts")}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {tb.rows.map((r, i) => (
+                                <tr key={r.id} className={focusId === r.id ? "focus-row" : ""}>
+                                  <td className="num">{i + 1}</td>
+                                  <td className="l team-cell">
+                                    <span className="code-cell">
+                                      {flagFor(r.name)} {codeOf(runCodes, r.id, r.name)}
+                                    </span>
+                                  </td>
+                                  <td className="num">{r.p}</td>
+                                  <td className="num">{r.w}</td>
+                                  <td className="num">{r.d}</td>
+                                  <td className="num">{r.l}</td>
+                                  <td className="num">{r.gd > 0 ? `+${r.gd}` : r.gd}</td>
+                                  <td className="num strong">{r.pts}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ))
+                    : [
+                        <div key={p.key} className="table-card">
+                          <h2 className="table-title">{stage(p.name)}</h2>
+                          <div className="bracket">
+                            {p.ties.map(({ m, played }) => (
+                              <div key={m.id} className={"tie" + (played ? " played" : "")}>
+                                <span className={"tie-team" + (m.home_team_id === focusId ? " focus-tag" : "")}>
+                                  {flagFor(m.home_team_name)} {codeOf(runCodes, m.home_team_id, m.home_team_name)}
+                                </span>
+                                <span className="tie-score">
+                                  {played ? `${m.home_score}–${m.away_score}` : "–"}
+                                </span>
+                                <span className={"tie-team away" + (m.away_team_id === focusId ? " focus-tag" : "")}>
+                                  {codeOf(runCodes, m.away_team_id, m.away_team_name)}{" "}
+                                  {flagFor(m.away_team_name)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>,
+                      ],
+                )}
               </div>
 
               {scorers.length > 0 && (

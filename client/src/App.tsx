@@ -264,25 +264,6 @@ export default function App() {
   const revealUpTo = (idx: number) =>
     setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, idx + 1) } : f));
 
-  /** Fast-forward from the live popup: simulate everything to the end of the
-   *  current round (same stage), then close back to the hub. */
-  const ffFromLive = (m: RunMatch) => {
-    if (!flow.run) {
-      setLiveMatch(null);
-      return;
-    }
-    stopFF();
-    const run = flow.run;
-    let last = 0;
-    for (const id of run.order) {
-      const x = run.matches.find((y) => y.id === id);
-      if (!x || x.stage_key !== m.stage_key) break;
-      last += 1;
-    }
-    setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, last) } : f));
-    setLiveMatch(null);
-  };
-
   const pickTournament = (t: Tournament) => {
     setFlow({ ...emptyFlow, tournament: t });
     setConfigs({});
@@ -355,6 +336,7 @@ export default function App() {
       if (idx < 0 || idx + 1 <= f.revealed) return f;
       return { ...f, revealed: idx + 1 };
     });
+    setLiveMatch(null);
   };
 
   /** Open the run-summary share popup; archive the completed run first. */
@@ -458,7 +440,6 @@ export default function App() {
           match={liveMatch}
           focusTeamId={flow.run.focus_team_id}
           onReveal={liveReveal}
-          onFF={ffFromLive}
         />
       )}
 

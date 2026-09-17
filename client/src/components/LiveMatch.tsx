@@ -6,7 +6,6 @@ interface Props {
   match: RunMatch;
   focusTeamId: number | null;
   onReveal: (m: RunMatch) => void;
-  onFF: (m: RunMatch) => void;
 }
 
 const GOLD = "#d8a418";
@@ -18,7 +17,6 @@ export default function LiveMatch({
   match: m,
   focusTeamId,
   onReveal,
-  onFF,
 }: Props) {
   const { t, stage, country } = useI18n();
 
@@ -35,9 +33,12 @@ export default function LiveMatch({
 
   const done = min >= lengthLabel;
 
-  // Reveal the result on the hub once the full match has been watched.
+  // Reveal the result on the hub (and close) once the full match has played,
+  // holding the final score on screen for a moment first.
   useEffect(() => {
-    if (done) onReveal(m);
+    if (!done) return;
+    const t = window.setTimeout(() => onReveal(m), 1600);
+    return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
@@ -136,9 +137,6 @@ export default function LiveMatch({
         <span className="live-stage">
           {stage(m.stage_name)} · {t("match.day", { day: m.day })}
         </span>
-        <button className="live-ff" onClick={() => onFF(m)}>
-          ⏩ {t("hub.ff")}
-        </button>
       </div>
 
       <div className="match-vs">

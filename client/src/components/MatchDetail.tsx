@@ -76,8 +76,7 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                   {g.assist ? <span className="dim"> · {t("match.assist", { name: g.assist })}</span> : null}
                 </span>
                 <span className={`goal-team${focused(g.team_id) ? " focus-tag" : ""}`}>
-                  {flagFor(g.team_id === m.home_team_id ? m.home_team_name : m.away_team_name)}{" "}
-                  {country(g.team_id === m.home_team_id ? m.home_team_name : m.away_team_name)}
+                  {flagFor(g.team_id === m.home_team_id ? m.home_team_name : m.away_team_name)}
                 </span>
               </div>
             ))}

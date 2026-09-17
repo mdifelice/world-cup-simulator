@@ -9,6 +9,7 @@ import {
   positionFamilies,
   positionFamily,
   ratingStars,
+  slotPenalty,
   slotsFor,
   STRATEGIES,
 } from "../types";
@@ -128,26 +129,63 @@ export default function LineupEditor({
   const positionsLabel = (p: Player) =>
     playerPositions(p).map((x) => pos(x)).join(" / ");
 
+  /** A player "owns" a slot when one of their positions carries no out-of-
+   *  position penalty for it. Auto-pick only uses owners, so a star forward is
+   *  never picked ahead of a real defender (or a keeper ahead of an outfielder). */
+  const owns = (p: Player, slot: string) =>
+    playerPositions(p).some((x) => slotPenalty(x, slot) === 0);
+
+  const bestIn = (slot: string, used: Set<number>) => {
+    let best: Player | null = null;
+    let bestEff = -Infinity;
+    for (const p of squad) {
+      if (used.has(p.id)) continue;
+      const eff = effFor(p, slot);
+      if (eff > bestEff) {
+        bestEff = eff;
+        best = p;
+      }
+    }
+    return best;
+  };
+
   const pickAuto = () => {
     const next: (number | null)[] = new Array(slots.length).fill(null);
     const used = new Set<number>();
-    for (let i = 0; i < slots.length; i++) {
-      const slot = slots[i];
-      let best: Player | null = null;
-      let bestEff = -Infinity;
-      for (const p of squad) {
-        if (used.has(p.id)) continue;
-        const eff = effFor(p, slot);
-        if (eff > bestEff) {
-          bestEff = eff;
-          best = p;
+    const ownersOf = (slot: string) => squad.filter((p) => owns(p, slot));
+
+    // Match every slot to a different owner (maximum bipartite matching), so a
+    // slot with no specialist left is the only one that can end up without an
+    // owner. Better-rated owners are tried first for each slot.
+    const playerSlot = new Map<number, number>();
+    const augment = (slotIndex: number, seen: Set<number>): boolean => {
+      const candidates = ownersOf(slots[slotIndex]).sort((a, b) => effFor(b, slots[slotIndex]) - effFor(a, slots[slotIndex]));
+      for (const p of candidates) {
+        if (seen.has(p.id)) continue;
+        seen.add(p.id);
+        const holder = playerSlot.get(p.id);
+        if (holder === undefined || augment(holder, seen)) {
+          playerSlot.set(p.id, slotIndex);
+          next[slotIndex] = p.id;
+          return true;
         }
       }
+      return false;
+    };
+    for (let i = 0; i < slots.length; i++) augment(i, new Set());
+
+    for (const p of playerSlot.keys()) used.add(p);
+
+    // Only slots with no owner available fall back to the best penalised pick.
+    for (let i = 0; i < slots.length; i++) {
+      if (next[i] != null) continue;
+      const best = bestIn(slots[i], used);
       if (best) {
         next[i] = best.id;
         used.add(best.id);
       }
     }
+
     setAssignments(next);
     setArmedId(null);
   };
@@ -246,6 +284,7 @@ export default function LineupEditor({
             return (
               <button
                 key={slot + ":" + x + ":" + i}
+                data-slot={slot}
                 className={
                   "slot-marker" +
                   (chosen ? " filled" : "") +
