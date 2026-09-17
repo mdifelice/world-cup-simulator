@@ -236,9 +236,9 @@ export default function App() {
     };
   }, []);
 
-  /** Hub fast-forward: simulate the rest of the current round, match by match
-   *  (result only, 500ms apart), stopping at the round's end or right before the
-   *  next focus match so it can be played. Never advances into another round. */
+  /** Hub fast-forward: simulate match by match (result only, 500ms apart) until
+   *  the next focus match is reached so it can be played, or until the end of the
+   *  tournament. It keeps going across round boundaries. */
   const runFastForward = () => {
     if (!flow.run || ffRunning) return;
     const run = flow.run;
@@ -249,13 +249,12 @@ export default function App() {
       const id = r.order[at];
       return id != null ? r.matches.find((m) => m.id === id) ?? null : null;
     };
-    const stage = nextAt(run, cur)?.stage_key ?? null;
     setFfRunning(true);
     ffTimer.current = window.setInterval(() => {
       const r = runRef.current;
       const at = revealedRef.current;
       const m = r ? nextAt(r, at) : null;
-      if (!r || !m || m.stage_key !== stage || isFocusMatch(r, m.id)) {
+      if (!r || !m || isFocusMatch(r, m.id)) {
         stopFF();
         return;
       }

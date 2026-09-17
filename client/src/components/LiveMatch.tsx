@@ -78,9 +78,12 @@ export default function LiveMatch({
   );
 
   const W = 900;
-  const H = 70;
-  const midY = H / 2;
-  const maxHalf = (H - 18) / 2;
+  const H = 108;
+  const midY = 52;
+  const maxHalf = 18;
+  const topLane = 14;
+  const botLane = 90;
+  const legendY = 104;
   const bw = W / lengthLabel;
 
   // The chart is stretched to the dialog width (preserveAspectRatio="none"), so
@@ -134,9 +137,20 @@ export default function LiveMatch({
       focusTeamId != null && g.team_id === focusTeamId
         ? !isAwayFocusMomentum
         : isAwayFocusMomentum;
-    const y = isFocusGoal ? 9 : H - 9;
+    const y = isFocusGoal ? topLane : botLane;
     const note = g.extra_time ? ` ${t("match.etShort")}` : "";
     return { x, y, minute: g.minute, note, key: i };
+  });
+
+  const redMarks = redsUpTo.map((r, i) => {
+    const x = (r.minute / lengthLabel) * W;
+    const isFocusRed =
+      focusTeamId != null && r.team_id === focusTeamId
+        ? !isAwayFocusMomentum
+        : isAwayFocusMomentum;
+    const y = isFocusRed ? topLane : botLane;
+    const note = r.extra_time ? ` ${t("match.etShort")}` : "";
+    return { x, y, minute: r.minute, note, key: i };
   });
 
   // Continuous momentum gauge: the home team's live dominance (-1 away … +1
@@ -148,13 +162,15 @@ export default function LiveMatch({
     return Math.max(-1, Math.min(1, v));
   }, [momentum, min]);
 
+  const yourLead = focusTeamId === m.home_team_id ? gauge >= 0 : gauge <= 0;
+
   const tick = (mmin: number, label: string) => {
     const x = (mmin / lengthLabel) * W;
     return (
       <g key={mmin}>
         <line x1={x} y1={0} x2={x} y2={H} stroke="rgba(27,37,48,0.15)" strokeWidth="1" />
         <text
-          transform={`translate(${x + 3} ${H - 2}) scale(${textSx} 1)`}
+          transform={`translate(${x + 3} ${legendY}) scale(${textSx} 1)`}
           fill="rgba(27,37,48,0.5)"
           fontSize="9"
         >
@@ -265,7 +281,7 @@ export default function LiveMatch({
               <g key={key}>
                 <line
                   x1={x}
-                  y1={y < midY ? 14 : H - 14}
+                  y1={y < midY ? midY - maxHalf : midY + maxHalf}
                   x2={x}
                   y2={y}
                   stroke="rgba(27,37,48,0.5)"
@@ -291,6 +307,37 @@ export default function LiveMatch({
                 </text>
               </g>
             ))}
+            {redMarks.map(({ x, y, minute, note, key }) => (
+              <g key={`r${key}`}>
+                <line
+                  x1={x}
+                  y1={y < midY ? midY - maxHalf : midY + maxHalf}
+                  x2={x}
+                  y2={y}
+                  stroke="rgba(200,67,61,0.55)"
+                  strokeWidth="1"
+                  strokeDasharray="3 3"
+                  opacity="0.7"
+                />
+                <rect
+                  x={x - 2.5}
+                  y={y - 5}
+                  width={5}
+                  height={10}
+                  rx={1.2}
+                  fill={DOWN}
+                />
+                <text
+                  transform={`translate(${x - 7} ${y + 3}) scale(${textSx} 1)`}
+                  textAnchor="end"
+                  fill="rgba(27,37,48,0.8)"
+                  fontSize="10"
+                >
+                  {minute}
+                  {note}
+                </text>
+              </g>
+            ))}
           </svg>
 
           <div className="mom-gauge">
@@ -301,6 +348,7 @@ export default function LiveMatch({
                 style={{
                   left: gauge >= 0 ? `${50 - gauge * 50}%` : "50%",
                   width: `${Math.abs(gauge) * 50}%`,
+                  background: yourLead ? UP : DOWN,
                 }}
               />
             </div>

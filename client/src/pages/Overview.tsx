@@ -424,7 +424,12 @@ export default function Overview({
                       <span className="mr-score">
                         {done ? (
                           <>
-                            {m.home_score}–{m.away_score}
+                            <span className="mr-score-main">
+                              {m.home_score}–{m.away_score}
+                              {(m.reds?.length ?? 0) > 0 && (
+                                <span className="red-card tiny" aria-hidden />
+                              )}
+                            </span>
                             {m.penalties && (
                               <span className="pens">
                                 {t("match.pensScore", {
@@ -432,9 +437,6 @@ export default function Overview({
                                   away: m.penalties.away_score,
                                 })}
                               </span>
-                            )}
-                            {(m.reds?.length ?? 0) > 0 && (
-                              <span className="red-card tiny" aria-hidden />
                             )}
                           </>
                         ) : (

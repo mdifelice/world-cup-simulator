@@ -1045,15 +1045,6 @@ impl<'a> Engine<'a> {
             let p = self.play_penalties(home, &home_xi, away, &away_xi);
             winner = if p.winner_id == home { Some(home) } else { Some(away) };
             penalties = Some(p.clone());
-            for k in &p.kicks {
-                if k.scored {
-                    if let Some(taker) = home_xi.iter().find(|pl| pl.name == k.taker) {
-                        self.perf(taker, home).goals += 1;
-                    } else if let Some(taker) = away_xi.iter().find(|pl| pl.name == k.taker) {
-                        self.perf(taker, away).goals += 1;
-                    }
-                }
-            }
         }
 
         // Sending-offs, in minute order.

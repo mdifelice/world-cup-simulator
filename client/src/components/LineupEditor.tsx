@@ -355,7 +355,7 @@ export default function LineupEditor({
                     </span>
                   </span>
                 )}
-                {chosen && (
+                {chosen && !disabled && (
                   <span
                     className="slot-clear"
                     role="button"

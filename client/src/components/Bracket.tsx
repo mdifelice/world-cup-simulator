@@ -28,6 +28,7 @@ interface Col {
   matches: RunMatch[];
   x: number;
   centers: number[];
+  labelTop?: number;
 }
 
 interface Line {
@@ -46,7 +47,7 @@ export default function Bracket({
 }: Props) {
   const { stage } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const colCountRef = useRef(0);
+  const lastRevealedRef = useRef<number | null>(null);
 
   const { cols, width, height, lines } = useMemo(() => {
     const rank = new Map(order.map((id, i) => [id, i]));
@@ -129,6 +130,7 @@ export default function Bracket({
         matches: thirdMatches,
         x,
         centers: [cy],
+        labelTop: cy - BOX_H / 2 - 16,
       };
       if (sfCol) {
         for (const i of [0, sfCol.centers.length - 1]) {
@@ -151,45 +153,46 @@ export default function Bracket({
     return { cols: allCols, width, height, lines };
   }, [matches, order]);
 
-  // Reveal the newest round as it is drawn: scroll the bracket to the rightmost
-  // column that has any revealed match.
-  const revealedCols = useMemo(
-    () => cols.filter((c) => c.matches.some((m) => revealedIds.has(m.id))).length,
-    [cols, revealedIds],
-  );
+  // Follow the newest revealed knockout match: scroll the bracket horizontally to
+  // its column and vertically to its box inside the sidebar. Runs on every reveal
+  // (not only when a new round starts) so the current match stays in view.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    if (revealedCols > colCountRef.current && revealedCols > 0) {
-      const col = cols.filter((c) => c.matches.some((m) => revealedIds.has(m.id)))[
-        revealedCols - 1
-      ];
-      if (col) {
-        const target = col.x + BOX_W + PAD - el.clientWidth;
-        el.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
-
-        // Vertical: bring the newest revealed box into view inside the sidebar.
-        const parent = el.closest(".group-scroll") as HTMLElement | null;
-        const revealedCol = col.matches.filter((m) => revealedIds.has(m.id));
-        const newest = revealedCol[revealedCol.length - 1];
-        const box = newest
-          ? el.querySelector<HTMLElement>(`.bk-box[data-id="${newest.id}"]`)
-          : null;
-        if (parent && box) {
-          const delta =
-            box.getBoundingClientRect().top -
-            parent.getBoundingClientRect().top;
-          if (delta < 8 || delta + box.offsetHeight > parent.clientHeight) {
-            parent.scrollTo({
-              top: parent.scrollTop + delta - 44,
-              behavior: "smooth",
-            });
-          }
+    const rank = new Map(order.map((id, i) => [id, i]));
+    let newest: RunMatch | null = null;
+    let col: Col | null = null;
+    for (const c of cols) {
+      for (const m of c.matches) {
+        if (!revealedIds.has(m.id)) continue;
+        if (!newest || (rank.get(m.id) ?? -1) > (rank.get(newest.id) ?? -1)) {
+          newest = m;
+          col = c;
         }
       }
     }
-    colCountRef.current = revealedCols;
-  }, [revealedCols, cols, revealedIds]);
+    if (!newest || !col || newest.id === lastRevealedRef.current) return;
+    lastRevealedRef.current = newest.id;
+    const colX = col.x;
+    const boxId = newest.id;
+    // Skip past the parent's own effect (which may jump the sidebar to the top on
+    // a new round) by scrolling on the next frame.
+    requestAnimationFrame(() => {
+      el.scrollTo({
+        left: Math.max(0, colX + BOX_W + PAD - el.clientWidth),
+        behavior: "smooth",
+      });
+      const parent = el.closest(".group-scroll") as HTMLElement | null;
+      const box = el.querySelector<HTMLElement>(`.bk-box[data-id="${boxId}"]`);
+      if (parent && box) {
+        const delta =
+          box.getBoundingClientRect().top - parent.getBoundingClientRect().top;
+        if (delta < 8 || delta + box.offsetHeight > parent.clientHeight) {
+          parent.scrollTo({ top: parent.scrollTop + delta - 44, behavior: "smooth" });
+        }
+      }
+    });
+  }, [cols, revealedIds, order]);
 
   const codeOf = (m: RunMatch, home: boolean) => {
     const id = home ? m.home_team_id : m.away_team_id;
@@ -216,7 +219,7 @@ export default function Bracket({
         </svg>
         {cols.map((c) => (
           <div key={c.key}>
-            <span className="bk-col-label" style={{ left: c.x, top: 0 }}>
+            <span className="bk-col-label" style={{ left: c.x, top: c.labelTop ?? 0 }}>
               {stage(c.name)}
             </span>
             {c.matches.map((m, i) => {

@@ -1541,6 +1541,10 @@ body {
   text-align: center;
   min-width: 44px;
 }
+.mr-score-main {
+  position: relative;
+  display: inline-block;
+}
 .pens {
   color: var(--muted);
   font-weight: 600;
@@ -1695,8 +1699,8 @@ body {
 }
 .red-card.tiny {
   position: absolute;
-  top: -2px;
-  right: -4px;
+  top: -4px;
+  right: -7px;
   width: 6px;
   height: 9px;
   border-radius: 1.5px;
@@ -1797,19 +1801,34 @@ body {
   margin-top: 14px;
 }
 .detail-pens {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.detail-pens-col {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
-.detail-pens-col .flag {
+.pen-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
-  font-weight: 700;
-  margin-bottom: 2px;
+}
+.pen-row .flag {
+  flex: 0 0 auto;
+}
+.pen-num {
+  flex: 0 0 18px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+.pen-taker {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pen-row .pen-kick {
+  flex: 0 0 auto;
+  padding: 2px 8px;
 }
 
 @media (max-width: 980px) {
