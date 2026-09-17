@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { canonSlot, useI18n } from "../i18n";
-import PlayerCard from "../components/PlayerCard";
 import type { LineupConfig, Player, Strategy } from "../types";
 import {
   bestEffectiveIn,
   FORMATIONS,
+  playerSurname,
   playerPositions,
   positionFamilies,
   positionFamily,
   ratingStars,
   slotPenalty,
   slotsFor,
+  starsString,
   STRATEGIES,
 } from "../types";
 
@@ -330,11 +331,13 @@ export default function LineupEditor({
                 </span>
                 {chosen && (
                   <span className={"marker-cap" + (up ? " up" : "")}>
-                    {chosen.name}
-                    {shirtNumbers && chosen.shirt_number != null
-                      ? ` · #${chosen.shirt_number}`
-                      : ""}
-                    {chosen.position ? ` · ${pos(chosen.position)}` : ""}
+                    <span className="mc-pos">{pos(canonSlot(slot))}</span>
+                    <span className="mc-name">
+                      {shirtNumbers && chosen.shirt_number != null
+                        ? `${chosen.shirt_number} - `
+                        : ""}
+                      {playerSurname(chosen.name)}
+                    </span>
                   </span>
                 )}
                 {chosen && (
@@ -367,21 +370,38 @@ export default function LineupEditor({
               return (
                 <button
                   key={p.id}
-                  className={"pc-pick" + (isArmed ? " armed" : "")}
+                  className={
+                    "pc-pick" + (isArmed ? " armed" : "") + (used ? " used" : "")
+                  }
                   onClick={() => setArmedId((cur) => (cur === p.id ? null : p.id))}
                   title={`${positionsLabel(p)} · ✦${Math.round(p.rating ?? p.overall)}`}
                 >
-                  <PlayerCard
-                    player={p}
-                    variant="stat"
-                    tone={p.id % 4}
-                    stars={ratingStars(p.rating ?? p.overall)}
-                    number={shirtNumbers ? p.shirt_number : null}
-                    sub={pos(p.position)}
-                    selected={isArmed}
-                    dimmed={used}
-                    stamp={used ? t("lineup.picked") : null}
-                  />
+                  <span className="pp-photo">
+                    {p.photo_url ? (
+                      <img
+                        src={p.photo_url}
+                        alt=""
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <span className="pp-empty" aria-hidden>
+                        <svg viewBox="0 0 24 24">
+                          <circle cx="12" cy="8" r="4" />
+                          <path d="M4 20c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5" />
+                        </svg>
+                      </span>
+                    )}
+                  </span>
+                  <span className="pp-text">
+                    <span className="pp-name">{playerSurname(p.name)}</span>
+                    <span className="pp-pos">{positionsLabel(p)}</span>
+                  </span>
+                  {used && <span className="pp-badge">{t("lineup.picked")}</span>}
+                  <span className="pp-stars">
+                    {starsString(ratingStars(p.rating ?? p.overall))}
+                  </span>
                 </button>
               );
             })}

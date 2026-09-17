@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { flagFor, useI18n } from "../i18n";
 import type { RunMatch } from "../types";
 
@@ -65,6 +65,25 @@ export default function LiveMatch({
   const midY = H / 2;
   const maxHalf = (H - 18) / 2;
   const bw = W / lengthLabel;
+
+  // The chart is stretched to the dialog width (preserveAspectRatio="none"), so
+  // its text would be distorted. Counter-scale it back to a natural aspect.
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [textSx, setTextSx] = useState(1);
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth || W;
+      const h = el.clientHeight || H;
+      setTextSx(h / H / (w / W));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const bars = useMemo(() => {
     if (!series || series.length === 0) return [] as { m: number; x: number; up: boolean; h: number }[];
     const out: { m: number; x: number; up: boolean; h: number }[] = [];
@@ -102,7 +121,11 @@ export default function LiveMatch({
     return (
       <g key={mmin}>
         <line x1={x} y1={0} x2={x} y2={H} stroke="rgba(27,37,48,0.15)" strokeWidth="1" />
-        <text x={x + 3} y={H - 2} fill="rgba(27,37,48,0.5)" fontSize="9">
+        <text
+          transform={`translate(${x + 3} ${H - 2}) scale(${textSx} 1)`}
+          fill="rgba(27,37,48,0.5)"
+          fontSize="9"
+        >
           {label}
         </text>
       </g>
@@ -119,13 +142,18 @@ export default function LiveMatch({
   );
 
   const resultLabel = m.extra_time || m.penalties ? (
-    (m.extra_time ? ` · ${t("match.aet")}` : "") +
-    (m.penalties
-      ? ` · ${t("match.pensScore", {
-          home: m.penalties.home_score,
-          away: m.penalties.away_score,
-        })}`
-      : "")
+    <>
+      {m.extra_time ? ` · ${t("match.aet")}` : ""}
+      {m.penalties ? (
+        <span className="pens">
+          {" · "}
+          {t("match.pensScore", {
+            home: m.penalties.home_score,
+            away: m.penalties.away_score,
+          })}
+        </span>
+      ) : null}
+    </>
   ) : null;
 
   const flagName = (n: string) => [flagFor(n), country(n)].filter(Boolean).join(" ");
@@ -171,7 +199,12 @@ export default function LiveMatch({
               {t("match.opp")}
             </span>
           </div>
-          <svg viewBox={`0 0 ${W} ${H}`} className="momentum" preserveAspectRatio="none">
+          <svg
+            ref={svgRef}
+            viewBox={`0 0 ${W} ${H}`}
+            className="momentum"
+            preserveAspectRatio="none"
+          >
             <line
               x1={0}
               y1={midY}
@@ -212,7 +245,11 @@ export default function LiveMatch({
                   opacity="0.6"
                 />
                 <circle cx={x} cy={y} r={4} fill={color} stroke="#fff" strokeWidth="1" />
-                <text x={x + 7} y={y + 3} fill="rgba(27,37,48,0.8)" fontSize="10">
+                <text
+                  transform={`translate(${x + 7} ${y + 3}) scale(${textSx} 1)`}
+                  fill="rgba(27,37,48,0.8)"
+                  fontSize="10"
+                >
                   {minute}
                   {note}
                 </text>

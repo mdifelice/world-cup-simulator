@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { toPng } from "html-to-image";
 import { flagFor, useI18n } from "../i18n";
 import type { PlayerAward, RunMatch, RunPayload } from "../types";
 
@@ -21,6 +22,8 @@ const flagName = (country: (s: string) => string, n: string) =>
 export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Props) {
   const { t, country } = useI18n();
   const [copied, setCopied] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const captureRef = useRef<HTMLDivElement>(null);
 
   const { podium, yourPos, best, scorers, assists, title, host } =
     useMemo(() => {
@@ -143,19 +146,51 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
     return lines.filter(Boolean).join("\n");
   }, [t, title, host, podium, yourPos, best, scorers, assists]);
 
-  const copySummary = async () => {
+  /** Render the summary as a PNG and share it; fall back to downloading the
+   *  image, then to copying the text summary. */
+  const share = async () => {
+    const node = captureRef.current;
+    if (!node || sharing) return;
+    setSharing(true);
     try {
-      await navigator.clipboard.writeText(summaryText);
+      const dataUrl = await toPng(node, {
+        pixelRatio: 2,
+        cacheBust: true,
+        backgroundColor: "#ffffff",
+      });
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], `world-cup-${run.year}.png`, {
+        type: "image/png",
+      });
+      const nav = navigator as Navigator & {
+        canShare?: (data: ShareData) => boolean;
+      };
+      if (nav.share && nav.canShare?.({ files: [file] })) {
+        await nav.share({ files: [file], title, text: summaryText });
+      } else {
+        const a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = `world-cup-${run.year}.png`;
+        a.click();
+      }
     } catch {
-      // Clipboard may be unavailable (permissions/context) — still ack.
+      // Last resort: copy the text summary.
+      try {
+        await navigator.clipboard.writeText(summaryText);
+        setCopied(true);
+        window.setTimeout(() => setCopied(false), 1500);
+      } catch {
+        // Clipboard may be unavailable — nothing else to do.
+      }
+    } finally {
+      setSharing(false);
     }
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1500);
   };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="share-capture" ref={captureRef}>
         <div className="share-head">
           <div>
             <div className="share-title">{title}</div>
@@ -226,10 +261,15 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
             </div>
           )}
         </div>
+        </div>
 
         <div className="share-actions bar">
-          <button className="btn primary big" onClick={copySummary}>
-            {copied ? t("share.copied") : t("share.viewSummary")}
+          <button className="btn primary big" onClick={share} disabled={sharing}>
+            {sharing
+              ? t("share.sharing")
+              : copied
+                ? t("share.copied")
+                : t("share.share")}
           </button>
           <button className="btn big" onClick={onPlayAgain}>
             {t("share.playAgain")}

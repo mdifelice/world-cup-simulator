@@ -12,6 +12,7 @@ interface Props {
   interactive: boolean;
   onFF: () => void;
   ffRunning: boolean;
+  canFF: boolean;
   scrollToId?: number | null;
   onSimulate: (idx: number) => void;
   onReplay: (m: RunMatch) => void;
@@ -53,6 +54,7 @@ export default function Overview({
   interactive,
   onFF,
   ffRunning,
+  canFF,
   scrollToId,
   onSimulate,
   onReplay,
@@ -295,6 +297,7 @@ export default function Overview({
             <button
               className={"btn big" + (ffRunning ? " ff-on" : "")}
               onClick={onFF}
+              disabled={!ffRunning && !canFF}
               title={ffRunning ? t("hub.ffStop") : t("hub.ff")}
             >
               {ffRunning ? t("hub.ffStop") : t("hub.ff")}
@@ -365,9 +368,21 @@ export default function Overview({
                         {flagFor(m.home_team_name)} {country(m.home_team_name)}
                       </span>
                       <span className="mr-score">
-                        {done
-                          ? `${m.home_score}–${m.away_score}${m.penalties ? ` · ${t("match.pensScore", { home: m.penalties.home_score, away: m.penalties.away_score })}` : ""}`
-                          : "–"}
+                        {done ? (
+                          <>
+                            {m.home_score}–{m.away_score}
+                            {m.penalties && (
+                              <span className="pens">
+                                {t("match.pensScore", {
+                                  home: m.penalties.home_score,
+                                  away: m.penalties.away_score,
+                                })}
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          "–"
+                        )}
                       </span>
                       <span className={"mr-team away" + (m.away_team_id === focusId ? " focus-tag" : "")}>
                         {flagFor(m.away_team_name)} {country(m.away_team_name)}
@@ -473,6 +488,14 @@ export default function Overview({
                                 </span>
                                 <span className="tie-score">
                                   {played ? `${m.home_score}–${m.away_score}` : "–"}
+                                  {played && m.penalties && (
+                                    <span className="pens">
+                                      {t("match.pensScore", {
+                                        home: m.penalties.home_score,
+                                        away: m.penalties.away_score,
+                                      })}
+                                    </span>
+                                  )}
                                 </span>
                                 <span className={"tie-team away" + (m.away_team_id === focusId ? " focus-tag" : "")}>
                                   {codeOf(runCodes, m.away_team_id, m.away_team_name)}{" "}

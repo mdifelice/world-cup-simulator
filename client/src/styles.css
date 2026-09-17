@@ -645,6 +645,24 @@ body {
   padding: 12px 14px;
   margin: 12px 0;
 }
+.goals-card {
+  overflow: hidden;
+  animation: cardGrow 0.3s ease;
+}
+@keyframes cardGrow {
+  from {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  to {
+    max-height: 1200px;
+    opacity: 1;
+  }
+}
 .pens-card h3,
 .goals-card h3 {
   margin: 0 0 10px;
@@ -1122,6 +1140,7 @@ body {
 .slot-marker {
   position: absolute;
   transform: translate(-50%, -50%);
+  width: 42px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1169,20 +1188,32 @@ body {
   color: var(--muted);
 }
 .marker-cap {
-  display: block;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.3px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  line-height: 1.15;
   white-space: nowrap;
   max-width: 150px;
   overflow: hidden;
-  text-overflow: ellipsis;
   color: #ffe9a8;
   background: rgba(6, 10, 20, 0.85);
-  border-radius: 999px;
-  padding: 1px 8px;
+  border-radius: 7px;
+  padding: 2px 7px;
   pointer-events: none;
   text-align: center;
+}
+.mc-pos {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  opacity: 0.8;
+}
+.mc-name {
+  font-size: 10px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .marker-cap.up {
   order: -1;
@@ -1246,12 +1277,93 @@ body {
 }
 .pc-pick {
   all: unset;
-  display: block;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
   cursor: pointer;
+  transition: border-color 0.12s ease;
 }
-.pc-pick.armed .pc-stat {
+.pc-pick:hover {
+  border-color: var(--accent);
+}
+.pc-pick.armed {
   outline: 2px solid var(--gold);
   outline-offset: 1px;
+}
+.pc-pick.used {
+  opacity: 0.55;
+}
+.pp-photo {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--panel2);
+  display: grid;
+  place-items: center;
+}
+.pp-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pp-empty {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: var(--muted);
+}
+.pp-empty svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+.pp-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: left;
+}
+.pp-name {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pp-pos {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pp-badge {
+  flex: 0 0 auto;
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--accent);
+}
+.pp-stars {
+  flex: 0 0 auto;
+  align-self: center;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--gold-read);
 }
 
 /* ------- scorers / assisters boxes ------- */
@@ -1281,12 +1393,20 @@ body {
   align-items: center;
   gap: 14px;
   padding: 16px 18px;
+  margin-bottom: 18px;
   border-radius: 14px;
   background:
     radial-gradient(120% 140% at 85% -10%, rgba(216, 164, 24, 0.22) 0%, transparent 55%),
     var(--panel);
   border: 2px solid var(--gold);
   box-shadow: 0 8px 26px rgba(216, 164, 24, 0.18);
+  animation: champIn 0.4s ease;
+}
+@keyframes champIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
 }
 .champ-cup {
   font-size: 44px;
@@ -1315,6 +1435,8 @@ body {
   border-radius: 12px;
   border: 1px solid var(--line);
   background: var(--panel);
+  scroll-margin-top: 90px;
+  scroll-margin-bottom: 90px;
   transition: border-color 0.12s ease;
 }
 .match-row.done {
@@ -1371,6 +1493,18 @@ body {
   font-weight: 900;
   text-align: center;
   min-width: 44px;
+}
+.pens {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.72em;
+}
+.mr-score .pens,
+.tie-score .pens {
+  display: block;
+  margin-top: 1px;
+  font-size: 10.5px;
+  letter-spacing: 0;
 }
 .mr-action {
   display: flex;
@@ -1445,6 +1579,9 @@ body {
   font-variant-numeric: tabular-nums;
   font-weight: 900;
   color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .tie.played .tie-score {
   color: var(--text);
