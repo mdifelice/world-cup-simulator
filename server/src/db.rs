@@ -396,9 +396,10 @@ pub fn open() -> rusqlite::Result<Connection> {
 }
 
 // ---------------------------------------------------------------------------
-// Real 2026 World Cup seed (from Wikipedia, see scripts/scrape_wc2026.py).
-// When data/seed/2026.json is present it replaces the demo roster with the
-// real 48 qualifiers, their 26-man squads and the real group fixtures.
+// Real World Cup seeds (see scripts/ingest_sofascore.py). When
+// data/seed/{year}.json is present it replaces the demo roster with that
+// edition's real qualifiers, squads and group fixtures. Editions without a
+// seed file fall back to the demo data (2022) or an empty field.
 // ---------------------------------------------------------------------------
 
 #[derive(Deserialize)]
@@ -419,23 +420,31 @@ struct SeedPlayer {
 struct SeedTeam {
     name: String,
     code: String,
+    #[serde(default)]
     flag: String,
     rating: i32,
-    group: String,
+    /// Absent for pure-knockout editions (1934/1938) and the 1950 final round.
+    #[serde(default)]
+    group: Option<String>,
 }
 
 #[derive(Deserialize)]
 struct SeedFixture {
     home: String,
     away: String,
+    #[serde(default)]
     matchday: i32,
+    #[serde(default)]
     kickoff: Option<String>,
 }
 
 #[derive(Deserialize)]
 struct SeedFile {
+    #[serde(default)]
     teams: Vec<SeedTeam>,
+    #[serde(default)]
     squads: HashMap<String, Vec<SeedPlayer>>,
+    #[serde(default)]
     fixtures: Vec<SeedFixture>,
 }
 
@@ -505,20 +514,24 @@ fn upsert_team(
     }
 }
 
-/// Real 2026 data when the JSON seed exists, otherwise the 32-team demo.
-fn seed_2026(conn: &Connection) -> rusqlite::Result<()> {
-    let dir = std::env::var("WCS_DATA_DIR").unwrap_or_else(|_| "data".to_string());
-    let path = Path::new(&dir).join("seed").join("2026.json");
+/// Data directory for seed files (and, if present, local player photos).
+pub fn data_dir() -> String {
+    std::env::var("WCS_DATA_DIR").unwrap_or_else(|_| "data".to_string())
+}
+
+/// Seeds one edition from `seed/{year}.json`, falling back to demo rosters.
+fn seed_edition(conn: &Connection, year: i32) -> rusqlite::Result<()> {
+    let path = Path::new(&data_dir()).join("seed").join(format!("{year}.json"));
     let text = match std::fs::read_to_string(&path) {
         Ok(t) => t,
-        Err(_) => return seed_2026_demo(conn),
+        Err(_) => return seed_demo(conn, year),
     };
     let file: SeedFile = serde_json::from_str(&text)
         .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
 
     let tournament_id: i64 = conn.query_row(
         "SELECT id FROM tournaments WHERE year = ?1",
-        [2026],
+        [year],
         |r| r.get(0),
     )?;
 
@@ -533,14 +546,16 @@ fn seed_2026(conn: &Connection) -> rusqlite::Result<()> {
             "INSERT OR IGNORE INTO tournament_teams (tournament_id, team_id) VALUES (?1, ?2)",
             rusqlite::params![tournament_id, tid],
         )?;
-        conn.execute(
-            "INSERT OR IGNORE INTO tournament_groups (tournament_id, group_name, team_id)
-             VALUES (?1, ?2, ?3)",
-            rusqlite::params![tournament_id, t.group, tid],
-        )?;
+        if let Some(group) = t.group.as_deref().filter(|g| !g.is_empty()) {
+            conn.execute(
+                "INSERT OR IGNORE INTO tournament_groups (tournament_id, group_name, team_id)
+                 VALUES (?1, ?2, ?3)",
+                rusqlite::params![tournament_id, group, tid],
+            )?;
+        }
     }
 
-    // Real 26-man squads.
+    // Real squads.
     // Repeated boot seeds must not accumulate duplicate squad rows, so first
     // drop the call-ups seeded for this edition and the players only they use.
     let prev: Vec<i64> = {
@@ -597,25 +612,39 @@ fn seed_2026(conn: &Connection) -> rusqlite::Result<()> {
         }
     }
 
-    // Real group fixtures (with kickoff). Skips when already present.
+    // Group fixtures: prefer the real schedule (with kickoff) from the seed,
+    // else let the round-robin generator fill in any edition with groups.
     let existing: i64 = conn.query_row(
         "SELECT COUNT(*) FROM matches WHERE tournament_id = ?1 AND stage = 'GROUP'",
         [tournament_id],
         |r| r.get(0),
     )?;
     if existing == 0 {
-        for f in &file.fixtures {
-            let Some(&home) = by_code.get(&f.home) else { continue };
-            let Some(&away) = by_code.get(&f.away) else { continue };
-            conn.execute(
-                "INSERT INTO matches (tournament_id, stage, round_num, matchday, home_team_id,
-                                      away_team_id, kickoff, status)
-                 VALUES (?1, 'GROUP', 0, ?2, ?3, ?4, ?5, 'scheduled')",
-                rusqlite::params![tournament_id, f.matchday, home, away, f.kickoff],
-            )?;
+        if file.fixtures.is_empty() {
+            fixture::generate(conn, tournament_id)?;
+        } else {
+            for f in &file.fixtures {
+                let Some(&home) = by_code.get(&f.home) else { continue };
+                let Some(&away) = by_code.get(&f.away) else { continue };
+                conn.execute(
+                    "INSERT INTO matches (tournament_id, stage, round_num, matchday, home_team_id,
+                                          away_team_id, kickoff, status)
+                     VALUES (?1, 'GROUP', 0, ?2, ?3, ?4, ?5, 'scheduled')",
+                    rusqlite::params![tournament_id, f.matchday, home, away, f.kickoff],
+                )?;
+            }
         }
     }
     Ok(())
+}
+
+/// Demo fallback for the two editions that shipped before the real seeds.
+fn seed_demo(conn: &Connection, year: i32) -> rusqlite::Result<()> {
+    match year {
+        2022 => seed_2022_demo(conn),
+        2026 => seed_2026_demo(conn),
+        _ => Ok(()),
+    }
 }
 
 /// Reuses the 2022 demo rosters to populate a 12-group 2026 tournament (the
@@ -673,8 +702,9 @@ fn seed_2026_demo(conn: &Connection) -> rusqlite::Result<()> {
 
 fn seed(conn: &Connection) -> rusqlite::Result<()> {
     seed_tournaments(conn)?;
-    seed_2022_demo(conn)?;
-    seed_2026(conn)?;
+    for (year, _, _) in WORLD_CUPS {
+        seed_edition(conn, *year)?;
+    }
     Ok(())
 }
 

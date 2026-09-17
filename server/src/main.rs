@@ -41,8 +41,12 @@ async fn main() {
         .allow_methods(Any)
         .allow_headers(Any);
 
+    // Local player headshots written by scripts/ingest_sofascore.py.
+    let photos_dir = format!("{}/photos", db::data_dir());
+
     let app = Router::new()
         .route("/health", get(handlers::health))
+        .nest_service("/photos", ServeDir::new(photos_dir.as_str()))
         .route("/api/auth/google", get(google_authorize))
         .route("/api/auth/callback", get(google_callback))
         .route("/api/auth/me", get(me))

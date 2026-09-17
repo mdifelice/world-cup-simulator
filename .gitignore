@@ -26,6 +26,8 @@ pwtest-shots/
 .env
 .env.local
 *.pem
+.venv/
+**/.venv/
 
 # OS / editor
 .DS_Store
