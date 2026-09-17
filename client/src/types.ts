@@ -296,6 +296,7 @@ export interface PlayerAward {
   goals: number;
   assists: number;
   score: number;
+  photo?: string | null;
 }
 
 export interface TopScorer {
@@ -306,6 +307,7 @@ export interface TopScorer {
   position: string;
   goals: number;
   assists: number;
+  photo?: string | null;
 }
 
 export interface Awards {
@@ -342,29 +344,36 @@ export interface RunListItem {
 }
 
 /** Short display name: just the surname (cards show the last name only). */
-export function playerSurname(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length <= 1) return parts[0];
-  const last = parts[parts.length - 1];
-  // Handle compound surnames with particles (de, del, van, von, di, da, do, etc.)
-  const particles = ["de", "del", "de la", "van", "von", "di", "da", "do", "dos", "du"];
-  const pLower = parts[0].toLowerCase();
-  if (particles.includes(pLower)) {
-    if (parts.length >= 2) return `${parts[0]} ${last}`;
-    return last;
+/** Nobiliary particles that are part of a surname (De Paul, Van Dijk, Di María). */
+const SURNAME_PARTICLES = new Set([
+  "de", "del", "della", "delle", "dello", "degli", "di", "da", "das", "do", "dos", "du",
+  "van", "von", "der", "den", "ter", "te", "la", "le", "lo", "los", "las", "el", "al",
+  "bin", "binti", "mac", "mc", "st", "saint", "sainte", "santa", "san", "ben", "af", "av",
+  "o",
+]);
+
+function surnameStart(parts: string[]): number {
+  let start = parts.length - 1;
+  while (
+    start > 0 &&
+    SURNAME_PARTICLES.has(parts[start - 1].toLowerCase().replace(/\.$/, ""))
+  ) {
+    start--;
   }
-  return last;
+  return start;
+}
+
+export function playerSurname(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return parts[0] ?? name;
+  return parts.slice(surnameStart(parts)).join(" ");
 }
 
 /** Full display name: shows "De Paul" instead of just "Paul". */
 export function playerDisplayName(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length <= 1) return parts[0];
-  const particles = ["de", "del", "de la", "van", "von", "di", "da", "do", "dos", "du"];
-  const pLower = parts[0].toLowerCase();
-  if (particles.includes(pLower) && parts.length >= 2) {
-    return `${parts[0]} ${parts[parts.length - 1]}`;
-  }
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return parts[0] ?? name;
+  if (surnameStart(parts) > 0) return parts.slice(surnameStart(parts)).join(" ");
   return name;
 }
 

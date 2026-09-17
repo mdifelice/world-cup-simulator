@@ -307,6 +307,7 @@ struct Perf {
     name: String,
     team_id: i64,
     position: String,
+    photo: Option<String>,
     games: i32,
     rating_sum: f64,
     goals: i32,
@@ -689,6 +690,7 @@ impl<'a> Engine<'a> {
             name: p.name.clone(),
             team_id,
             position: p.position.clone(),
+            photo: p.photo_url.clone(),
             ..Perf::default()
         })
     }
@@ -828,36 +830,43 @@ impl<'a> Engine<'a> {
     // ------------------------------------------------------------------
 
     fn finalize_awards(&mut self) -> ApiResult<Awards> {
-        let mut players: Vec<Perf> = self.perfs.values().cloned().collect();
+        let mut players: Vec<(i64, Perf)> =
+            self.perfs.iter().map(|(id, p)| (*id, p.clone())).collect();
         players.sort_by(|a, b| {
-            let sa = self.player_score(a);
-            let sb = self.player_score(b);
+            let sa = self.player_score(&a.1);
+            let sb = self.player_score(&b.1);
             sb.partial_cmp(&sa)
                 .unwrap_or(std::cmp::Ordering::Equal)
-                .then_with(|| a.name.cmp(&b.name))
+                .then_with(|| a.1.name.cmp(&b.1.name))
         });
 
-        let golden = players.first().and_then(|p| self.medal(p));
-        let silver = players.get(1).and_then(|p| self.medal(p));
-        let bronze = players.get(2).and_then(|p| self.medal(p));
+        let golden = players.first().and_then(|(id, p)| self.medal(*id, p));
+        let silver = players.get(1).and_then(|(id, p)| self.medal(*id, p));
+        let bronze = players.get(2).and_then(|(id, p)| self.medal(*id, p));
 
-        let mut scorers: Vec<Perf> = self.perfs.values().filter(|p| p.goals > 0).cloned().collect();
+        let mut scorers: Vec<(i64, Perf)> = self
+            .perfs
+            .iter()
+            .filter(|(_, p)| p.goals > 0)
+            .map(|(id, p)| (*id, p.clone()))
+            .collect();
         scorers.sort_by(|a, b| {
-            b.goals
-                .cmp(&a.goals)
-                .then(b.assists.cmp(&a.assists))
-                .then_with(|| a.name.cmp(&b.name))
+            b.1.goals
+                .cmp(&a.1.goals)
+                .then(b.1.assists.cmp(&a.1.assists))
+                .then_with(|| a.1.name.cmp(&b.1.name))
         });
         let mut top_scorers = Vec::new();
-        for p in scorers.into_iter().take(20) {
+        for (id, p) in scorers.into_iter().take(20) {
             top_scorers.push(TopScorer {
-                player_id: 0,
+                player_id: id,
                 name: p.name.clone(),
                 team_id: p.team_id,
                 team_name: self.team_name(p.team_id).unwrap_or_default(),
                 position: p.position.clone(),
                 goals: p.goals,
                 assists: p.assists,
+                photo: p.photo.clone(),
             });
         }
 
@@ -869,12 +878,12 @@ impl<'a> Engine<'a> {
         })
     }
 
-    fn medal(&mut self, p: &Perf) -> Option<PlayerAward> {
+    fn medal(&mut self, player_id: i64, p: &Perf) -> Option<PlayerAward> {
         if p.games == 0 {
             return None;
         }
         Some(PlayerAward {
-            player_id: 0,
+            player_id,
             name: p.name.clone(),
             team_id: p.team_id,
             team_name: self.team_name(p.team_id).unwrap_or_default(),
@@ -883,6 +892,7 @@ impl<'a> Engine<'a> {
             goals: p.goals,
             assists: p.assists,
             score: self.player_score(p),
+            photo: p.photo.clone(),
         })
     }
 

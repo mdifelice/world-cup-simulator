@@ -118,6 +118,7 @@ const en: Record<string, string> = {
   "cup.ga": "GA",
   "cup.gd": "GD",
   "cup.pts": "Pts",
+  "cup.bracket": "Bracket",
   "cup.scorers": "Top scorers",
   "cup.assisters": "Top assister",
   "cup.recent": "Recent results",
@@ -311,6 +312,7 @@ const es: Record<string, string> = {
   "cup.ga": "GC",
   "cup.gd": "DG",
   "cup.pts": "Pts",
+  "cup.bracket": "Llaves",
   "cup.scorers": "Máximos goleadores",
   "cup.assisters": "Máximos asistentes",
   "cup.recent": "Resultados recientes",
@@ -411,8 +413,8 @@ const dicts: Record<Locale, Record<string, string>> = { en, es };
 const STAGE_PATTERNS: [RegExp, string][] = [
   [/^(?:round of (?:16|dieciseis|octavos)|octavos de final)$/i, "stage.r16"],
   [/^(?:round of (?:32|treintaidos|dieciseisavos)|dieciseisavos)$/i, "stage.r32"],
-  [/^(?:round of 8|quarters?|cuartos(?: de final)?)$/i, "stage.quarter"],
-  [/^(?:semi-?final|semifinals?|semifinales?)$/i, "stage.semi"],
+  [/^(?:round of 8|quarter-?finals?|quarters?|cuartos(?: de final)?)$/i, "stage.quarter"],
+  [/^(?:semi-?finals?|semifinals?|semifinales?)$/i, "stage.semi"],
   [/^finals?$/i, "stage.final"],
   [/^(?:third place|tercer puesto|bronze final)$/i, "stage.third"],
 ];

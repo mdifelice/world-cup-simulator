@@ -12,9 +12,6 @@ interface Props {
 const UP = "#2da562";
 const DOWN = "#c8443a";
 const LIVE_MS = 150;
-// How many match-minutes a goal keeps the momentum gauge pegged before it
-// eases back to the centre.
-const MOM_WINDOW = 18;
 
 export default function LiveMatch({
   match: m,
@@ -109,8 +106,6 @@ export default function LiveMatch({
   }, [series, min, lengthLabel, W, maxHalf]);
 
   const isAwayFocusMomentum = momentum != null && focusTeamId === m.away_team_id;
-  const focusName =
-    m.home_team_id === focusTeamId ? m.home_team_name : m.away_team_name;
 
   const goalMarks = goalsUpTo.map((g, i) => {
     const x = (g.minute / lengthLabel) * W;
@@ -123,18 +118,14 @@ export default function LiveMatch({
     return { x, y, minute: g.minute, note, key: i };
   });
 
-  // Horizontal momentum gauge: centre is neutral, a goal snaps the fill to that
-  // team's end (home = left, away = right) and it eases back to the centre over
-  // the following minutes.
+  // Continuous momentum gauge: the home team's live dominance (-1 away … +1
+  // home) drives a green centre fill that always moves with the series.
   const gauge = useMemo(() => {
-    if (goalsUpTo.length === 0) return 0;
-    let last = goalsUpTo[0];
-    for (const g of goalsUpTo) if (g.minute >= last.minute) last = g;
-    const age = min - last.minute;
-    if (age < 0 || age >= MOM_WINDOW) return 0;
-    const mag = 1 - age / MOM_WINDOW;
-    return (last.team_id === m.home_team_id ? -1 : 1) * mag;
-  }, [goalsUpTo, min, m.home_team_id]);
+    if (!momentum || momentum.home.length === 0) return 0;
+    const idx = Math.min(Math.max(min, 1), momentum.home.length) - 1;
+    const v = (momentum.home[idx] - 0.5) * 2;
+    return Math.max(-1, Math.min(1, v));
+  }, [momentum, min]);
 
   const tick = (mmin: number, label: string) => {
     const x = (mmin / lengthLabel) * W;
@@ -185,6 +176,16 @@ export default function LiveMatch({
         <span className="live-stage">
           {stage(m.stage_name)} · {t("match.day", { day: m.day })}
         </span>
+        {done && (
+          <button
+            className="live-x"
+            onClick={onClose}
+            aria-label={t("match.close")}
+            title={t("match.close")}
+          >
+            ×
+          </button>
+        )}
       </div>
 
       <div className="match-vs">
@@ -208,11 +209,6 @@ export default function LiveMatch({
 
       {momentum && series && series.length > 0 && (
         <div className="chart-card">
-          <div className="chart-head">
-            <span className="chart-title">
-              {t("match.momentum", { team: flagName(focusName) })}
-            </span>
-          </div>
           <svg
             ref={svgRef}
             viewBox={`0 0 ${W} ${H}`}
@@ -267,7 +263,7 @@ export default function LiveMatch({
                   ⚽
                 </text>
                 <text
-                  transform={`translate(${x + 7} ${y + 3}) scale(${textSx} 1)`}
+                  transform={`translate(${x + 11} ${y + 3}) scale(${textSx} 1)`}
                   fill="rgba(27,37,48,0.8)"
                   fontSize="10"
                 >
@@ -284,9 +280,9 @@ export default function LiveMatch({
             <div className="mg-track">
               <div className="mg-mid" />
               <div
-                className={"mg-fill " + (gauge <= 0 ? "home" : "away")}
+                className="mg-fill"
                 style={{
-                  left: gauge <= 0 ? `${50 + gauge * 50}%` : "50%",
+                  left: gauge >= 0 ? `${50 - gauge * 50}%` : "50%",
                   width: `${Math.abs(gauge) * 50}%`,
                 }}
               />
@@ -335,14 +331,6 @@ export default function LiveMatch({
               <span className="goal-scorer">{r.player}</span>
             </div>
           ))}
-        </div>
-      )}
-
-      {done && (
-        <div className="live-actions">
-          <button className="btn primary" onClick={onClose}>
-            {t("match.close")}
-          </button>
         </div>
       )}
       </div>

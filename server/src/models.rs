@@ -629,6 +629,8 @@ pub struct PlayerAward {
     pub assists: i32,
     /// Aggregate performance score used to rank the awards.
     pub score: f64,
+    #[serde(default)]
+    pub photo: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -640,4 +642,6 @@ pub struct TopScorer {
     pub position: String,
     pub goals: i32,
     pub assists: i32,
+    #[serde(default)]
+    pub photo: Option<String>,
 }

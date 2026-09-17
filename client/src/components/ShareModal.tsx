@@ -128,12 +128,22 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
     if (!node || sharing) return;
     setSharing(true);
     try {
+      const pad = 28;
+      const w = node.offsetWidth;
+      const h = node.offsetHeight;
       const dataUrl = await toPng(node, {
         pixelRatio: 2,
         cacheBust: true,
         backgroundColor: "#ffffff",
-        // White margin around the captured card.
-        style: { padding: "28px", background: "#ffffff" },
+        // Grow the canvas by the padding so the bottom/right margin is not cut.
+        width: w + pad * 2,
+        height: h + pad * 2,
+        style: {
+          padding: `${pad}px`,
+          background: "#ffffff",
+          width: `${w + pad * 2}px`,
+          boxSizing: "border-box",
+        },
       });
       const blob = await (await fetch(dataUrl)).blob();
       const file = new File([blob], `world-cup-${run.year}.png`, {
@@ -194,8 +204,9 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
               {best.map((a, i) => (
                 <div key={a.player_id || i} className="share-row">
                   <span className="share-medal">{medals[i] ?? "⭐"}</span>
-                  <span className="share-name">{flagName(country, a.name)}</span>
-                  <span className="share-detail">{flagName(country, a.team_name)}</span>
+                  {a.photo ? <img className="share-photo" src={a.photo} alt="" /> : null}
+                  <span className="share-name">{a.name}</span>
+                  <span className="share-detail">{flagFor(a.team_name)}</span>
                 </div>
               ))}
             </div>
@@ -207,8 +218,9 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
               {scorers.map((a) => (
                 <div key={a.player_id} className="share-row">
                   <span className="share-medal">⚽</span>
-                  <span className="share-name">{flagName(country, a.name)}</span>
-                  <span className="share-detail">{flagName(country, a.team_name)}</span>
+                  {a.photo ? <img className="share-photo" src={a.photo} alt="" /> : null}
+                  <span className="share-name">{a.name}</span>
+                  <span className="share-detail">{flagFor(a.team_name)}</span>
                   <span className="share-num">{a.goals}</span>
                   <span className="share-tag">{t("final.goals")}</span>
                 </div>
@@ -222,8 +234,9 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
               {assists.map((a) => (
                 <div key={a.player_id} className="share-row">
                   <span className="share-medal">🎯</span>
-                  <span className="share-name">{flagName(country, a.name)}</span>
-                  <span className="share-detail">{flagName(country, a.team_name)}</span>
+                  {a.photo ? <img className="share-photo" src={a.photo} alt="" /> : null}
+                  <span className="share-name">{a.name}</span>
+                  <span className="share-detail">{flagFor(a.team_name)}</span>
                   <span className="share-num">{a.assists}</span>
                   <span className="share-tag">{t("final.assists")}</span>
                 </div>

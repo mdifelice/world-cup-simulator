@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useI18n, flagFor } from "../i18n";
 import PlayerCard from "../components/PlayerCard";
 import FormationPanel from "../components/FormationPanel";
+import Bracket from "../components/Bracket";
 import type { LineupConfig, RunMatch, RunPayload } from "../types";
 
 interface Props {
@@ -100,6 +101,11 @@ export default function Overview({
   }
 
   const revealedIds = new Set(revealedMatches.map((m) => m.id));
+  // The bracket appears once the knockout stage starts; unplayed rounds show as
+  // TBD placeholders until their results are revealed.
+  const hasKnockout = revealedMatches.some((m) =>
+    ["R32", "R16", "QF", "SF", "F", "THIRD"].includes(m.stage_key),
+  );
 
   /** Standings for a group/league phase: members come from the seeded groups
    *  when available, otherwise from the phase's own fixtures (union-find). */
@@ -271,7 +277,7 @@ export default function Overview({
             target.getBoundingClientRect().top -
             el.getBoundingClientRect().top +
             el.scrollTop;
-          el.scrollTo({ top: Math.max(0, top - 12), behavior: "smooth" });
+          el.scrollTo({ top: Math.max(0, top - 12), behavior: "auto" });
           phaseCountRef.current = phases.length;
           return;
         }
@@ -415,6 +421,9 @@ export default function Overview({
                                 })}
                               </span>
                             )}
+                            {(m.reds?.length ?? 0) > 0 && (
+                              <span className="red-card tiny" aria-hidden />
+                            )}
                           </>
                         ) : (
                           "–"
@@ -481,67 +490,55 @@ export default function Overview({
 
             <aside className="hub-side">
               <div className="group-scroll" ref={groupScrollRef}>
-                {phases.flatMap((p) =>
-                  p.groupType
-                    ? p.tables.map((tb) => (
-                        <div key={p.key + tb.name} className="table-card">
-                          <h2 className="table-title">{stage(tb.name)}</h2>
-                          <table className="mini-table">
-                            <thead>
-                              <tr>
-                                <th></th><th className="l">{t("cup.team")}</th>
-                                <th>{t("cup.p")}</th><th>{t("cup.w")}</th><th>{t("cup.d")}</th><th>{t("cup.l")}</th>
-                                <th>{t("cup.gd")}</th><th>{t("cup.pts")}</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {tb.rows.map((r, i) => (
-                                <tr key={r.id} className={focusId === r.id ? "focus-row" : ""}>
-                                  <td className="num">{i + 1}</td>
-                                  <td className="l team-cell">
-                                    <span className="code-cell">
-                                      {flagFor(r.name)} {codeOf(runCodes, r.id, r.name)}
-                                    </span>
-                                  </td>
-                                  <td className="num">{r.p}</td>
-                                  <td className="num">{r.w}</td>
-                                  <td className="num">{r.d}</td>
-                                  <td className="num">{r.l}</td>
-                                  <td className="num">{r.gd > 0 ? `+${r.gd}` : r.gd}</td>
-                                  <td className="num strong">{r.pts}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ))
-                    : [
-                        <div key={p.key} className="table-card">
-                          <h2 className="table-title">{stage(p.name)}</h2>
-                          <div className="bracket">
-                            {p.ties.map(({ m, played }) => (
-                              <div key={m.id} className={"tie" + (played ? " played" : "")}>
-                                <span className={"tie-team" + (m.home_team_id === focusId ? " focus-tag" : "")}>
-                                  {flagFor(m.home_team_name)} {codeOf(runCodes, m.home_team_id, m.home_team_name)}
-                                </span>
-                                <span className="tie-score">
-                                  {played ? `${m.home_score}–${m.away_score}` : "–"}
-                                  {played && m.penalties && (
-                                    <span className="pens">
-                                      {`(${m.penalties.home_score}–${m.penalties.away_score})`}
-                                    </span>
-                                  )}
-                                </span>
-                                <span className={"tie-team away" + (m.away_team_id === focusId ? " focus-tag" : "")}>
-                                  {codeOf(runCodes, m.away_team_id, m.away_team_name)}{" "}
-                                  {flagFor(m.away_team_name)}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>,
-                      ],
+                {run && hasKnockout && (
+                  <div className="table-card">
+                    <h2 className="table-title">{t("cup.bracket")}</h2>
+                    <Bracket
+                      matches={run.matches}
+                      order={run.order}
+                      revealedIds={revealedIds}
+                      focusId={focusId}
+                      codes={runCodes}
+                      onOpen={onOpenDetail}
+                    />
+                  </div>
                 )}
+                {phases
+                  .filter((p) => p.groupType)
+                  .flatMap((p) =>
+                    p.tables.map((tb) => (
+                      <div key={p.key + tb.name} className="table-card">
+                        <h2 className="table-title">{stage(tb.name)}</h2>
+                        <table className="mini-table">
+                          <thead>
+                            <tr>
+                              <th></th><th className="l">{t("cup.team")}</th>
+                              <th>{t("cup.p")}</th><th>{t("cup.w")}</th><th>{t("cup.d")}</th><th>{t("cup.l")}</th>
+                              <th>{t("cup.gd")}</th><th>{t("cup.pts")}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {tb.rows.map((r, i) => (
+                              <tr key={r.id} className={focusId === r.id ? "focus-row" : ""}>
+                                <td className="num">{i + 1}</td>
+                                <td className="l team-cell">
+                                  <span className="code-cell">
+                                    {flagFor(r.name)} {codeOf(runCodes, r.id, r.name)}
+                                  </span>
+                                </td>
+                                <td className="num">{r.p}</td>
+                                <td className="num">{r.w}</td>
+                                <td className="num">{r.d}</td>
+                                <td className="num">{r.l}</td>
+                                <td className="num">{r.gd > 0 ? `+${r.gd}` : r.gd}</td>
+                                <td className="num strong">{r.pts}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )),
+                  )}
               </div>
 
               {scorers.length > 0 && (

@@ -1253,8 +1253,8 @@ body {
 }
 .slot-clear {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: 0;
+  right: 0;
   width: 16px;
   height: 16px;
   display: grid;
@@ -1589,49 +1589,101 @@ body {
   font-weight: 800;
   letter-spacing: 0.5px;
 }
-.bracket {
+.bracket-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+}
+.bk-canvas {
+  position: relative;
+}
+.bk-lines {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+.bk-col-label {
+  position: absolute;
+  transform: translateY(-2px);
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.bk-box {
+  position: absolute;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  font-size: 11.5px;
 }
-.tie {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+.bk-box.played {
+  cursor: pointer;
+}
+.bk-box.focus {
+  border-color: var(--accent);
+}
+.bk-box.played:hover {
+  border-color: var(--accent);
+}
+.bk-line {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 12.5px;
+  gap: 5px;
+  color: var(--muted);
+  line-height: 1.1;
 }
-.tie:last-child {
-  border-bottom: none;
+.bk-line.win {
+  color: var(--text);
+  font-weight: 800;
 }
-.tie-team {
-  font-weight: 700;
-  white-space: nowrap;
+.bk-flag {
+  font-size: 11px;
+}
+.bk-code {
+  flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 700;
 }
-.tie-team:not(.away) {
-  text-align: right;
-}
-.tie-team.away {
-  text-align: left;
-}
-.tie-team.focus-tag {
-  color: var(--accent);
-}
-.tie-score {
-  min-width: 34px;
-  text-align: center;
+.bk-sc {
   font-variant-numeric: tabular-nums;
   font-weight: 900;
-  color: var(--muted);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
-.tie.played .tie-score {
-  color: var(--text);
+.bk-pens {
+  font-size: 9px;
+  color: var(--muted);
+  text-align: right;
+}
+.bk-tbd {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--muted);
+  opacity: 0.75;
+}
+.bk-red {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+}
+.red-card.tiny {
+  width: 9px;
+  height: 12px;
+  border-radius: 1.5px;
+  display: inline-block;
+  margin-left: 4px;
+  vertical-align: -2px;
 }
 
 /* ------- full-match scrollable list ------- */
@@ -1859,18 +1911,8 @@ body {
   position: absolute;
   top: 0;
   bottom: 0;
-  transition: left 0.15s linear, width 0.15s linear;
-}
-.mg-fill.home {
   background: #2da562;
-}
-.mg-fill.away {
-  background: #c8443a;
-}
-.live-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 14px;
+  transition: left 0.15s linear, width 0.15s linear;
 }
 .mom-bar.up {
   fill: #2da562;
@@ -1979,6 +2021,15 @@ body {
 .share-medal {
   width: 20px;
   text-align: center;
+}
+.share-photo {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top;
+  background: var(--panel2);
+  flex: 0 0 auto;
 }
 .share-name {
   font-weight: 600;
