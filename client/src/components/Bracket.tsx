@@ -270,11 +270,8 @@ export default function Bracket({
                     </>
                   ) : (
                     <div className="bk-tbd">TBD</div>
-                  )}
-                                    {(m.reds?.length ?? 0) > 0 && (
-                    <span className="red-card bk-red" aria-hidden />
-                  )}
-                </div>
+)}
+                 </div>
               );
             })}
           </div>

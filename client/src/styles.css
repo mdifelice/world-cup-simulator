@@ -1690,13 +1690,6 @@ body {
   color: var(--muted);
   opacity: 0.75;
 }
-.bk-red {
-  position: absolute;
-  top: -2px;
-  right: -3px;
-  width: 6px;
-  height: 9px;
-}
 .red-card.tiny {
   position: absolute;
   top: -4px;

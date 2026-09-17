@@ -168,21 +168,18 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="share-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="share-scroll">
-        <div className="share-capture" ref={captureRef}>
-        <div className="share-head">
-          <div>
-            <div className="share-title">{title}</div>
-            <div className="share-sub">{host}</div>
-          </div>
-          <button className="live-x" onClick={onClose} title={t("share.close")}>
-            ✕
-          </button>
-        </div>
+<div className="modal-backdrop" onClick={onClose}>
+        <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="share-scroll">
+            <div className="share-capture" ref={captureRef}>
+              <div className="share-head">
+                <div>
+                  <div className="share-title">{title}</div>
+                  <div className="share-sub">{host}</div>
+                </div>
+              </div>
 
-        <div className="share-body">
+              <div className="share-body">
           <div className="podium-list">
             {podium.map((p) => (
               <div key={p.medal} className={"podium-row p" + (podium.indexOf(p) + 1)}>
@@ -246,8 +243,11 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
             </div>
           )}
         </div>
-        </div>
-        </div>
+            </div>
+            <button className="live-x" onClick={onClose} title={t("share.close")} style={{margin: "12px auto 0", display: "block"}}>
+              ✕
+            </button>
+          </div>
 
         <div className="share-actions bar">
           <button className="btn primary big" onClick={share} disabled={sharing}>
