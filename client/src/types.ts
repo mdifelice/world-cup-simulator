@@ -108,6 +108,9 @@ export interface LineupConfig {
 }
 
 export const FORMATIONS: Record<string, readonly string[]> = {
+  "2-3-5": ["GK", "DF", "DF", "DMF", "DMF", "AMF", "RFW", "FW", "FW", "FW", "LFW"],
+  "3-2-5": ["GK", "DF", "DF", "DF", "DMF", "DMF", "RFW", "FW", "FW", "FW", "LFW"],
+  "4-2-4": ["GK", "RWB", "DF", "DF", "LWB", "DMF", "DMF", "RFW", "FW", "FW", "LFW"],
   "5-3-2": ["GK", "RWB", "DF", "DF", "DF", "LWB", "DMF", "DMF", "AMF", "FW", "FW"],
   "5-4-1": ["GK", "RWB", "DF", "DF", "DF", "LWB", "RMF", "DMF", "LMF", "AMF", "FW"],
   "4-5-1": ["GK", "RWB", "DF", "DF", "LWB", "RMF", "DMF", "DMF", "LMF", "AMF", "FW"],
@@ -116,6 +119,33 @@ export const FORMATIONS: Record<string, readonly string[]> = {
   "3-5-2": ["GK", "DF", "DF", "DF", "RMF", "DMF", "DMF", "LMF", "AMF", "FW", "FW"],
   "3-4-3": ["GK", "DF", "DF", "DF", "RMF", "DMF", "LMF", "AMF", "RFW", "FW", "LFW"],
 };
+
+/** Tactical eras: the default formation and the plausible set for each span.
+ *  Mirrors the server's `era_formation` in detail.rs (defaults only). */
+const ERAS: Array<{ max: number; default: string; allowed: string[] }> = [
+  { max: 1954, default: "2-3-5", allowed: ["2-3-5", "3-2-5"] },
+  { max: 1966, default: "4-2-4", allowed: ["2-3-5", "3-2-5", "4-2-4", "4-3-3"] },
+  { max: 1974, default: "4-3-3", allowed: ["4-2-4", "4-3-3", "4-4-2"] },
+  { max: 1998, default: "4-4-2", allowed: ["4-4-2", "4-3-3", "4-5-1", "5-3-2", "5-4-1", "3-5-2"] },
+  { max: Infinity, default: "4-3-3", allowed: ["4-3-3", "4-4-2", "4-5-1", "5-3-2", "5-4-1", "3-5-2", "3-4-3"] },
+];
+
+function eraBucket(year: number) {
+  return ERAS.find((e) => year > 0 && year <= e.max) ?? ERAS[0];
+}
+
+/** Tactical default for a given tournament year — older championships line up
+ *  the way they actually did (WM/2-3-5, Brazil's 4-2-4, etc.). Mirrors the
+ *  server's `era_formation` in detail.rs. */
+export function eraFormation(year: number): string {
+  return eraBucket(year).default;
+}
+
+/** The formations plausible for a tournament year, used to filter the lineup
+ *  editor's chip grid (a 1930 run shouldn't offer a 5-man-back park-the-bus). */
+export function eraFormations(year: number): string[] {
+  return eraBucket(year).allowed;
+}
 
 export const STRATEGIES: Strategy[] = ["defensive", "normal", "attacking"];
 

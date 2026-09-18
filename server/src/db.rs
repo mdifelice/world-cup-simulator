@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
 use rusqlite::Connection;
@@ -575,8 +575,9 @@ fn seed_edition(conn: &Connection, year: i32) -> rusqlite::Result<()> {
     for (code, players) in &file.squads {
         let Some(&team_id) = by_code.get(code) else { continue };
         let base = rating_by_code.get(code).copied().unwrap_or(70);
-        for p in players {
-            let pos = p.positions.first().cloned().unwrap_or_else(|| "CM".to_string());
+        let resolved = era_positions(year, code, players);
+        for (i, p) in players.iter().enumerate() {
+            let pos = resolved[i].first().cloned().unwrap_or_else(|| "CM".to_string());
             let delta = match family_of(&pos) {
                 0 => 3,
                 1 => -2,
@@ -603,7 +604,7 @@ fn seed_edition(conn: &Connection, year: i32) -> rusqlite::Result<()> {
                 ],
             )?;
             let player_id = conn.last_insert_rowid();
-            let positions_str = p.positions.join(",");
+            let positions_str = resolved[i].join(",");
             conn.execute(
                 "INSERT OR IGNORE INTO player_callups (player_id, tournament_id, team_id, position, positions, shirt_number)
                  VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
@@ -636,6 +637,93 @@ fn seed_edition(conn: &Connection, year: i32) -> rusqlite::Result<()> {
         }
     }
     Ok(())
+}
+
+/// Deterministic string hash (FNV-1a 64) — stable across runs, so rebuilding
+/// the DB reproduces exactly the same squads.
+fn hash_str(s: &str) -> u64 {
+    let mut h: u64 = 0xcbf29ce484222325;
+    for b in s.bytes() {
+        h ^= b as u64;
+        h = h.wrapping_mul(0x100000001b3);
+    }
+    h
+}
+
+/// Historical openfootball pages carry no real positional data for most
+/// editions: every player in a squad lands on "CM", so there is no signal to
+/// recover. With that, each player gets a role that fits his era's formation
+/// shape (WM 2-3-5, Brazil's 4-2-4, etc.), picked deterministically from a
+/// hash of his name — GKs, defenders, midfielders and forwards are spread
+/// across the squad instead of being blank "CM" boxes. Squads that do carry
+/// real positions (2018+, the 2022/2026 demo rosters) are left untouched.
+fn era_positions(year: i32, code: &str, players: &[SeedPlayer]) -> Vec<Vec<String>> {
+    let distinct: HashSet<&str> = players
+        .iter()
+        .filter_map(|p| p.positions.first().map(|s| s.as_str()))
+        .collect();
+    if distinct.len() > 1 {
+        return players.iter().map(|p| p.positions.clone()).collect();
+    }
+
+    let n = players.len();
+    if n == 0 {
+        return Vec::new();
+    }
+    let n_gk = if n >= 14 { 2 } else { 1 };
+    let (w_df, w_mf, w_fw) = if year <= 1954 {
+        (2, 3, 5)
+    } else if year <= 1966 {
+        (4, 2, 4)
+    } else if year <= 1974 {
+        (4, 3, 3)
+    } else if year <= 1998 {
+        (4, 4, 2)
+    } else {
+        (4, 3, 3)
+    };
+    let wsum = w_df + w_mf + w_fw;
+    let out = n - n_gk;
+    let df = out * w_df / wsum;
+    let mf = out * w_mf / wsum;
+    let fw = out - df - mf;
+
+    let mut fam: Vec<&str> = Vec::with_capacity(n);
+    for _ in 0..n_gk {
+        fam.push("GK");
+    }
+    for _ in 0..df {
+        fam.push("DF");
+    }
+    for _ in 0..mf {
+        fam.push("MF");
+    }
+    for _ in 0..fw {
+        fam.push("FW");
+    }
+
+    // Shuffle the family bag by name hash so GKs and role spread don't simply
+    // follow the roster's JSON order.
+    let mut order: Vec<usize> = (0..n).collect();
+    order.sort_by_key(|&i| hash_str(&format!("{code}|{}", players[i].name)));
+
+    const DF_ROLES: [&str; 4] = ["CB", "CB", "RB", "LB"];
+    const MF_ROLES: [&str; 4] = ["CM", "CM", "CDM", "CAM"];
+    const FW_ROLES: [&str; 5] = ["ST", "ST", "CF", "LW", "RW"];
+
+    let mut out_v: Vec<Vec<String>> = vec![Vec::new(); n];
+    for k in 0..n {
+        let i = order[k];
+        let h = hash_str(&format!("{code}|{}", players[i].name)) as usize;
+        let role = match fam[k] {
+            "GK" => "GK".to_string(),
+            "DF" => DF_ROLES[h % DF_ROLES.len()].to_string(),
+            "MF" => MF_ROLES[h % MF_ROLES.len()].to_string(),
+            _ => FW_ROLES[h % FW_ROLES.len()].to_string(),
+        };
+        out_v[i] = vec![role];
+    }
+    out_v
 }
 
 /// Demo fallback for the two editions that shipped before the real seeds.

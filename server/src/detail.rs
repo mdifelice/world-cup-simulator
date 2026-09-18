@@ -69,6 +69,9 @@ const HOME_FACTOR: f64 = 1.08;
 /// then attack) — mirrored by the client's lineup screen.
 fn formation_slots(formation: &str) -> Option<&'static [&'static str]> {
     match formation {
+        "2-3-5" => Some(&["GK", "DF", "DF", "DMF", "DMF", "AMF", "RFW", "FW", "FW", "FW", "LFW"]),
+        "3-2-5" => Some(&["GK", "DF", "DF", "DF", "DMF", "DMF", "RFW", "FW", "FW", "FW", "LFW"]),
+        "4-2-4" => Some(&["GK", "RWB", "DF", "DF", "LWB", "DMF", "DMF", "RFW", "FW", "FW", "LFW"]),
         "5-3-2" => Some(&["GK", "RWB", "DF", "DF", "DF", "LWB", "DMF", "DMF", "AMF", "FW", "FW"]),
         "5-4-1" => Some(&["GK", "RWB", "DF", "DF", "DF", "LWB", "RMF", "DMF", "LMF", "AMF", "FW"]),
         "4-5-1" => Some(&["GK", "RWB", "DF", "DF", "LWB", "RMF", "DMF", "DMF", "LMF", "AMF", "FW"]),
@@ -77,6 +80,23 @@ fn formation_slots(formation: &str) -> Option<&'static [&'static str]> {
         "3-5-2" => Some(&["GK", "DF", "DF", "DF", "RMF", "DMF", "DMF", "LMF", "AMF", "FW", "FW"]),
         "3-4-3" => Some(&["GK", "DF", "DF", "DF", "RMF", "DMF", "LMF", "AMF", "RFW", "FW", "LFW"]),
         _ => None,
+    }
+}
+
+/// The default formation for a tournament year, mirroring how the era actually
+/// lined up: pre-1955 WM (2-3-5), Brazil's 4-2-4 through the sixties, classic
+/// 4-3-3 in the seventies and the modern era's default.
+fn era_formation(year: i32) -> &'static str {
+    if year > 0 && year <= 1954 {
+        "2-3-5"
+    } else if year <= 1966 {
+        "4-2-4"
+    } else if year <= 1974 {
+        "4-3-3"
+    } else if year <= 1998 {
+        "4-4-2"
+    } else {
+        "4-3-3"
     }
 }
 
@@ -253,6 +273,7 @@ pub fn simulate_run(
     let mut eng = Engine {
         conn,
         tournament_id,
+        year,
         shirt_numbers,
         focus: req.focus_team_id,
         run_seed,
@@ -333,6 +354,7 @@ impl Row {
 struct Engine<'a> {
     conn: &'a Connection,
     tournament_id: i64,
+    year: i32,
     shirt_numbers: bool,
     focus: Option<i64>,
     run_seed: u64,
@@ -580,17 +602,26 @@ impl<'a> Engine<'a> {
         Ok(s)
     }
 
-    /// Best XI (4-4-2) by overall within each position family — the default
-    /// used for the opponent and for focus matches with no config yet.
+    /// Best XI by overall within each position family — the default used for
+    /// the opponent and for focus matches with no config yet. The shape comes
+    /// from the era's default formation (2-3-5 in 1930, 4-2-4 in 1958 …).
+    /// Squads that can't fill a family (e.g. openfootball's uniform "CM"
+    /// rosters) are topped up with the best remaining players.
     fn pick_xi(&mut self, team_id: i64) -> ApiResult<Vec<SquadPlayer>> {
         let squad = self.squad(team_id)?;
+        let slots = effective_slots(era_formation(self.year), "normal");
+        let df = slots.iter().filter(|&&s| matches!(s, "DF" | "RWB" | "LWB")).count();
+        let mf = slots.iter().filter(|&&s| matches!(s, "DMF" | "AMF" | "RMF" | "LMF")).count();
+        let fw = slots.iter().filter(|&&s| matches!(s, "FW" | "RFW" | "LFW")).count();
         let mut chosen = Vec::new();
-        for (family, count) in [("GK", 1), ("DF", 4), ("MF", 4), ("FW", 2)] {
+        let mut used: HashSet<i64> = HashSet::new();
+        for (family, count) in [("GK", 1), ("DF", df), ("MF", mf), ("FW", fw)] {
             let mut pool: Vec<SquadPlayer> = squad
                 .iter()
                 .filter(|p| {
                     crate::models::position_family(&p.position) == family
                         && !self.suspended(p.id)
+                        && !used.contains(&p.id)
                 })
                 .cloned()
                 .collect();
@@ -600,11 +631,28 @@ impl<'a> Engine<'a> {
                     .unwrap_or(std::cmp::Ordering::Equal)
             });
             for p in pool.into_iter().take(count) {
+                used.insert(p.id);
                 chosen.push(p);
             }
         }
         if chosen.is_empty() {
             chosen = squad.into_iter().filter(|p| !self.suspended(p.id)).take(11).collect();
+        } else {
+            // Top up to a full XI with the best unused players, so squads
+            // whose positions are uniform never run out on the pitch.
+            let mut rest: Vec<SquadPlayer> = squad
+                .iter()
+                .filter(|p| !self.suspended(p.id) && !used.contains(&p.id))
+                .cloned()
+                .collect();
+            rest.sort_by(|a, b| {
+                b.overall
+                    .partial_cmp(&a.overall)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            });
+            for p in rest.into_iter().take(11 - chosen.len()) {
+                chosen.push(p);
+            }
         }
         Ok(chosen)
     }

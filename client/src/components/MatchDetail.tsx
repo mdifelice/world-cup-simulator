@@ -19,11 +19,6 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
     [m.goals],
   );
 
-  const labels: Record<string, string> = {
-    home: flagName(m.home_team_name),
-    away: flagName(m.away_team_name),
-  };
-
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="detail-modal" onClick={(e) => e.stopPropagation()}>
@@ -151,14 +146,6 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                   ))}
               </div>
             </div>
-          </div>
-        )}
-
-        {m.goals.length === 0 && (
-          <div className="champ-banner">
-            <p className="hint">
-              {labels.home}–{labels.away} 0–0
-            </p>
           </div>
         )}
       </div>

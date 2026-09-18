@@ -593,6 +593,24 @@ body {
   font-weight: 900;
   line-height: 1;
 }
+.vs-score.bump {
+  display: inline-block;
+  animation: scoreBump 0.7s ease;
+}
+@keyframes scoreBump {
+  0% {
+    transform: scale(1);
+    color: inherit;
+  }
+  30% {
+    transform: scale(1.55) rotate(-4deg);
+    color: var(--gold);
+  }
+  100% {
+    transform: scale(1);
+    color: inherit;
+  }
+}
 .vs-dash {
   font-size: 34px;
   color: var(--muted);

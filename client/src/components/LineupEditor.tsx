@@ -3,6 +3,8 @@ import { canonSlot, useI18n } from "../i18n";
 import type { LineupConfig, Player, Strategy } from "../types";
 import {
   bestEffectiveIn,
+  eraFormation,
+  eraFormations,
   FORMATIONS,
   playerSurname,
   playerPositions,
@@ -19,6 +21,8 @@ export interface LineupEditorProps {
   shirtNumbers: boolean;
   squad: Player[];
   initial?: LineupConfig;
+  /** Tournament year — drives the era-appropriate default formation. */
+  year?: number;
   /** Read-only mode: the XI is shown but nothing can be changed. */
   disabled?: boolean;
   /** Player ids serving a suspension: locked out of the XI and auto-pick. */
@@ -49,8 +53,11 @@ const SLOT_SPREAD = 34;
 /** Lay the 11 slots out, spreading repeated slots (DF, or a second FW/DMF)
  *  horizontally so their always-visible captions never stack on top of
  *  each other and never leave the pitch. Captions sit above the marker in the
- *  top half, below it in the bottom half. */
+ *  top half, below it in the bottom half. A five-wide attack (WM-era 5-up,
+ *  4-2-4) spreads its three central strikers tighter so the flanks never
+ *  collide with the RFW/LFW anchors. */
 function layout(slots: string[]) {
+  const fwCount = slots.filter((s) => s === "FW").length;
   const anchors = slots.map((s) =>
     s === "DF" ? { x: 50, y: 70 } : SLOT_POS[s],
   );
@@ -66,7 +73,8 @@ function layout(slots: string[]) {
     const j = seen.get(k) ?? 0;
     seen.set(k, j + 1);
     const n = counts.get(k)!;
-    const dx = n > 1 ? (j - (n - 1) / 2) * SLOT_SPREAD : 0;
+    const step = slot === "FW" && fwCount >= 5 ? 18 : SLOT_SPREAD;
+    const dx = n > 1 ? (j - (n - 1) / 2) * step : 0;
     const up = a.y < 50;
     return { slot, x: a.x + dx, y: a.y, up };
   });
@@ -78,12 +86,14 @@ export default function LineupEditor({
   shirtNumbers,
   squad,
   initial,
+  year,
   disabled = false,
   unavailable,
   onReady,
 }: LineupEditorProps) {
   const { t, pos } = useI18n();
-  const [formation, setFormation] = useState<string>(initial?.formation ?? "4-4-2");
+  const defaultFormation = initial?.formation ?? (year != null ? eraFormation(year) : "4-4-2");
+  const [formation, setFormation] = useState<string>(defaultFormation);
   const [strategy, setStrategy] = useState<Strategy>(initial?.strategy ?? "normal");
   const [armedId, setArmedId] = useState<number | null>(null);
 
@@ -98,7 +108,7 @@ export default function LineupEditor({
     const lists = initial?.starting ?? {};
     const out: (number | null)[] = [];
     const used = new Set<number>();
-    for (const slot of slotsFor(initial?.formation ?? "4-4-2", initial?.strategy ?? "normal")) {
+    for (const slot of slotsFor(defaultFormation, initial?.strategy ?? "normal")) {
       const ids = lists[slot] ?? [];
       const pid = ids.find((p) => !used.has(p) && !blocked.has(p));
       out.push(pid ?? null);
@@ -241,12 +251,19 @@ export default function LineupEditor({
 
   const anyPicked = assignments.some((p) => p != null);
 
+  // Only the era's plausible formations are offered; the current one is always
+  // in the grid (a saved lineup might predate the chip filter).
+  const formationChips = useMemo(() => {
+    const base = year != null ? eraFormations(year) : Object.keys(FORMATIONS);
+    return base.includes(formation) ? base : [formation, ...base];
+  }, [year, formation]);
+
   return (
     <div className="form-editor">
       <div className="form-body">
         <div className="form-left">
           <div className="chip-grid">
-            {Object.keys(FORMATIONS).map((f) => (
+            {formationChips.map((f) => (
               <button
                 key={f}
                 className={"chip btn" + (formation === f ? " active" : "")}

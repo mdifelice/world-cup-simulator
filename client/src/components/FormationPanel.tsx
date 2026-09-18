@@ -11,6 +11,7 @@ interface Props {
   match: RunMatch;
   shirtNumbers: boolean;
   initial?: LineupConfig;
+  year?: number;
   disabled?: boolean;
   unavailable?: number[];
   onReady?: (cfg: LineupConfig | null) => void;
@@ -23,6 +24,7 @@ export default function FormationPanel({
   match,
   shirtNumbers,
   initial,
+  year,
   disabled = false,
   unavailable,
   onReady,
@@ -62,6 +64,7 @@ export default function FormationPanel({
           shirtNumbers={shirtNumbers}
           squad={squad}
           initial={initial}
+          year={year}
           disabled={disabled}
           unavailable={unavailable}
           onReady={onReady}

@@ -496,6 +496,7 @@ export default function Overview({
                     match={formationMatch}
                     shirtNumbers={run.shirt_numbers}
                     initial={formationInitial}
+                    year={run.year}
                     disabled={formationDisabled}
                     unavailable={formationUnavailable}
                     onReady={onDraft}

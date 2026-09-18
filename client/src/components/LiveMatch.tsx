@@ -237,12 +237,22 @@ export default function LiveMatch({
       <div className="match-vs">
         <div className={"vs-team" + (m.home_team_id === focusTeamId ? " focus" : "")}>
           <span className="vs-name">{flagName(m.home_team_name)}</span>
-          <span className="vs-score">{homeGoals}</span>
+          <span
+            key={`h${homeGoals}`}
+            className={"vs-score" + (homeGoals > 0 ? " bump" : "")}
+          >
+            {homeGoals}
+          </span>
         </div>
         <div className="vs-dash">–</div>
         <div className={"vs-team" + (m.away_team_id === focusTeamId ? " focus" : "")}>
           <span className="vs-name">{flagName(m.away_team_name)}</span>
-          <span className="vs-score">{awayGoals}</span>
+          <span
+            key={`a${awayGoals}`}
+            className={"vs-score" + (awayGoals > 0 ? " bump" : "")}
+          >
+            {awayGoals}
+          </span>
         </div>
       </div>
       <p className="match-label">
