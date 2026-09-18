@@ -15,6 +15,7 @@ Outputs:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -68,7 +69,8 @@ TEAM_CODES = {
     "Costa Rica": "CRC", "Republic of Ireland": "IRL", "UAE": "UAE", "Czechoslovakia": "TCH",
     "Soviet Union": "URS", "West Germany": "FRG", "Yugoslavia": "YUG",
     # 1994
-    "Greece": "GRE", "Nigeria": "NGA", "Saudi Arabia": "KSA",
+    "Greece": "GRE", "Nigeria": "NGA", "Saudi Arabia": "KSA", "Ireland": "IRL",
+    "USSR": "URS", "United States": "USA",
     # 1998
     "Croatia": "CRO", "Jamaica": "JAM", "Japan": "JPN", "South Africa": "RSA",
     # 2002
@@ -91,12 +93,12 @@ NAME_OVERRIDES = {
     "Soviet Union": "USSR",
     "Czechoslovakia": "Czechoslovakia",
     "Zaire": "DR Congo",
-    "Korea Republic": "South Korea",
-    "Iran": "Iran",
     "Côte d'Ivoire": "Ivory Coast",
     "Trinidad and Tobago": "Trinidad & Tobago",
     "West Germany": "West Germany",
     "Yugoslavia": "Yugoslavia",
+    "USA": "United States",
+    "Bosnia-Herzegovina": "Bosnia and Herzegovina",
 }
 
 # Country code mapping for flags
@@ -174,6 +176,10 @@ PHOTO_SIZE = 96
 YEARS = list(range(1930, 2019))
 YEARS.remove(1942)
 YEARS.remove(1946)
+
+
+def stable_id(key: str) -> int:
+    return int(hashlib.sha1(key.encode()).hexdigest()[:8], 16)
 
 
 def fetch(url: str) -> str:
@@ -314,6 +320,22 @@ def fetch_photos(cache: dict, titles: list) -> None:
         cache.setdefault(t, None)
 
 
+# Position mapper: family-level Wikipedia `pos` → granular like 2022/2026.
+POS_MAP = {
+    "GK": "GK", "DF": "CB", "CB": "CB", "LB": "LB", "RB": "RB",
+    "LWB": "LB", "RWB": "RB", "WB": "RB",
+    "MF": "CM", "CM": "CM", "DM": "CDM", "CDM": "CDM", "AM": "CAM", "CAM": "CAM",
+    "LM": "LW", "RM": "RW", "LW": "LW", "RW": "RW",
+    "FW": "ST", "ST": "ST", "CF": "ST",
+}
+
+
+def map_pos(raw: str) -> str:
+    """Map a Wikipedia pos token to a granular position (falls back to CM)."""
+    token = raw.strip().upper()
+    return POS_MAP.get(token, "CM")
+
+
 def strip_links(raw: str) -> str:
     def repl(m):
         return m.group(1).split("|")[-1]
@@ -353,7 +375,7 @@ def parse_squads_wikipedia(year: int) -> dict[str, list[dict]]:
             en = st + (nxt2.start() if nxt2 else len(section[st:]))
             loads = []
             for pm in re.finditer(
-                r"\{\{nat fs g player\|([^}]*?)\}\}", section[st:en], re.S,
+                r"\{\{nat fs g? player\|([^}]*?)\}\}", section[st:en], re.S,
             ):
                 fields = dict(
                     (k.strip(), v.strip())
@@ -369,11 +391,12 @@ def parse_squads_wikipedia(year: int) -> dict[str, list[dict]]:
                     continue
                 if not wiki:
                     wiki = name
-                pos = fields.get("pos", "").upper()
+                pos_raw = fields.get("pos", "").upper()
+                positions = [map_pos(p) for p in re.split(r"[/,]", pos_raw) if p.strip()]
                 no = fields.get("no", "").replace("&nbsp;", "").strip()
                 loads.append({
                     "name": name,
-                    "positions": [pos] if pos else ["CM"],
+                    "positions": positions if positions else ["CM"],
                     "shirt": int(no) if no.isdigit() else None,
                     "wiki": wiki,
                 })
@@ -485,51 +508,64 @@ def build_seed(year: int) -> dict | None:
             "group": "",  # filled below
         })
 
-    # Assign groups from standings or match data
+    # Assign groups from standings or match data. A team belongs to the group
+    # of its earliest group-phase match (base worldcup.json carries `group`),
+    # which also cleanly ignores the 1974/78/82 second-round stage.
+    group_matches = []
+    for m in of_data.get("matches", []):
+        grp = m.get("group", "")
+        if not grp and "Group" in m.get("round", "") and "Play" not in m.get("round", ""):
+            grp = m.get("round", "")
+        letter_m = re.search(r"Group\s+([A-Z]|\d+)", grp, re.I)
+        if not letter_m:
+            continue
+        g = letter_m.group(1).upper()
+        if g.isdigit():
+            g = chr(ord('A') + int(g) - 1)
+        group_matches.append((m.get("date", "") or "0000", m.get("team1", ""), m.get("team2", ""), g))
+
     group_of = {}
     if standings:
         for grp in standings.get("groups", []):
-            gname = grp.get("name", "")
-            letter = re.search(r"Group\s+([A-Z])", gname, re.I)
+            letter = re.search(r"Group\s+([A-Z])", grp.get("name", ""), re.I)
             if not letter:
                 continue
             letter = letter.group(1).upper()
             for row in grp.get("standings", []):
                 tn = (row.get("team") or {}).get("name")
                 if tn:
-                    group_of[normalize_name(tn)] = letter
+                    group_of.setdefault(normalize_name(tn), letter)
 
-    # Fallback: parse group from match data
-    for m in of_data.get("matches", []):
-        grp = m.get("group", "")
-        round_name = m.get("round", "")
-        if not grp and "Group" in round_name:
-            grp = round_name
-        if grp and ("Group" in grp or "group" in grp):
-            # Match "Group A" or "Group 1" or "Group A" etc.
-            letter = re.search(r"Group\s+([A-L0-9]+)", grp, re.I)
-            if letter:
-                g = letter.group(1).upper()
-                # Convert numbers to letters (Group 1 -> A, Group 2 -> B, etc.)
-                if g.isdigit():
-                    g = chr(ord('A') + int(g) - 1)
-                group_of[normalize_name(m.get("team1", ""))] = g
-                group_of[normalize_name(m.get("team2", ""))] = g
+    group_matches.sort(key=lambda x: x[0])
+    for _dt, t1, t2, g in group_matches:
+        group_of.setdefault(normalize_name(t1), g)
+        group_of.setdefault(normalize_name(t2), g)
 
     for t in teams:
         t["group"] = group_of.get(normalize_name(t["name"]), "")
 
-    # Parse matches → fixtures
+    # Parse matches → real first-stage group fixtures.
     fixtures = []
+    group_teams: dict[str, set] = {}
     for m in of_data.get("matches", []):
         round_name = m.get("round", "")
-        grp_field = m.get("group", "")
-        # Include matches that are in group stage (either round mentions Group/First stage,
-        # or the match has a group field)
-        if "Group" not in round_name and "First stage" not in round_name and "Group" not in m.get("group", ""):
+        grp = m.get("group", "")
+        if not grp and "Group" in round_name and "Play" not in round_name:
+            grp = round_name
+        if not grp or "Group" not in grp:
             continue  # only group stage fixtures for now
+        letter_m = re.search(r"Group\s+([A-Z]|\d+)", grp, re.I)
+        if not letter_m:
+            continue
+        letter = letter_m.group(1).upper()
+        if letter.isdigit():
+            letter = chr(ord('A') + int(letter) - 1)
         team1 = normalize_name(m.get("team1", ""))
         team2 = normalize_name(m.get("team2", ""))
+        # Skip the second-round group stage (1974/78/82): a team's earliest
+        # group is the first-stage letter, so a later stage would not match.
+        if group_of.get(team1) != letter or group_of.get(team2) != letter:
+            continue
         code1 = get_code(team1)
         code2 = get_code(team2)
         date_str = m.get("date", "")
@@ -542,12 +578,6 @@ def build_seed(year: int) -> dict | None:
                 kickoff = f"{date_str}T{h:02d}:{t_match.group(2)}"
             else:
                 kickoff = date_str
-        grp = m.get("group", "")
-        letter = ""
-        if grp and grp.startswith("Group"):
-            m_letter = re.search(r"Group\s+([A-Z])", grp, re.I)
-            if m_letter:
-                letter = m_letter.group(1).upper()
         fixtures.append({
             "group": letter,
             "match": len(fixtures) + 1,
@@ -556,17 +586,21 @@ def build_seed(year: int) -> dict | None:
             "matchday": 1,  # will be computed below
             "kickoff": kickoff,
         })
+        group_teams.setdefault(letter, set()).add(code1)
+        group_teams.setdefault(letter, set()).add(code2)
 
-    # Compute matchdays per group
-    group_match_counts = {}
+    # Real matchdays: within each group, order by kickoff and chunk into
+    # (teams // 2) games per round → 3 rounds of 2 for a 4-team group,
+    # 1 game per round for a 3-team group, etc.
+    by_group: dict[str, list] = {}
     for f in fixtures:
-        g = f["group"]
-        group_match_counts.setdefault(g, 0)
-        group_match_counts[g] += 1
-        f["matchday"] = group_match_counts[g]  # simple sequential
-
-    # Merge with Wikipedia squads for positions/shirt numbers/photos
-    wiki_squads = parse_squads_wikipedia(year)
+        by_group.setdefault(f["group"], []).append(f)
+    for g, fs in by_group.items():
+        per_round = max(1, len(group_teams.get(g, set())) // 2)
+        fs.sort(key=lambda f: f["kickoff"] or "")
+        for i, f in enumerate(fs):
+            f["matchday"] = i // per_round + 1
+    fixtures.sort(key=lambda f: (f["group"], f["kickoff"] or "", f["match"]))
 
     # Parse squads from openfootball-full lineups
     squads_by_team: dict[str, dict[int, dict]] = {}
@@ -581,7 +615,7 @@ def build_seed(year: int) -> dict | None:
                 squad = squads_by_team.setdefault(code, {})
                 for starter in side.get("starter", []):
                     name = starter.get("name", "").title()
-                    pid = hash(name + code) & 0x7FFFFFFF
+                    pid = stable_id(name + code)
                     if pid not in squad:
                         squad[pid] = {
                             "name": name,
@@ -594,7 +628,7 @@ def build_seed(year: int) -> dict | None:
                     squad[pid]["starts"] += 1
                 for bench in side.get("bench", []):
                     name = bench.get("name", "").title()
-                    pid = hash(name + code) & 0x7FFFFFFF
+                    pid = stable_id(name + code)
                     if pid not in squad:
                         squad[pid] = {
                             "name": name,
@@ -606,7 +640,7 @@ def build_seed(year: int) -> dict | None:
                     squad[pid]["caps"] += 1
                 for sub in side.get("subs", []):
                     name = sub.get("on", "").title()
-                    pid = hash(name + code) & 0x7FFFFFFF
+                    pid = stable_id(name + code)
                     if pid not in squad:
                         squad[pid] = {
                             "name": name,
@@ -654,7 +688,7 @@ def build_seed(year: int) -> dict | None:
                 merged[match_pid]["wiki"] = wp["wiki"]
             else:
                 # New player only in Wikipedia
-                npid = hash(wp["name"] + code) & 0x7FFFFFFF
+                npid = stable_id(wp["name"] + code)
                 merged[npid] = {
                     "name": wp["name"],
                     "positions": wp["positions"],
