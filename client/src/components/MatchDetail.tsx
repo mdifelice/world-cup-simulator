@@ -1,11 +1,32 @@
 import { useMemo } from "react";
 import { flagFor, useI18n } from "../i18n";
-import type { RunMatch } from "../types";
+import type { Goal, RedCard, RunMatch } from "../types";
 
 interface Props {
   match: RunMatch;
   focusTeamId?: number | null;
   onClose: () => void;
+}
+
+type Incident = { kind: "goal"; g: Goal } | { kind: "red"; r: RedCard };
+
+function incidentMinute(i: Incident) {
+  return i.kind === "goal" ? i.g.minute : i.r.minute;
+}
+function incidentET(i: Incident) {
+  return i.kind === "goal" ? i.g.extra_time : i.r.extra_time;
+}
+function incidentTeam(i: Incident) {
+  return i.kind === "goal" ? i.g.team_id : i.r.team_id;
+}
+function incidentName(i: Incident) {
+  return i.kind === "goal" ? i.g.scorer : i.r.player;
+}
+function incidentPhoto(i: Incident) {
+  return i.kind === "goal" ? i.g.scorer_photo : i.r.player_photo;
+}
+function incidentNumber(i: Incident) {
+  return i.kind === "goal" ? i.g.shirt_number : i.r.shirt_number;
 }
 
 export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
@@ -14,10 +35,21 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
   const focused = (teamId: number) => focusTeamId != null && focusTeamId === teamId;
   const flagName = (n: string) => [flagFor(n), country(n)].filter(Boolean).join(" ");
 
-  const sorted = useMemo(
-    () => [...m.goals].sort((a, b) => b.minute - a.minute || Number(b.extra_time) - Number(a.extra_time)),
-    [m.goals],
-  );
+  // Goals and cards share one timeline, ordered by time (newest first), ties
+  // sorted by extra time then goals before cards.
+  const incidents = useMemo(() => {
+    const list: Incident[] = [
+      ...(m.goals ?? []).map((g) => ({ kind: "goal" as const, g })),
+      ...(m.reds ?? []).map((r) => ({ kind: "red" as const, r })),
+    ];
+    return list.sort((a, b) => {
+      const byMin = incidentMinute(b) - incidentMinute(a);
+      if (byMin !== 0) return byMin;
+      const byEt = Number(incidentET(b)) - Number(incidentET(a));
+      if (byEt !== 0) return byEt;
+      return a.kind === "red" ? 1 : -1;
+    });
+  }, [m.goals, m.reds]);
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -56,56 +88,59 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
           </p>
         )}
 
-        {m.goals.length > 0 && (
+        {incidents.length > 0 && (
           <div className="detail-goals">
-            {sorted.map((g, i) => (
-              <div key={i} className="goal-row">
-                <span className="goal-side" aria-hidden>
-                  {g.scorer_photo ? (
-                    <img className="goal-photo" src={g.scorer_photo} alt="" />
-                  ) : null}
-                  <span className="goal-info">
-                    <span className="goal-ball" aria-hidden>⚽</span>
-                    <span className="goal-player">
-                      {g.shirt_number ? `${g.shirt_number} - ` : ""}
-                      {g.scorer}
-                    </span>
-                    {g.own_goal ? (
-                      <span className="og-badge">{t("match.ownGoal")}</span>
-                    ) : null}
-                    {g.assist ? <span className="dim"> · {t("match.assist", { name: g.assist })}</span> : null}
-                  </span>
+            {incidents.map((inc, i) => (
+              <div
+                key={i}
+                className={
+                  "goal-row" + (inc.kind === "red" ? " red-row" : "")
+                }
+              >
+                <span className="goal-ball" aria-hidden>
+                  {inc.kind === "goal" ? "⚽" : "🟥"}
                 </span>
-                <span className="goal-min">{g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}</span>
-                <span className={`goal-team${focused(g.team_id) ? " focus-tag" : ""}`}>
-                  {flagFor(g.team_id === m.home_team_id ? m.home_team_name : m.away_team_name)}
+                {incidentPhoto(inc) && (
+                  <img
+                    className="goal-photo"
+                    src={incidentPhoto(inc)!}
+                    alt=""
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                )}
+                <span className="goal-player">
+                  {incidentNumber(inc) != null
+                    ? `${incidentNumber(inc)} - `
+                    : ""}
+                  {incidentName(inc)}
+                  {inc.kind === "goal" && inc.g.own_goal ? (
+                    <span className="og-badge">{t("match.ownGoal")}</span>
+                  ) : null}
+                </span>
+                {inc.kind === "goal" && inc.g.assist ? (
+                  <span className="goal-assist">
+                    · {t("match.assist", { name: inc.g.assist })}
+                  </span>
+                ) : null}
+                <span className="goal-end">
+                  <span className="goal-min">
+                    {incidentMinute(inc)}'
+                    {incidentET(inc) ? ` ${t("match.etShort")}` : ""}
+                  </span>
+                  <span
+                    className={`goal-team${focused(incidentTeam(inc)) ? " focus-tag" : ""}`}
+                  >
+                    {flagFor(
+                      incidentTeam(inc) === m.home_team_id
+                        ? m.home_team_name
+                        : m.away_team_name,
+                    )}
+                  </span>
                 </span>
               </div>
             ))}
-          </div>
-        )}
-
-        {(m.reds ?? []).length > 0 && (
-          <div className="detail-goals reds-card">
-            {[...(m.reds ?? [])]
-              .sort((a, b) => a.minute - b.minute)
-              .map((r, i) => (
-                <div key={i} className="goal-row red-row">
-                  <span className="goal-side" aria-hidden>
-                    {r.player_photo ? (
-                      <img className="goal-photo" src={r.player_photo} alt="" />
-                    ) : null}
-                    <span className="goal-info">
-                      <span className="goal-ball" aria-hidden>🟥</span>
-                      <span className="goal-player">{r.player}</span>
-                    </span>
-                  </span>
-                  <span className="goal-min">{r.minute}'{r.extra_time ? ` ${t("match.etShort")}` : ""}</span>
-                  <span className={`goal-team${focused(r.team_id) ? " focus-tag" : ""}`}>
-                    {flagFor(r.team_id === m.home_team_id ? m.home_team_name : m.away_team_name)}
-                  </span>
-                </div>
-              ))}
           </div>
         )}
 

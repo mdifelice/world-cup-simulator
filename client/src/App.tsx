@@ -65,6 +65,7 @@ export default function App() {
   const [ffRunning, setFfRunning] = useState(false);
   const ffTimer = useRef<number | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const [notifications, setNotifications] = useState<Array<{ id: number; message: string; type: "info" | "success" | "warning" }>>([]);
   const notifyId = useRef(0);
   const { t, locale, setLocale } = useI18n();
@@ -358,6 +359,14 @@ export default function App() {
     setStep("tournament");
   };
 
+  /** Logo click: ask before abandoning an in-progress interactive run. */
+  const onBrandClick = () => {
+    const inProgress =
+      interactive && flow.run && flow.revealed < (flow.run.matches.length || 0);
+    if (inProgress) setConfirmLeave(true);
+    else reset();
+  };
+
   const liveReveal = (m: RunMatch) => {
     const translate = t;
     setFlow((f) => {
@@ -438,7 +447,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand" onClick={reset}>
+        <div className="brand" onClick={onBrandClick}>
           <img
             className="brand-ball"
             src={trophyForYear(flow.tournament?.year)}
@@ -573,6 +582,29 @@ export default function App() {
             setStep("tournament");
           }}
         />
+      )}
+
+      {confirmLeave && (
+        <div className="modal-backdrop" onClick={() => setConfirmLeave(false)}>
+          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-title">{t("confirm.title")}</div>
+            <div className="confirm-body">{t("confirm.body")}</div>
+            <div className="confirm-actions">
+              <button className="btn secondary" onClick={() => setConfirmLeave(false)}>
+                {t("confirm.keep")}
+              </button>
+              <button
+                className="btn danger"
+                onClick={() => {
+                  setConfirmLeave(false);
+                  reset();
+                }}
+              >
+                {t("confirm.leave")}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

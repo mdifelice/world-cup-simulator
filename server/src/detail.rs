@@ -270,6 +270,28 @@ pub fn simulate_run(
             | 1
     });
 
+    // Real kickoff dates live on the seeded group fixtures; knockouts are
+    // generated on the fly and have none. Key by sorted pair so the parity
+    // of home/away in a sim match never matters.
+    let mut kickoffs = HashMap::new();
+    {
+        let mut stmt = conn.prepare(
+            "SELECT home_team_id, away_team_id, kickoff FROM matches
+             WHERE tournament_id = ?1 AND kickoff IS NOT NULL",
+        )?;
+        let rows = stmt.query_map([tournament_id], |r| {
+            Ok((r.get(0)?, r.get(1)?, r.get::<_, String>(2)?))
+        })?;
+        for row in rows {
+            let (h, a, k) = row?;
+            if h < a {
+                kickoffs.insert((h, a), k);
+            } else {
+                kickoffs.insert((a, h), k);
+            }
+        }
+    }
+
     let mut eng = Engine {
         conn,
         tournament_id,
@@ -285,6 +307,7 @@ pub fn simulate_run(
         perfs: HashMap::new(),
         team_names: HashMap::new(),
         team_codes: HashMap::new(),
+        kickoffs,
         squads: HashMap::new(),
         team_bonus: HashMap::new(),
         champion: None,
@@ -366,6 +389,8 @@ struct Engine<'a> {
     perfs: HashMap<i64, Perf>,
     team_names: HashMap<i64, String>,
     team_codes: HashMap<i64, String>,
+    /// Real kickoff dates for seeded group fixtures, keyed by sorted team pair.
+    kickoffs: HashMap<(i64, i64), String>,
     squads: HashMap<i64, Vec<SquadPlayer>>,
     team_bonus: HashMap<i64, f64>,
     champion: Option<String>,
@@ -1108,10 +1133,11 @@ impl<'a> Engine<'a> {
                 minute: *minute,
                 extra_time: false,
                 team_id: home,
-                player_id: p.id,
-                player: p.name.clone(),
-                player_photo: p.photo_url.clone(),
-            });
+player_id: p.id,
+                    player: p.name.clone(),
+                    player_photo: p.photo_url.clone(),
+                    shirt_number: p.shirt_number,
+                });
         }
         if let Some((minute, p)) = &away_red {
             reds.push(RedCard {
@@ -1121,6 +1147,7 @@ impl<'a> Engine<'a> {
                 player_id: p.id,
                 player: p.name.clone(),
                 player_photo: p.photo_url.clone(),
+                shirt_number: p.shirt_number,
             });
         }
         reds.sort_by_key(|r| r.minute);
@@ -1194,6 +1221,7 @@ impl<'a> Engine<'a> {
             goals,
             reds,
             unavailable,
+            date: self.kickoffs.get(&if home < away { (home, away) } else { (away, home) }).cloned(),
             momentum,
         };
         self.order.push(match_id);
@@ -1320,6 +1348,7 @@ impl<'a> Engine<'a> {
                     scorer_id: og.id,
                     scorer: og.name.clone(),
                     scorer_photo: og.photo_url.clone(),
+                    shirt_number: og.shirt_number,
                     assist_id: None,
                     assist: None,
                     assist_photo: None,
@@ -1356,6 +1385,7 @@ impl<'a> Engine<'a> {
             scorer_id: scorer.id,
             scorer: scorer.name.clone(),
             scorer_photo: scorer.photo_url.clone(),
+            shirt_number: scorer.shirt_number,
             assist_id: assist.as_ref().map(|p| p.id),
             assist: assist.as_ref().map(|p| p.name.clone()),
             assist_photo: assist.as_ref().and_then(|p| p.photo_url.clone()),

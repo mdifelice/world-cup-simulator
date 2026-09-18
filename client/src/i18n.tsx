@@ -30,6 +30,12 @@ const en: Record<string, string> = {
   "app.signedin": "Signed in",
   "app.noMatchOpen": "No match open. Back to the tournament.",
 
+  "confirm.title": "Abandon tournament?",
+  "confirm.body":
+    "The tournament is still in progress and your changes will be lost. Leave anyway?",
+  "confirm.leave": "Leave",
+  "confirm.keep": "Keep playing",
+
   "choose.title": "Choose your World Cup",
   "choose.hint":
     "Every edition from 1930 (Uruguay) through 2026 (USA · Mexico · Canada).",
@@ -170,6 +176,7 @@ const en: Record<string, string> = {
   "share.title": "{year} World Cup",
   "share.host": "Host: {host}",
   "share.yourPos": "Your team {team}: {pos}",
+  "share.you": "you",
   "share.bestPlayers": "Best players",
   "share.bestScorer": "Top scorers",
   "share.bestAssists": "Top assister",
@@ -228,6 +235,12 @@ const es: Record<string, string> = {
   "step.history": "Historial",
   "app.signedin": "Conectado",
   "app.noMatchOpen": "No hay ningún partido abierto. Volver al torneo.",
+
+  "confirm.title": "¿Abandonar el torneo?",
+  "confirm.body":
+    "El torneo sigue en curso y perderás los cambios. ¿Abandonar de todas formas?",
+  "confirm.leave": "Abandonar",
+  "confirm.keep": "Seguir jugando",
 
   "choose.title": "Elige tu Mundial",
   "choose.hint":
@@ -369,6 +382,7 @@ const es: Record<string, string> = {
   "share.title": "Mundial {year}",
   "share.host": "Sede: {host}",
   "share.yourPos": "Tu equipo {team}: {pos}",
+  "share.you": "tú",
   "share.bestPlayers": "Mejores jugadores",
   "share.bestScorer": "Máximos goleadores",
   "share.bestAssists": "Máximos asistentes",

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flagFor, useI18n } from "../i18n";
-import type { RunMatch } from "../types";
+import type { Goal, RedCard, RunMatch } from "../types";
 
 interface Props {
   match: RunMatch;
@@ -23,20 +23,30 @@ export default function LiveMatch({
 
   const lengthLabel = m.extra_time ? 120 : 90;
   const [min, setMin] = useState(0);
-  const [pauseUntil, setPauseUntil] = useState(0);
+  const pauseUntilRef = useRef(0);
+  const halfPausedRef = useRef(false);
 
   useEffect(() => {
     setMin(0);
-    setPauseUntil(0);
+    pauseUntilRef.current = 0;
+    halfPausedRef.current = false;
     const iv = setInterval(() => {
       setMin((cur) => {
         const now = Date.now();
-        if (now < pauseUntil) return cur;
-        // Pause at half-time (45') and extra-time half-time (90')
-        if ((cur === 45 && lengthLabel === 90) || (cur === 90 && lengthLabel === 120)) {
-          setPauseUntil(now + 1000); // 1 second pause
+        if (now < pauseUntilRef.current) return cur;
+        // Pause once at half-time (45' or 90' in extra time) for a beat, then
+        // advance on the first tick after the pause expires.
+        const isHalf = (cur === 45 && lengthLabel === 90) || (cur === 90 && lengthLabel === 120);
+        if (isHalf) {
+          if (halfPausedRef.current) {
+            halfPausedRef.current = false;
+            return cur + 1;
+          }
+          pauseUntilRef.current = now + 1000; // 1 second pause
+          halfPausedRef.current = true;
           return cur;
         }
+        halfPausedRef.current = false;
         return cur >= lengthLabel ? cur : cur + 1;
       });
     }, LIVE_MS);
@@ -87,6 +97,32 @@ export default function LiveMatch({
     () => (m.reds ?? []).filter((r) => r.minute <= min),
     [m.reds, min],
   );
+
+  // Goals and cards share one timeline, newest first, ties by extra time then
+  // goals before cards. Photos and shirt numbers ride along for the rows.
+  type Incident =
+    | { kind: "goal"; g: Goal }
+    | { kind: "red"; r: RedCard };
+  const incName = (i: Incident) => (i.kind === "goal" ? i.g.scorer : i.r.player);
+  const incPhoto = (i: Incident) =>
+    i.kind === "goal" ? i.g.scorer_photo : i.r.player_photo;
+  const incNumber = (i: Incident) =>
+    i.kind === "goal" ? i.g.shirt_number : i.r.shirt_number;
+  const incMin = (i: Incident) => (i.kind === "goal" ? i.g.minute : i.r.minute);
+  const incET = (i: Incident) => (i.kind === "goal" ? i.g.extra_time : i.r.extra_time);
+  const incidents = useMemo(() => {
+    const list: Incident[] = [
+      ...(m.goals ?? []).map((g) => ({ kind: "goal" as const, g })),
+      ...(m.reds ?? []).map((r) => ({ kind: "red" as const, r })),
+    ];
+    return list.filter((i) => incMin(i) <= min).sort((a, b) => {
+      const byMin = incMin(b) - incMin(a);
+      if (byMin !== 0) return byMin;
+      const byEt = Number(incET(b)) - Number(incET(a));
+      if (byEt !== 0) return byEt;
+      return a.kind === "red" ? 1 : -1;
+    });
+  }, [m.goals, m.reds, min]);
 
   const W = 900;
   const H = 108;
@@ -192,13 +228,6 @@ export default function LiveMatch({
   };
 
   // The goals are listed newest first, the newest on top.
-  const goalsSorted = useMemo(
-    () =>
-      goalsUpTo
-        .map((g, i) => ({ g, i }))
-        .sort((a, b) => b.g.minute - a.g.minute || b.i - a.i),
-    [goalsUpTo],
-  );
 
   const resultLabel = m.extra_time || m.penalties ? (
     <>
@@ -216,6 +245,8 @@ export default function LiveMatch({
   ) : null;
 
   const flagName = (n: string) => [flagFor(n), country(n)].filter(Boolean).join(" ");
+  const teamFlag = (teamId: number) =>
+    flagFor(teamId === m.home_team_id ? m.home_team_name : m.away_team_name);
 
   return (
     <div className="live-modal">
@@ -377,48 +408,45 @@ export default function LiveMatch({
         </div>
       )}
 
-      {goalsUpTo.length > 0 && (
+      {incidents.length > 0 && (
         <div className="goals-card">
-          {goalsSorted.map(({ g, i }) => (
-            <div key={i} className="goal-row">
-              <span className="goal-side">
-                {g.scorer_photo ? (
-                  <img className="goal-photo" src={g.scorer_photo} alt="" />
-                ) : null}
-                <span className="goal-info">
-                  <span className="goal-ball" aria-hidden>⚽</span>
-                  <span className="goal-player">
-                    {g.shirt_number ? `${g.shirt_number} - ` : ""}
-                    {g.scorer}
-                  </span>
-                  {g.own_goal ? (
-                    <span className="og-badge">{t("match.ownGoal")}</span>
-                  ) : null}
-                  {g.assist ? (
-                    <span className="dim"> · {t("match.assist", { name: g.assist })}</span>
-                  ) : null}
-                </span>
+          {incidents.map((i, idx) => (
+            <div
+              key={idx}
+              className={"goal-row" + (i.kind === "red" ? " red-row" : "")}
+            >
+              <span className="goal-ball" aria-hidden>
+                {i.kind === "goal" ? "⚽" : "🟥"}
               </span>
-              <span className="goal-min">{g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {redsUpTo.length > 0 && (
-        <div className="goals-card reds-card">
-          {redsUpTo.map((r, i) => (
-            <div key={i} className="goal-row red-row">
-              <span className="goal-side">
-                {r.player_photo ? (
-                  <img className="goal-photo" src={r.player_photo} alt="" />
+              {incPhoto(i) ? (
+                <img
+                  className="goal-photo"
+                  src={incPhoto(i)!}
+                  alt=""
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              ) : null}
+              <span className="goal-player">
+                {incNumber(i) != null ? `${incNumber(i)} - ` : ""}
+                {incName(i)}
+                {i.kind === "goal" && i.g.own_goal ? (
+                  <span className="og-badge">{t("match.ownGoal")}</span>
                 ) : null}
-                <span className="goal-info">
-                  <span className="goal-ball" aria-hidden>🟥</span>
-                  <span className="goal-player">{r.player}</span>
-                </span>
               </span>
-              <span className="goal-min">{r.minute}'{r.extra_time ? ` ${t("match.etShort")}` : ""}</span>
+              {i.kind === "goal" && i.g.assist ? (
+                <span className="goal-assist">
+                  · {t("match.assist", { name: i.g.assist })}
+                </span>
+              ) : null}
+              <span className="goal-end">
+                <span className="goal-min">
+                  {incMin(i)}'
+                  {incET(i) ? ` ${t("match.etShort")}` : ""}
+                </span>
+                <span className="goal-team">{teamFlag(i.kind === "goal" ? i.g.team_id : i.r.team_id)}</span>
+              </span>
             </div>
           ))}
         </div>

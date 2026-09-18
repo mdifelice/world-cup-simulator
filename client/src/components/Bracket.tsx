@@ -119,7 +119,6 @@ export default function Bracket({
     let third: Col | null = null;
     const thirdMatches = byStage.get("THIRD") ?? [];
     const finalCol = cols.find((c) => c.key === "F");
-    const sfCol = cols.find((c) => c.key === "SF");
     if (thirdMatches.length > 0) {
       const x = finalCol?.x ?? px;
       const fy = finalCol?.centers[0];
@@ -132,17 +131,17 @@ export default function Bracket({
         centers: [cy],
         labelTop: cy - BOX_H / 2 - 16,
       };
-      if (sfCol) {
-        for (const i of [0, sfCol.centers.length - 1]) {
-          const sy = sfCol.centers[i];
-          if (sy == null) continue;
-          const midX = x - GAP_X / 2;
-          lines.push({
-            key: `SF-${i}-THIRD`,
-            points: `${sfCol.x + BOX_W},${sy} ${midX},${sy} ${midX},${cy} ${x},${cy}`,
-            dashed: false,
-          });
-        }
+      if (finalCol) {
+        const fy = finalCol.centers[0];
+        const midX = x - GAP_X / 2;
+        lines.push({
+          key: "THIRD-UP",
+          // The third-place match hangs off the main line at the final's
+          // height: short horizontal from the box, then straight up to the
+          // spine. Nothing reaches back to the semifinals.
+          points: `${x},${cy} ${midX},${cy} ${midX},${fy}`,
+          dashed: true,
+        });
       }
       py = Math.max(py, cy + BOX_H / 2);
     }

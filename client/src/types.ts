@@ -295,6 +295,7 @@ export interface RedCard {
   player_id: number;
   player: string;
   player_photo?: string | null;
+  shirt_number?: number;
 }
 
 export interface RunMatch {
@@ -314,6 +315,8 @@ export interface RunMatch {
   goals: Goal[];
   reds?: RedCard[];
   unavailable?: number[];
+  /** Real fixture date (group stage only; knockouts have none). */
+  date?: string | null;
   momentum: Momentum | null;
 }
 

@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { useI18n } from "../i18n";
 import type { Player, Team, Tournament } from "../types";
-import { positionFamily } from "../types";
-import PlayerCard from "../components/PlayerCard";
+import { positionFamily, ratingStars, starsString } from "../types";
 
 interface Props {
   tournament: Tournament;
@@ -17,7 +16,7 @@ const FAMILIES = ["GK", "DF", "MF", "FW"] as const;
 export default function Roster({ tournament, team, onDone, onBack }: Props) {
   const [squad, setSquad] = useState<Player[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { t, country, pos } = useI18n();
+  const { t, pos, country } = useI18n();
 
   useEffect(() => {
     setSquad(null);
@@ -29,13 +28,16 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
   }, [team.id, tournament.id]);
 
   const groups = useMemo(() => {
-    const by = new Map<string, Player[]>();
-    for (const f of FAMILIES) by.set(f, []);
+    const ps = new Map<string, Player[]>();
+    for (const f of FAMILIES) ps.set(f, []);
     for (const p of squad ?? []) {
       const f = positionFamily(p.position);
-      by.get(f)!.push(p);
+      ps.get(f)!.push(p);
     }
-    return by;
+    for (const list of ps.values()) {
+      list.sort((a, b) => (b.rating ?? b.overall) - (a.rating ?? a.overall));
+    }
+    return ps;
   }, [squad]);
 
   return (
@@ -67,27 +69,39 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
             return (
               <div key={f} className="pos-block">
                 <h2 className="pos-title">{t(`pos.${f}`)}</h2>
-                <div className="squad-grid">
-                  {ps.map((p, i) => (
-                    <PlayerCard
-                      key={p.id}
-                      player={{
-                        id: p.id,
-                        name: p.name,
-                        position: p.position,
-                        photo_url: p.photo_url,
-                        shirt_number: p.shirt_number ?? undefined,
-                        overall: p.overall,
-                        rating: p.rating,
-                      }}
-                      variant="grid"
-                      tone={i}
-                      number={
-                        tournament.shirt_numbers
-                          ? p.shirt_number ?? null
-                          : pos(p.position)
-                      }
-                    />
+                <div className="squad-list">
+                  {ps.map((p) => (
+                    <div key={p.id} className="pc-pick static">
+                      <span className="rr-pos">{p.position}</span>
+                      <span className="rr-photo">
+                        {p.photo_url ? (
+                          <img
+                            src={p.photo_url}
+                            alt=""
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                        ) : (
+                          <span className="pp-empty" aria-hidden>
+                            <svg viewBox="0 0 24 24">
+                              <circle cx="12" cy="8" r="4" />
+                              <path d="M4 20c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5" />
+                            </svg>
+                          </span>
+                        )}
+                      </span>
+                      <span className="rr-num">
+                        {p.shirt_number != null ? p.shirt_number : ""}
+                      </span>
+                      <span className="rr-text">
+                        <span className="rr-name">{p.name}</span>
+                        <span className="rr-pos2">{pos(p.position)}</span>
+                      </span>
+                      <span className="rr-stars">
+                        {starsString(ratingStars(p.rating ?? p.overall))}
+                      </span>
+                    </div>
                   ))}
                 </div>
               </div>

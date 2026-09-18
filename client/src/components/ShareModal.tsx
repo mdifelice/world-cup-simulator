@@ -14,6 +14,7 @@ interface PodiumRow {
   medal: string;
   name: string;
   sub: string;
+  id: number | null;
 }
 
 const flagName = (country: (s: string) => string, n: string) =>
@@ -38,11 +39,18 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
               : m.away_team_id;
 
       const champName = run.champion ?? "";
+      const championId = finalMatch ? winnerOf(finalMatch) : null;
       const runnerUp =
         finalMatch && champName
           ? finalMatch.home_team_name === champName
             ? finalMatch.away_team_name
             : finalMatch.home_team_name
+          : null;
+      const runnerUpId =
+        finalMatch && championId != null
+          ? finalMatch.home_team_id === championId
+            ? finalMatch.away_team_id
+            : finalMatch.home_team_id
           : null;
       const thirdWinner =
         thirdMatch && winnerOf(thirdMatch) != null
@@ -58,9 +66,9 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
           : null;
 
       const podium: PodiumRow[] = [
-        { medal: "🥇", name: champName, sub: t("share.pos.1") },
-        { medal: "🥈", name: runnerUp ?? "", sub: t("share.pos.2") },
-        { medal: "🥉", name: thirdWinner ?? "", sub: t("share.pos.3") },
+        { medal: "🥇", name: champName, sub: t("share.pos.1"), id: championId },
+        { medal: "🥈", name: runnerUp ?? "", sub: t("share.pos.2"), id: runnerUpId },
+        { medal: "🥉", name: thirdWinner ?? "", sub: t("share.pos.3"), id: thirdId },
       ].filter((p) => p.name !== "");
 
       // Focus team placement when not on the podium.
@@ -120,6 +128,8 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
     }, [run, focusTeam, t, country]);
 
   const medals = ["🥇", "🥈", "🥉"];
+
+  const isMe = (p: PodiumRow) => focusTeam?.id != null && p.id === focusTeam.id;
 
   /** Render the summary as a PNG and share it (image only); fall back to
    *  downloading the image. */
@@ -182,10 +192,16 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
               <div className="share-body">
           <div className="podium-list">
             {podium.map((p) => (
-              <div key={p.medal} className={"podium-row p" + (podium.indexOf(p) + 1)}>
+              <div
+                key={p.medal}
+                className={
+                  "podium-row p" + (podium.indexOf(p) + 1) + (isMe(p) ? " you" : "")
+                }
+              >
                 <span className="podium-medal">{p.medal}</span>
                 <span className="podium-name">{flagName(country, p.name)}</span>
                 <span className="podium-sub">{p.sub}</span>
+                {isMe(p) && <span className="podium-you">{t("share.you")}</span>}
               </div>
             ))}
           </div>

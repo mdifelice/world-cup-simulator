@@ -415,6 +415,11 @@ body {
   background: transparent;
   border-color: var(--line);
 }
+.btn.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
 .bar {
   display: flex;
   gap: 10px;
@@ -705,25 +710,17 @@ body {
 }
 .goal-row {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
+  flex-wrap: nowrap;
   padding: 6px 0;
   border-bottom: 1px solid var(--line);
   font-size: 14px;
 }
-.goal-side {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.goal-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
 .goal-ball {
   font-size: 12px;
   line-height: 1;
+  flex: 0 0 auto;
 }
 .goal-player {
   display: flex;
@@ -731,9 +728,25 @@ body {
   gap: 4px;
   font-weight: 600;
   font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.goal-assist {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.goal-end {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex: 0 0 auto;
 }
 .goal-min {
-  flex: 0 0 50px;
   text-align: right;
   font-variant-numeric: tabular-nums;
   color: var(--gold-read);
@@ -743,15 +756,6 @@ body {
 .goal-team {
   color: var(--muted);
   font-size: 12px;
-}
-.goal-photo {
-  flex: 0 0 auto;
-  align-self: flex-start;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--panel2);
 }
 .og-badge {
   margin-left: 6px;
@@ -2134,6 +2138,34 @@ body {
   border-top: 1px solid var(--line);
   margin-top: 18px;
   padding-top: 16px;
+}
+
+/* ------- abandon-tournament confirm ------- */
+.confirm-modal {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  padding: 24px;
+  box-shadow: 0 18px 50px rgba(20, 28, 38, 0.28);
+  text-align: center;
+}
+.confirm-title {
+  font-size: 18px;
+  font-weight: 800;
+}
+.confirm-body {
+  margin: 10px 0 20px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 /* Toast notifications */

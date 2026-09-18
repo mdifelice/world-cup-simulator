@@ -544,6 +544,10 @@ pub struct RunMatch {
     /// Player ids unavailable for this match because of a suspension.
     #[serde(default)]
     pub unavailable: Vec<i64>,
+    /// Real fixture date when the schedule knows one (group stage only;
+    /// knockouts are generated without a stored date).
+    #[serde(default)]
+    pub date: Option<String>,
     /// Minute-by-minute momentum (only present for the user's team's matches).
     pub momentum: Option<Momentum>,
 }
@@ -558,6 +562,8 @@ pub struct RedCard {
     pub player: String,
     #[serde(default)]
     pub player_photo: Option<String>,
+    #[serde(default)]
+    pub shirt_number: Option<i32>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -588,6 +594,8 @@ pub struct Goal {
     pub scorer: String,
     #[serde(default)]
     pub scorer_photo: Option<String>,
+    #[serde(default)]
+    pub shirt_number: Option<i32>,
     pub assist_id: Option<i64>,
     pub assist: Option<String>,
     #[serde(default)]
