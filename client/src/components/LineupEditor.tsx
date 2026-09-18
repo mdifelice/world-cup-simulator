@@ -343,6 +343,19 @@ export default function LineupEditor({
                   ) : (
                     <span className="slot-tag">{pos(canonSlot(slot))}</span>
                   )}
+                  {chosen && !disabled && (
+                    <span
+                      className="slot-clear"
+                      role="button"
+                      aria-label="clear"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        clearSlot(i);
+                      }}
+                    >
+                      ✕
+                    </span>
+                  )}
                 </span>
                 {chosen && (
                   <span className={"marker-cap" + (up ? " up" : "")}>
@@ -353,19 +366,6 @@ export default function LineupEditor({
                         : ""}
                       {playerSurname(chosen.name)}
                     </span>
-                  </span>
-                )}
-                {chosen && !disabled && (
-                  <span
-                    className="slot-clear"
-                    role="button"
-                    aria-label="clear"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      clearSlot(i);
-                    }}
-                  >
-                    ✕
                   </span>
                 )}
               </button>

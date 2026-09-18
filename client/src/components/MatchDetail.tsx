@@ -65,13 +65,7 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
           <div className="detail-goals">
             {sorted.map((g, i) => (
               <div key={i} className="goal-row">
-                <span className="goal-min">
-                  <span className="goal-ball" aria-hidden>⚽</span>
-                  {g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}
-                </span>
-                {g.scorer_photo ? (
-                  <img className="goal-photo" src={g.scorer_photo} alt="" />
-                ) : null}
+                <span className="goal-type" aria-hidden>⚽</span>
                 <span className="goal-scorer">
                   {g.scorer}
                   {g.own_goal ? (
@@ -79,6 +73,10 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                   ) : null}
                   {g.assist ? <span className="dim"> · {t("match.assist", { name: g.assist })}</span> : null}
                 </span>
+                {g.scorer_photo ? (
+                  <img className="goal-photo" src={g.scorer_photo} alt="" />
+                ) : null}
+                <span className="goal-min">{g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}</span>
                 <span className={`goal-team${focused(g.team_id) ? " focus-tag" : ""}`}>
                   {flagFor(g.team_id === m.home_team_id ? m.home_team_name : m.away_team_name)}
                 </span>
@@ -93,14 +91,12 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
               .sort((a, b) => a.minute - b.minute)
               .map((r, i) => (
                 <div key={i} className="goal-row red-row">
-                  <span className="goal-min">
-                    <span className="red-card" aria-hidden />
-                    {r.minute}'{r.extra_time ? ` ${t("match.etShort")}` : ""}
-                  </span>
+                  <span className="goal-type" aria-hidden>🟥</span>
+                  <span className="goal-scorer">{r.player}</span>
                   {r.player_photo ? (
                     <img className="goal-photo" src={r.player_photo} alt="" />
                   ) : null}
-                  <span className="goal-scorer">{r.player}</span>
+                  <span className="goal-min">{r.minute}'{r.extra_time ? ` ${t("match.etShort")}` : ""}</span>
                   <span className={`goal-team${focused(r.team_id) ? " focus-tag" : ""}`}>
                     {flagFor(r.team_id === m.home_team_id ? m.home_team_name : m.away_team_name)}
                   </span>

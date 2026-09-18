@@ -687,24 +687,27 @@ body {
 }
 .goal-row {
   display: flex;
-  gap: 12px;
-  align-items: baseline;
+  gap: 10px;
+  align-items: center;
   padding: 6px 0;
   border-bottom: 1px solid var(--line);
   font-size: 14px;
+}
+.goal-type {
+  flex: 0 0 20px;
+  font-size: 14px;
+  text-align: center;
 }
 .goal-row:last-child {
   border-bottom: none;
 }
 .goal-min {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
+  flex: 0 0 50px;
+  text-align: right;
   font-variant-numeric: tabular-nums;
   color: var(--gold-read);
   font-weight: 700;
+  font-size: 12px;
 }
 .goal-ball {
   font-size: 12px;
@@ -1201,6 +1204,23 @@ body {
   letter-spacing: 0.4px;
   transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
 }
+.marker-face .slot-clear {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0;
+  z-index: 3;
+  transition: opacity 0.12s ease;
+}
 .slot-marker:hover .marker-face {
   border-color: var(--gold);
 }
@@ -1250,24 +1270,7 @@ body {
   order: -1;
   margin-bottom: 2px;
 }
-.slot-clear {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 16px;
-  height: 16px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--danger);
-  color: #fff;
-  font-size: 10px;
-  line-height: 1;
-  opacity: 0;
-  z-index: 3;
-  transition: opacity 0.12s ease;
-}
-.slot-marker.filled:hover .slot-clear {
+.slot-marker.filled:hover .marker-face .slot-clear {
   opacity: 0.95;
 }
 @keyframes slotPulse {
@@ -2093,4 +2096,48 @@ body {
   border-top: 1px solid var(--line);
   margin-top: 18px;
   padding-top: 16px;
+}
+
+/* Toast notifications */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(20, 28, 38, 0.25);
+  animation: toastIn 0.25s ease;
+  max-width: 320px;
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.toast-info {
+  background: var(--blue);
+  color: #fff;
+}
+.toast-success {
+  background: var(--accent);
+  color: #06210f;
+}
+.toast-warning {
+  background: var(--gold);
+  color: #241a00;
 }

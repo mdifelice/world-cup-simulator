@@ -139,6 +139,9 @@ const en: Record<string, string> = {
   "hub.formation": "Your squad",
   "hub.p1": "Start",
   "hub.pEnd": "End",
+  "hub.roundPassed": "Round passed! You advanced to the next stage.",
+  "hub.groupPassed": "Group stage passed! You advanced to the knockout stage.",
+  "hub.eliminated": "You were eliminated from the tournament.",
 
   "stage.group": "Group",
   "stage.final": "Final",
@@ -333,6 +336,9 @@ const es: Record<string, string> = {
   "hub.formation": "Tu plantel",
   "hub.p1": "Inicio",
   "hub.pEnd": "Final",
+  "hub.roundPassed": "¡Ronda superada! Avanzas a la siguiente fase.",
+  "hub.groupPassed": "¡Fase de grupos superada! Avanzas a la fase eliminatoria.",
+  "hub.eliminated": "Has quedado eliminado del torneo.",
 
   "stage.group": "Grupo",
   "stage.final": "Final",

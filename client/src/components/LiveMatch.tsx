@@ -23,11 +23,22 @@ export default function LiveMatch({
 
   const lengthLabel = m.extra_time ? 120 : 90;
   const [min, setMin] = useState(0);
+  const [pauseUntil, setPauseUntil] = useState(0);
 
   useEffect(() => {
     setMin(0);
+    setPauseUntil(0);
     const iv = setInterval(() => {
-      setMin((cur) => (cur >= lengthLabel ? cur : cur + 1));
+      setMin((cur) => {
+        const now = Date.now();
+        if (now < pauseUntil) return cur;
+        // Pause at half-time (45') and extra-time half-time (90')
+        if ((cur === 45 && lengthLabel === 90) || (cur === 90 && lengthLabel === 120)) {
+          setPauseUntil(now + 1000); // 1 second pause
+          return cur;
+        }
+        return cur >= lengthLabel ? cur : cur + 1;
+      });
     }, LIVE_MS);
     return () => clearInterval(iv);
   }, [m.id, lengthLabel]);

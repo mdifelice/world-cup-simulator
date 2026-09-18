@@ -65,7 +65,9 @@ export default function App() {
   const [ffRunning, setFfRunning] = useState(false);
   const ffTimer = useRef<number | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
-  const { locale, setLocale } = useI18n();
+  const [notifications, setNotifications] = useState<Array<{ id: number; message: string; type: "info" | "success" | "warning" }>>([]);
+  const notifyId = useRef(0);
+  const { t, locale, setLocale } = useI18n();
 
   // Silent #token= capture from the OAuth redirect (login stays hidden).
   useEffect(() => {
@@ -356,13 +358,73 @@ export default function App() {
   };
 
   const liveReveal = (m: RunMatch) => {
+    const translate = t;
     setFlow((f) => {
       if (!f.run) return f;
       const idx = f.run.order.indexOf(m.id);
       if (idx < 0 || idx + 1 <= f.revealed) return f;
-      return { ...f, revealed: idx + 1 };
+      const newRevealed = idx + 1;
+      const run = f.run;
+      // Check for round completion or elimination after state updates
+      setTimeout(() => {
+        checkRoundProgress(run, newRevealed, translate);
+      }, 0);
+      return { ...f, revealed: newRevealed };
     });
-  }
+  };
+
+  const checkRoundProgress = (run: RunPayload, newRevealed: number, t: (key: string) => string) => {
+    const allMatches = run.matches;
+    const revealedIds = new Set(run.order.slice(0, newRevealed));
+    const revealedMatches = allMatches.filter((m) => revealedIds.has(m.id));
+    const nextMatchIdx = newRevealed < run.order.length ? run.order[newRevealed] : null;
+    const nextMatch = nextMatchIdx ? allMatches.find((m) => m.id === nextMatchIdx) : null;
+    
+    // Check if current stage is complete (all matches in that stage revealed)
+    if (nextMatch) {
+      const currentStage = revealedMatches.length > 0 ? revealedMatches[revealedMatches.length - 1].stage_key : null;
+      const nextStage = nextMatch.stage_key;
+      if (currentStage && currentStage !== nextStage) {
+        // Stage transition - check if focus team advanced or was eliminated
+        const focusId = run.focus_team_id;
+        if (focusId != null) {
+          // Check if focus team has more matches in the new stage
+          const focusMatchesInNewStage = allMatches.filter(
+            (m) => m.stage_key === nextStage && (m.home_team_id === focusId || m.away_team_id === focusId)
+          );
+          if (focusMatchesInNewStage.length === 0) {
+            // Focus team has no more matches in this stage - check if they were in previous stage
+            const focusMatchesInPrevStage = allMatches.filter(
+              (m) => m.stage_key === currentStage && (m.home_team_id === focusId || m.away_team_id === focusId)
+            );
+            const lostPrevMatch = focusMatchesInPrevStage.some(
+              (m) => revealedIds.has(m.id) &&
+                ((m.home_team_id === focusId && m.home_score < m.away_score) ||
+                 (m.away_team_id === focusId && m.away_score < m.home_score))
+            );
+            if (lostPrevMatch) {
+              addNotification(t("hub.eliminated"), "warning");
+            } else {
+              addNotification(t("hub.roundPassed"), "success");
+            }
+          } else if (currentStage !== "GROUP") {
+            // Advanced in knockout
+            addNotification(t("hub.roundPassed"), "success");
+          } else {
+            // Group stage passed
+            addNotification(t("hub.groupPassed"), "success");
+          }
+        }
+      }
+    }};
+
+  const addNotification = (message: string, type: "info" | "success" | "warning" = "info") => {
+    setNotifications((prev) => [...prev, { id: ++notifyId.current, message, type }]);
+    // Auto-dismiss after 4 seconds
+    setTimeout(() => {
+      setNotifications((prev) => prev.filter((n) => n.id !== notifyId.current));
+    }, 4000);
+  };
 
   const closeLive = () => setLiveMatch(null);
 
@@ -467,6 +529,17 @@ export default function App() {
         )}
       </main>
 
+      {/* Toast notifications */}
+      {notifications.length > 0 && (
+        <div className="toast-container" role="region" aria-live="polite">
+          {notifications.map((n) => (
+            <div key={n.id} className={`toast toast-${n.type}`}>
+              {n.message}
+            </div>
+          ))}
+        </div>
+      )}
+
       {liveMatch && flow.run && (
         <LiveMatch
           match={liveMatch}
@@ -493,7 +566,10 @@ export default function App() {
               : null
           }
           onClose={() => setShareOpen(false)}
-          onPlayAgain={startCup}
+          onPlayAgain={() => {
+            setShareOpen(false);
+            setStep("tournament");
+          }}
         />
       )}
     </div>

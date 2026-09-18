@@ -312,10 +312,9 @@ export default function Overview({
       goals: number;
     }
     const by = new Map<number, Entry>();
-    // Use all matches from the run (completed ones have goals populated),
-    // so the scorers table matches the share dialog which uses awards.top_scorers.
-    const source = run?.matches ?? revealedMatches;
-    for (const m of source) {
+    // Only use completed matches (revealedMatches) so the table is empty
+    // before any game is played, matching the share dialog behavior.
+    for (const m of revealedMatches) {
       for (const g of m.goals) {
         if (g.own_goal) continue;
         const teamName = m.home_team_id === g.team_id ? m.home_team_name : m.away_team_name;
