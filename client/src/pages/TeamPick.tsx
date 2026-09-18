@@ -34,14 +34,16 @@ export default function TeamPick({ tournament, selected, onPick, onNeutral, onBa
   return (
     <section>
       <div className="page-head">
-        <button className="btn secondary" onClick={onBack} aria-label="back">
-          ←
-        </button>
         <div>
           <h1>{t("team.title", { year: tournament.year })}</h1>
           <p className="hint">{t("team.hint", { year: tournament.year })}</p>
         </div>
-        <button className="btn secondary" onClick={onNeutral}>{t("team.neutral")}</button>
+        <div className="page-actions">
+          <button className="btn secondary" onClick={onBack} aria-label="back">
+            ←
+          </button>
+          <button className="btn secondary" onClick={onNeutral}>{t("team.neutral")}</button>
+        </div>
       </div>
       {error && <p className="error">{error}</p>}
       {!teams && !error && <p className="hint">{t("team.loading")}</p>}

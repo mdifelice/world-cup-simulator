@@ -1398,6 +1398,21 @@ impl<'a> Engine<'a> {
         let home_takers = self.taker_order(home_xi);
         let away_takers = self.taker_order(away_xi);
 
+        // Ensure we have at least 5 takers per side for standard 5-round shootout
+        // If a side has fewer players, cycle through available players
+        let max_takers = home_takers.len().max(away_takers.len());
+        let min_takers = home_takers.len().min(away_takers.len());
+        if min_takers == 0 {
+            // No players available - should not happen but guard against it
+            return PenResult {
+                home_score: 0,
+                away_score: 0,
+                winner_id: home,
+                sudden_death: false,
+                kicks: Vec::new(),
+            };
+        }
+
         let mut kicks = Vec::new();
         let mut hs = 0i32;
         let mut aw = 0i32;
@@ -1405,9 +1420,9 @@ impl<'a> Engine<'a> {
         let mut sudden_death = false;
 
         'rounds: for round in 1..=5 {
-            let idx = (round - 1) % home_takers.len();
-            let ht = home_takers[idx];
-            let at = away_takers[idx];
+            let idx = (round - 1) % max_takers;
+            let ht = &home_takers[idx % home_takers.len()];
+            let at = &away_takers[idx % away_takers.len()];
             let h_s = self.rng.unit() < self.score_prob(ht, away_gk_ov);
             let a_s = self.rng.unit() < self.score_prob(at, home_gk_ov);
             if h_s {
@@ -1434,9 +1449,9 @@ impl<'a> Engine<'a> {
             sudden_death = true;
             let mut round = 6usize;
             loop {
-                let idx = (round - 1) % home_takers.len();
-                let ht = home_takers[idx];
-                let at = away_takers[idx];
+                let idx = (round - 1) % max_takers;
+                let ht = &home_takers[idx % home_takers.len()];
+                let at = &away_takers[idx % away_takers.len()];
                 let h_s = self.rng.unit() < self.score_prob(ht, away_gk_ov);
                 let a_s = self.rng.unit() < self.score_prob(at, home_gk_ov);
                 if h_s {
