@@ -371,22 +371,25 @@ export default function LiveMatch({
         <div className="goals-card">
           {goalsSorted.map(({ g, i }) => (
             <div key={i} className="goal-row">
-              <span className="goal-min">
-                <span className="goal-ball" aria-hidden>⚽</span>
-                {g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}
-              </span>
-              {g.scorer_photo ? (
-                <img className="goal-photo" src={g.scorer_photo} alt="" />
-              ) : null}
-              <span className="goal-scorer">
-                {g.scorer}
-                {g.own_goal ? (
-                  <span className="og-badge">{t("match.ownGoal")}</span>
+              <span className="goal-side">
+                {g.scorer_photo ? (
+                  <img className="goal-photo" src={g.scorer_photo} alt="" />
                 ) : null}
-                {g.assist ? (
-                  <span className="dim"> · {t("match.assist", { name: g.assist })}</span>
-                ) : null}
+                <span className="goal-info">
+                  <span className="goal-ball" aria-hidden>⚽</span>
+                  <span className="goal-player">
+                    {g.shirt_number ? `${g.shirt_number} - ` : ""}
+                    {g.scorer}
+                  </span>
+                  {g.own_goal ? (
+                    <span className="og-badge">{t("match.ownGoal")}</span>
+                  ) : null}
+                  {g.assist ? (
+                    <span className="dim"> · {t("match.assist", { name: g.assist })}</span>
+                  ) : null}
+                </span>
               </span>
+              <span className="goal-min">{g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}</span>
             </div>
           ))}
         </div>
@@ -396,14 +399,16 @@ export default function LiveMatch({
         <div className="goals-card reds-card">
           {redsUpTo.map((r, i) => (
             <div key={i} className="goal-row red-row">
-              <span className="goal-min">
-                <span className="red-card" aria-hidden />
-                {r.minute}'{r.extra_time ? ` ${t("match.etShort")}` : ""}
+              <span className="goal-side">
+                {r.player_photo ? (
+                  <img className="goal-photo" src={r.player_photo} alt="" />
+                ) : null}
+                <span className="goal-info">
+                  <span className="goal-ball" aria-hidden>🟥</span>
+                  <span className="goal-player">{r.player}</span>
+                </span>
               </span>
-              {r.player_photo ? (
-                <img className="goal-photo" src={r.player_photo} alt="" />
-              ) : null}
-              <span className="goal-scorer">{r.player}</span>
+              <span className="goal-min">{r.minute}'{r.extra_time ? ` ${t("match.etShort")}` : ""}</span>
             </div>
           ))}
         </div>

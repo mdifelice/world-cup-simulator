@@ -65,17 +65,22 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
           <div className="detail-goals">
             {sorted.map((g, i) => (
               <div key={i} className="goal-row">
-                <span className="goal-type" aria-hidden>⚽</span>
-                <span className="goal-scorer">
-                  {g.scorer}
-                  {g.own_goal ? (
-                    <span className="og-badge">{t("match.ownGoal")}</span>
+                <span className="goal-side" aria-hidden>
+                  {g.scorer_photo ? (
+                    <img className="goal-photo" src={g.scorer_photo} alt="" />
                   ) : null}
-                  {g.assist ? <span className="dim"> · {t("match.assist", { name: g.assist })}</span> : null}
+                  <span className="goal-info">
+                    <span className="goal-ball" aria-hidden>⚽</span>
+                    <span className="goal-player">
+                      {g.shirt_number ? `${g.shirt_number} - ` : ""}
+                      {g.scorer}
+                    </span>
+                    {g.own_goal ? (
+                      <span className="og-badge">{t("match.ownGoal")}</span>
+                    ) : null}
+                    {g.assist ? <span className="dim"> · {t("match.assist", { name: g.assist })}</span> : null}
+                  </span>
                 </span>
-                {g.scorer_photo ? (
-                  <img className="goal-photo" src={g.scorer_photo} alt="" />
-                ) : null}
                 <span className="goal-min">{g.minute}'{g.extra_time ? ` ${t("match.etShort")}` : ""}</span>
                 <span className={`goal-team${focused(g.team_id) ? " focus-tag" : ""}`}>
                   {flagFor(g.team_id === m.home_team_id ? m.home_team_name : m.away_team_name)}
@@ -91,11 +96,15 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
               .sort((a, b) => a.minute - b.minute)
               .map((r, i) => (
                 <div key={i} className="goal-row red-row">
-                  <span className="goal-type" aria-hidden>🟥</span>
-                  <span className="goal-scorer">{r.player}</span>
-                  {r.player_photo ? (
-                    <img className="goal-photo" src={r.player_photo} alt="" />
-                  ) : null}
+                  <span className="goal-side" aria-hidden>
+                    {r.player_photo ? (
+                      <img className="goal-photo" src={r.player_photo} alt="" />
+                    ) : null}
+                    <span className="goal-info">
+                      <span className="goal-ball" aria-hidden>🟥</span>
+                      <span className="goal-player">{r.player}</span>
+                    </span>
+                  </span>
                   <span className="goal-min">{r.minute}'{r.extra_time ? ` ${t("match.etShort")}` : ""}</span>
                   <span className={`goal-team${focused(r.team_id) ? " focus-tag" : ""}`}>
                     {flagFor(r.team_id === m.home_team_id ? m.home_team_name : m.away_team_name)}
@@ -109,24 +118,38 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
           <div className="pens-card">
             <h3>{t("match.pens")}</h3>
             <div className="detail-pens">
-              {m.penalties.kicks.map((k) => (
-                <div key={`${k.round}-${k.team_id}`} className="pen-row">
-                  <span className="pen-num">{k.round}</span>
-                  <span className="flag">
-                    {flagFor(
-                      k.team_id === m.home_team_id
-                        ? m.home_team_name
-                        : m.away_team_name,
-                    )}
-                  </span>
-                  <span className="pen-taker">{k.taker}</span>
-                  <span
-                    className={"pen-kick" + (k.scored ? " scored" : " missed")}
-                  >
-                    {k.scored ? "✓" : "✕"}
-                  </span>
-                </div>
-              ))}
+              <div className="pens-side pens-home">
+                <span className="pens-side-label">{flagFor(m.home_team_name)} {t("match.pensHome")}</span>
+                {m.penalties.kicks
+                  .filter((k) => k.team_id === m.home_team_id)
+                  .map((k) => (
+                    <div key={`${k.round}-${k.team_id}`} className="pen-row">
+                      <span className="pen-num">{k.round}</span>
+                      <span className="pen-taker">{k.taker}</span>
+                      <span
+                        className={"pen-kick" + (k.scored ? " scored" : " missed")}
+                      >
+                        {k.scored ? "✓" : "✕"}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+              <div className="pens-side pens-away">
+                <span className="pens-side-label">{t("match.pensAway")} {flagFor(m.away_team_name)}</span>
+                {m.penalties.kicks
+                  .filter((k) => k.team_id === m.away_team_id)
+                  .map((k) => (
+                    <div key={`${k.round}-${k.team_id}`} className="pen-row">
+                      <span className="pen-num">{k.round}</span>
+                      <span className="pen-taker">{k.taker}</span>
+                      <span
+                        className={"pen-kick" + (k.scored ? " scored" : " missed")}
+                      >
+                        {k.scored ? "✓" : "✕"}
+                      </span>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
         )}

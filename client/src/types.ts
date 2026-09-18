@@ -250,6 +250,7 @@ export interface Goal {
   assist: string | null;
   assist_photo?: string | null;
   own_goal?: boolean;
+  shirt_number?: number;
 }
 
 export interface Momentum {

@@ -161,8 +161,10 @@ const en: Record<string, string> = {
   "match.etShort": "ET",
   "match.assist": "assist {name}",
   "match.pensScore": "Pens {home}–{away}",
+  "match.pensHome": "home",
+  "match.pensAway": "away",
   "match.ownGoal": "OG",
-  "match.currentMomentum": "Current momentum",
+  "match.tbd": "TBD",
   "match.close": "Close",
 
   "share.title": "{year} World Cup",
@@ -358,8 +360,10 @@ const es: Record<string, string> = {
   "match.etShort": "Pr",
   "match.assist": "asistencia de {name}",
   "match.pensScore": "Penaltis {home}–{away}",
+  "match.pensHome": "local",
+  "match.pensAway": "visitante",
   "match.ownGoal": "e/p",
-  "match.currentMomentum": "Impulso actual",
+  "match.tbd": "TBD",
   "match.close": "Cerrar",
 
   "share.title": "Mundial {year}",

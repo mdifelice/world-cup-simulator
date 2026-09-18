@@ -693,13 +693,26 @@ body {
   border-bottom: 1px solid var(--line);
   font-size: 14px;
 }
-.goal-type {
-  flex: 0 0 20px;
-  font-size: 14px;
-  text-align: center;
+.goal-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.goal-row:last-child {
-  border-bottom: none;
+.goal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.goal-ball {
+  font-size: 12px;
+  line-height: 1;
+}
+.goal-player {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 13px;
 }
 .goal-min {
   flex: 0 0 50px;
@@ -709,20 +722,13 @@ body {
   font-weight: 700;
   font-size: 12px;
 }
-.goal-ball {
-  font-size: 12px;
-  line-height: 1;
-}
-.goal-scorer {
-  flex: 1;
-}
 .goal-team {
   color: var(--muted);
   font-size: 12px;
 }
 .goal-photo {
   flex: 0 0 auto;
-  align-self: center;
+  align-self: flex-start;
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -1798,17 +1804,31 @@ body {
 }
 .detail-pens {
   display: flex;
+  flex-direction: row;
+  gap: 24px;
+}
+.pens-side {
+  flex: 1;
+  display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
+  min-width: 0;
+}
+.pens-side-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  text-align: center;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
 }
 .pen-row {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 13px;
-}
-.pen-row .flag {
-  flex: 0 0 auto;
 }
 .pen-num {
   flex: 0 0 18px;

@@ -244,9 +244,6 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
           )}
         </div>
             </div>
-            <button className="live-x" onClick={onClose} title={t("share.close")} style={{margin: "12px auto 0", display: "block"}}>
-              ✕
-            </button>
           </div>
 
         <div className="share-actions bar">

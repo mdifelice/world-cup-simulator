@@ -45,7 +45,7 @@ export default function Bracket({
   codes,
   onOpen,
 }: Props) {
-  const { stage } = useI18n();
+  const { t, stage } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastRevealedRef = useRef<number | null>(null);
 
@@ -140,7 +140,7 @@ export default function Bracket({
           lines.push({
             key: `SF-${i}-THIRD`,
             points: `${sfCol.x + BOX_W},${sy} ${midX},${sy} ${midX},${cy} ${x},${cy}`,
-            dashed: true,
+            dashed: false,
           });
         }
       }
@@ -269,7 +269,7 @@ export default function Bracket({
                       )}
                     </>
                   ) : (
-                    <div className="bk-tbd">TBD</div>
+                    <div className="bk-tbd">{t("match.tbd")}</div>
 )}
                  </div>
               );
