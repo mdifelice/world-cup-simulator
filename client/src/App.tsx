@@ -316,7 +316,8 @@ export default function App() {
   const startNeutral = () => {
     const id = flow.tournament?.id;
     if (!id) return;
-    setFlow((f) => ({ ...f, team: null }));
+    // Explicitly clear team and all related state when starting as spectator
+    setFlow((f) => ({ ...f, team: null, focus_team_id: null }));
     setInteractive(true);
     setConfigs({});
     setLastLineup(null);
@@ -479,6 +480,7 @@ export default function App() {
               setStep("roster");
             }}
             onNeutral={startNeutral}
+            onBack={() => setStep("tournament")}
           />
         )}
         {step === "roster" && flow.tournament && flow.team && (

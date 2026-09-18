@@ -63,9 +63,10 @@ TEAM_CODES = {
     # 1982
     "Algeria": "ALG", "Honduras": "HON", "Kuwait": "KUW", "New Zealand": "NZL",
     # 1986
-    "Canada": "CAN", "Denmark": "DEN", "Iraq": "IRQ",
+    "Canada": "CAN", "Denmark": "DEN", "Iraq": "IRQ", "Soviet Union": "URS",
     # 1990
-    "Costa Rica": "CRC", "Republic of Ireland": "IRL", "UAE": "UAE",
+    "Costa Rica": "CRC", "Republic of Ireland": "IRL", "UAE": "UAE", "Czechoslovakia": "TCH",
+    "Soviet Union": "URS", "West Germany": "FRG", "Yugoslavia": "YUG",
     # 1994
     "Greece": "GRE", "Nigeria": "NGA", "Saudi Arabia": "KSA",
     # 1998
@@ -87,15 +88,15 @@ TEAM_CODES = {
 NAME_OVERRIDES = {
     "Korea Republic": "South Korea",
     "Dutch East Indies": "Indonesia",
-    "Soviet Union": "Russia",
-    "Czechoslovakia": "Czech Republic",
+    "Soviet Union": "USSR",
+    "Czechoslovakia": "Czechoslovakia",
     "Zaire": "DR Congo",
     "Korea Republic": "South Korea",
     "Iran": "Iran",
     "Côte d'Ivoire": "Ivory Coast",
     "Trinidad and Tobago": "Trinidad & Tobago",
-    "Korea Republic": "South Korea",
-    "Iran": "Iran",
+    "West Germany": "West Germany",
+    "Yugoslavia": "Yugoslavia",
 }
 
 # Country code mapping for flags
@@ -131,11 +132,11 @@ FLAG_CODES = {
     "FRA": "🇫🇷", "MEX": "🇲🇽", "ARG": "🇦🇷", "CHI": "🇨🇱", "YUG": "🇷🇸",
     "BRA": "🇧🇷", "BOL": "🇧🇴", "PER": "🇵🇪", "PAR": "🇵🇾", "ROU": "🇷🇴",
     "URU": "🇺🇾", "BEL": "🇧🇪", "USA": "🇺🇸", "ITA": "🇮🇹", "TCH": "🇨🇿",
-    "GER": "🇩🇪", "AUT": "🇦🇹", "ESP": "🇪🇸", "HUN": "🇭🇺", "SUI": "🇨🇭",
+    "GER": "🇩🇪", "FRG": "🇩🇪", "AUT": "🇦🇹", "ESP": "🇪🇸", "HUN": "🇭🇺", "SUI": "🇨🇭",
     "SWE": "🇸🇪", "NED": "🇳🇱", "EGY": "🇪🇬", "POL": "🇵🇱", "NOR": "🇳🇴",
     "CUB": "🇨🇺", "IDN": "🇮🇩", "ENG": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "SCO": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
     "TUR": "🇹🇷", "IND": "🇮🇳", "KOR": "🇰🇷", "WAL": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
-    "NIR": "🇬🇧", "URS": "🇷🇺", "COL": "🇨🇴", "BUL": "🇧🇬",
+    "NIR": "🇬🇧", "URS": "🇷🇺", "FRG": "🇩🇪", "COL": "🇨🇴", "BUL": "🇧🇬",
     "PRK": "🇰🇵", "POR": "🇵🇹", "SLV": "🇸🇻", "MAR": "🇲🇦", "ISR": "🇮🇱",
     "ZAI": "🇨🇩", "HAI": "🇭🇹", "AUS": "🇦🇺", "IRN": "🇮🇷", "TUN": "🇹🇳",
     "ALG": "🇩🇿", "HON": "🇭🇳", "KUW": "🇰🇼", "NZL": "🇳🇿", "CIV": "🇨🇮",
@@ -198,18 +199,48 @@ def cache_path(name: str) -> Path:
     return CACHE_DIR / name
 
 
-def get_openfootball(year: int) -> dict | None:
-    """Download worldcup-full.json from openfootball."""
+def _load_cached_json(cpath: Path) -> dict | None:
+    """Load JSON from cache, handling potential double-encoded legacy cache."""
+    if not cpath.exists():
+        return None
+    text = cpath.read_text()
+    parsed = json.loads(text)
+    # Handle legacy double-encoded cache
+    if isinstance(parsed, str):
+        return json.loads(parsed)
+    return parsed
+
+
+def get_openfootball_full(year: int) -> dict | None:
+    """Download worldcup-full.json from openfootball (for lineups)."""
     url = f"{OF_BASE}/{year}/worldcup-full.json"
     cpath = cache_path(f"of_{year}_full.json")
-    if cpath.exists():
-        return json.loads(cpath.read_text())
+    cached = _load_cached_json(cpath)
+    if cached is not None:
+        return cached
     time.sleep(_POLITE)
     data = fetch(url)
     if not data:
         return None
-    cpath.write_text(data)
-    return json.loads(data)
+    parsed = json.loads(data)
+    cpath.write_text(json.dumps(parsed))
+    return parsed
+
+
+def get_openfootball(year: int) -> dict | None:
+    """Download worldcup.json from openfootball (for matches/groups)."""
+    url = f"{OF_BASE}/{year}/worldcup.json"
+    cpath = cache_path(f"of_{year}.json")
+    cached = _load_cached_json(cpath)
+    if cached is not None:
+        return cached
+    time.sleep(_POLITE)
+    data = fetch(url)
+    if not data:
+        return None
+    parsed = json.loads(data)
+    cpath.write_text(json.dumps(parsed))
+    return parsed
 
 
 def get_standings(year: int) -> dict | None:
@@ -409,6 +440,9 @@ def build_seed(year: int) -> dict | None:
         print(f"[{year}] NO openfootball data", file=sys.stderr)
         return None
 
+    # Also fetch full data for lineups
+    of_full = get_openfootball_full(year)
+
     # Get standings for group assignments
     standings = get_standings(year)
     of_teams = get_teams(year)
@@ -489,7 +523,10 @@ def build_seed(year: int) -> dict | None:
     fixtures = []
     for m in of_data.get("matches", []):
         round_name = m.get("round", "")
-        if "Group" not in round_name and "First stage" not in round_name:
+        grp_field = m.get("group", "")
+        # Include matches that are in group stage (either round mentions Group/First stage,
+        # or the match has a group field)
+        if "Group" not in round_name and "First stage" not in round_name and "Group" not in m.get("group", ""):
             continue  # only group stage fixtures for now
         team1 = normalize_name(m.get("team1", ""))
         team2 = normalize_name(m.get("team2", ""))
@@ -528,53 +565,57 @@ def build_seed(year: int) -> dict | None:
         group_match_counts[g] += 1
         f["matchday"] = group_match_counts[g]  # simple sequential
 
-    # Parse squads from openfootball lineups
+    # Merge with Wikipedia squads for positions/shirt numbers/photos
+    wiki_squads = parse_squads_wikipedia(year)
+
+    # Parse squads from openfootball-full lineups
     squads_by_team: dict[str, dict[int, dict]] = {}
-    for m in of_data.get("matches", []):
-        lineup = m.get("lineup")
-        if not lineup:
-            continue
-        for side_idx, side in enumerate(lineup):
-            team_name = normalize_name(m.get("team1" if side_idx == 0 else "team2", ""))
-            code = get_code(team_name)
-            squad = squads_by_team.setdefault(code, {})
-            for starter in side.get("starter", []):
-                name = starter.get("name", "").title()
-                pid = hash(name + code) & 0x7FFFFFFF
-                if pid not in squad:
-                    squad[pid] = {
-                        "name": name,
-                        "positions": ["CM"],
-                        "shirt": None,
-                        "starts": 0,
-                        "caps": 0,
-                    }
-                squad[pid]["caps"] += 1
-                squad[pid]["starts"] += 1
-            for bench in side.get("bench", []):
-                name = bench.get("name", "").title()
-                pid = hash(name + code) & 0x7FFFFFFF
-                if pid not in squad:
-                    squad[pid] = {
-                        "name": name,
-                        "positions": ["CM"],
-                        "shirt": None,
-                        "starts": 0,
-                        "caps": 0,
-                    }
-                squad[pid]["caps"] += 1
-            for sub in side.get("subs", []):
-                name = sub.get("on", "").title()
-                pid = hash(name + code) & 0x7FFFFFFF
-                if pid not in squad:
-                    squad[pid] = {
-                        "name": name,
-                        "positions": ["CM"],
-                        "shirt": None,
-                        "starts": 0,
-                        "caps": 0,
-                    }
-                squad[pid]["caps"] += 1
+    if of_full:
+        for m in of_full.get("matches", []):
+            lineup = m.get("lineup")
+            if not lineup:
+                continue
+            for side_idx, side in enumerate(lineup):
+                team_name = normalize_name(m.get("team1" if side_idx == 0 else "team2", ""))
+                code = get_code(team_name)
+                squad = squads_by_team.setdefault(code, {})
+                for starter in side.get("starter", []):
+                    name = starter.get("name", "").title()
+                    pid = hash(name + code) & 0x7FFFFFFF
+                    if pid not in squad:
+                        squad[pid] = {
+                            "name": name,
+                            "positions": ["CM"],
+                            "shirt": None,
+                            "starts": 0,
+                            "caps": 0,
+                        }
+                    squad[pid]["caps"] += 1
+                    squad[pid]["starts"] += 1
+                for bench in side.get("bench", []):
+                    name = bench.get("name", "").title()
+                    pid = hash(name + code) & 0x7FFFFFFF
+                    if pid not in squad:
+                        squad[pid] = {
+                            "name": name,
+                            "positions": ["CM"],
+                            "shirt": None,
+                            "starts": 0,
+                            "caps": 0,
+                        }
+                    squad[pid]["caps"] += 1
+                for sub in side.get("subs", []):
+                    name = sub.get("on", "").title()
+                    pid = hash(name + code) & 0x7FFFFFFF
+                    if pid not in squad:
+                        squad[pid] = {
+                            "name": name,
+                            "positions": ["CM"],
+                            "shirt": None,
+                            "starts": 0,
+                            "caps": 0,
+                        }
+                    squad[pid]["caps"] += 1
 
     # Merge with Wikipedia squads for positions/shirt numbers/photos
     wiki_squads = parse_squads_wikipedia(year)

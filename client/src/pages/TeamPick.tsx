@@ -9,9 +9,10 @@ interface Props {
   selected: Participant | null;
   onPick: (t: Participant, all: Participant[]) => void;
   onNeutral: () => void;
+  onBack: () => void;
 }
 
-export default function TeamPick({ tournament, selected, onPick, onNeutral }: Props) {
+export default function TeamPick({ tournament, selected, onPick, onNeutral, onBack }: Props) {
   const [teams, setTeams] = useState<Participant[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { t, country } = useI18n();
@@ -33,6 +34,9 @@ export default function TeamPick({ tournament, selected, onPick, onNeutral }: Pr
   return (
     <section>
       <div className="page-head">
+        <button className="btn secondary" onClick={onBack} aria-label="back">
+          ←
+        </button>
         <div>
           <h1>{t("team.title", { year: tournament.year })}</h1>
           <p className="hint">{t("team.hint", { year: tournament.year })}</p>
