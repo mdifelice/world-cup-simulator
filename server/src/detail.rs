@@ -496,7 +496,13 @@ impl<'a> Engine<'a> {
         let pairings: Vec<(i64, i64)> = if !self.played_groups && self.prev_winners.is_empty() {
             sim::seeded_pairings(&stage_teams)?
         } else if self.group_count > 0 && self.prev_winners.is_empty() {
-            sim::group_pairings(&stage_teams, self.group_count)?
+            // If only group winners advanced (no runners-up), stage_teams.len() == group_count.
+            // In that case, use seeded pairings (standard bracket) instead of group_pairings.
+            if stage_teams.len() == self.group_count {
+                sim::seeded_pairings(&stage_teams)?
+            } else {
+                sim::group_pairings(&stage_teams, self.group_count)?
+            }
         } else {
             sim::next_pairings(&stage_teams)?
         };

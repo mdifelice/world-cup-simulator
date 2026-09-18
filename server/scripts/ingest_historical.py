@@ -1,0 +1,674 @@
+#!/usr/bin/env python3
+"""Hybrid World Cup data ingest: openfootball (fixtures/lineups) + Wikipedia (photos).
+
+For each edition 1930-2018:
+  1. Download openfootball worldcup-full.json → teams, matches, lineups, goals, bookings
+  2. Scrape Wikipedia for squad pages → player photos from Wikimedia Commons
+  3. Merge → server/data/seed/{year}.json consumed by Rust server
+
+Run:
+    python3 server/scripts/ingest_historical.py
+
+Outputs:
+    server/data/seed/1930.json, ..., server/data/seed/2018.json
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import re
+import sys
+import time
+import urllib.request
+import urllib.parse
+from pathlib import Path
+from typing import Any
+
+UA = {"User-Agent": "wcs-historical-ingest/0.1 (dev; local tool)"}
+OF_BASE = "https://raw.githubusercontent.com/openfootball/worldcup.json/master"
+WIKI_API = "https://en.wikipedia.org/w/api.php"
+_POLITE = 1.2
+
+# FIFA-style 3-letter codes for all historical teams
+TEAM_CODES = {
+    # 1930
+    "France": "FRA", "Mexico": "MEX", "Argentina": "ARG", "Chile": "CHI",
+    "Yugoslavia": "YUG", "Brazil": "BRA", "Bolivia": "BOL", "Peru": "PER",
+    "Paraguay": "PAR", "Romania": "ROU", "Uruguay": "URU", "Belgium": "BEL",
+    "USA": "USA", "Romania": "ROU", "Peru": "PER", "Paraguay": "PAR",
+    # 1934
+    "Italy": "ITA", "Czechoslovakia": "TCH", "Germany": "GER", "Austria": "AUT",
+    "Spain": "ESP", "Hungary": "HUN", "Switzerland": "SUI", "Sweden": "SWE",
+    "Netherlands": "NED", "Romania": "ROU", "Egypt": "EGY", "Belgium": "BEL",
+    "France": "FRA", "USA": "USA", "Brazil": "BRA", "Argentina": "ARG",
+    # 1938
+    "Poland": "POL", "Norway": "NOR", "Cuba": "CUB", "Dutch East Indies": "IDN",
+    # 1950
+    "England": "ENG", "Scotland": "SCO", "Turkey": "TUR", "India": "IND",
+    # 1954
+    "Korea Republic": "KOR", "Turkey": "TUR", "South Korea": "KOR",
+    # 1958
+    "Wales": "WAL", "Northern Ireland": "NIR", "Soviet Union": "URS",
+    # 1962
+    "Colombia": "COL", "Bulgaria": "BUL",
+    # 1966
+    "North Korea": "PRK", "Portugal": "POR",
+    # 1970
+    "El Salvador": "SLV", "Morocco": "MAR", "Israel": "ISR",
+    # 1974
+    "Zaire": "ZAI", "Haiti": "HAI", "Australia": "AUS",
+    # 1978
+    "Iran": "IRN", "Tunisia": "TUN", "Peru": "PER",
+    # 1982
+    "Algeria": "ALG", "Honduras": "HON", "Kuwait": "KUW", "New Zealand": "NZL",
+    # 1986
+    "Canada": "CAN", "Denmark": "DEN", "Iraq": "IRQ",
+    # 1990
+    "Costa Rica": "CRC", "Republic of Ireland": "IRL", "UAE": "UAE",
+    # 1994
+    "Greece": "GRE", "Nigeria": "NGA", "Saudi Arabia": "KSA",
+    # 1998
+    "Croatia": "CRO", "Jamaica": "JAM", "Japan": "JPN", "South Africa": "RSA",
+    # 2002
+    "China PR": "CHN", "Ecuador": "ECU", "Senegal": "SEN", "Slovenia": "SVN",
+    # 2006
+    "Angola": "ANG", "Côte d'Ivoire": "CIV", "Ghana": "GHA", "Trinidad and Tobago": "TRI",
+    "Togo": "TOG", "Ukraine": "UKR",
+    # 2010
+    "Slovakia": "SVK",
+    # 2014
+    "Bosnia and Herzegovina": "BIH",
+    # 2018
+    "Iceland": "ISL", "Panama": "PAN",
+}
+
+# These override the name as it appears in openfootball
+NAME_OVERRIDES = {
+    "Korea Republic": "South Korea",
+    "Dutch East Indies": "Indonesia",
+    "Soviet Union": "Russia",
+    "Czechoslovakia": "Czech Republic",
+    "Zaire": "DR Congo",
+    "Korea Republic": "South Korea",
+    "Iran": "Iran",
+    "Côte d'Ivoire": "Ivory Coast",
+    "Trinidad and Tobago": "Trinidad & Tobago",
+    "Korea Republic": "South Korea",
+    "Iran": "Iran",
+}
+
+# Country code mapping for flags
+# Host country per edition
+HOSTS = {
+    1930: "Uruguay",
+    1934: "Italy",
+    1938: "France",
+    1950: "Brazil",
+    1954: "Switzerland",
+    1958: "Sweden",
+    1962: "Chile",
+    1966: "England",
+    1970: "Mexico",
+    1974: "West Germany",
+    1978: "Argentina",
+    1982: "Spain",
+    1986: "Mexico",
+    1990: "Italy",
+    1994: "United States",
+    1998: "France",
+    2002: "South Korea / Japan",
+    2006: "Germany",
+    2010: "South Africa",
+    2014: "Brazil",
+    2018: "Russia",
+    2022: "Qatar",
+    2026: "United States / Mexico / Canada",
+}
+
+# Flag emoji per team code
+FLAG_CODES = {
+    "FRA": "🇫🇷", "MEX": "🇲🇽", "ARG": "🇦🇷", "CHI": "🇨🇱", "YUG": "🇷🇸",
+    "BRA": "🇧🇷", "BOL": "🇧🇴", "PER": "🇵🇪", "PAR": "🇵🇾", "ROU": "🇷🇴",
+    "URU": "🇺🇾", "BEL": "🇧🇪", "USA": "🇺🇸", "ITA": "🇮🇹", "TCH": "🇨🇿",
+    "GER": "🇩🇪", "AUT": "🇦🇹", "ESP": "🇪🇸", "HUN": "🇭🇺", "SUI": "🇨🇭",
+    "SWE": "🇸🇪", "NED": "🇳🇱", "EGY": "🇪🇬", "POL": "🇵🇱", "NOR": "🇳🇴",
+    "CUB": "🇨🇺", "IDN": "🇮🇩", "ENG": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "SCO": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "TUR": "🇹🇷", "IND": "🇮🇳", "KOR": "🇰🇷", "WAL": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+    "NIR": "🇬🇧", "URS": "🇷🇺", "COL": "🇨🇴", "BUL": "🇧🇬",
+    "PRK": "🇰🇵", "POR": "🇵🇹", "SLV": "🇸🇻", "MAR": "🇲🇦", "ISR": "🇮🇱",
+    "ZAI": "🇨🇩", "HAI": "🇭🇹", "AUS": "🇦🇺", "IRN": "🇮🇷", "TUN": "🇹🇳",
+    "ALG": "🇩🇿", "HON": "🇭🇳", "KUW": "🇰🇼", "NZL": "🇳🇿", "CIV": "🇨🇮",
+    "GHA": "🇬🇭", "TRI": "🇹🇹", "TOG": "🇹🇬", "UKR": "🇺🇦", "CRC": "🇨🇷",
+    "IRL": "🇮🇪", "UAE": "🇦🇪", "GRE": "🇬🇷", "NGA": "🇳🇬", "KSA": "🇸🇦",
+    "CRO": "🇭🇷", "JAM": "🇯🇲", "JPN": "🇯🇵", "RSA": "🇿🇦", "CHN": "🇨🇳",
+    "ECU": "🇪🇨", "SEN": "🇸🇳", "SVN": "🇸🇮", "ANG": "🇦🇴", "SVK": "🇸🇰",
+    "BIH": "🇧🇦", "ISL": "🇮🇸", "PAN": "🇵🇦", "DR Congo": "🇨🇩",
+    "Russia": "🇷🇺", "Czech Republic": "🇨🇿", "DR Congo": "🇨🇩",
+    "South Korea": "🇰🇷", "Ivory Coast": "🇨🇮", "Trinidad & Tobago": "🇹🇹",
+}
+
+# Strength ratings by team code (FIFA ranking–inspired)
+RATINGS = {
+    "ARG": 93, "BRA": 92, "FRA": 91, "GER": 90, "ESP": 89, "ITA": 88,
+    "URU": 87, "ENG": 86, "NED": 85, "POR": 84, "BEL": 83, "CRO": 82,
+    "COL": 81, "CHI": 80, "MEX": 79, "USA": 78, "URU": 77, "SRB": 76,
+    "SUI": 75, "CRO": 74, "DEN": 73, "MEX": 72, "SWE": 71, "POL": 70,
+    "KSA": 69, "IRN": 68, "KOR": 67, "JPN": 66, "AUS": 65, "NGA": 64,
+    "CIV": 63, "GHA": 62, "CMR": 61, "ALG": 60, "MAR": 59, "TUN": 58,
+    "EGY": 57, "SEN": 56, "CIV": 55, "ECU": 54, "PAR": 53, "VEN": 52,
+    "BOL": 51, "PER": 50, "VEN": 49, "PAN": 48, "CRC": 47, "JAM": 46,
+    "TRI": 45, "HAI": 44, "ZAI": 43, "HKG": 42, "SLV": 41, "KUW": 40,
+    "IRQ": 39, "NZL": 38, "CHN": 37, "UAE": 36, "KOR": 35, "PRK": 34,
+    "SVN": 33, "SVK": 32, "BIH": 31, "ISL": 30, "PAN": 29,
+}
+
+REPO = Path(__file__).resolve().parents[2]
+DATA_DIR = REPO / "server" / "data"
+SEED_DIR = DATA_DIR / "seed"
+PHOTO_DIR = DATA_DIR / "photos"
+CACHE_DIR = Path(__file__).resolve().parent / ".cache"
+PHOTO_SIZE = 96
+
+YEARS = list(range(1930, 2019))
+YEARS.remove(1942)
+YEARS.remove(1946)
+
+
+def fetch(url: str) -> str:
+    for attempt in range(10):
+        try:
+            req = urllib.request.Request(url, headers=UA)
+            with urllib.request.urlopen(req, timeout=90) as r:
+                return r.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                time.sleep(min(120.0, 5.0 * (2 ** attempt)))
+                continue
+            if e.code == 404:
+                return ""
+            raise
+        except Exception:
+            time.sleep(min(120.0, 5.0 * (2 ** attempt)))
+    raise RuntimeError(f"Failed to fetch {url}")
+
+
+def cache_path(name: str) -> Path:
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    return CACHE_DIR / name
+
+
+def get_openfootball(year: int) -> dict | None:
+    """Download worldcup-full.json from openfootball."""
+    url = f"{OF_BASE}/{year}/worldcup-full.json"
+    cpath = cache_path(f"of_{year}_full.json")
+    if cpath.exists():
+        return json.loads(cpath.read_text())
+    time.sleep(_POLITE)
+    data = fetch(url)
+    if not data:
+        return None
+    cpath.write_text(data)
+    return json.loads(data)
+
+
+def get_standings(year: int) -> dict | None:
+    url = f"{OF_BASE}/{year}/worldcup.standings.json"
+    cpath = cache_path(f"of_{year}_standings.json")
+    if cpath.exists():
+        return json.loads(cpath.read_text())
+    time.sleep(_POLITE)
+    data = fetch(url)
+    if not data:
+        return None
+    cpath.write_text(data)
+    return json.loads(data)
+
+
+def get_teams(year: int) -> dict | None:
+    url = f"{OF_BASE}/{year}/worldcup.teams.json"
+    cpath = cache_path(f"of_{year}_teams.json")
+    if cpath.exists():
+        return json.loads(cpath.read_text())
+    time.sleep(_POLITE)
+    data = fetch(url)
+    if not data:
+        return None
+    cpath.write_text(data)
+    return json.loads(data)
+
+
+# ---------------------------------------------------------------------------
+# Wikipedia photo fetching (same as 2022/2026 scrapers)
+# ---------------------------------------------------------------------------
+
+_PHOTO_CACHE = CACHE_DIR / "pageimages.json"
+
+
+def load_photo_cache() -> dict:
+    if _PHOTO_CACHE.exists():
+        try:
+            return json.loads(_PHOTO_CACHE.read_text())
+        except (OSError, ValueError):
+            pass
+    return {}
+
+
+def save_photo_cache(cache: dict) -> None:
+    tmp = str(_PHOTO_CACHE) + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(cache, f, ensure_ascii=False)
+    os.replace(tmp, _PHOTO_CACHE)
+
+
+def fetch_photos(cache: dict, titles: list) -> None:
+    missing = [t for t in titles if t not in cache]
+    for i in range(0, len(missing), 25):
+        batch = missing[i:i + 25]
+        time.sleep(_POLITE)
+        qs = urllib.parse.urlencode({
+            "action": "query", "titles": "|".join(batch),
+            "prop": "pageimages", "piprop": "thumbnail", "pithumbsize": "320",
+            "format": "json", "formatversion": "2"
+        })
+        data = json.loads(fetch(f"{WIKI_API}?{qs}"))
+        for page in data.get("query", {}).get("pages", []):
+            if page.get("missing"):
+                continue
+            title = page.get("title")
+            url = page.get("thumbnail", {}).get("source")
+            cache.setdefault(title, url)
+        save_photo_cache(cache)
+    for t in missing:
+        cache.setdefault(t, None)
+
+
+def strip_links(raw: str) -> str:
+    def repl(m):
+        return m.group(1).split("|")[-1]
+    out = re.sub(r"\[\[([^\]]+)\]\]", repl, raw)
+    out = out.replace("{{", " ").replace("}}", " ")
+    out = re.sub(r"<[^>]+>", "", out)
+    return re.sub(r"\s+", " ", out).strip()
+
+
+def parse_squads_wikipedia(year: int) -> dict[str, list[dict]]:
+    """Scrape 'YYYY FIFA World Cup squads' page for player rosters."""
+    page = f"{year} FIFA World Cup squads"
+    print(f"  fetching {page} ...", file=sys.stderr)
+    time.sleep(_POLITE)
+    qs = urllib.parse.urlencode({
+        "action": "parse", "page": page, "prop": "wikitext",
+        "format": "json", "formatversion": "2"
+    })
+    data = json.loads(fetch(f"{WIKI_API}?{qs}"))
+    wt = data["parse"]["wikitext"]
+
+    squads = {}
+    # Find group sections
+    for gm in re.finditer(r"^==([^=\n]+)==\s*$", wt, re.M):
+        title = gm.group(1).strip()
+        if not title.startswith("Group "):
+            continue
+        start = gm.end()
+        nxt = re.search(r"^==([^=\n]+)==\s*$", wt[start:], re.M)
+        end = start + (nxt.start() if nxt else len(wt[start:]))
+        section = wt[start:end]
+
+        for tm in re.finditer(r"^===([^=\n]+)===\s*$", section, re.M):
+            team_name = tm.group(1).strip()
+            st = tm.end()
+            nxt2 = re.search(r"^===([^=\n]+)===\s*$", section[st:], re.M)
+            en = st + (nxt2.start() if nxt2 else len(section[st:]))
+            loads = []
+            for pm in re.finditer(
+                r"\{\{nat fs g player\|([^}]*?)\}\}", section[st:en], re.S,
+            ):
+                fields = dict(
+                    (k.strip(), v.strip())
+                    for k, v in re.findall(
+                        r"(\w+)\s*=\s*(.*?)(?=\|\w+\s*=|$)", pm.group(1), re.S,
+                    )
+                )
+                raw_name = fields.get("name", "")
+                link = re.search(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]", raw_name)
+                wiki = link.group(1).split("#")[0].replace("_", " ").strip() if link else ""
+                name = strip_links(raw_name)
+                if not name:
+                    continue
+                if not wiki:
+                    wiki = name
+                pos = fields.get("pos", "").upper()
+                no = fields.get("no", "").replace("&nbsp;", "").strip()
+                loads.append({
+                    "name": name,
+                    "positions": [pos] if pos else ["CM"],
+                    "shirt": int(no) if no.isdigit() else None,
+                    "wiki": wiki,
+                })
+            squads[team_name] = loads
+    return squads
+
+
+# ---------------------------------------------------------------------------
+# Main ingest
+# ---------------------------------------------------------------------------
+
+def normalize_name(name: str) -> str:
+    return NAME_OVERRIDES.get(name, name)
+
+
+def get_code(name: str) -> str:
+    name = normalize_name(name)
+    if name in TEAM_CODES:
+        return TEAM_CODES[name]
+    # Fallback: first 3 letters upper
+    return name[:3].upper()
+
+
+def get_flag(code: str) -> str:
+    return FLAG_CODES.get(code, "🏳️")
+
+
+def get_rating(name: str) -> int:
+    code = get_code(name)
+    return RATINGS.get(code, 60)
+
+
+def parse_minute(text: str) -> tuple[int, bool]:
+    """Parse minute string like '90+1' or '45' -> (minute, extra_time)."""
+    if not text:
+        return (0, False)
+    extra = False
+    m = re.search(r"(\d+)(?:\+(\d+))?", text)
+    if not m:
+        return (0, False)
+    minute = int(m.group(1))
+    if m.group(2):
+        minute += int(m.group(2))
+    if minute > 90:
+        extra = True
+    return (minute, extra)
+
+
+def parse_booking(item: dict) -> dict | None:
+    """Convert openfootball booking to RedCard."""
+    if item.get("type") not in ("Y", "R"):
+        return None
+    return {
+        "minute": parse_minute(item.get("minute", "0"))[0],
+        "extra_time": parse_minute(item.get("minute", "0"))[1],
+        "player": item.get("name", ""),
+    }
+
+
+def build_seed(year: int) -> dict | None:
+    print(f"[{year}] fetching openfootball data ...", file=sys.stderr)
+    of_data = get_openfootball(year)
+    if not of_data:
+        print(f"[{year}] NO openfootball data", file=sys.stderr)
+        return None
+
+    # Get standings for group assignments
+    standings = get_standings(year)
+    of_teams = get_teams(year)
+
+    # Build team list from matches (more complete than teams.json for older years)
+    team_names = set()
+    for m in of_data.get("matches", []):
+        team_names.add(m.get("team1"))
+        team_names.add(m.get("team2"))
+
+    # Also check teams.json if available
+    if of_teams:
+        for t in of_teams.get("teams", []):
+            team_names.add(t.get("name"))
+
+    # Also check standings
+    if standings:
+        for grp in standings.get("standings", []):
+            for row in grp.get("rows", []):
+                tn = (row.get("team") or {}).get("name")
+                if tn:
+                    team_names.add(tn)
+
+    # Apply name normalization
+    normalized_names = {normalize_name(n) for n in team_names if n}
+
+    # Build team records
+    teams = []
+    seen_codes = set()
+    for name in sorted(normalized_names):
+        code = get_code(name)
+        if code in seen_codes:
+            continue
+        seen_codes.add(code)
+        teams.append({
+            "name": name,
+            "code": code,
+            "flag": get_flag(code),
+            "rating": get_rating(name),
+            "group": "",  # filled below
+        })
+
+    # Assign groups from standings or match data
+    group_of = {}
+    if standings:
+        for grp in standings.get("groups", []):
+            gname = grp.get("name", "")
+            letter = re.search(r"Group\s+([A-Z])", gname, re.I)
+            if not letter:
+                continue
+            letter = letter.group(1).upper()
+            for row in grp.get("standings", []):
+                tn = (row.get("team") or {}).get("name")
+                if tn:
+                    group_of[normalize_name(tn)] = letter
+
+    # Fallback: parse group from match data
+    for m in of_data.get("matches", []):
+        grp = m.get("group", "")
+        round_name = m.get("round", "")
+        if not grp and "Group" in round_name:
+            grp = round_name
+        if grp and ("Group" in grp or "group" in grp):
+            # Match "Group A" or "Group 1" or "Group A" etc.
+            letter = re.search(r"Group\s+([A-L0-9]+)", grp, re.I)
+            if letter:
+                g = letter.group(1).upper()
+                # Convert numbers to letters (Group 1 -> A, Group 2 -> B, etc.)
+                if g.isdigit():
+                    g = chr(ord('A') + int(g) - 1)
+                group_of[normalize_name(m.get("team1", ""))] = g
+                group_of[normalize_name(m.get("team2", ""))] = g
+
+    for t in teams:
+        t["group"] = group_of.get(normalize_name(t["name"]), "")
+
+    # Parse matches → fixtures
+    fixtures = []
+    for m in of_data.get("matches", []):
+        round_name = m.get("round", "")
+        if "Group" not in round_name and "First stage" not in round_name:
+            continue  # only group stage fixtures for now
+        team1 = normalize_name(m.get("team1", ""))
+        team2 = normalize_name(m.get("team2", ""))
+        code1 = get_code(team1)
+        code2 = get_code(team2)
+        date_str = m.get("date", "")
+        time_str = m.get("time", "")
+        kickoff = None
+        if date_str:
+            t_match = re.search(r"(\d{1,2}):(\d{2})", time_str)
+            if t_match:
+                h = int(t_match.group(1))
+                kickoff = f"{date_str}T{h:02d}:{t_match.group(2)}"
+            else:
+                kickoff = date_str
+        grp = m.get("group", "")
+        letter = ""
+        if grp and grp.startswith("Group"):
+            m_letter = re.search(r"Group\s+([A-Z])", grp, re.I)
+            if m_letter:
+                letter = m_letter.group(1).upper()
+        fixtures.append({
+            "group": letter,
+            "match": len(fixtures) + 1,
+            "home": code1,
+            "away": code2,
+            "matchday": 1,  # will be computed below
+            "kickoff": kickoff,
+        })
+
+    # Compute matchdays per group
+    group_match_counts = {}
+    for f in fixtures:
+        g = f["group"]
+        group_match_counts.setdefault(g, 0)
+        group_match_counts[g] += 1
+        f["matchday"] = group_match_counts[g]  # simple sequential
+
+    # Parse squads from openfootball lineups
+    squads_by_team: dict[str, dict[int, dict]] = {}
+    for m in of_data.get("matches", []):
+        lineup = m.get("lineup")
+        if not lineup:
+            continue
+        for side_idx, side in enumerate(lineup):
+            team_name = normalize_name(m.get("team1" if side_idx == 0 else "team2", ""))
+            code = get_code(team_name)
+            squad = squads_by_team.setdefault(code, {})
+            for starter in side.get("starter", []):
+                name = starter.get("name", "").title()
+                pid = hash(name + code) & 0x7FFFFFFF
+                if pid not in squad:
+                    squad[pid] = {
+                        "name": name,
+                        "positions": ["CM"],
+                        "shirt": None,
+                        "starts": 0,
+                        "caps": 0,
+                    }
+                squad[pid]["caps"] += 1
+                squad[pid]["starts"] += 1
+            for bench in side.get("bench", []):
+                name = bench.get("name", "").title()
+                pid = hash(name + code) & 0x7FFFFFFF
+                if pid not in squad:
+                    squad[pid] = {
+                        "name": name,
+                        "positions": ["CM"],
+                        "shirt": None,
+                        "starts": 0,
+                        "caps": 0,
+                    }
+                squad[pid]["caps"] += 1
+            for sub in side.get("subs", []):
+                name = sub.get("on", "").title()
+                pid = hash(name + code) & 0x7FFFFFFF
+                if pid not in squad:
+                    squad[pid] = {
+                        "name": name,
+                        "positions": ["CM"],
+                        "shirt": None,
+                        "starts": 0,
+                        "caps": 0,
+                    }
+                squad[pid]["caps"] += 1
+
+    # Merge with Wikipedia squads for positions/shirt numbers/photos
+    wiki_squads = parse_squads_wikipedia(year)
+
+    # Photo cache
+    photo_cache = load_photo_cache()
+
+    # Build final squads
+    squads = {}
+    for t in teams:
+        code = t["code"]
+        of_squad = squads_by_team.get(code, {})
+        wiki_roster = wiki_squads.get(t["name"], [])
+
+        # Merge: prefer Wikipedia for position/shirt, OF for existence
+        merged: dict[int, dict] = {}
+        for pid, pl in of_squad.items():
+            merged[pid] = {
+                "name": pl["name"],
+                "positions": pl["positions"],
+                "shirt": None,
+                "sofa_id": pid,
+            }
+
+        # Try to match wiki players to OF players by name
+        for wp in wiki_roster:
+            wname = wp["name"].lower()
+            match_pid = None
+            for pid, pl in merged.items():
+                if pl["name"].lower() == wname:
+                    match_pid = pid
+                    break
+            if match_pid is not None:
+                merged[match_pid]["positions"] = wp["positions"]
+                merged[match_pid]["shirt"] = wp["shirt"]
+                merged[match_pid]["wiki"] = wp["wiki"]
+            else:
+                # New player only in Wikipedia
+                npid = hash(wp["name"] + code) & 0x7FFFFFFF
+                merged[npid] = {
+                    "name": wp["name"],
+                    "positions": wp["positions"],
+                    "shirt": wp["shirt"],
+                    "wiki": wp["wiki"],
+                }
+
+        # Resolve photos
+        all_titles = sorted({pl.get("wiki") for pl in merged.values() if pl.get("wiki")})
+        fetch_photos(photo_cache, all_titles)
+        save_photo_cache(photo_cache)
+
+        final_roster = []
+        for pl in merged.values():
+            pl_copy = {k: v for k, v in pl.items() if k != "wiki" and k != "sofa_id"}
+            pl_copy["photo"] = photo_cache.get(pl.get("wiki"))
+            final_roster.append(pl_copy)
+
+        final_roster.sort(key=lambda r: r["name"])
+        squads[code] = final_roster
+
+    return {
+        "year": year,
+        "name": f"{year} FIFA World Cup",
+        "host": HOSTS.get(year, of_data.get("name", "").replace("World Cup ", "")),
+        "teams": teams,
+        "squads": squads,
+        "fixtures": fixtures,
+    }
+
+
+def main() -> int:
+    SEED_DIR.mkdir(parents=True, exist_ok=True)
+    PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+
+    for year in YEARS:
+        dest = SEED_DIR / f"{year}.json"
+        if dest.exists():
+            print(f"[{year}] seed exists, skipping", file=sys.stderr)
+            continue
+        try:
+            seed = build_seed(year)
+            if not seed:
+                print(f"[{year}] FAILED", file=sys.stderr)
+                continue
+            dest.write_text(json.dumps(seed, ensure_ascii=False, indent=1))
+            nplayers = sum(len(v) for v in seed["squads"].values())
+            nphotos = sum(1 for v in seed["squads"].values() for pl in v if pl.get("photo"))
+            print(f"[{year}] wrote {dest}: {len(seed['teams'])} teams, {nplayers} players ({nphotos} photos), {len(seed['fixtures'])} fixtures", file=sys.stderr)
+        except Exception as exc:
+            print(f"[{year}] ERROR: {exc}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
