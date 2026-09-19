@@ -1234,8 +1234,8 @@ body {
 }
 .marker-face .slot-clear {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: -6px;
+  right: -2px;
   width: 16px;
   height: 16px;
   display: grid;
