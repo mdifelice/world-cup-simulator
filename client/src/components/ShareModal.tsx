@@ -64,6 +64,12 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
             ? thirdMatch.away_team_name
             : thirdMatch.home_team_name
           : null;
+      const thirdId =
+        thirdMatch && winnerOf(thirdMatch) != null
+          ? thirdMatch.home_team_id === winnerOf(thirdMatch)
+            ? thirdMatch.home_team_id
+            : thirdMatch.away_team_id
+          : null;
 
       const podium: PodiumRow[] = [
         { medal: "🥇", name: champName, sub: t("share.pos.1"), id: championId },

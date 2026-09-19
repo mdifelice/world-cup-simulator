@@ -51,6 +51,13 @@ const initials = (name: string) =>
 const codeOf = (map: Map<number, string>, id: number, name: string) =>
   map.get(id) ?? initials(name);
 
+/** "1930-07-13" or "2026-06-24T19:00" → "13/07" (let the user hover for the year). */
+const shortDate = (iso: string): string => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return iso;
+  return `${m[3]}/${m[2]}`;
+};
+
 export default function Overview({
   run,
   revealed,
@@ -420,6 +427,7 @@ export default function Overview({
                       role={done ? "button" : undefined}
                     >
                       <span className="mr-stage">{stage(m.stage_name)}</span>
+                      {m.date && <span className="mr-date">{shortDate(m.date)}</span>}
                       <span className={"mr-team home" + (m.home_team_id === focusId ? " focus-tag" : "")}>
                         {flagFor(m.home_team_name)} {country(m.home_team_name)}
                       </span>
