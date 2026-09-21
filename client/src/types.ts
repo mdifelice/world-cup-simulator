@@ -344,6 +344,14 @@ export interface RunMatch {
   bans?: MatchBan[];
   /** Automatic live feed for the user's team's matches. */
   events?: LiveEvent[];
+  /** Additional minutes at half-time (first half), typically 2-3. */
+  added_time_ht?: number;
+  /** Additional minutes at full-time (second half), typically 4-6. */
+  added_time_ft?: number;
+  /** Additional minutes at first half of extra time (0-2). */
+  added_time_et1?: number;
+  /** Additional minutes at second half of extra time (0-2). */
+  added_time_et2?: number;
 }
 
 export interface PlayerAward {

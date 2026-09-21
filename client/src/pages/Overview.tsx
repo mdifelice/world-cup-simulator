@@ -32,6 +32,8 @@ interface Props {
   onDraft?: (cfg: LineupConfig | null) => void;
   onStart: () => void;
   onShare: () => void;
+  /** True when the final match has been completed in live view. */
+  finalMatchCompleted: boolean;
 }
 
 interface Row {
@@ -83,6 +85,7 @@ export default function Overview({
   onDraft,
   onStart,
   onShare,
+  finalMatchCompleted,
 }: Props) {
   const focusId = run?.focus_team_id ?? null;
   const total = run?.matches.length ?? 0;
@@ -402,7 +405,7 @@ export default function Overview({
         <p className="hint">{t("squad.loading")}</p>
       )}
 
-      {allRevealed && champion && (
+      {finalMatchCompleted && champion && (
         <div className="champ-card">
           <span className="champ-cup">{flagFor(champion)}</span>
           <div className="champ-text">

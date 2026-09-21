@@ -205,9 +205,11 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
                 }
               >
                 <span className="podium-medal">{p.medal}</span>
-                <span className="podium-name">{flagName(country, p.name)}</span>
+                <span className="podium-name">
+                  {flagName(country, p.name)}
+                  {isMe(p) && <span className="podium-you">{t("share.you")}</span>}
+                </span>
                 <span className="podium-sub">{p.sub}</span>
-                {isMe(p) && <span className="podium-you">{t("share.you")}</span>}
               </div>
             ))}
           </div>

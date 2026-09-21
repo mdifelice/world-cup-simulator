@@ -978,6 +978,42 @@ impl<'a> Engine<'a> {
         Ok(())
     }
 
+    /// Generates additional time goals for a given period.
+    fn gen_added_time_goals(
+        &mut self,
+        base_minute: i32,
+        added: i32,
+        xg_per_minute: f64,
+        home: i64,
+        away: i64,
+        home_xi: &[SquadPlayer],
+        away_xi: &[SquadPlayer],
+        home_red: &Option<(i32, SquadPlayer)>,
+        away_red: &Option<(i32, SquadPlayer)>,
+    ) -> Vec<Goal> {
+        if added <= 0 {
+            return Vec::new();
+        }
+        let total_xg = (xg_per_minute * added as f64).clamp(0.01, 2.0);
+        let n_goals = sim::poisson(&mut self.rng, total_xg) as usize;
+        if n_goals == 0 {
+            return Vec::new();
+        }
+        let minutes = spaced_minutes(&mut self.rng, n_goals, added);
+        let teams = shuffled(&mut self.rng, team_labels(home, away, n_goals as i32, 0));
+        let mut goals = Vec::new();
+        for (i, &minute) in minutes.iter().enumerate() {
+            let team = if i < teams.len() { teams[i] } else { home };
+            let (xi, opp, red) = if team == home {
+                (home_xi, away_xi, home_red)
+            } else {
+                (away_xi, home_xi, away_red)
+            };
+            goals.push(self.make_goal(xi, opp, base_minute + minute, base_minute >= 90, team, red.as_ref()));
+        }
+        goals
+    }
+
     /// Fractional xG edge from fielding a stronger/weaker XI than the squad
     /// average (only meaningful for the focus team's picks, applied uniformly
     /// so the auto XI baseline stays neutral).
@@ -1308,10 +1344,40 @@ impl<'a> Engine<'a> {
             goals.push(self.make_goal(xi, opp, minute, false, team, red.as_ref()));
         }
 
-        let mut extra_time = false;
-        let mut penalties: Option<PenResult> = None;
-        let mut hs = hs0;
-        let mut aw = aw0;
+        // Additional time: half-time (2-3 min) and full-time (4-6 min)
+        let added_ht = 2 + (self.rng.unit() * 2.0) as i32; // 2-3
+        let added_ft = 4 + (self.rng.unit() * 3.0) as i32; // 4-6
+        let mut added_et1 = 0;
+        let mut added_et2 = 0;
+        // Reduced xG during added time (tired legs, less intensity)
+        let ht_xg_rate = (h_xg + a_xg) / 90.0 * 0.3;
+        let ft_xg_rate = (h_xg + a_xg) / 90.0 * 0.25;
+        goals.extend(self.gen_added_time_goals(
+            45,
+            added_ht,
+            ht_xg_rate,
+            home,
+            away,
+            &home_xi,
+            &away_xi,
+            &home_red,
+            &away_red,
+        ));
+        goals.extend(self.gen_added_time_goals(
+            90,
+            added_ft,
+            ft_xg_rate,
+            home,
+            away,
+            &home_xi,
+            &away_xi,
+            &home_red,
+            &away_red,
+        ));
+        goals.sort_by_key(|g| (g.minute, g.team_id));
+        // Recalculate scores including added time goals
+        let mut hs = goals.iter().filter(|g| g.team_id == home).count() as i32;
+        let mut aw = goals.iter().filter(|g| g.team_id == away).count() as i32;
         let mut winner = if hs > aw {
             Some(home)
         } else if aw > hs {
@@ -1319,6 +1385,9 @@ impl<'a> Engine<'a> {
         } else {
             None
         };
+
+        let mut extra_time = false;
+        let mut penalties: Option<PenResult> = None;
 
         if knockout && winner.is_none() {
             // Extra time: lower xG (tired legs).
@@ -1348,6 +1417,44 @@ impl<'a> Engine<'a> {
             } else {
                 None
             };
+            // Extra time additional time: 0-2 min per half
+            if extra_time {
+                added_et1 = (self.rng.unit() * 3.0) as i32; // 0-2
+                added_et2 = (self.rng.unit() * 3.0) as i32; // 0-2
+                let et_xg_rate = (h_xg + a_xg) / 90.0 * 0.2;
+                goals.extend(self.gen_added_time_goals(
+                    105,
+                    added_et1,
+                    et_xg_rate,
+                    home,
+                    away,
+                    &home_xi,
+                    &away_xi,
+                    &home_red,
+                    &away_red,
+                ));
+                goals.extend(self.gen_added_time_goals(
+                    120,
+                    added_et2,
+                    et_xg_rate,
+                    home,
+                    away,
+                    &home_xi,
+                    &away_xi,
+                    &home_red,
+                    &away_red,
+                ));
+                goals.sort_by_key(|g| (g.minute, g.team_id));
+                hs = goals.iter().filter(|g| g.team_id == home).count() as i32;
+                aw = goals.iter().filter(|g| g.team_id == away).count() as i32;
+                winner = if hs > aw {
+                    Some(home)
+                } else if aw > hs {
+                    Some(away)
+                } else {
+                    None
+                };
+            }
         }
 
         if knockout && winner.is_none() {
@@ -1501,6 +1608,10 @@ player_id: p.id,
             momentum,
             bans,
             events,
+            added_time_ht: added_ht,
+            added_time_ft: added_ft,
+            added_time_et1: if extra_time { added_et1 } else { 0 },
+            added_time_et2: if extra_time { added_et2 } else { 0 },
         };
         self.order.push(match_id);
         self.matches.push(rm);

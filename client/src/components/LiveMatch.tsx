@@ -21,12 +21,34 @@ export default function LiveMatch({
 }: Props) {
   const { t, stage, country } = useI18n();
 
-  const lengthLabel = m.extra_time ? 120 : 90;
-  // After the half-time boundary the clock reads added time (45+1, 45+2 …)
-  // capped at +5; the momentum chart stays put, only the label changes.
-  const stopBoundary = m.extra_time ? 90 : 45;
-  const clockLabel = (n: number) =>
-    n > stopBoundary ? `${stopBoundary}+${Math.min(n - stopBoundary, 5)}'` : `${n}'`;
+  // Total match minutes including added time
+  const addedHT = m.added_time_ht ?? 0;
+  const addedFT = m.added_time_ft ?? 0;
+  const addedET1 = m.added_time_et1 ?? 0;
+  const addedET2 = m.added_time_et2 ?? 0;
+  const regulationLength = 90 + addedHT + addedFT;
+  const extraTimeLength = m.extra_time ? 30 + addedET1 + addedET2 : 0;
+  const totalLength = regulationLength + extraTimeLength;
+
+  // Clock label shows added time (45+X, 90+X, 105+X, 120+X)
+  const clockLabel = (n: number) => {
+    if (n <= 45) return `${n}'`;
+    if (n <= 45 + addedHT) return `45+${n - 45}'`;
+    if (n <= 90) return `${n}'`;
+    if (n <= 90 + addedFT) return `90+${n - 90}'`;
+    if (m.extra_time) {
+      if (n <= 105) return `${n}'`;
+      if (n <= 105 + addedET1) return `105+${n - 105}'`;
+      if (n <= 120) return `${n}'`;
+      return `120+${n - 120}'`;
+    }
+    return `${n}'`;
+  };
+
+  const stopBoundaryHT = 45 + addedHT;
+  const stopBoundaryFT = 90 + addedFT;
+  const stopBoundaryET1 = m.extra_time ? 105 + addedET1 : 0;
+  const stopBoundaryET2 = m.extra_time ? 120 + addedET2 : 0;
   const [min, setMin] = useState(0);
   const pauseUntilRef = useRef(0);
   const halfPausedRef = useRef(false);
@@ -39,26 +61,25 @@ export default function LiveMatch({
       setMin((cur) => {
         const now = Date.now();
         if (now < pauseUntilRef.current) return cur;
-        // Pause once at half-time (45' or 90' in extra time) for a beat, then
-        // advance on the first tick after the pause expires.
-        const isHalf = (cur === 45 && lengthLabel === 90) || (cur === 90 && lengthLabel === 120);
-        if (isHalf) {
+        // Pause at each boundary (HT, FT, ET halves) for a beat
+        const isBoundary = cur === stopBoundaryHT || cur === stopBoundaryFT || cur === stopBoundaryET1 || cur === stopBoundaryET2;
+        if (isBoundary) {
           if (halfPausedRef.current) {
             halfPausedRef.current = false;
             return cur + 1;
           }
-          pauseUntilRef.current = now + 1000; // 1 second pause
+          pauseUntilRef.current = now + 1000;
           halfPausedRef.current = true;
           return cur;
         }
         halfPausedRef.current = false;
-        return cur >= lengthLabel ? cur : cur + 1;
+        return cur >= totalLength ? cur : cur + 1;
       });
     }, LIVE_MS);
     return () => clearInterval(iv);
-  }, [m.id, lengthLabel]);
+  }, [m.id, totalLength, stopBoundaryHT, stopBoundaryFT, stopBoundaryET1, stopBoundaryET2]);
 
-  const done = min >= lengthLabel;
+  const done = min >= totalLength;
 
   // Commit the result to the hub as soon as the match ends, but keep the dialog
   // open so the user can watch the final score and close it manually.
@@ -73,12 +94,12 @@ export default function LiveMatch({
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && (e.key === "F" || e.key === "f")) {
         e.preventDefault();
-        setMin((cur) => (cur >= lengthLabel ? cur : lengthLabel));
+        setMin((cur) => (cur >= totalLength ? cur : totalLength));
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [lengthLabel]);
+  }, [totalLength]);
 
   const isFocus =
     focusTeamId != null &&
@@ -117,7 +138,9 @@ export default function LiveMatch({
     const list: Incident[] = [
       ...(m.goals ?? []).map((g) => ({ kind: "goal" as const, g })),
       ...(m.reds ?? []).map((r) => ({ kind: "red" as const, r })),
-      ...(m.events ?? []).map((e) => ({ kind: "event" as const, e })),
+      ...(m.events ?? [])
+        .filter((e) => e.kind === "sub" || e.kind === "injury")
+        .map((e) => ({ kind: "event" as const, e })),
     ];
     return list.filter((i) => incMin(i) <= min).sort((a, b) => {
       const byMin = incMin(b) - incMin(a);
@@ -136,7 +159,7 @@ export default function LiveMatch({
   const topLane = 14;
   const botLane = 90;
   const legendY = 104;
-  const bw = W / lengthLabel;
+  const bw = W / totalLength;
 
   // The chart is stretched to the dialog width (preserveAspectRatio="none"), so
   // its text would be distorted. Counter-scale it back to a natural aspect.
@@ -162,7 +185,7 @@ export default function LiveMatch({
     // Each bar summarises the momentum of the last minute rather than a single
     // sample, smoothing the chart while keeping goal spikes visible.
     const ROLL = 1;
-    for (let mm = 1; mm <= Math.min(min, lengthLabel); mm++) {
+    for (let mm = 1; mm <= Math.min(min, totalLength); mm++) {
       let sum = 0;
       let n = 0;
       for (let j = Math.max(0, mm - ROLL); j < mm; j++) {
@@ -173,18 +196,18 @@ export default function LiveMatch({
       const d = s - 0.5;
       out.push({
         m: mm,
-        x: ((mm - 0.5) / lengthLabel) * W,
+        x: ((mm - 0.5) / totalLength) * W,
         up: d >= 0,
         h: Math.max(1, Math.round(Math.abs(d) * 2 * maxHalf)),
       });
     }
     return out;
-  }, [series, min, lengthLabel, W, maxHalf]);
+  }, [series, min, totalLength, W, maxHalf]);
 
   const isAwayFocusMomentum = momentum != null && focusTeamId === m.away_team_id;
 
   const goalMarks = goalsUpTo.map((g, i) => {
-    const x = (g.minute / lengthLabel) * W;
+    const x = (g.minute / totalLength) * W;
     const isFocusGoal =
       focusTeamId != null && g.team_id === focusTeamId
         ? !isAwayFocusMomentum
@@ -195,7 +218,7 @@ export default function LiveMatch({
   });
 
   const redMarks = redsUpTo.map((r, i) => {
-    const x = (r.minute / lengthLabel) * W;
+    const x = (r.minute / totalLength) * W;
     const isFocusRed =
       focusTeamId != null && r.team_id === focusTeamId
         ? !isAwayFocusMomentum
@@ -217,7 +240,7 @@ export default function LiveMatch({
   const yourLead = focusTeamId === m.home_team_id ? gauge >= 0 : gauge <= 0;
 
   const tick = (mmin: number, label: string) => {
-    const x = (mmin / lengthLabel) * W;
+    const x = (mmin / totalLength) * W;
     return (
       <g key={mmin}>
         <line x1={x} y1={0} x2={x} y2={H} stroke="rgba(27,37,48,0.15)" strokeWidth="1" />
@@ -319,9 +342,14 @@ export default function LiveMatch({
             />
             {tick(0, "0'")}
             {tick(45, t("match.ht"))}
+            {addedHT > 0 && tick(45 + addedHT, `45+${addedHT}'`)}
             {tick(90, m.extra_time ? "90'" : t("match.ft"))}
+            {addedFT > 0 && tick(90 + addedFT, `90+${addedFT}'`)}
+            {m.extra_time && tick(105, "105'")}
+            {m.extra_time && addedET1 > 0 && tick(105 + addedET1, `105+${addedET1}'`)}
             {m.extra_time && tick(120, t("match.ft"))}
-            {done ? null : tick(Math.min(min, lengthLabel), min === 0 ? "" : clockLabel(min))}
+            {m.extra_time && addedET2 > 0 && tick(120 + addedET2, `120+${addedET2}'`)}
+            {done ? null : tick(Math.min(min, totalLength), min === 0 ? "" : clockLabel(min))}
             {bars.map((b) => (
               <rect
                 key={b.m}
@@ -472,7 +500,18 @@ export default function LiveMatch({
                       (e.currentTarget as HTMLImageElement).style.display = "none";
                     }}
                   />
-                ) : null}
+                ) : (
+                  <span className="goal-photo goal-photo-fallback" aria-hidden>
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                      <circle cx="12" cy="8" r="4.5" fill="currentColor" opacity="0.85" />
+                      <path
+                        d="M3.5 20.5c1.4-4.2 4.6-6 8.5-6s7.1 1.8 8.5 6"
+                        fill="currentColor"
+                        opacity="0.85"
+                      />
+                    </svg>
+                  </span>
+                )}
                 <span className="goal-player">
                   {playerNumber != null ? `${playerNumber}. ` : ""}
                   {playerName}

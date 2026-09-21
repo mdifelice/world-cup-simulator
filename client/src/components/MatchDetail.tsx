@@ -100,7 +100,7 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                 <span className="goal-ball" aria-hidden>
                   {inc.kind === "goal" ? "⚽" : "🟥"}
                 </span>
-                {incidentPhoto(inc) && (
+                {incidentPhoto(inc) ? (
                   <img
                     className="goal-photo"
                     src={incidentPhoto(inc)!}
@@ -109,6 +109,17 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                       (e.currentTarget as HTMLImageElement).style.display = "none";
                     }}
                   />
+                ) : (
+                  <span className="goal-photo goal-photo-fallback" aria-hidden>
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                      <circle cx="12" cy="8" r="4.5" fill="currentColor" opacity="0.85" />
+                      <path
+                        d="M3.5 20.5c1.4-4.2 4.6-6 8.5-6s7.1 1.8 8.5 6"
+                        fill="currentColor"
+                        opacity="0.85"
+                      />
+                    </svg>
+                  </span>
                 )}
                 <span className="goal-player">
                   {incidentNumber(inc) != null

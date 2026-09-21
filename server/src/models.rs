@@ -556,6 +556,18 @@ pub struct RunMatch {
     /// Automatic tactics/strategy/substitution/injury feed (user's matches).
     #[serde(default)]
     pub events: Vec<LiveEvent>,
+    /// Additional minutes at half-time (first half), typically 2-3.
+    #[serde(default)]
+    pub added_time_ht: i32,
+    /// Additional minutes at full-time (second half), typically 4-6.
+    #[serde(default)]
+    pub added_time_ft: i32,
+    /// Additional minutes at first half of extra time (0-2).
+    #[serde(default)]
+    pub added_time_et1: i32,
+    /// Additional minutes at second half of extra time (0-2).
+    #[serde(default)]
+    pub added_time_et2: i32,
 }
 
 /// A player unavailable for this match, with the reason and how many matches

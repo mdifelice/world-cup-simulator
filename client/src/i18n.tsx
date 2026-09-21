@@ -229,6 +229,12 @@ const en: Record<string, string> = {
     "No runs saved yet. Play a tournament while signed in and it will show up here.",
   "history.relive": "Relive",
   "history.opening": "Loading…",
+
+  "lab.homeXG": "Home xG",
+  "lab.awayXG": "Away xG",
+  "lab.seed": "Seed",
+  "lab.regenerate": "Regenerate Match",
+  "lab.debugInfo": "Debug Info",
 };
 
 const es: Record<string, string> = {
@@ -442,6 +448,12 @@ const es: Record<string, string> = {
     "Todavía no hay partidas guardadas. Juega un torneo conectado y aparecerá aquí.",
   "history.relive": "Revivir",
   "history.opening": "Cargando…",
+
+  "lab.homeXG": "xG local",
+  "lab.awayXG": "xG visitante",
+  "lab.seed": "Semilla",
+  "lab.regenerate": "Regenerar partido",
+  "lab.debugInfo": "Info de depuración",
 };
 
 const dicts: Record<Locale, Record<string, string>> = { en, es };
