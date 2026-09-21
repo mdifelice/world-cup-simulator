@@ -1668,3 +1668,65 @@ player_id: p.id,
         }
     }
 }
+
+#[cfg(test)]
+mod fixture_emitter {
+    use super::{match_seed, splitmix64, str_key};
+    use crate::sim;
+    use serde_json::json;
+
+    /// Byte-parity oracle for the client-side engine port. Recomputes the pure
+    /// deterministic functions for a FIXED seed and prints them as JSON. The
+    /// TypeScript port must reproduce this file byte-for-byte.
+    #[test]
+    fn emit_fixed_seed_fixture() {
+        const SEED: u64 = 1_231_231_231_231_231;
+
+        let mut rng = sim::Rng::from_seed(SEED);
+        let rng_next: Vec<u64> = (0..16).map(|_| rng.next()).collect();
+
+        let mut mk_unit = |seed: u64| {
+            let mut r = sim::Rng::from_seed(seed);
+            (0..8).map(|_| r.unit()).collect::<Vec<f64>>()
+        };
+
+        let mut mk_pois = |lambda: f64| {
+            let mut r = sim::Rng::from_seed(SEED);
+            (0..10).map(|_| sim::poisson(&mut r, lambda)).collect::<Vec<i32>>()
+        };
+
+        let j = json!({
+            "seed": SEED,
+            "rng_next": rng_next,
+            "rng_unit_seed0": mk_unit(0),
+            "rng_unit_seed1": mk_unit(1),
+            "poisson_low": mk_pois(0.9),
+            "poisson_mid": mk_pois(1.3),
+            "poisson_high": mk_pois(2.1),
+            "str_key": [
+                str_key("G1"),
+                str_key("KO16"),
+                str_key("THIRD"),
+                str_key("F"),
+                str_key("poisson"),
+                str_key(""),
+            ],
+            "match_seed_group": [
+                match_seed(SEED, "G1", 1, 101, 202, false),
+                match_seed(SEED, "G1", 6, 303, 404, false),
+            ],
+            "match_seed_ko": [
+                match_seed(SEED, "KO16", 1, 101, 202, true),
+                match_seed(SEED, "THIRD", 1, 111, 222, true),
+                match_seed(SEED, "F", 1, 333, 444, true),
+            ],
+            "splitmix64": [
+                splitmix64(0),
+                splitmix64(1),
+                splitmix64(1_231_231_231_231_231),
+                splitmix64(u64::MAX),
+            ],
+        });
+        println!("{}", serde_json::to_string_pretty(&j).unwrap());
+    }
+}
