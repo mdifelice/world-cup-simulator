@@ -70,7 +70,6 @@ export default function App() {
   const ffTimer = useRef<number | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
-  const [finalMatchCompleted, setFinalMatchCompleted] = useState(false);
   const [notifications, setNotifications] = useState<Array<{ id: number; message: string; type: "info" | "success" | "warning" }>>([]);
   const notifyId = useRef(0);
   const { t, locale, setLocale } = useI18n();
@@ -320,7 +319,6 @@ export default function App() {
     setConfigs({});
     setLastLineup(null);
     setSeed(null);
-    setFinalMatchCompleted(false);
     postRun(false, null, {});
     setStep("overview");
   };
@@ -334,7 +332,6 @@ export default function App() {
     setConfigs({});
     setLastLineup(null);
     setSeed(null);
-    setFinalMatchCompleted(false);
     postRun(true, null, {});
     setStep("overview");
   };
@@ -391,10 +388,6 @@ export default function App() {
       }, 0);
       return { ...f, revealed };
     });
-    // Check if this is the final match
-    if (m.stage_key === "F") {
-      setFinalMatchCompleted(true);
-    }
   };
 
   const checkRoundProgress = (run: RunPayload, revealedIds: Set<number>, t: (key: string) => string) => {
@@ -540,7 +533,6 @@ export default function App() {
             onDraft={setDraft}
             onStart={() => postRun(false, null, configs)}
             onShare={openShare}
-            finalMatchCompleted={finalMatchCompleted}
           />
         )}
         {step === "history" && (

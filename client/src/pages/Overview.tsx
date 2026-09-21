@@ -32,8 +32,6 @@ interface Props {
   onDraft?: (cfg: LineupConfig | null) => void;
   onStart: () => void;
   onShare: () => void;
-  /** True when the final match has been completed in live view. */
-  finalMatchCompleted: boolean;
 }
 
 interface Row {
@@ -85,7 +83,6 @@ export default function Overview({
   onDraft,
   onStart,
   onShare,
-  finalMatchCompleted,
 }: Props) {
   const focusId = run?.focus_team_id ?? null;
   const total = run?.matches.length ?? 0;
@@ -130,9 +127,9 @@ export default function Overview({
   const revealedMatchIds = new Set(revealedMatches.map((m) => m.id));
   // The bracket appears once the knockout stage starts; unplayed rounds show as
   // TBD placeholders until their results are revealed.
-  const hasKnockout = revealedMatches.some((m) =>
+  const hasKnockout = run?.matches.some((m) =>
     ["R32", "R16", "QF", "SF", "F", "THIRD"].includes(m.stage_key),
-  );
+  ) ?? false;
 
   /** Standings for a group/league phase: members come from the seeded groups
    *  when available, otherwise from the phase's own fixtures (union-find). */
@@ -405,7 +402,7 @@ export default function Overview({
         <p className="hint">{t("squad.loading")}</p>
       )}
 
-      {finalMatchCompleted && champion && (
+      {allRevealed && champion && (
         <div className="champ-card">
           <span className="champ-cup">{flagFor(champion)}</span>
           <div className="champ-text">
@@ -428,6 +425,9 @@ export default function Overview({
                   const done = revealedIds.has(m.id);
                   const isNext = m.id === nextMatch?.id;
                   const mine = isMine(m);
+                  // Play button only enabled if all previous matches in chronological order are done
+                  const idx = run.order.indexOf(m.id);
+                  const allPreviousDone = run.order.slice(0, idx).every((id) => revealedIds.has(id));
                   return (
                     <div
                       key={m.id}
@@ -476,7 +476,7 @@ export default function Overview({
                         {flagFor(m.away_team_name)} {country(m.away_team_name)}
                       </span>
                       <span className="mr-action">
-                        {!done && mine && interactive && (
+                        {!done && mine && interactive && allPreviousDone && (
                           <button
                             className="btn play msg"
                             onClick={(e) => {
@@ -497,7 +497,7 @@ export default function Overview({
                             ▶ {t("hub.play")}
                           </button>
                         )}
-                        {!done && !mine && (
+                        {!done && !mine && allPreviousDone && (
                           <button className="btn sim msg" onClick={() => onSimulate(m)}>
                             {t("hub.simulate")}
                           </button>

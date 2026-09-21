@@ -774,7 +774,13 @@ impl<'a> Engine<'a> {
 
     /// Random XI outfielder to come off, favouring forward/midfield when losing
     /// and defenders when winning (so the change matches the game state).
-    fn pick_sub_out(&mut self, xi: &[SquadPlayer], diff: i32) -> Option<SquadPlayer> {
+    /// Excludes players already subbed out.
+    fn pick_sub_out(
+        &mut self,
+        xi: &[SquadPlayer],
+        diff: i32,
+        subbed_out: &HashSet<i64>,
+    ) -> Option<SquadPlayer> {
         let families: &[&str] = if diff < 0 {
             &["FW", "MF"]
         } else if diff > 0 {
@@ -784,12 +790,18 @@ impl<'a> Engine<'a> {
         };
         let mut cands: Vec<&SquadPlayer> = xi
             .iter()
-            .filter(|p| families.iter().any(|f| models::position_family(&p.position) == *f))
+            .filter(|p| {
+                !subbed_out.contains(&p.id)
+                    && families.iter().any(|f| models::position_family(&p.position) == *f)
+            })
             .collect();
         if cands.is_empty() {
             cands = xi
                 .iter()
-                .filter(|p| models::position_family(&p.position) != "GK")
+                .filter(|p| {
+                    !subbed_out.contains(&p.id)
+                        && models::position_family(&p.position) != "GK"
+                })
                 .collect();
         }
         if cands.is_empty() {
@@ -801,11 +813,18 @@ impl<'a> Engine<'a> {
 
     /// Best unused bench player to come on, optionally restricted to a position
     /// family (goalkeepers are never brought on for an outfielder change).
-    fn pick_in_from_bench(&self, bench: &[SquadPlayer], family: Option<&str>) -> Option<SquadPlayer> {
+    /// Excludes players already subbed in.
+    fn pick_in_from_bench(
+        &self,
+        bench: &[SquadPlayer],
+        family: Option<&str>,
+        subbed_in: &HashSet<i64>,
+    ) -> Option<SquadPlayer> {
         let mut pool: Vec<&SquadPlayer> = bench
             .iter()
             .filter(|p| {
-                family.map_or(true, |f| models::position_family(&p.position) == f)
+                !subbed_in.contains(&p.id)
+                    && family.map_or(true, |f| models::position_family(&p.position) == f)
                     && models::position_family(&p.position) != "GK"
             })
             .collect();
@@ -839,6 +858,9 @@ impl<'a> Engine<'a> {
             })
             .cloned()
             .collect();
+        // Track players who have been subbed out (cannot return) and subbed in (cannot be subbed out again)
+        let mut subbed_out: HashSet<i64> = HashSet::new();
+        let mut subbed_in: HashSet<i64> = HashSet::new();
         let gf_at = |minute: i32| -> i32 {
             goals
                 .iter()
@@ -886,7 +908,7 @@ impl<'a> Engine<'a> {
             };
             if let Some(outp) = self.pick_field(xi) {
                 if subs_used < max_subs && !bench.is_empty() {
-                    let inp = self.pick_in_from_bench(&bench, None);
+                    let inp = self.pick_in_from_bench(&bench, None, &subbed_in);
                     push_event(
                         events,
                         46,
@@ -896,6 +918,10 @@ impl<'a> Engine<'a> {
                         inp.as_ref().map(|p| (p.name.clone(), p.photo_url.clone())),
                     );
                     subs_used += 1;
+                    subbed_out.insert(outp.id);
+                    if let Some(ref inp) = inp {
+                        subbed_in.insert(inp.id);
+                    }
                 } else {
                     push_event(
                         events,
@@ -905,6 +931,7 @@ impl<'a> Engine<'a> {
                         Some((outp.name.clone(), outp.photo_url.clone())),
                         None,
                     );
+                    subbed_out.insert(outp.id);
                 }
                 self.suspensions
                     .insert(outp.id, (banned_for, "injury".to_string()));
@@ -947,8 +974,8 @@ impl<'a> Engine<'a> {
             } else {
                 "MF"
             };
-            if let Some(outp) = self.pick_sub_out(xi, d) {
-                if let Some(inp) = self.pick_in_from_bench(&bench, Some(family)) {
+            if let Some(outp) = self.pick_sub_out(xi, d, &subbed_out) {
+                if let Some(inp) = self.pick_in_from_bench(&bench, Some(family), &subbed_in) {
                     push_event(
                         events,
                         minute,
@@ -957,6 +984,9 @@ impl<'a> Engine<'a> {
                         Some((outp.name.clone(), outp.photo_url.clone())),
                         Some((inp.name.clone(), inp.photo_url.clone())),
                     );
+                    subs_used += 1;
+                    subbed_out.insert(outp.id);
+                    subbed_in.insert(inp.id);
                 }
             }
         }

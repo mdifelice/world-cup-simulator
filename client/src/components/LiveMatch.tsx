@@ -30,19 +30,22 @@ export default function LiveMatch({
   const extraTimeLength = m.extra_time ? 30 + addedET1 + addedET2 : 0;
   const totalLength = regulationLength + extraTimeLength;
 
-  // Clock label shows added time (45+X, 90+X, 105+X, 120+X)
+  // Clock label: show 45' until added time starts, then 45+1, 45+2...
+  // Same for 90', 105', 120'
   const clockLabel = (n: number) => {
-    if (n <= 45) return `${n}'`;
+    if (n < 45) return `${n}'`;
+    if (n === 45) return `${n}'`;
     if (n <= 45 + addedHT) return `45+${n - 45}'`;
-    if (n <= 90) return `${n}'`;
+    if (n < 90) return `${n}'`;
+    if (n === 90) return `${n}'`;
     if (n <= 90 + addedFT) return `90+${n - 90}'`;
-    if (m.extra_time) {
-      if (n <= 105) return `${n}'`;
-      if (n <= 105 + addedET1) return `105+${n - 105}'`;
-      if (n <= 120) return `${n}'`;
-      return `120+${n - 120}'`;
-    }
-    return `${n}'`;
+    if (!m.extra_time) return `${n}'`;
+    if (n < 105) return `${n}'`;
+    if (n === 105) return `${n}'`;
+    if (n <= 105 + addedET1) return `105+${n - 105}'`;
+    if (n < 120) return `${n}'`;
+    if (n === 120) return `${n}'`;
+    return `120+${n - 120}'`;
   };
 
   const stopBoundaryHT = 45 + addedHT;
@@ -259,7 +262,7 @@ export default function LiveMatch({
 
   const resultLabel = m.extra_time || m.penalties ? (
     <>
-      {m.extra_time ? ` · ${t("match.aet")}` : ""}
+      {m.extra_time ? t("match.aet") : ""}
       {m.penalties ? (
         <span className="pens">
           {" · "}
@@ -342,13 +345,9 @@ export default function LiveMatch({
             />
             {tick(0, "0'")}
             {tick(45, t("match.ht"))}
-            {addedHT > 0 && tick(45 + addedHT, `45+${addedHT}'`)}
             {tick(90, m.extra_time ? "90'" : t("match.ft"))}
-            {addedFT > 0 && tick(90 + addedFT, `90+${addedFT}'`)}
             {m.extra_time && tick(105, "105'")}
-            {m.extra_time && addedET1 > 0 && tick(105 + addedET1, `105+${addedET1}'`)}
             {m.extra_time && tick(120, t("match.ft"))}
-            {m.extra_time && addedET2 > 0 && tick(120 + addedET2, `120+${addedET2}'`)}
             {done ? null : tick(Math.min(min, totalLength), min === 0 ? "" : clockLabel(min))}
             {bars.map((b) => (
               <rect
