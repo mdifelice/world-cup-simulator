@@ -13,6 +13,7 @@ services:
       WCS_ADDR: "0.0.0.0:8080"
     volumes:
       - wcs-data:/app/data
+      - ./server/data/seed:/app/data/seed:ro
     restart: unless-stopped
 
 volumes:

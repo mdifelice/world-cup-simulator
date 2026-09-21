@@ -536,6 +536,18 @@ fn seed_edition(conn: &Connection, year: i32) -> rusqlite::Result<()> {
     )?;
 
     // Teams + group assignments.
+    // Re-seeding is idempotent per edition: clear this tournament's previous
+    // team/group rows first so teams dropped or regrouped since the last boot
+    // (e.g. updated seed files) never linger as stale participants or
+    // duplicate group memberships.
+    conn.execute(
+        "DELETE FROM tournament_groups WHERE tournament_id = ?1",
+        rusqlite::params![tournament_id],
+    )?;
+    conn.execute(
+        "DELETE FROM tournament_teams WHERE tournament_id = ?1",
+        rusqlite::params![tournament_id],
+    )?;
     let mut by_code: HashMap<String, i64> = HashMap::new();
     let mut rating_by_code: HashMap<String, i32> = HashMap::new();
     for t in &file.teams {
