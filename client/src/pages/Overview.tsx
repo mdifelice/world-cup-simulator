@@ -344,6 +344,15 @@ export default function Overview({
 
   const isMine = (m: RunMatch) => focusId != null && (m.home_team_id === focusId || m.away_team_id === focusId);
 
+  // While a round is in progress only that round is shown; matches from later
+  // rounds (the next matchday / knockout round) stay hidden until the current
+  // one is fully revealed. All matches of a round share the same `day`.
+  const currentDay = (() => {
+    if (!run || revealed >= run.order.length) return null;
+    const byId = new Map(run.matches.map((m) => [m.id, m]));
+    return byId.get(run.order[revealed])?.day ?? null;
+  })();
+
   return (
     <section>
       <div className="page-head">
@@ -404,7 +413,9 @@ export default function Overview({
             <div className="hub-main">
               <div className="match-scroll" ref={matchScrollRef}>
                 {run.matches.length === 0 && <p className="hint">{t("cup.noMatches")}</p>}
-                {run.matches.map((m) => {
+                {run.matches
+                  .filter((m) => currentDay == null || m.day <= currentDay)
+                  .map((m) => {
                   const idx = run.order.indexOf(m.id);
                   const done = idx < revealed;
                   const next = idx === revealed;
@@ -426,8 +437,10 @@ export default function Overview({
                       title={done ? t("hub.viewResult") : undefined}
                       role={done ? "button" : undefined}
                     >
-                      <span className="mr-stage">{stage(m.stage_name)}</span>
-                      {m.date && <span className="mr-date">{shortDate(m.date)}</span>}
+                      <span className="mr-round">
+                        <span className="mr-stage">{stage(m.stage_name)}</span>
+                        {m.date && <span className="mr-date">{shortDate(m.date)}</span>}
+                      </span>
                       <span className={"mr-team home" + (m.home_team_id === focusId ? " focus-tag" : "")}>
                         {flagFor(m.home_team_name)} {country(m.home_team_name)}
                       </span>

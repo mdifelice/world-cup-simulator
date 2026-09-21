@@ -33,15 +33,23 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
       .catch((e) => setError(e.message));
   }, [team.id, tournament.id]);
 
-  /** Whole squad, one flat list — no family grouping. Ordered by pitch line
-   *  then rating; every row leads with the exact translated position. */
+  /** Whole squad, one flat list — no family grouping. Sorted by shirt number
+   *  (squads without numbers fall back to pitch line); players without a
+   *  number trail, then ratings keep ties deterministic. */
   const ordered = useMemo(() => {
     const ps = [...(squad ?? [])];
-    ps.sort(
-      (a, b) =>
+    const hasNumbers = ps.some((p) => p.shirt_number != null);
+    ps.sort((a, b) => {
+      if (hasNumbers) {
+        const an = a.shirt_number ?? 99_999;
+        const bn = b.shirt_number ?? 99_999;
+        if (an !== bn) return an - bn;
+      }
+      return (
         lineIndex(a.position) - lineIndex(b.position) ||
-        (b.rating ?? b.overall) - (a.rating ?? a.overall),
-    );
+        (b.rating ?? b.overall) - (a.rating ?? a.overall)
+      );
+    });
     return ps;
   }, [squad, lineIndex]);
 
@@ -70,7 +78,6 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
         <div className="squad-list">
           {ordered.map((p) => (
             <div key={p.id} className="pc-pick static">
-              <span className="st">{pos(p.position)}</span>
               <span className="rr-photo">
                 {p.photo_url ? (
                   <img
@@ -94,6 +101,7 @@ export default function Roster({ tournament, team, onDone, onBack }: Props) {
               </span>
               <span className="rr-text">
                 <span className="rr-name">{p.name}</span>
+                <span className="rr-pos">{pos(p.position)}</span>
               </span>
               <span className="rr-stars">
                 {starsString(ratingStars(p.rating ?? p.overall))}

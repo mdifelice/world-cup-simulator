@@ -112,7 +112,7 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                 )}
                 <span className="goal-player">
                   {incidentNumber(inc) != null
-                    ? `${incidentNumber(inc)} - `
+                    ? `${incidentNumber(inc)}. `
                     : ""}
                   {incidentName(inc)}
                   {inc.kind === "goal" && inc.g.own_goal ? (

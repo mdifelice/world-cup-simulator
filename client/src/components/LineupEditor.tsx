@@ -286,7 +286,7 @@ export default function LineupEditor({
               </button>
             ))}
             <button
-              className="btn secondary chip"
+              className="btn chip autopick"
               onClick={pickAuto}
               title={t("lineup.auto")}
               disabled={anyPicked || disabled}

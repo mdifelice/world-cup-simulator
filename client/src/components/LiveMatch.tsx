@@ -22,6 +22,11 @@ export default function LiveMatch({
   const { t, stage, country } = useI18n();
 
   const lengthLabel = m.extra_time ? 120 : 90;
+  // After the half-time boundary the clock reads added time (45+1, 45+2 …)
+  // capped at +5; the momentum chart stays put, only the label changes.
+  const stopBoundary = m.extra_time ? 90 : 45;
+  const clockLabel = (n: number) =>
+    n > stopBoundary ? `${stopBoundary}+${Math.min(n - stopBoundary, 5)}'` : `${n}'`;
   const [min, setMin] = useState(0);
   const pauseUntilRef = useRef(0);
   const halfPausedRef = useRef(false);
@@ -290,7 +295,7 @@ export default function LiveMatch({
         {done ? (
           resultLabel
         ) : (
-          <span className="match-clock">{min}'</span>
+          <span className="match-clock">{clockLabel(min)}</span>
         )}
       </p>
 
@@ -316,7 +321,7 @@ export default function LiveMatch({
             {tick(45, t("match.ht"))}
             {tick(90, m.extra_time ? "90'" : t("match.ft"))}
             {m.extra_time && tick(120, t("match.ft"))}
-            {done ? null : tick(Math.min(min, lengthLabel), min === 0 ? "" : `${min}'`)}
+            {done ? null : tick(Math.min(min, lengthLabel), min === 0 ? "" : clockLabel(min))}
             {bars.map((b) => (
               <rect
                 key={b.m}
@@ -429,7 +434,7 @@ export default function LiveMatch({
                 />
               ) : null}
               <span className="goal-player">
-                {incNumber(i) != null ? `${incNumber(i)} - ` : ""}
+                {incNumber(i) != null ? `${incNumber(i)}. ` : ""}
                 {incName(i)}
                 {i.kind === "goal" && i.g.own_goal ? (
                   <span className="og-badge">{t("match.ownGoal")}</span>

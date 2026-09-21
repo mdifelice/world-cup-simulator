@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { useI18n } from "../i18n";
 import LineupEditor from "./LineupEditor";
@@ -45,6 +45,14 @@ export default function FormationPanel({
   const opponent =
     match.home_team_id === teamId ? match.away_team_name : match.home_team_name;
 
+  const suspendedNames = useMemo(
+    () =>
+      (squad ?? [])
+        .filter((p) => (unavailable ?? []).includes(p.id))
+        .map((p) => p.name),
+    [squad, unavailable],
+  );
+
   return (
     <div className="form-panel form-wrap">
       <div className="form-head">
@@ -60,15 +68,23 @@ export default function FormationPanel({
       {error && <p className="error">{error}</p>}
       {!squad && !error && <p className="hint">{t("squad.loading")}</p>}
       {squad && (
-        <LineupEditor
-          shirtNumbers={shirtNumbers}
-          squad={squad}
-          initial={initial}
-          year={year}
-          disabled={disabled}
-          unavailable={unavailable}
-          onReady={onReady}
-        />
+        <>
+          {suspendedNames.length > 0 && (
+            <p className="sus-note">
+              <span className="red-card tiny" aria-hidden />
+              {t("lineup.suspendedNote", { names: suspendedNames.join(", ") })}
+            </p>
+          )}
+          <LineupEditor
+            shirtNumbers={shirtNumbers}
+            squad={squad}
+            initial={initial}
+            year={year}
+            disabled={disabled}
+            unavailable={unavailable}
+            onReady={onReady}
+          />
+        </>
       )}
     </div>
   );

@@ -132,14 +132,12 @@ export default function Bracket({
         labelTop: cy - BOX_H / 2 - 16,
       };
       if (finalCol) {
-        const fy = finalCol.centers[0];
         const midX = x - GAP_X / 2;
         lines.push({
           key: "THIRD-UP",
-          // The third-place match hangs off the main line at the final's
-          // height: short horizontal from the box, then straight up to the
-          // spine. Nothing reaches back to the semifinals.
-          points: `${x},${cy} ${midX},${cy} ${midX},${fy}`,
+          // The third-place match joins the bracket spine with a single
+          // horizontal connector at its own height (no vertical rising leg).
+          points: `${x},${cy} ${midX},${cy}`,
           dashed: true,
         });
       }
