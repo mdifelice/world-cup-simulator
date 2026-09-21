@@ -1695,6 +1695,22 @@ mod fixture_emitter {
             (0..10).map(|_| sim::poisson(&mut r, lambda)).collect::<Vec<i32>>()
         };
 
+        let mut mk_live = || {
+            let mut r = sim::Rng::from_seed(match_seed(SEED, "F", 90, 0, 0, true));
+            let mut lead = 0i32;
+            (1..=90)
+                .map(|m| {
+                    let (lh, la) = if lead > 0 { (0.9f64, 2.1f64) }
+                        else if lead < 0 { (2.1f64, 0.9f64) }
+                        else { (1.3f64, 1.3f64) };
+                    let gh = sim::poisson(&mut r, lh);
+                    let ga = sim::poisson(&mut r, la);
+                    lead += gh - ga;
+                    format!("{m}:{gh}:{ga}")
+                })
+                .collect::<Vec<String>>()
+        };
+
         let j = json!({
             "seed": SEED,
             "rng_next": rng_next,
@@ -1703,6 +1719,7 @@ mod fixture_emitter {
             "poisson_low": mk_pois(0.9),
             "poisson_mid": mk_pois(1.3),
             "poisson_high": mk_pois(2.1),
+            "live_minutes": mk_live(),
             "str_key": [
                 str_key("G1"),
                 str_key("KO16"),

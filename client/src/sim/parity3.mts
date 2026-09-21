@@ -12,7 +12,7 @@ const raw = readFileSync(PATH, "utf8");
 function rawTokens(key: string): string[] {
   const m = raw.match(new RegExp(`"${key}"\\s*:\\s*\\[([^\\]]*)\\]`));
   if (!m) return [];
-  return m[1].split(",").map((t) => t.trim()).filter((t) => t !== "" && t !== "null");
+  return m[1].split(",").map((t) => t.trim().replace(/^"|"$/g, "")).filter((t) => t !== "" && t !== "null");
 }
 
 const SEED = 1231231231231231n;
@@ -60,6 +60,23 @@ const groups: [string, string[]][] = [
     String(match_seed(SEED, "THIRD", 1, 111n, 222n, true)),
     String(match_seed(SEED, "F", 1, 333n, 444n, true)),
   ]],
+  ["live_minutes", (() => {
+    const r = Rng.from_seed(match_seed(SEED, "F", 90, 0n, 0n, true));
+    let lead = 0n;
+    const g: string[] = [];
+    for (let m = 1; m <= 90; m++) {
+      let lh: number;
+      let la: number;
+      if (lead > 0n) { lh = 0.9; la = 2.1; }
+      else if (lead < 0n) { lh = 2.1; la = 0.9; }
+      else { lh = 1.3; la = 1.3; }
+      const gh = poisson(r, lh);
+      const ga = poisson(r, la);
+      lead += BigInt(gh - ga);
+      g.push(`${m}:${gh}:${ga}`);
+    }
+    return g;
+  })()],
 ];
 
 let fails = 0;
