@@ -298,6 +298,28 @@ export interface RedCard {
   shirt_number?: number;
 }
 
+/** A player out for this match, with the reason and total matches missed. */
+export interface MatchBan {
+  player_id: number;
+  player: string;
+  player_photo?: string | null;
+  reason: "red" | "injury";
+  matches: number;
+}
+
+/** One entry of the automatic live feed (tactics/strategy/sub/injury). */
+export interface LiveEvent {
+  minute: number;
+  extra_time: boolean;
+  kind: "tactics" | "strategy" | "sub" | "injury";
+  team_id: number;
+  detail?: string;
+  out_player?: string | null;
+  out_player_photo?: string | null;
+  in_player?: string | null;
+  in_player_photo?: string | null;
+}
+
 export interface RunMatch {
   id: number;
   day: number;
@@ -318,6 +340,10 @@ export interface RunMatch {
   /** Real fixture date (group stage only; knockouts have none). */
   date?: string | null;
   momentum: Momentum | null;
+  /** The focus team's banned players for this match, with match counts. */
+  bans?: MatchBan[];
+  /** Automatic live feed for the user's team's matches. */
+  events?: LiveEvent[];
 }
 
 export interface PlayerAward {

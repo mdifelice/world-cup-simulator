@@ -172,14 +172,14 @@ export default function LineupEditor({
 
   const pickAuto = () => {
     if (disabled) return;
-    const next: (number | null)[] = new Array(slots.length).fill(null);
-    const used = new Set<number>();
-    const pool = squad.filter((p) => !blocked.has(p.id));
+    // Start with current assignments, only fill empty slots
+    const next = [...assignments];
+    const used = new Set<number>(assignments.filter((p): p is number => p != null));
+    const pool = squad.filter((p) => !blocked.has(p.id) && !used.has(p.id));
     const ownersOf = (slot: string) => pool.filter((p) => owns(p, slot));
 
-    // Match every slot to a different owner (maximum bipartite matching), so a
-    // slot with no specialist left is the only one that can end up without an
-    // owner. Better-rated owners are tried first for each slot.
+    // Match empty slots to owners (maximum bipartite matching)
+    const emptySlotIndices = next.map((p, i) => (p == null ? i : -1)).filter((i) => i >= 0);
     const playerSlot = new Map<number, number>();
     const augment = (slotIndex: number, seen: Set<number>): boolean => {
       const candidates = ownersOf(slots[slotIndex]).sort((a, b) => effFor(b, slots[slotIndex]) - effFor(a, slots[slotIndex]));
@@ -195,12 +195,12 @@ export default function LineupEditor({
       }
       return false;
     };
-    for (let i = 0; i < slots.length; i++) augment(i, new Set());
+    for (const i of emptySlotIndices) augment(i, new Set());
 
     for (const p of playerSlot.keys()) used.add(p);
 
     // Only slots with no owner available fall back to the best penalised pick.
-    for (let i = 0; i < slots.length; i++) {
+    for (const i of emptySlotIndices) {
       if (next[i] != null) continue;
       const best = bestIn(slots[i], used);
       if (best) {
@@ -249,8 +249,6 @@ export default function LineupEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filled, assignments]);
 
-  const anyPicked = assignments.some((p) => p != null);
-
   // Only the era's plausible formations are offered; the current one is always
   // in the grid (a saved lineup might predate the chip filter).
   const formationChips = useMemo(() => {
@@ -289,7 +287,7 @@ export default function LineupEditor({
               className="btn chip autopick"
               onClick={pickAuto}
               title={t("lineup.auto")}
-              disabled={anyPicked || disabled}
+              disabled={filled || disabled}
             >
               ⚙ {t("lineup.auto")}
             </button>

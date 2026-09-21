@@ -16,8 +16,8 @@ use crate::{
     error::{ApiError, ApiResult},
     fixture,
     models::{
-        self, Awards, Goal, GroupInfo, Momentum, PenKick, PenResult, PlayerAward, RedCard,
-        RunMatch, RunPayload, RunTeam, TopScorer,
+        self, Awards, Goal, GroupInfo, LiveEvent, MatchBan, Momentum, PenKick, PenResult,
+        PlayerAward, RedCard, RunMatch, RunPayload, RunTeam, TopScorer,
     },
     names::{self, SquadPlayer},
     sim,
@@ -141,6 +141,18 @@ fn strategy_adj(strategy: &str, scoring: bool) -> f64 {
         ("defensive", true) => -0.08,
         ("defensive", false) => -0.14,
         _ => 0.0,
+    }
+}
+
+/// Maximum substitutions allowed in the tournament's era: five since 2022,
+/// three from 1998 (plus goalkeeper allowance folded in), two before that.
+fn max_subs_for(year: i32) -> usize {
+    if year >= 2022 {
+        5
+    } else if year >= 1998 {
+        3
+    } else {
+        2
     }
 }
 
@@ -407,10 +419,10 @@ struct Engine<'a> {
     /// Cumulative form/morale drift, mirroring `sim::apply_result` in memory.
     form_shift: HashMap<i64, i32>,
     morale_shift: HashMap<i64, i32>,
-    /// Matches remaining for suspended players (red cards). A player with a
-    /// positive count is excluded from his team's XI and decremented once his
-    /// team plays.
-    suspensions: HashMap<i64, i32>,
+    /// Matches remaining for suspended players, plus why ("red" | "injury").
+    /// A player with a positive count is excluded from his team's XI and
+    /// decremented once his team plays.
+    suspensions: HashMap<i64, (i32, String)>,
 }
 
 impl<'a> Engine<'a> {
@@ -751,6 +763,221 @@ impl<'a> Engine<'a> {
         pool.into_iter().next()
     }
 
+    /// Random outfielder from the current XI (used for injury draws).
+    fn pick_field(&mut self, xi: &[SquadPlayer]) -> Option<SquadPlayer> {
+        if xi.is_empty() {
+            return None;
+        }
+        let idx = (self.rng.unit() * xi.len() as f64) as usize % xi.len();
+        xi.get(idx).cloned()
+    }
+
+    /// Random XI outfielder to come off, favouring forward/midfield when losing
+    /// and defenders when winning (so the change matches the game state).
+    fn pick_sub_out(&mut self, xi: &[SquadPlayer], diff: i32) -> Option<SquadPlayer> {
+        let families: &[&str] = if diff < 0 {
+            &["FW", "MF"]
+        } else if diff > 0 {
+            &["DF", "MF"]
+        } else {
+            &["MF", "FW", "DF"]
+        };
+        let mut cands: Vec<&SquadPlayer> = xi
+            .iter()
+            .filter(|p| families.iter().any(|f| models::position_family(&p.position) == *f))
+            .collect();
+        if cands.is_empty() {
+            cands = xi
+                .iter()
+                .filter(|p| models::position_family(&p.position) != "GK")
+                .collect();
+        }
+        if cands.is_empty() {
+            return None;
+        }
+        let idx = (self.rng.unit() * cands.len() as f64) as usize % cands.len();
+        Some(cands[idx].clone())
+    }
+
+    /// Best unused bench player to come on, optionally restricted to a position
+    /// family (goalkeepers are never brought on for an outfielder change).
+    fn pick_in_from_bench(&self, bench: &[SquadPlayer], family: Option<&str>) -> Option<SquadPlayer> {
+        let mut pool: Vec<&SquadPlayer> = bench
+            .iter()
+            .filter(|p| {
+                family.map_or(true, |f| models::position_family(&p.position) == f)
+                    && models::position_family(&p.position) != "GK"
+            })
+            .collect();
+        pool.sort_by(|a, b| {
+            b.overall
+                .partial_cmp(&a.overall)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        pool.into_iter().next().map(|p| p.clone())
+    }
+
+    /// Builds the automatic live feed for one side of a match: injuries (which
+    /// consume a substitution when one remains and add a multi-match ban),
+    /// half-time strategy tweaks, score-aware tactical substitutions and a late
+    /// formation switch — all driven by the seeded RNG so results stay stable.
+    fn gen_match_events(
+        &mut self,
+        events: &mut Vec<LiveEvent>,
+        team: i64,
+        xi: &[SquadPlayer],
+        goals: &[crate::models::Goal],
+        max_subs: usize,
+        banned_at_kickoff: &HashSet<i64>,
+    ) -> ApiResult<()> {
+        let squad = self.squad(team)?;
+        let xi_ids: HashSet<i64> = xi.iter().map(|p| p.id).collect();
+        let bench: Vec<SquadPlayer> = squad
+            .iter()
+            .filter(|p| {
+                !xi_ids.contains(&p.id) && !banned_at_kickoff.contains(&p.id)
+            })
+            .cloned()
+            .collect();
+        let gf_at = |minute: i32| -> i32 {
+            goals
+                .iter()
+                .filter(|g| g.team_id == team && g.minute <= minute)
+                .count() as i32
+        };
+        let ga_at = |minute: i32| -> i32 {
+            goals
+                .iter()
+                .filter(|g| g.team_id != team && g.minute <= minute)
+                .count() as i32
+        };
+        let push_event = |events: &mut Vec<LiveEvent>,
+                              minute: i32,
+                              kind: &str,
+                              detail: String,
+                              out: Option<(String, Option<String>)>,
+                              inp: Option<(String, Option<String>)>| {
+            events.push(LiveEvent {
+                minute,
+                extra_time: false,
+                kind: kind.to_string(),
+                team_id: team,
+                detail,
+                out_player: out.as_ref().map(|(n, _)| n.clone()),
+                out_player_photo: out.as_ref().and_then(|(_, p)| p.clone()),
+                in_player: inp.as_ref().map(|(n, _)| n.clone()),
+                in_player_photo: inp.as_ref().and_then(|(_, p)| p.clone()),
+            });
+        };
+
+        let mut subs_used: usize = 0;
+
+        // Injuries: roughly 1-in-11 per side per match, lasting 1-4 matches.
+        if self.rng.unit() < 0.09 {
+            let w = self.rng.unit();
+            let banned_for = if w < 0.3 {
+                1
+            } else if w < 0.6 {
+                2
+            } else if w < 0.85 {
+                3
+            } else {
+                4
+            };
+            if let Some(outp) = self.pick_field(xi) {
+                if subs_used < max_subs && !bench.is_empty() {
+                    let inp = self.pick_in_from_bench(&bench, None);
+                    push_event(
+                        events,
+                        46,
+                        "injury",
+                        String::new(),
+                        Some((outp.name.clone(), outp.photo_url.clone())),
+                        inp.as_ref().map(|p| (p.name.clone(), p.photo_url.clone())),
+                    );
+                    subs_used += 1;
+                } else {
+                    push_event(
+                        events,
+                        46,
+                        "injury",
+                        String::new(),
+                        Some((outp.name.clone(), outp.photo_url.clone())),
+                        None,
+                    );
+                }
+                self.suspensions
+                    .insert(outp.id, (banned_for, "injury".to_string()));
+            }
+        }
+
+        // Half-time reaction: chase or protect the lead.
+        let d46 = gf_at(46) - ga_at(46);
+        let strat = if d46 < 0 {
+            Some("attacking")
+        } else if d46 > 0 {
+            Some("defensive")
+        } else if self.rng.unit() < 0.5 {
+            Some("normal")
+        } else {
+            None
+        };
+        if let Some(s) = strat {
+            push_event(
+                events,
+                46,
+                "strategy",
+                s.to_string(),
+                None,
+                None,
+            );
+        }
+
+        // Score-aware tactical substitutions within the era's allowance.
+        let slots = [46i32, 62, 70, 78, 84];
+        let quota = ((1 + (self.rng.unit() * 3.0) as usize).min(max_subs))
+            .saturating_sub(subs_used);
+        for &base in slots.iter().take(quota) {
+            let minute = (base + (self.rng.unit() * 5.0) as i32).min(88);
+            let d = gf_at(minute) - ga_at(minute);
+            let family = if d < 0 {
+                "FW"
+            } else if d > 0 {
+                "DF"
+            } else {
+                "MF"
+            };
+            if let Some(outp) = self.pick_sub_out(xi, d) {
+                if let Some(inp) = self.pick_in_from_bench(&bench, Some(family)) {
+                    push_event(
+                        events,
+                        minute,
+                        "sub",
+                        String::new(),
+                        Some((outp.name.clone(), outp.photo_url.clone())),
+                        Some((inp.name.clone(), inp.photo_url.clone())),
+                    );
+                }
+            }
+        }
+
+        // Late formation switch when the scoreboard begs for one.
+        let mn = 70 + (self.rng.unit() * 5.0) as i32;
+        let d = gf_at(mn) - ga_at(mn);
+        let formation = if d < 0 {
+            Some(if self.rng.unit() < 0.5 { "4-3-3" } else { "3-4-3" })
+        } else if d > 0 {
+            Some(if self.rng.unit() < 0.5 { "5-3-2" } else { "5-4-1" })
+        } else {
+            None
+        };
+        if let Some(f) = formation {
+            push_event(events, mn, "tactics", f.to_string(), None, None);
+        }
+
+        Ok(())
+    }
+
     /// Fractional xG edge from fielding a stronger/weaker XI than the squad
     /// average (only meaningful for the focus team's picks, applied uniformly
     /// so the auto XI baseline stays neutral).
@@ -780,7 +1007,10 @@ impl<'a> Engine<'a> {
 
     /// True when a player is currently serving a suspension.
     fn suspended(&self, player_id: i64) -> bool {
-        self.suspensions.get(&player_id).copied().unwrap_or(0) > 0
+        self.suspensions
+            .get(&player_id)
+            .map(|(n, _)| *n > 0)
+            .unwrap_or(false)
     }
 
     fn strength(&self, team_id: i64, knockout: bool) -> ApiResult<f64> {
@@ -1155,10 +1385,31 @@ player_id: p.id,
         // Players already banned for this match (the focus team's, so the
         // lineup editor can lock them). Captured before the bans tick down.
         let mut unavailable: Vec<i64> = Vec::new();
+        let mut bans: Vec<MatchBan> = Vec::new();
         if let Some(ft) = self.focus.filter(|t| *t == home || *t == away) {
             for p in self.squad(ft)? {
+                if let Some((n, reason)) = self.suspensions.get(&p.id) {
+                    if *n > 0 {
+                        unavailable.push(p.id);
+                        bans.push(MatchBan {
+                            player_id: p.id,
+                            player: p.name.clone(),
+                            player_photo: p.photo_url.clone(),
+                            reason: reason.clone(),
+                            matches: *n,
+                        });
+                    }
+                }
+            }
+        }
+
+        // Players suspended at kickoff (captured before the per-match tick), so
+        // the live feed never brings a banned player on from the bench.
+        let mut banned_at_kickoff: HashSet<i64> = HashSet::new();
+        for team in [home, away] {
+            for p in self.squad(team)? {
                 if self.suspended(p.id) {
-                    unavailable.push(p.id);
+                    banned_at_kickoff.insert(p.id);
                 }
             }
         }
@@ -1181,7 +1432,7 @@ player_id: p.id,
         // the next one.
         for team in [home, away] {
             for p in self.squad(team)? {
-                if let Some(n) = self.suspensions.get_mut(&p.id) {
+                if let Some((n, _reason)) = self.suspensions.get_mut(&p.id) {
                     if *n > 0 {
                         *n -= 1;
                     }
@@ -1189,7 +1440,32 @@ player_id: p.id,
             }
         }
         for r in &reds {
-            self.suspensions.insert(r.player_id, 1);
+            self.suspensions.insert(r.player_id, (1, "red".to_string()));
+        }
+
+        // Live feed only for the user's team's matches (like momentum): automatic
+        // substitutions/strategy/tactics changes plus injuries that may rule a
+        // player out for several matches.
+        let mut events: Vec<LiveEvent> = Vec::new();
+        if self.focus == Some(home) || self.focus == Some(away) {
+            let max_subs = max_subs_for(self.year);
+            self.gen_match_events(
+                &mut events,
+                home,
+                &home_xi,
+                &goals,
+                max_subs,
+                &banned_at_kickoff,
+            )?;
+            self.gen_match_events(
+                &mut events,
+                away,
+                &away_xi,
+                &goals,
+                max_subs,
+                &banned_at_kickoff,
+            )?;
+            events.sort_by(|a, b| a.minute.cmp(&b.minute));
         }
 
         let total_minutes = if extra_time { 120 } else { 90 };
@@ -1223,6 +1499,8 @@ player_id: p.id,
             unavailable,
             date: self.kickoffs.get(&if home < away { (home, away) } else { (away, home) }).cloned(),
             momentum,
+            bans,
+            events,
         };
         self.order.push(match_id);
         self.matches.push(rm);

@@ -550,6 +550,50 @@ pub struct RunMatch {
     pub date: Option<String>,
     /// Minute-by-minute momentum (only present for the user's team's matches).
     pub momentum: Option<Momentum>,
+    /// The focus team's banned players for this match (reason + match count).
+    #[serde(default)]
+    pub bans: Vec<MatchBan>,
+    /// Automatic tactics/strategy/substitution/injury feed (user's matches).
+    #[serde(default)]
+    pub events: Vec<LiveEvent>,
+}
+
+/// A player unavailable for this match, with the reason and how many matches
+/// (including the current one) they are out for.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MatchBan {
+    pub player_id: i64,
+    pub player: String,
+    #[serde(default)]
+    pub player_photo: Option<String>,
+    /// "red" | "injury"
+    pub reason: String,
+    /// Total matches unavailable, including the current match.
+    pub matches: i32,
+}
+
+/// One entry of the automatic live feed (tactical/strategic changes,
+/// substitutions and injuries). Only generated for the user's team's matches.
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct LiveEvent {
+    pub minute: i32,
+    /// True when the change happened after regulation time.
+    pub extra_time: bool,
+    /// "tactics" | "strategy" | "sub" | "injury"
+    pub kind: String,
+    pub team_id: i64,
+    /// Formation ("4-3-3") for tactics, strategy name ("attacking") for
+    /// strategy, empty otherwise.
+    #[serde(default)]
+    pub detail: String,
+    #[serde(default)]
+    pub out_player: Option<String>,
+    #[serde(default)]
+    pub out_player_photo: Option<String>,
+    #[serde(default)]
+    pub in_player: Option<String>,
+    #[serde(default)]
+    pub in_player_photo: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

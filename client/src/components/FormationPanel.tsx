@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 import { useI18n } from "../i18n";
 import LineupEditor from "./LineupEditor";
-import type { LineupConfig, Player, RunMatch } from "../types";
+import type { LineupConfig, MatchBan, Player, RunMatch } from "../types";
 
 interface Props {
   tournamentId: number;
@@ -14,6 +14,7 @@ interface Props {
   year?: number;
   disabled?: boolean;
   unavailable?: number[];
+  bans?: MatchBan[];
   onReady?: (cfg: LineupConfig | null) => void;
 }
 
@@ -27,6 +28,7 @@ export default function FormationPanel({
   year,
   disabled = false,
   unavailable,
+  bans,
   onReady,
 }: Props) {
   const { t, stage, country } = useI18n();
@@ -45,12 +47,16 @@ export default function FormationPanel({
   const opponent =
     match.home_team_id === teamId ? match.away_team_name : match.home_team_name;
 
-  const suspendedNames = useMemo(
+  const banDetails = useMemo(
     () =>
-      (squad ?? [])
-        .filter((p) => (unavailable ?? []).includes(p.id))
-        .map((p) => p.name),
-    [squad, unavailable],
+      (bans ?? [])
+        .filter((ban: MatchBan) => (unavailable ?? []).includes(ban.player_id))
+        .map((ban: MatchBan) => {
+          const reasonText = ban.reason === "red" ? t("lineup.redCard") : t("lineup.injury");
+          const matchText = ban.matches === 1 ? t("lineup.oneMatch") : t("lineup.matches", { n: ban.matches });
+          return `${ban.player} (${reasonText}, ${matchText})`;
+        }),
+    [bans, unavailable, t],
   );
 
   return (
@@ -69,10 +75,10 @@ export default function FormationPanel({
       {!squad && !error && <p className="hint">{t("squad.loading")}</p>}
       {squad && (
         <>
-          {suspendedNames.length > 0 && (
+          {banDetails.length > 0 && (
             <p className="sus-note">
               <span className="red-card tiny" aria-hidden />
-              {t("lineup.suspendedNote", { names: suspendedNames.join(", ") })}
+              {t("lineup.suspendedNote", { names: banDetails.join(", ") })}
             </p>
           )}
           <LineupEditor

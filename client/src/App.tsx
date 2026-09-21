@@ -31,7 +31,9 @@ interface Flow {
   team: Participant | null;
   participants: Participant[];
   run: RunPayload | null;
-  revealed: number;
+  /** Match ids revealed in the hub (prefix no longer required — the user can
+   *  reveal any listed match). */
+  revealed: Set<number>;
   runError: string | null;
 }
 
@@ -40,7 +42,7 @@ const emptyFlow: Flow = {
   team: null,
   participants: [],
   run: null,
-  revealed: 0,
+  revealed: new Set<number>(),
   runError: null,
 };
 
@@ -84,13 +86,9 @@ export default function App() {
     api.me().then(setUser).catch(() => setUser(null));
   }, [step]);
 
-  const revealedSet = useMemo(
-    () => new Set((flow.run?.order ?? []).slice(0, flow.revealed)),
-    [flow.run, flow.revealed],
-  );
   const revealedMatches = useMemo(
-    () => (flow.run?.matches ?? []).filter((m) => revealedSet.has(m.id)),
-    [flow.run, revealedSet],
+    () => (flow.run?.matches ?? []).filter((m) => flow.revealed.has(m.id)),
+    [flow.run, flow.revealed],
   );
 
   const focusId = flow.run?.focus_team_id ?? null;
@@ -118,17 +116,13 @@ export default function App() {
     inlineMatch ?? (focusConfigured ? focusMatches[focusMatches.length - 1] ?? null : null);
   const panelDisabled = inlineMatch == null && panelMatch != null;
 
-  // Players banned for the panel's match: for an upcoming match that is the
-  // red cards from the team's previous match (a one-match ban).
+  // Players banned for the panel's match (server-computed: red cards from the
+  // previous match AND longer injury bans, each with a match count).
   const panelUnavailable = (() => {
     if (!panelMatch) return [] as number[];
-    if (!inlineMatch) return panelMatch.unavailable ?? [];
-    const i = focusMatches.indexOf(panelMatch);
-    const prev = i > 0 ? focusMatches[i - 1] : null;
-    return (prev?.reds ?? [])
-      .filter((r) => r.team_id === focusId)
-      .map((r) => r.player_id);
+    return panelMatch.unavailable ?? [];
   })();
+  const panelBans = panelMatch?.bans ?? [];
 
   /** Match helpers used by the match-by-match fast-forward. */
   const isFocusMatch = (run: RunPayload, id: number) => {
@@ -167,9 +161,11 @@ export default function App() {
       .then((run) => {
         setSeed(run.seed);
         runGuard.current = null;
-        const idx = target ? run.order.indexOf(target.matchId) : -1;
-        const revealed = idx >= 0 ? idx + 1 : 0;
-        setFlow((f) => ({ ...f, run, revealed, runError: null }));
+        setFlow((f) => {
+          const revealed = new Set(f.revealed);
+          if (target) revealed.add(target.matchId);
+          return { ...f, run, revealed, runError: null };
+        });
         if (target?.open) {
           const fm = run.matches.find((m) => m.id === target.matchId);
           if (fm) setLiveMatch(fm);
@@ -239,44 +235,50 @@ export default function App() {
     };
   }, []);
 
+  /** First match in chronological order that has not been revealed yet. */
+  const firstUnrevealed = (run: RunPayload, revealed: Set<number>) =>
+    run.matches.find((m) => !revealed.has(m.id)) ?? null;
+
   /** Hub fast-forward: simulate match by match (result only, 500ms apart) until
-   *  the next focus match is reached so it can be played, or until the end of the
+   *  a focus match is reached so it can be played, or until the end of the
    *  tournament. It keeps going across round boundaries. */
   const runFastForward = () => {
     if (!flow.run || ffRunning) return;
     const run = flow.run;
-    const cur = flow.revealed;
-    const first = cur < run.order.length ? run.order[cur] : null;
-    if (first == null || isFocusMatch(run, first)) return;
-    const nextAt = (r: RunPayload, at: number) => {
-      const id = r.order[at];
-      return id != null ? r.matches.find((m) => m.id === id) ?? null : null;
-    };
+    const first = firstUnrevealed(run, flow.revealed);
+    if (first == null || isFocusMatch(run, first.id)) return;
     setFfRunning(true);
     ffTimer.current = window.setInterval(() => {
       const r = runRef.current;
-      const at = revealedRef.current;
-      const m = r ? nextAt(r, at) : null;
+      const rev = revealedRef.current;
+      const m = r ? firstUnrevealed(r, rev) : null;
       if (!r || !m || isFocusMatch(r, m.id)) {
         stopFF();
         return;
       }
-      setFlow((f) => (f.run ? { ...f, revealed: f.revealed + 1 } : f));
+      setFlow((f) => {
+        if (!f.run) return f;
+        const next = new Set(f.revealed);
+        next.add(m.id);
+        return { ...f, revealed: next };
+      });
     }, 500);
   };
 
   /** The Forward button can act only while the next pending match is not ours. */
-  const canFF =
-    !!flow.run &&
-    flow.revealed < flow.run.order.length &&
-    !isFocusMatch(
-      flow.run,
-      flow.run.order[flow.revealed] ?? -1,
+  const canFF = (() => {
+    if (!flow.run) return false;
+    const next = firstUnrevealed(flow.run, flow.revealed);
+    return (
+      !!next &&
+      flow.revealed.size < flow.run.order.length &&
+      !isFocusMatch(flow.run, next.id)
     );
+  })();
 
   // Ask before abandoning an in-progress interactive run with a refresh.
   useEffect(() => {
-    if (!interactive || !flow.run || flow.revealed >= (flow.run.matches.length || 0)) return;
+    if (!interactive || !flow.run || flow.revealed.size >= (flow.run.matches.length || 0)) return;
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       e.returnValue = "";
@@ -285,8 +287,13 @@ export default function App() {
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
   }, [interactive, flow.run, flow.revealed]);
 
-  const revealUpTo = (idx: number) =>
-    setFlow((f) => (f.run ? { ...f, revealed: Math.max(f.revealed, idx + 1) } : f));
+  const revealMatch = (m: RunMatch) =>
+    setFlow((f) => {
+      if (!f.run || f.revealed.has(m.id)) return f;
+      const next = new Set(f.revealed);
+      next.add(m.id);
+      return { ...f, revealed: next };
+    });
 
   const pickTournament = (t: Tournament) => {
     setFlow({ ...emptyFlow, tournament: t });
@@ -343,7 +350,7 @@ export default function App() {
     setConfigs({});
     setLastLineup(null);
     setSeed(run.seed);
-    setFlow((f) => ({ ...f, tournament: t, run, revealed: 0 }));
+    setFlow((f) => ({ ...f, tournament: t, run, revealed: new Set<number>() }));
     setStep("overview");
   };
 
@@ -362,7 +369,7 @@ export default function App() {
   /** Logo click: ask before abandoning an in-progress interactive run. */
   const onBrandClick = () => {
     const inProgress =
-      interactive && flow.run && flow.revealed < (flow.run.matches.length || 0);
+      interactive && flow.run && flow.revealed.size < (flow.run.matches.length || 0);
     if (inProgress) setConfirmLeave(true);
     else reset();
   };
@@ -370,25 +377,21 @@ export default function App() {
   const liveReveal = (m: RunMatch) => {
     const translate = t;
     setFlow((f) => {
-      if (!f.run) return f;
-      const idx = f.run.order.indexOf(m.id);
-      if (idx < 0 || idx + 1 <= f.revealed) return f;
-      const newRevealed = idx + 1;
+      if (!f.run || f.revealed.has(m.id)) return f;
       const run = f.run;
-      // Check for round completion or elimination after state updates
+      const revealed = new Set(f.revealed);
+      revealed.add(m.id);
       setTimeout(() => {
-        checkRoundProgress(run, newRevealed, translate);
+        checkRoundProgress(run, revealed, translate);
       }, 0);
-      return { ...f, revealed: newRevealed };
+      return { ...f, revealed };
     });
   };
 
-  const checkRoundProgress = (run: RunPayload, newRevealed: number, t: (key: string) => string) => {
+  const checkRoundProgress = (run: RunPayload, revealedIds: Set<number>, t: (key: string) => string) => {
     const allMatches = run.matches;
-    const revealedIds = new Set(run.order.slice(0, newRevealed));
     const revealedMatches = allMatches.filter((m) => revealedIds.has(m.id));
-    const nextMatchIdx = newRevealed < run.order.length ? run.order[newRevealed] : null;
-    const nextMatch = nextMatchIdx ? allMatches.find((m) => m.id === nextMatchIdx) : null;
+    const nextMatch = firstUnrevealed(run, revealedIds);
     
     // Check if current stage is complete (all matches in that stage revealed)
     if (nextMatch) {
@@ -503,7 +506,7 @@ export default function App() {
         {step === "overview" && flow.tournament && (
           <Overview
             run={flow.run}
-            revealed={flow.revealed}
+            revealedIds={flow.revealed}
             runError={flow.runError}
             revealedMatches={revealedMatches}
             interactive={interactive}
@@ -511,7 +514,7 @@ export default function App() {
             ffRunning={ffRunning}
             canFF={canFF}
             scrollToId={scrollToMatch}
-            onSimulate={revealUpTo}
+            onSimulate={revealMatch}
             onReplay={replayMatch}
             onOpenDetail={setMatchDetail}
             isConfigured={(m) => !!configs[matchKey(m)]}
@@ -523,6 +526,7 @@ export default function App() {
             }
             formationDisabled={panelDisabled}
             formationUnavailable={panelUnavailable}
+            formationBans={panelBans}
             draftReady={inlineMatch ? !configs[matchKey(inlineMatch)] && !!draft : false}
             onDraft={setDraft}
             onStart={() => postRun(false, null, configs)}

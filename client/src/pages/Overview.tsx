@@ -3,11 +3,11 @@ import { useI18n, flagFor } from "../i18n";
 import PlayerCard from "../components/PlayerCard";
 import FormationPanel from "../components/FormationPanel";
 import Bracket from "../components/Bracket";
-import type { LineupConfig, RunMatch, RunPayload } from "../types";
+import type { LineupConfig, MatchBan, RunMatch, RunPayload } from "../types";
 
 interface Props {
   run: RunPayload | null;
-  revealed: number;
+  revealedIds: Set<number>;
   runError: string | null;
   revealedMatches: RunMatch[];
   interactive: boolean;
@@ -15,7 +15,7 @@ interface Props {
   ffRunning: boolean;
   canFF: boolean;
   scrollToId?: number | null;
-  onSimulate: (idx: number) => void;
+  onSimulate: (m: RunMatch) => void;
   onReplay: (m: RunMatch) => void;
   onOpenDetail: (m: RunMatch) => void;
   isConfigured: (m: RunMatch) => boolean;
@@ -25,6 +25,8 @@ interface Props {
   formationDisabled?: boolean;
   /** Player ids suspended for the formation panel's match. */
   formationUnavailable?: number[];
+  /** Match bans with reason and match counts for the formation panel's match. */
+  formationBans?: MatchBan[];
   /** True when the inline editor's XI is complete and ready to play. */
   draftReady: boolean;
   onDraft?: (cfg: LineupConfig | null) => void;
@@ -60,7 +62,7 @@ const shortDate = (iso: string): string => {
 
 export default function Overview({
   run,
-  revealed,
+  revealedIds,
   runError,
   revealedMatches,
   interactive,
@@ -76,6 +78,7 @@ export default function Overview({
   formationInitial,
   formationDisabled = false,
   formationUnavailable,
+  formationBans,
   draftReady,
   onDraft,
   onStart,
@@ -108,11 +111,11 @@ export default function Overview({
 
   // While fast-forwarding, keep the current match in view (list only).
   useEffect(() => {
-    if (revealed <= 0) return;
+    if (revealedIds.size <= 0) return;
     const row = matchScrollRef.current?.querySelector<HTMLElement>(".match-row.next");
     scrollRowIntoView(row ?? null, "smooth");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revealed]);
+  }, [revealedIds.size]);
 
   const runCodes = new Map<number, string>();
   for (const g of run?.groups ?? []) {
@@ -121,7 +124,7 @@ export default function Overview({
     }
   }
 
-  const revealedIds = new Set(revealedMatches.map((m) => m.id));
+  const revealedMatchIds = new Set(revealedMatches.map((m) => m.id));
   // The bracket appears once the knockout stage starts; unplayed rounds show as
   // TBD placeholders until their results are revealed.
   const hasKnockout = revealedMatches.some((m) =>
@@ -261,7 +264,7 @@ export default function Overview({
     const out = [];
     const firstKey = order[0]?.stage_key;
     for (const [key, p] of map.entries()) {
-      const revealed = p.matches.filter((m) => revealedIds.has(m.id));
+      const revealed = p.matches.filter((m) => revealedMatchIds.has(m.id));
       const groupType = key === "GROUP" || key === "FINAL";
       // Show the opening group stage from kickoff (all-zero tables); every
       // later phase only once its first match has been played.
@@ -276,7 +279,7 @@ export default function Overview({
           ? []
           : [...p.matches]
               .sort((a, b) => b.day - a.day || b.id - a.id)
-              .map((m) => ({ m, played: revealedIds.has(m.id) })),
+              .map((m) => ({ m, played: revealedMatchIds.has(m.id) })),
       });
     }
     out.sort((a, b) => b.lastDay - a.lastDay);
@@ -339,19 +342,22 @@ export default function Overview({
       .slice(0, 10);
   })();
 
-  const allRevealed = total > 0 && revealed >= total;
+  const allRevealed = total > 0 && revealedIds.size >= total;
   const champion = run?.champion ?? null;
 
   const isMine = (m: RunMatch) => focusId != null && (m.home_team_id === focusId || m.away_team_id === focusId);
+
+  const firstUnrevealed = (r: RunPayload, shown: Set<number>) =>
+    r.matches.find((m) => !shown.has(m.id)) ?? null;
 
   // While a round is in progress only that round is shown; matches from later
   // rounds (the next matchday / knockout round) stay hidden until the current
   // one is fully revealed. All matches of a round share the same `day`.
   const currentDay = (() => {
-    if (!run || revealed >= run.order.length) return null;
-    const byId = new Map(run.matches.map((m) => [m.id, m]));
-    return byId.get(run.order[revealed])?.day ?? null;
+    if (!run) return null;
+    return firstUnrevealed(run, revealedIds)?.day ?? null;
   })();
+  const nextMatch = run ? firstUnrevealed(run, revealedIds) : null;
 
   return (
     <section>
@@ -416,11 +422,9 @@ export default function Overview({
                 {run.matches
                   .filter((m) => currentDay == null || m.day <= currentDay)
                   .map((m) => {
-                  const idx = run.order.indexOf(m.id);
-                  const done = idx < revealed;
-                  const next = idx === revealed;
+                  const done = revealedIds.has(m.id);
+                  const isNext = m.id === nextMatch?.id;
                   const mine = isMine(m);
-                  const locked = idx > revealed;
                   return (
                     <div
                       key={m.id}
@@ -428,8 +432,7 @@ export default function Overview({
                       className={
                         "match-row" +
                         (done ? " done" : "") +
-                        (next ? " next" : "") +
-                        (locked ? " locked" : "") +
+                        (isNext ? " next" : "") +
                         (mine ? " mine" : "") +
                         (m.id === scrollToId ? " ff-target" : "")
                       }
@@ -470,7 +473,7 @@ export default function Overview({
                         {flagFor(m.away_team_name)} {country(m.away_team_name)}
                       </span>
                       <span className="mr-action">
-                        {next && mine && interactive && (
+                        {!done && mine && interactive && (
                           <button
                             className="btn play msg"
                             onClick={(e) => {
@@ -491,8 +494,8 @@ export default function Overview({
                             ▶ {t("hub.play")}
                           </button>
                         )}
-                        {next && !mine && (
-                          <button className="btn sim msg" onClick={() => onSimulate(idx)}>
+                        {!done && !mine && (
+                          <button className="btn sim msg" onClick={() => onSimulate(m)}>
                             {t("hub.simulate")}
                           </button>
                         )}
@@ -520,6 +523,7 @@ export default function Overview({
                     year={run.year}
                     disabled={formationDisabled}
                     unavailable={formationUnavailable}
+                    bans={formationBans}
                     onReady={onDraft}
                   />
                 </div>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flagFor, useI18n } from "../i18n";
-import type { Goal, RedCard, RunMatch } from "../types";
+import type { Goal, LiveEvent, RedCard, RunMatch } from "../types";
 
 interface Props {
   match: RunMatch;
@@ -103,31 +103,31 @@ export default function LiveMatch({
     [m.reds, min],
   );
 
-  // Goals and cards share one timeline, newest first, ties by extra time then
-  // goals before cards. Photos and shirt numbers ride along for the rows.
+  // Goals, cards and events share one timeline, newest first, ties by extra time then
+  // goals before cards before events. Photos and shirt numbers ride along for the rows.
   type Incident =
     | { kind: "goal"; g: Goal }
-    | { kind: "red"; r: RedCard };
-  const incName = (i: Incident) => (i.kind === "goal" ? i.g.scorer : i.r.player);
-  const incPhoto = (i: Incident) =>
-    i.kind === "goal" ? i.g.scorer_photo : i.r.player_photo;
-  const incNumber = (i: Incident) =>
-    i.kind === "goal" ? i.g.shirt_number : i.r.shirt_number;
-  const incMin = (i: Incident) => (i.kind === "goal" ? i.g.minute : i.r.minute);
-  const incET = (i: Incident) => (i.kind === "goal" ? i.g.extra_time : i.r.extra_time);
+    | { kind: "red"; r: RedCard }
+    | { kind: "event"; e: LiveEvent };
+  const incMin = (i: Incident) =>
+    i.kind === "goal" ? i.g.minute : i.kind === "red" ? i.r.minute : i.e.minute;
+  const incET = (i: Incident) =>
+    i.kind === "goal" ? i.g.extra_time : i.kind === "red" ? i.r.extra_time : i.e.extra_time;
   const incidents = useMemo(() => {
     const list: Incident[] = [
       ...(m.goals ?? []).map((g) => ({ kind: "goal" as const, g })),
       ...(m.reds ?? []).map((r) => ({ kind: "red" as const, r })),
+      ...(m.events ?? []).map((e) => ({ kind: "event" as const, e })),
     ];
     return list.filter((i) => incMin(i) <= min).sort((a, b) => {
       const byMin = incMin(b) - incMin(a);
       if (byMin !== 0) return byMin;
       const byEt = Number(incET(b)) - Number(incET(a));
       if (byEt !== 0) return byEt;
-      return a.kind === "red" ? 1 : -1;
+      const kindOrder = { goal: 0, red: 1, event: 2 };
+      return kindOrder[a.kind] - kindOrder[b.kind];
     });
-  }, [m.goals, m.reds, min]);
+  }, [m.goals, m.reds, m.events, min]);
 
   const W = 900;
   const H = 108;
@@ -415,45 +415,81 @@ export default function LiveMatch({
 
       {incidents.length > 0 && (
         <div className="goals-card">
-          {incidents.map((i, idx) => (
-            <div
-              key={idx}
-              className={"goal-row" + (i.kind === "red" ? " red-row" : "")}
-            >
-              <span className="goal-ball" aria-hidden>
-                {i.kind === "goal" ? "⚽" : "🟥"}
-              </span>
-              {incPhoto(i) ? (
-                <img
-                  className="goal-photo"
-                  src={incPhoto(i)!}
-                  alt=""
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
-                  }}
-                />
-              ) : null}
-              <span className="goal-player">
-                {incNumber(i) != null ? `${incNumber(i)}. ` : ""}
-                {incName(i)}
-                {i.kind === "goal" && i.g.own_goal ? (
-                  <span className="og-badge">{t("match.ownGoal")}</span>
+          {incidents.map((i, idx) => {
+            const isEvent = i.kind === "event";
+            const event = isEvent ? i.e : null;
+            const eventIcon = isEvent
+              ? event!.kind === "tactics"
+                ? "📋"
+                : event!.kind === "strategy"
+                  ? "🎯"
+                  : event!.kind === "sub"
+                    ? "🔄"
+                    : "⚕️"
+              : i.kind === "goal"
+                ? "⚽"
+                : "🟥";
+            const eventClass = isEvent
+              ? ` event-row event-${event!.kind}`
+              : i.kind === "red"
+                ? " red-row"
+                : "";
+            const playerName = isEvent
+              ? event!.kind === "sub"
+                ? `${event!.out_player} → ${event!.in_player}`
+                : event!.kind === "injury"
+                  ? `${event!.out_player} (${t("match.injury")})`
+                  : event!.detail || event!.kind
+              : i.kind === "goal"
+                ? i.g.scorer
+                : i.r.player;
+            const playerNumber = isEvent
+              ? undefined
+              : i.kind === "goal"
+                ? i.g.shirt_number
+                : i.r.shirt_number;
+            const playerPhoto = isEvent
+              ? event!.in_player_photo ?? event!.out_player_photo
+              : i.kind === "goal"
+                ? i.g.scorer_photo
+                : i.r.player_photo;
+            const teamId = isEvent
+              ? event!.team_id
+              : i.kind === "goal"
+                ? i.g.team_id
+                : i.r.team_id;
+            return (
+              <div key={idx} className={"goal-row" + eventClass}>
+                <span className="goal-ball" aria-hidden>
+                  {eventIcon}
+                </span>
+                {playerPhoto ? (
+                  <img
+                    className="goal-photo"
+                    src={playerPhoto}
+                    alt=""
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                  />
                 ) : null}
-              </span>
-              {i.kind === "goal" && i.g.assist ? (
-                <span className="goal-assist">
-                  · {t("match.assist", { name: i.g.assist })}
+                <span className="goal-player">
+                  {playerNumber != null ? `${playerNumber}. ` : ""}
+                  {playerName}
                 </span>
-              ) : null}
-              <span className="goal-end">
-                <span className="goal-min">
-                  {incMin(i)}'
-                  {incET(i) ? ` ${t("match.etShort")}` : ""}
+                {isEvent && event!.kind === "sub" && (
+                  <span className="goal-assist">{t("match.substitution")}</span>
+                )}
+                <span className="goal-end">
+                  <span className="goal-min">
+                    {incMin(i)}'
+                    {incET(i) ? ` ${t("match.etShort")}` : ""}
+                  </span>
+                  <span className="goal-team">{teamFlag(teamId)}</span>
                 </span>
-                <span className="goal-team">{teamFlag(i.kind === "goal" ? i.g.team_id : i.r.team_id)}</span>
-              </span>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       )}
       </div>
