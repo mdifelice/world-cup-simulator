@@ -107,7 +107,14 @@ export default function Lab() {
 
   // Load tournaments on mount
   useEffect(() => {
-    api.tournaments().then(setTournaments).catch(() => {});
+    api.tournaments().then((tournaments) => {
+      setTournaments(tournaments);
+      // Auto-select 2026 tournament if available
+      const wc2026 = tournaments.find((t) => t.year === 2026);
+      if (wc2026) {
+        setSelectedTournamentId(wc2026.id);
+      }
+    }).catch(() => {});
   }, []);
 
   // Load teams when tournament selected
@@ -116,7 +123,18 @@ export default function Lab() {
       setTeams([]);
       return;
     }
-    api.participants(selectedTournamentId).then(setTeams).catch(() => setTeams([]));
+    api.participants(selectedTournamentId).then((teams) => {
+      setTeams(teams);
+      // Auto-select Argentina vs Spain for 2026
+      if (teams.length > 0) {
+        const argentina = teams.find((t) => t.name === "Argentina");
+        const spain = teams.find((t) => t.name === "Spain");
+        if (argentina && spain) {
+          setSelectedHomeTeamId(argentina.id);
+          setSelectedAwayTeamId(spain.id);
+        }
+      }
+    }).catch(() => setTeams([]));
   }, [selectedTournamentId]);
 
   // Load the two squads when both teams are picked (stats come from the
@@ -159,6 +177,7 @@ export default function Lab() {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === " ") {
         e.preventDefault();
+        e.stopPropagation();
         liveMatchRef.current?.togglePause();
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();

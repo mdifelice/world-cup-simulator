@@ -646,26 +646,16 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
                   : "";
             const playerName = isEvent
               ? event!.kind === "sub"
-                ? `${event!.out_player}${event!.out_player_number != null ? ` ${event!.out_player_number}` : ""} → ${event!.in_player}${event!.in_player_number != null ? ` ${event!.in_player_number}` : ""}`
+                ? `${event!.out_player_number != null ? `${event!.out_player_number}. ` : ""}${event!.out_player} → ${event!.in_player_number != null ? `${event!.in_player_number}. ` : ""}${event!.in_player}`
                 : event!.kind === "injury"
-                  ? `${event!.out_player}${event!.out_player_number != null ? ` ${event!.out_player_number}` : ""} (${t("match.injury")})`
+                  ? `${event!.out_player_number != null ? `${event!.out_player_number}. ` : ""}${event!.out_player} (${t("match.injury")})`
                   : event!.detail || event!.kind
               : isPen
                 ? pen!.taker
                 : i.kind === "goal"
                   ? i.g.scorer
                   : i.r.player;
-            const playerNumber = isEvent
-              ? event!.kind === "sub"
-                ? event!.out_player_number != null ? `${event!.out_player_number}. ` : undefined
-                : event!.kind === "injury"
-                  ? event!.out_player_number != null ? `${event!.out_player_number}. ` : undefined
-                  : undefined
-              : isPen
-                ? undefined
-                : i.kind === "goal"
-                  ? i.g.shirt_number
-                  : i.r.shirt_number;
+            const playerNumber = undefined;
             const playerPhoto = isEvent
               ? event!.in_player_photo ?? event!.out_player_photo
               : isPen
