@@ -774,27 +774,26 @@ export default function Overview({
                   </option>
                 ))}
               </select>
-              <span className="scorers-count">{filteredScorers.length}</span>
             </div>
             <div className="scorers-table">
               <div className="scorers-header">
                 <span
                   className={`scorers-col scorers-col-rank ${sortKey === "rank" ? "active" : ""}`}
-                  onClick={() => { setSortKey("rank"); setSortDesc(!sortDesc); }}
+                  onClick={() => { if (sortKey === "rank") setSortDesc(!sortDesc); else { setSortKey("rank"); setSortDesc(true); } }}
                   title={t("cup.sort")}
                 >
                   #{sortKey === "rank" && (sortDesc ? " ▼" : " ▲")}
                 </span>
                 <span
                   className={`scorers-col scorers-col-photo ${sortKey === "photo" ? "active" : ""}`}
-                  onClick={() => { setSortKey("photo"); setSortDesc(!sortDesc); }}
+                  onClick={() => { if (sortKey === "photo") setSortDesc(!sortDesc); else { setSortKey("photo"); setSortDesc(true); } }}
                   title={t("cup.sort")}
                 >
                   {sortKey === "photo" && (sortDesc ? " ▼" : " ▲")}
                 </span>
                 <span
                   className={`scorers-col scorers-col-name ${sortKey === "name" ? "active" : ""}`}
-                  onClick={() => { setSortKey("name"); setSortDesc(!sortDesc); }}
+                  onClick={() => { if (sortKey === "name") setSortDesc(!sortDesc); else { setSortKey("name"); setSortDesc(true); } }}
                   title={t("cup.sort")}
                 >
                   {t("cup.player")}
@@ -802,7 +801,7 @@ export default function Overview({
                 </span>
                 <span
                   className={`scorers-col scorers-col-goals ${sortKey === "goals" ? "active" : ""}`}
-                  onClick={() => { setSortKey("goals"); setSortDesc(!sortDesc); }}
+                  onClick={() => { if (sortKey === "goals") setSortDesc(!sortDesc); else { setSortKey("goals"); setSortDesc(true); } }}
                   title={t("cup.sort")}
                 >
                   {t("cup.goals")}
@@ -810,7 +809,7 @@ export default function Overview({
                 </span>
                 <span
                   className={`scorers-col scorers-col-assists ${sortKey === "assists" ? "active" : ""}`}
-                  onClick={() => { setSortKey("assists"); setSortDesc(!sortDesc); }}
+                  onClick={() => { if (sortKey === "assists") setSortDesc(!sortDesc); else { setSortKey("assists"); setSortDesc(true); } }}
                   title={t("cup.sort")}
                 >
                   {t("cup.assists")}
@@ -818,7 +817,7 @@ export default function Overview({
                 </span>
                 <span
                   className={`scorers-col scorers-col-rating ${sortKey === "rating" ? "active" : ""}`}
-                  onClick={() => { setSortKey("rating"); setSortDesc(!sortDesc); }}
+                  onClick={() => { if (sortKey === "rating") setSortDesc(!sortDesc); else { setSortKey("rating"); setSortDesc(true); } }}
                   title={t("cup.ratingHint")}
                 >
                   {t("cup.rating")}
@@ -826,7 +825,7 @@ export default function Overview({
                 </span>
                 <span
                   className={`scorers-col scorers-col-matches ${sortKey === "matches" ? "active" : ""}`}
-                  onClick={() => { setSortKey("matches"); setSortDesc(!sortDesc); }}
+                  onClick={() => { if (sortKey === "matches") setSortDesc(!sortDesc); else { setSortKey("matches"); setSortDesc(true); } }}
                   title={t("cup.sort")}
                 >
                   {t("cup.matches")}

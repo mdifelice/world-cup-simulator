@@ -648,7 +648,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
               ? event!.kind === "sub"
                 ? `${event!.out_player}${event!.out_player_number != null ? ` ${event!.out_player_number}` : ""} → ${event!.in_player}${event!.in_player_number != null ? ` ${event!.in_player_number}` : ""}`
                 : event!.kind === "injury"
-                  ? `${event!.out_player} (${t("match.injury")})`
+                  ? `${event!.out_player}${event!.out_player_number != null ? ` ${event!.out_player_number}` : ""} (${t("match.injury")})`
                   : event!.detail || event!.kind
               : isPen
                 ? pen!.taker
@@ -656,7 +656,11 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
                   ? i.g.scorer
                   : i.r.player;
             const playerNumber = isEvent
-              ? undefined
+              ? event!.kind === "sub"
+                ? event!.out_player_number != null ? `${event!.out_player_number}. ` : undefined
+                : event!.kind === "injury"
+                  ? event!.out_player_number != null ? `${event!.out_player_number}. ` : undefined
+                  : undefined
               : isPen
                 ? undefined
                 : i.kind === "goal"

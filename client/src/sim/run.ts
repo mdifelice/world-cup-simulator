@@ -1010,6 +1010,7 @@ class Engine {
     team: number,
     xi: SquadPlayer[],
     goals: Goal[],
+    redCards: [number, SquadPlayer] | null,
     maxSubs: number,
     bannedAtKickoff: Set<number>,
   ): void {
@@ -1044,25 +1045,72 @@ class Engine {
 
     let subsUsed = 0;
 
+    // Red card for this team (if applicable)
+    if (redCards) {
+      const [minute] = redCards;
+      push(minute, "red", "", redCards[1], null);
+      subbedOut.add(redCards[1].id);
+      // If red card is GK, handle GK substitution
+      if (redCards[1].position === "GK") {
+        // Find a GK on the bench
+        const gkBench = bench.find(p => p.position === "GK");
+        if (gkBench) {
+          push(redCards[0], "sub", "GK sent off", redCards[1], gkBench);
+        } else {
+          // No GK on bench, field player takes GK
+          const fieldPlayer = xi.find(p => p.id !== redCards[1].id);
+          if (fieldPlayer) {
+            push(redCards[0], "sub", "GK sent off, field player takes GK", fieldPlayer, fieldPlayer);
+          }
+        }
+      }
+    }
+
     // Injuries: roughly 1-in-11 per side per match, lasting 1-4 matches.
+    // Can happen at any minute during the match.
     if (this.rng.unit() < 0.09) {
       const w = this.rng.unit();
       const bannedFor = w < 0.3 ? 1 : w < 0.6 ? 2 : w < 0.85 ? 3 : 4;
       const outp = this.pickField(xi);
       if (outp) {
+        const isGK = outp.position === "GK";
+        const minute = Math.min(1 + Math.floor(this.rng.unit() * 90), 90);
         if (subsUsed < maxSubs && bench.length > 0) {
-          const inp = this.pickInFromBench(bench, null, subbedIn);
-          push(46, "injury", "", outp, inp);
-          subsUsed += 1;
-          subbedOut.add(outp.id);
-          if (inp) subbedIn.add(inp.id);
-        } else {
-          push(46, "injury", "", outp, null);
-          subbedOut.add(outp.id);
+          // Find a suitable replacement (same position if possible, especially for GK)
+          let inp: SquadPlayer | null = null;
+          if (isGK) {
+            inp = this.pickInFromBench(bench, "GK", subbedIn);
+          }
+          if (!inp) {
+            inp = this.pickInFromBench(bench, null, subbedIn);
+          }
+          if (inp) {
+            push(minute, "injury", "", outp, inp);
+            subsUsed += 1;
+            subbedOut.add(outp.id);
+            if (inp) subbedIn.add(inp.id);
+          } else {
+            // No substitution available - player injured but no sub available
+            push(minute, "injury", "", outp, null);
+            subbedOut.add(outp.id);
+            // If GK injured and no sub, a field player must take GK role
+            if (isGK) {
+              const fieldPlayer = xi.find(p => p.id !== outp.id && !subbedOut.has(p.id));
+              if (fieldPlayer) {
+                push(minute, "sub", "GK injured, field player takes GK", fieldPlayer, fieldPlayer);
+              }
+            }
+            subbedOut.add(outp.id);
+          }
+          this.suspensions.set(outp.id, [bannedFor, "injury"]);
         }
-        this.suspensions.set(outp.id, [bannedFor, "injury"]);
       }
     }
+
+    // Red card for this team (if applicable)
+    // This is called from playMatch where red card is already determined
+    // We'll handle red card events here for the user's team
+    // Red card is passed as parameter (minute and player)
 
     // Half-time reaction: chase or protect the lead.
     const d46 = gfAt(46) - gaAt(46);
@@ -1292,8 +1340,8 @@ class Engine {
     const events: LiveEvent[] = [];
     if (this.focus === home || this.focus === away) {
       const maxSubs = maxSubsFor(this.year);
-      this.genMatchEvents(events, home, homeXi, goals, maxSubs, bannedAtKickoff);
-      this.genMatchEvents(events, away, awayXi, goals, maxSubs, bannedAtKickoff);
+      this.genMatchEvents(events, home, homeXi, goals, homeRed, maxSubs, bannedAtKickoff);
+      this.genMatchEvents(events, away, awayXi, goals, awayRed, maxSubs, bannedAtKickoff);
       events.sort((a, b) => a.minute - b.minute);
     }
 
