@@ -353,8 +353,10 @@ export interface LiveEvent {
   detail?: string;
   out_player?: string | null;
   out_player_photo?: string | null;
+  out_player_number?: number | null;
   in_player?: string | null;
   in_player_photo?: string | null;
+  in_player_number?: number | null;
 }
 
 export interface RunMatch {

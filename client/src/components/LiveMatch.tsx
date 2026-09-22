@@ -646,7 +646,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
                   : "";
             const playerName = isEvent
               ? event!.kind === "sub"
-                ? `${event!.out_player} → ${event!.in_player}`
+                ? `${event!.out_player}${event!.out_player_number != null ? ` ${event!.out_player_number}` : ""} → ${event!.in_player}${event!.in_player_number != null ? ` ${event!.in_player_number}` : ""}`
                 : event!.kind === "injury"
                   ? `${event!.out_player} (${t("match.injury")})`
                   : event!.detail || event!.kind

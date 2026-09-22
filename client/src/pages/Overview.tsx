@@ -380,15 +380,14 @@ export default function Overview({
     }
     return [...by.values()]
       .filter((e) => e.goals > 0)
-      .sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name))
-      .slice(0, 50);
+      .sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name));
   })();
   // Sidebar keeps the classic top-10 table.
   const scorers = scorersAll.slice(0, 10);
 
   const matchRatings = run?.ratings ?? {};
 
-  type SortKey = "rank" | "name" | "goals" | "assists" | "rating" | "matches";
+  type SortKey = "rank" | "name" | "goals" | "assists" | "rating" | "matches" | "photo";
   const [sortKey, setSortKey] = useState<SortKey>("goals");
   const [sortDesc, setSortDesc] = useState(true);
 
@@ -405,6 +404,7 @@ export default function Overview({
       else if (sortKey === "rating") { va = matchRatings[a.id] ?? 0; vb = matchRatings[b.id] ?? 0; }
       else if (sortKey === "matches") { va = a.matches; vb = b.matches; }
       else if (sortKey === "rank") { va = 0; vb = 0; } // rank is just display order
+      else if (sortKey === "photo") { va = a.photo ? 1 : 0; vb = b.photo ? 1 : 0; } // photo presence
       else { va = a.name; vb = b.name; } // name
       if (va !== vb) {
         if (typeof va === "number") return sortDesc ? (vb as number) - (va as number) : (va as number) - (vb as number);
@@ -414,7 +414,7 @@ export default function Overview({
     });
   };
 
-  const sortedScorers = sortScorers(filteredScorers);
+  const sortedScorers = sortScorers(filteredScorers).slice(0, 50);
   const scorerCountries = [...new Set(scorersAll.map((s) => s.team_name))].sort(
     (a, b) => a.localeCompare(b),
   );
@@ -784,6 +784,13 @@ export default function Overview({
                   title={t("cup.sort")}
                 >
                   #{sortKey === "rank" && (sortDesc ? " ▼" : " ▲")}
+                </span>
+                <span
+                  className={`scorers-col scorers-col-photo ${sortKey === "photo" ? "active" : ""}`}
+                  onClick={() => { setSortKey("photo"); setSortDesc(!sortDesc); }}
+                  title={t("cup.sort")}
+                >
+                  {sortKey === "photo" && (sortDesc ? " ▼" : " ▲")}
                 </span>
                 <span
                   className={`scorers-col scorers-col-name ${sortKey === "name" ? "active" : ""}`}

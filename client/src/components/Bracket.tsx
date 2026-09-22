@@ -294,7 +294,37 @@ export default function Bracket({
                   ) : (
                       (() => {
                         const colIdx = cols.findIndex((col) => col.key === c.key);
-                        if (colIdx <= 0) return <div className="bk-tbd">{t("match.tbd")}</div>;
+                        // First knockout round: teams are known from group stage qualifiers
+                        if (colIdx === 0) {
+                          const hasHome = m.home_team_name && m.home_team_id;
+                          const hasAway = m.away_team_name && m.away_team_id;
+                          if (!hasHome && !hasAway) return <div className="bk-tbd">{t("match.tbd")}</div>;
+                          return (
+                            <div className="bk-qual">
+                              <div className="bk-line">
+                                {hasHome ? (
+                                  <>
+                                    <span className="bk-flag">{flagFor(m.home_team_name)}</span>
+                                    <span className="bk-code">{codeOf(m, true)}</span>
+                                  </>
+                                ) : (
+                                  <span className="bk-tbd-min">{t("match.tbd")}</span>
+                                )}
+                              </div>
+                              <div className="bk-line">
+                                {hasAway ? (
+                                  <>
+                                    <span className="bk-flag">{flagFor(m.away_team_name)}</span>
+                                    <span className="bk-code">{codeOf(m, false)}</span>
+                                  </>
+                                ) : (
+                                  <span className="bk-tbd-min">{t("match.tbd")}</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        }
+                        // Subsequent rounds: feed from previous round winners
                         const prevCol = cols[colIdx - 1];
                         const fa = prevCol.matches[2 * i];
                         const fb = prevCol.matches[2 * i + 1];

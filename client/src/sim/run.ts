@@ -1035,8 +1035,10 @@ class Engine {
         detail,
         out_player: out ? out.name : null,
         out_player_photo: out ? out.photo_url : null,
+        out_player_number: out ? out.shirt_number : null,
         in_player: inp ? inp.name : null,
         in_player_photo: inp ? inp.photo_url : null,
+        in_player_number: inp ? inp.shirt_number : null,
       });
     };
 
