@@ -3,7 +3,7 @@ import { useI18n, flagFor } from "../i18n";
 import PlayerCard from "../components/PlayerCard";
 import FormationPanel from "../components/FormationPanel";
 import Bracket from "../components/Bracket";
-import type { LineupConfig, MatchBan, RunMatch, RunPayload, Locale, Speed } from "../types";
+import type { LineupConfig, MatchBan, RunMatch, RunPayload } from "../types";
 
 interface Props {
   run: RunPayload | null;
@@ -86,7 +86,7 @@ export default function Overview({
 }: Props) {
   const focusId = run?.focus_team_id ?? null;
   const total = run?.matches.length ?? 0;
-  const { t, stage, country, locale, setLocale, speed, setSpeed } = useI18n();
+  const { t, stage, country } = useI18n();
   const [bracketOpen, setBracketOpen] = useState(false);
   const [scorersOpen, setScorersOpen] = useState(false);
   const [countryFilter, setCountryFilter] = useState("");
@@ -327,11 +327,13 @@ export default function Overview({
       photo?: string | null;
       goals: number;
       assists: number;
+      matches: number;
     }
     const by = new Map<number, Entry>();
     // Only use completed matches (revealedMatches) so the table is empty
     // before any game is played, matching the share dialog behavior.
     for (const m of revealedMatches) {
+      const scorerIdsInMatch = new Set<number>();
       for (const g of m.goals) {
         if (g.own_goal) continue;
         const teamName = m.home_team_id === g.team_id ? m.home_team_name : m.away_team_name;
@@ -345,10 +347,12 @@ export default function Overview({
             photo: g.scorer_photo,
             goals: 0,
             assists: 0,
+            matches: 0,
           };
           by.set(g.scorer_id, e);
         }
         e.goals += 1;
+        scorerIdsInMatch.add(g.scorer_id);
         if (g.assist_id != null && g.assist_id !== g.scorer_id) {
           let a = by.get(g.assist_id);
           if (!a) {
@@ -360,11 +364,18 @@ export default function Overview({
               photo: g.assist_photo,
               goals: 0,
               assists: 0,
+              matches: 0,
             };
             by.set(g.assist_id, a);
           }
           a.assists += 1;
+          scorerIdsInMatch.add(g.assist_id);
         }
+      }
+      // Increment matches played for each player who scored or assisted in this match
+      for (const id of scorerIdsInMatch) {
+        const e = by.get(id);
+        if (e) e.matches += 1;
       }
     }
     return [...by.values()]
@@ -377,7 +388,7 @@ export default function Overview({
 
   const matchRatings = run?.ratings ?? {};
 
-  type SortKey = "rank" | "name" | "goals" | "assists" | "rating";
+  type SortKey = "rank" | "name" | "goals" | "assists" | "rating" | "matches";
   const [sortKey, setSortKey] = useState<SortKey>("goals");
   const [sortDesc, setSortDesc] = useState(true);
 
@@ -392,6 +403,7 @@ export default function Overview({
       if (sortKey === "goals") { va = a.goals; vb = b.goals; }
       else if (sortKey === "assists") { va = a.assists; vb = b.assists; }
       else if (sortKey === "rating") { va = matchRatings[a.id] ?? 0; vb = matchRatings[b.id] ?? 0; }
+      else if (sortKey === "matches") { va = a.matches; vb = b.matches; }
       else if (sortKey === "rank") { va = 0; vb = 0; } // rank is just display order
       else { va = a.name; vb = b.name; } // name
       if (va !== vb) {
@@ -436,28 +448,6 @@ export default function Overview({
           <p className="hint">
             {focusId ? t("cup.managing") : t("cup.neutral")}
           </p>
-        </div>
-        <div className="top-controls">
-          <select
-            className="ctrl-select"
-            value={locale}
-            onChange={(e) => setLocale(e.target.value as Locale)}
-            aria-label={t("cup.language")}
-          >
-            <option value="en">English</option>
-            <option value="es">Español</option>
-          </select>
-          <select
-            className="ctrl-select"
-            value={speed}
-            onChange={(e) => setSpeed(parseFloat(e.target.value) as Speed)}
-            aria-label={t("cup.speed")}
-          >
-            <option value="0.5">{t("cup.slow")}</option>
-            <option value="1">{t("cup.normal")}</option>
-            <option value="2">{t("cup.fast")}</option>
-            <option value="4">{t("cup.ultraFast")}</option>
-          </select>
         </div>
         {run && !allRevealed && (
           <div className="top-actions cmd">
@@ -746,7 +736,6 @@ export default function Overview({
                 focusId={focusId}
                 codes={runCodes}
                 onOpen={(m) => {
-                  setBracketOpen(false);
                   onOpenDetail(m);
                 }}
                 scale={1.5}
@@ -789,45 +778,53 @@ export default function Overview({
             </div>
             <div className="scorers-table">
               <div className="scorers-header">
-                <button
+                <span
                   className={`scorers-col scorers-col-rank ${sortKey === "rank" ? "active" : ""}`}
                   onClick={() => { setSortKey("rank"); setSortDesc(!sortDesc); }}
                   title={t("cup.sort")}
                 >
                   #{sortKey === "rank" && (sortDesc ? " ▼" : " ▲")}
-                </button>
-                <button
+                </span>
+                <span
                   className={`scorers-col scorers-col-name ${sortKey === "name" ? "active" : ""}`}
                   onClick={() => { setSortKey("name"); setSortDesc(!sortDesc); }}
                   title={t("cup.sort")}
                 >
                   {t("cup.player")}
                   {sortKey === "name" && (sortDesc ? " ▼" : " ▲")}
-                </button>
-                <button
+                </span>
+                <span
                   className={`scorers-col scorers-col-goals ${sortKey === "goals" ? "active" : ""}`}
                   onClick={() => { setSortKey("goals"); setSortDesc(!sortDesc); }}
                   title={t("cup.sort")}
                 >
                   {t("cup.goals")}
                   {sortKey === "goals" && (sortDesc ? " ▼" : " ▲")}
-                </button>
-                <button
+                </span>
+                <span
                   className={`scorers-col scorers-col-assists ${sortKey === "assists" ? "active" : ""}`}
                   onClick={() => { setSortKey("assists"); setSortDesc(!sortDesc); }}
                   title={t("cup.sort")}
                 >
                   {t("cup.assists")}
                   {sortKey === "assists" && (sortDesc ? " ▼" : " ▲")}
-                </button>
-                <button
+                </span>
+                <span
                   className={`scorers-col scorers-col-rating ${sortKey === "rating" ? "active" : ""}`}
                   onClick={() => { setSortKey("rating"); setSortDesc(!sortDesc); }}
                   title={t("cup.ratingHint")}
                 >
                   {t("cup.rating")}
                   {sortKey === "rating" && (sortDesc ? " ▼" : " ▲")}
-                </button>
+                </span>
+                <span
+                  className={`scorers-col scorers-col-matches ${sortKey === "matches" ? "active" : ""}`}
+                  onClick={() => { setSortKey("matches"); setSortDesc(!sortDesc); }}
+                  title={t("cup.sort")}
+                >
+                  {t("cup.matches")}
+                  {sortKey === "matches" && (sortDesc ? " ▼" : " ▲")}
+                </span>
               </div>
               <div className="scorers-scroll">
                 {sortedScorers.map((s, i) => (
@@ -854,6 +851,7 @@ export default function Overview({
                     <span className="scorers-cell scorers-rating">
                       {(matchRatings[s.id] ?? 0).toFixed(1)}
                     </span>
+                    <span className="scorers-cell">{s.matches}</span>
                   </div>
                 ))}
               </div>

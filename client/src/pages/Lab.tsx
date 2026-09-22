@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useI18n, flagFor } from "../i18n";
 import LiveMatch from "../components/LiveMatch";
-import type { Participant, Player, RunMatch, Strategy, Tournament } from "../types";
+import type { Participant, Player, RunMatch, Strategy, Tournament, Speed } from "../types";
 import { STRATEGIES } from "../types";
 import type { LabTeam } from "../sim/run";
 import { playLabMatch, randomSeed } from "../sim/run";
@@ -79,7 +79,7 @@ function statsFrom(scores: Score[]) {
 }
 
 export default function Lab() {
-  const { t } = useI18n();
+  const { t, speed, setSpeed } = useI18n();
   const [showLiveMatch, setShowLiveMatch] = useState(false);
   const [showSummary, setShowSummary] = useState<RunMatch | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -149,6 +149,27 @@ export default function Lab() {
     if (id == null) return fallback;
     return teams.find((tm) => tm.id === id)?.name ?? `Team ${id}`;
   };
+
+  // Keyboard shortcuts for live match
+  useEffect(() => {
+    if (!showLiveMatch) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === " ") {
+        e.preventDefault();
+        // Space toggles play/pause - we'd need to expose this from LiveMatch
+        // For now, we can't easily control LiveMatch from parent
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        // Go back - could navigate history
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        // Go forward
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [showLiveMatch]);
 
   const squadsReady =
     selectedHomeTeamId != null &&
@@ -289,6 +310,20 @@ export default function Lab() {
             <button className="btn primary" onClick={() => generateEngine(false)} disabled={generating || !squadsReady}>
               {generating ? t("lab.generating") : t("lab.simulate")}
             </button>
+          </div>
+          <div className="lab-toolgroup">
+            <label>{t("cup.speed")}</label>
+            <select
+              className="lab-speed-select"
+              value={speed}
+              onChange={(e) => setSpeed(parseFloat(e.target.value) as Speed)}
+              aria-label={t("cup.speed")}
+            >
+              <option value="0.5">{t("cup.slow")}</option>
+              <option value="1">{t("cup.normal")}</option>
+              <option value="2">{t("cup.fast")}</option>
+              <option value="4">{t("cup.ultraFast")}</option>
+            </select>
           </div>
           <div className="lab-toolgroup lab-format">
             <label>{t("lab.format")}</label>

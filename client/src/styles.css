@@ -1936,13 +1936,12 @@ body {
 }
 .scorers-header {
   display: grid;
-  grid-template-columns: 36px 36px 1fr 48px 48px 56px;
+  grid-template-columns: 36px 36px 1fr 48px 48px 56px 48px;
   gap: 4px;
   padding: 4px 8px;
   font-size: 11px;
   font-weight: 600;
   color: var(--muted);
-  border-bottom: 1px solid var(--line);
   position: sticky;
   top: 0;
   background: var(--panel);
@@ -1950,16 +1949,17 @@ body {
 }
 .scorers-col {
   text-align: center;
-  cursor: default;
+  cursor: pointer;
   user-select: none;
 }
 .scorers-col-name {
   text-align: left;
-  cursor: default;
+  cursor: pointer;
 }
 .scorers-col-goals.active,
 .scorers-col-assists.active,
-.scorers-col-rating.active {
+.scorers-col-rating.active,
+.scorers-col-matches.active {
   color: var(--accent);
 }
 .scorers-scroll {
@@ -1974,7 +1974,7 @@ body {
 }
 .scorers-row {
   display: grid;
-  grid-template-columns: 36px 36px 1fr 48px 48px 56px;
+  grid-template-columns: 36px 36px 1fr 48px 48px 56px 48px;
   gap: 4px;
   align-items: center;
   padding: 4px 8px;

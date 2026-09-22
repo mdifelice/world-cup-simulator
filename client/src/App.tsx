@@ -5,6 +5,7 @@ import type {
   RunMatch,
   RunPayload,
   Tournament,
+  Speed,
 } from "./types";
 import { api, setToken } from "./api";
 import { localeName, useI18n, type Locale } from "./i18n";
@@ -85,7 +86,7 @@ export default function App() {
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [notifications, setNotifications] = useState<Array<{ id: number; message: string; type: "info" | "success" | "warning" }>>([]);
   const notifyId = useRef(0);
-  const { t, locale, setLocale } = useI18n();
+  const { t, locale, setLocale, speed, setSpeed } = useI18n();
 
   // Silent #token= capture from the OAuth redirect (login stays hidden).
   useEffect(() => {
@@ -260,7 +261,6 @@ export default function App() {
   /** Hub fast-forward: simulate match by match (result only, interval adjusted by speed) until
    *  a focus match is reached so it can be played, or until the end of the
    *  tournament. It keeps going across round boundaries. */
-  const { speed } = useI18n();
   const FF_BASE_MS = 500;
   const runFastForward = () => {
     if (!flow.run || ffRunning) return;
@@ -491,6 +491,17 @@ export default function App() {
           >
             <option value="en">{localeName("en")}</option>
             <option value="es">{localeName("es")}</option>
+          </select>
+          <select
+            className="lang"
+            value={speed}
+            onChange={(e) => setSpeed(parseFloat(e.target.value) as Speed)}
+            title={t("cup.speed")}
+          >
+            <option value="0.5">{t("cup.slow")}</option>
+            <option value="1">{t("cup.normal")}</option>
+            <option value="2">{t("cup.fast")}</option>
+            <option value="4">{t("cup.ultraFast")}</option>
           </select>
         </div>
       </header>
