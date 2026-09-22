@@ -235,16 +235,6 @@ fn schema(conn: &Connection) -> rusqlite::Result<()> {
             logo TEXT
         );
 
-        CREATE TABLE IF NOT EXISTS sim_runs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            tournament_id INTEGER NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,
-            created_at TEXT NOT NULL DEFAULT (datetime('now')),
-            payload TEXT NOT NULL
-        );
-        CREATE INDEX IF NOT EXISTS idx_sim_runs_user ON sim_runs(user_id);
-        CREATE INDEX IF NOT EXISTS idx_sim_runs_tournament ON sim_runs(tournament_id);
-
         CREATE TABLE IF NOT EXISTS tournament_phases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             tournament_id INTEGER NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,

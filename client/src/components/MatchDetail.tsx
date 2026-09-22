@@ -129,6 +129,9 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                   {inc.kind === "goal" && inc.g.own_goal ? (
                     <span className="og-badge">{t("match.ownGoal")}</span>
                   ) : null}
+                  {inc.kind === "goal" && inc.g.penalty ? (
+                    <span className="pen-badge">{t("match.penShort")}</span>
+                  ) : null}
                 </span>
                 {inc.kind === "goal" && inc.g.assist ? (
                   <span className="goal-assist">
@@ -168,9 +171,18 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                       <span className="pen-num">{k.round}</span>
                       <span className="pen-taker">{k.taker}</span>
                       <span
-                        className={"pen-kick" + (k.scored ? " scored" : " missed")}
+                        className={
+                          "pen-kick" + (k.scored ? " scored" : k.saved ? " saved" : " missed")
+                        }
+                        title={
+                          k.scored
+                            ? t("match.penScored")
+                            : k.saved
+                              ? t("match.penSaved")
+                              : t("match.penMissed")
+                        }
                       >
-                        {k.scored ? "✓" : "✕"}
+                        {k.scored ? "✓" : k.saved ? "🧤" : "✕"}
                       </span>
                     </div>
                   ))}
@@ -184,9 +196,18 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                       <span className="pen-num">{k.round}</span>
                       <span className="pen-taker">{k.taker}</span>
                       <span
-                        className={"pen-kick" + (k.scored ? " scored" : " missed")}
+                        className={
+                          "pen-kick" + (k.scored ? " scored" : k.saved ? " saved" : " missed")
+                        }
+                        title={
+                          k.scored
+                            ? t("match.penScored")
+                            : k.saved
+                              ? t("match.penSaved")
+                              : t("match.penMissed")
+                        }
                       >
-                        {k.scored ? "✓" : "✕"}
+                        {k.scored ? "✓" : k.saved ? "🧤" : "✕"}
                       </span>
                     </div>
                   ))}

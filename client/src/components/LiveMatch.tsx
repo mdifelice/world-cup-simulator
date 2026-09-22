@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { flagFor, useI18n } from "../i18n";
-import type { Goal, LiveEvent, RedCard, RunMatch } from "../types";
+import type { Goal, LiveEvent, PenKick, RedCard, RunMatch } from "../types";
 
 interface Props {
   match: RunMatch;
@@ -12,6 +12,9 @@ interface Props {
 const UP = "#2da562";
 const DOWN = "#c8443a";
 const LIVE_MS = 150;
+// Between penalty kicks the reveal pauses a beat, mirroring the minute-to-minute
+// tick but long enough to read each outcome.
+const PEN_MS = 900;
 
 export default function LiveMatch({
   match: m,
@@ -53,6 +56,7 @@ export default function LiveMatch({
   const stopBoundaryET1 = m.extra_time ? 105 + addedET1 : 0;
   const stopBoundaryET2 = m.extra_time ? 120 + addedET2 : 0;
   const [min, setMin] = useState(0);
+
   const pauseUntilRef = useRef(0);
   const halfPausedRef = useRef(false);
 
@@ -92,17 +96,50 @@ export default function LiveMatch({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [done]);
 
-  // Hidden shortcut: Ctrl+Shift+F jumps the live match straight to full time.
+  // Shootout: once the match ends (added time included), pause 1s, then reveal
+  // each penalty kick one by one in the incidents row.
+  const kicks = m.penalties?.kicks ?? [];
+  const [penShown, setPenShown] = useState(0);
+  const [pensGo, setPensGo] = useState(false);
+
+  useEffect(() => {
+    setPenShown(0);
+    setPensGo(false);
+  }, [m.id]);
+
+  useEffect(() => {
+    if (!done || !m.penalties || kicks.length === 0) {
+      setPensGo(false);
+      return;
+    }
+    const t = setTimeout(() => setPensGo(true), 1000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done, m.id]);
+
+  useEffect(() => {
+    if (!pensGo || kicks.length === 0) return;
+    if (penShown >= kicks.length) return;
+    const t = setTimeout(() => setPenShown((c) => c + 1), PEN_MS);
+    return () => clearTimeout(t);
+  }, [pensGo, penShown, kicks.length]);
+
+  // Hidden shortcut: Ctrl+Shift+F jumps the live match straight to full time
+  // and, when the match ended in a shootout, reveals every kick at once.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.shiftKey && (e.key === "F" || e.key === "f")) {
         e.preventDefault();
         setMin((cur) => (cur >= totalLength ? cur : totalLength));
+        if (kicks.length > 0) {
+          setPensGo(true);
+          setPenShown(kicks.length);
+        }
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [totalLength]);
+  }, [totalLength, kicks.length]);
 
   const isFocus =
     focusTeamId != null &&
@@ -128,15 +165,30 @@ export default function LiveMatch({
   );
 
   // Goals, cards and events share one timeline, newest first, ties by extra time then
-  // goals before cards before events. Photos and shirt numbers ride along for the rows.
+  // goals before cards before events. Penalty shootout kicks are appended in a later
+  // lane (130+) so they always sort on top once revealed. Photos and shirt numbers ride
+  // along for the rows.
   type Incident =
     | { kind: "goal"; g: Goal }
     | { kind: "red"; r: RedCard }
-    | { kind: "event"; e: LiveEvent };
+    | { kind: "event"; e: LiveEvent }
+    | { kind: "pen"; k: PenKick; idx: number };
   const incMin = (i: Incident) =>
-    i.kind === "goal" ? i.g.minute : i.kind === "red" ? i.r.minute : i.e.minute;
+    i.kind === "goal"
+      ? i.g.minute
+      : i.kind === "red"
+        ? i.r.minute
+        : i.kind === "event"
+          ? i.e.minute
+          : 130 + i.idx;
   const incET = (i: Incident) =>
-    i.kind === "goal" ? i.g.extra_time : i.kind === "red" ? i.r.extra_time : i.e.extra_time;
+    i.kind === "goal"
+      ? i.g.extra_time
+      : i.kind === "red"
+        ? i.r.extra_time
+        : i.kind === "event"
+          ? i.e.extra_time
+          : false;
   const incidents = useMemo(() => {
     const list: Incident[] = [
       ...(m.goals ?? []).map((g) => ({ kind: "goal" as const, g })),
@@ -144,16 +196,19 @@ export default function LiveMatch({
       ...(m.events ?? [])
         .filter((e) => e.kind === "sub" || e.kind === "injury")
         .map((e) => ({ kind: "event" as const, e })),
+      ...kicks.slice(0, penShown).map((k, idx) => ({ kind: "pen" as const, k, idx })),
     ];
-    return list.filter((i) => incMin(i) <= min).sort((a, b) => {
-      const byMin = incMin(b) - incMin(a);
-      if (byMin !== 0) return byMin;
-      const byEt = Number(incET(b)) - Number(incET(a));
-      if (byEt !== 0) return byEt;
-      const kindOrder = { goal: 0, red: 1, event: 2 };
-      return kindOrder[a.kind] - kindOrder[b.kind];
-    });
-  }, [m.goals, m.reds, m.events, min]);
+    return list
+      .filter((i) => (i.kind === "pen" ? true : incMin(i) <= min))
+      .sort((a, b) => {
+        const byMin = incMin(b) - incMin(a);
+        if (byMin !== 0) return byMin;
+        const byEt = Number(incET(b)) - Number(incET(a));
+        if (byEt !== 0) return byEt;
+        const kindOrder = { goal: 0, red: 1, event: 2, pen: 3 };
+        return kindOrder[a.kind] - kindOrder[b.kind];
+      });
+  }, [m.goals, m.reds, m.events, min, kicks, penShown]);
 
   const W = 900;
   const H = 108;
@@ -162,7 +217,63 @@ export default function LiveMatch({
   const topLane = 14;
   const botLane = 90;
   const legendY = 104;
-  const bw = W / totalLength;
+
+  // Growing/zoom axis: the visible span grows as the match progresses.
+  // - First half (min ≤ 45): span = 45
+  // - HT added time (min 46..45+addedHT): span = min (grows with each added minute)
+  // - Second half regular: span = 90 + addedHT
+  // - FT added time: span = min (grows)
+  // - ET: similar pattern with 105/120 boundaries.
+  // This makes the chart "zoom" to the current period, with period lines
+  // at the right edge during their active period, then settling to their
+  // final fraction once the next period begins.
+  const baseSH = 90 + addedHT + addedFT;
+  const visTotal = (() => {
+    if (min <= 45) return 45;
+    if (min <= 45 + addedHT) return min; // HT added time: grow
+    if (min <= 90 + addedHT) return 90 + addedHT; // 2nd half regular
+    if (min <= 90 + addedHT + addedFT) return min; // FT added time: grow
+    if (!m.extra_time) return 90 + addedHT + addedFT;
+    // Extra time
+    if (min <= baseSH + 15) return baseSH + 15; // ET1 regular
+    if (min <= baseSH + 15 + addedET1) return min; // ET1 added: grow
+    if (min <= baseSH + 30 + addedET1) return baseSH + 30 + addedET1; // ET2 regular
+    return Math.min(min, totalLength); // ET2 added: grow
+  })();
+  const bw = W / visTotal;
+
+  // Map a chart minute to an index of the momentum series. The engine only builds
+  // samples for the regulation (90) or extra-time (120) minutes, so added-time
+  // minutes borrow the last sample of their half, and the second-half and
+  // extra-time samples are reached at the duration the clock walks through.
+  const sampleAt = (mm: number): number => {
+    if (!series) return 0;
+    if (mm <= 0) return 0;
+    if (mm <= 45) return mm - 1;
+    if (mm <= 45 + addedHT) return 44;
+    if (mm <= 90 + addedHT) return mm - 1 - addedHT;
+    if (mm <= 90 + addedHT + addedFT) return 89;
+    if (m.extra_time) {
+      if (mm <= 105 + addedHT + addedFT) return mm - 1 - addedHT - addedFT;
+      if (mm <= 105 + addedHT + addedFT + addedET1) return 104;
+      if (mm <= 120 + addedHT + addedFT + addedET1) return mm - 1 - addedHT - addedFT - addedET1;
+      return Math.min(119, series.length - 1);
+    }
+    return Math.min(mm - 1, series.length - 1);
+  };
+
+  // Chronological slot of an incident on the fixed axis. Minute values overlap
+  // across halves (e.g. 46' can be a first-half added-time goal or a second-half
+  // one), so the rare added-time goals in the overlapping range lean on the
+  // position of their more common regular-play counterpart.
+  const seqForMinute = (v: number, et: boolean): number => {
+    if (!et) return v <= 45 ? v : v + addedHT;
+    if (!m.extra_time) return v + addedHT;
+    const baseSH = 90 + addedHT + addedFT;
+    if (v <= 105 + addedET1) return baseSH + (v - 90);
+    if (v <= 120) return baseSH + 15 + addedET1 + (v - 105);
+    return baseSH + 30 + addedET1 + (v - 120);
+  };
 
   // The chart is stretched to the dialog width (preserveAspectRatio="none"), so
   // its text would be distorted. Counter-scale it back to a natural aspect.
@@ -192,36 +303,58 @@ export default function LiveMatch({
       let sum = 0;
       let n = 0;
       for (let j = Math.max(0, mm - ROLL); j < mm; j++) {
-        sum += series[Math.min(j, series.length - 1)];
+        sum += series[sampleAt(j)];
         n += 1;
       }
-      const s = n > 0 ? sum / n : series[Math.min(mm - 1, series.length - 1)];
+      const s = n > 0 ? sum / n : series[sampleAt(mm)];
       const d = s - 0.5;
       out.push({
         m: mm,
-        x: ((mm - 0.5) / totalLength) * W,
+        x: ((mm - 0.5) / visTotal) * W,
         up: d >= 0,
         h: Math.max(1, Math.round(Math.abs(d) * 2 * maxHalf)),
       });
     }
     return out;
-  }, [series, min, totalLength, W, maxHalf]);
+  }, [series, min, visTotal, W, maxHalf]);
 
   const isAwayFocusMomentum = momentum != null && focusTeamId === m.away_team_id;
 
+  // Period line positions on the growing axis:
+  // - HT line: right edge (1.0) during 1st half + HT added time; then at (45+addedHT)/visTotal
+  // - FT line: right edge during 2nd half + FT added; then at (90+addedHT+addedFT)/visTotal (or 1.0 if no ET)
+  // - ET1 line (105'): right edge during ET1, then at its fraction
+  // - Final FT: always at 1.0 when done, or right edge during ET2
+  const HT_CHRONO = 45 + addedHT;
+  const FT_CHRONO = 90 + addedHT + addedFT;
+  const ET1_CHRONO = baseSH + 15 + addedET1;
+  const ET2_CHRONO = baseSH + 30 + addedET1 + addedET2; // = totalLength
+
+  const htLine = min <= HT_CHRONO ? 1 : HT_CHRONO / visTotal;
+  const ftLine = m.extra_time
+    ? (min <= FT_CHRONO ? 1 : FT_CHRONO / visTotal)
+    : (min <= FT_CHRONO ? 1 : FT_CHRONO / visTotal); // for non-ET, FT_CHRONO = totalLength, so always 1 when min>FT_CHRONO (which never happens)
+  const et1Line = m.extra_time
+    ? (min <= ET1_CHRONO ? 1 : ET1_CHRONO / visTotal)
+    : 0;
+  const et2Line = m.extra_time
+    ? (min <= ET2_CHRONO ? 1 : ET2_CHRONO / visTotal)
+    : 0;
+
   const goalMarks = goalsUpTo.map((g, i) => {
-    const x = (g.minute / totalLength) * W;
+    const x = (seqForMinute(g.minute, g.extra_time) / visTotal) * W;
     const isFocusGoal =
       focusTeamId != null && g.team_id === focusTeamId
         ? !isAwayFocusMomentum
         : isAwayFocusMomentum;
     const y = isFocusGoal ? topLane : botLane;
-    const note = g.extra_time ? ` ${t("match.etShort")}` : "";
+    let note = g.extra_time ? ` ${t("match.etShort")}` : "";
+    if (g.penalty) note += ` ${t("match.penShort")}`;
     return { x, y, minute: g.minute, note, key: i };
   });
 
   const redMarks = redsUpTo.map((r, i) => {
-    const x = (r.minute / totalLength) * W;
+    const x = (seqForMinute(r.minute, r.extra_time) / visTotal) * W;
     const isFocusRed =
       focusTeamId != null && r.team_id === focusTeamId
         ? !isAwayFocusMomentum
@@ -242,10 +375,10 @@ export default function LiveMatch({
 
   const yourLead = focusTeamId === m.home_team_id ? gauge >= 0 : gauge <= 0;
 
-  const tick = (mmin: number, label: string) => {
-    const x = (mmin / totalLength) * W;
+  const tick = (p: number, label: string) => {
+    const x = p * W;
     return (
-      <g key={mmin}>
+      <g key={p}>
         <line x1={x} y1={0} x2={x} y2={H} stroke="rgba(27,37,48,0.15)" strokeWidth="1" />
         <text
           transform={`translate(${x + 3} ${legendY}) scale(${textSx} 1)`}
@@ -278,6 +411,15 @@ export default function LiveMatch({
   const flagName = (n: string) => [flagFor(n), country(n)].filter(Boolean).join(" ");
   const teamFlag = (teamId: number) =>
     flagFor(teamId === m.home_team_id ? m.home_team_name : m.away_team_name);
+
+  // Running shootout tally while the kicks are being revealed.
+  const penLive = done && pensGo && m.penalties != null && penShown < m.penalties.kicks.length;
+  const penShownHome = kicks
+    .slice(0, penShown)
+    .filter((k) => k.team_id === m.home_team_id && k.scored).length;
+  const penShownAway = kicks
+    .slice(0, penShown)
+    .filter((k) => k.team_id === m.away_team_id && k.scored).length;
 
   return (
     <div className="live-modal">
@@ -319,7 +461,13 @@ export default function LiveMatch({
       </div>
       <p className="match-label">
         {done ? (
-          resultLabel
+          penLive ? (
+            <span className="pens">
+              {t("match.pensLive", { home: penShownHome, away: penShownAway })}
+            </span>
+          ) : (
+            resultLabel
+          )
         ) : (
           <span className="match-clock">{clockLabel(min)}</span>
         )}
@@ -344,11 +492,13 @@ export default function LiveMatch({
               vectorEffect="non-scaling-stroke"
             />
             {tick(0, "0'")}
-            {tick(45, t("match.ht"))}
-            {tick(90, m.extra_time ? "90'" : t("match.ft"))}
-            {m.extra_time && tick(105, "105'")}
-            {m.extra_time && tick(120, t("match.ft"))}
-            {done ? null : tick(Math.min(min, totalLength), min === 0 ? "" : clockLabel(min))}
+            {tick(htLine, t("match.ht"))}
+            {tick(ftLine, m.extra_time ? "90'" : t("match.ft"))}
+            {m.extra_time && tick(et1Line, "105'")}
+            {m.extra_time && tick(et2Line, t("match.ft"))}
+            {done
+              ? null
+              : tick(Math.min(min, visTotal) / visTotal, min === 0 ? "" : clockLabel(min))}
             {bars.map((b) => (
               <rect
                 key={b.m}
@@ -445,6 +595,8 @@ export default function LiveMatch({
           {incidents.map((i, idx) => {
             const isEvent = i.kind === "event";
             const event = isEvent ? i.e : null;
+            const isPen = i.kind === "pen";
+            const pen = isPen ? i.k : null;
             const eventIcon = isEvent
               ? event!.kind === "tactics"
                 ? "📋"
@@ -453,38 +605,54 @@ export default function LiveMatch({
                   : event!.kind === "sub"
                     ? "🔄"
                     : "⚕️"
-              : i.kind === "goal"
-                ? "⚽"
-                : "🟥";
+              : isPen
+                ? pen!.scored
+                  ? "⚽"
+                  : pen!.saved
+                    ? "🧤"
+                    : "✕"
+                : i.kind === "goal"
+                  ? "⚽"
+                  : "🟥";
             const eventClass = isEvent
               ? ` event-row event-${event!.kind}`
               : i.kind === "red"
                 ? " red-row"
-                : "";
+                : isPen
+                  ? " pen-inc"
+                  : "";
             const playerName = isEvent
               ? event!.kind === "sub"
                 ? `${event!.out_player} → ${event!.in_player}`
                 : event!.kind === "injury"
                   ? `${event!.out_player} (${t("match.injury")})`
                   : event!.detail || event!.kind
-              : i.kind === "goal"
-                ? i.g.scorer
-                : i.r.player;
+              : isPen
+                ? pen!.taker
+                : i.kind === "goal"
+                  ? i.g.scorer
+                  : i.r.player;
             const playerNumber = isEvent
               ? undefined
-              : i.kind === "goal"
-                ? i.g.shirt_number
-                : i.r.shirt_number;
+              : isPen
+                ? undefined
+                : i.kind === "goal"
+                  ? i.g.shirt_number
+                  : i.r.shirt_number;
             const playerPhoto = isEvent
               ? event!.in_player_photo ?? event!.out_player_photo
-              : i.kind === "goal"
-                ? i.g.scorer_photo
-                : i.r.player_photo;
+              : isPen
+                ? null
+                : i.kind === "goal"
+                  ? i.g.scorer_photo
+                  : i.r.player_photo;
             const teamId = isEvent
               ? event!.team_id
-              : i.kind === "goal"
-                ? i.g.team_id
-                : i.r.team_id;
+              : isPen
+                ? pen!.team_id
+                : i.kind === "goal"
+                  ? i.g.team_id
+                  : i.r.team_id;
             return (
               <div key={idx} className={"goal-row" + eventClass}>
                 <span className="goal-ball" aria-hidden>
@@ -514,14 +682,33 @@ export default function LiveMatch({
                 <span className="goal-player">
                   {playerNumber != null ? `${playerNumber}. ` : ""}
                   {playerName}
+                  {i.kind === "goal" && i.g.own_goal ? (
+                    <span className="og-badge">{t("match.ownGoal")}</span>
+                  ) : null}
+                  {i.kind === "goal" && i.g.penalty ? (
+                    <span className="pen-badge">{t("match.penShort")}</span>
+                  ) : null}
+                  {isPen ? (
+                    <span
+                      className={
+                        "pen-out " + (pen!.scored ? "ok" : pen!.saved ? "sv" : "no")
+                      }
+                    >
+                      {pen!.scored
+                        ? t("match.penScored")
+                        : pen!.saved
+                          ? t("match.penSaved")
+                          : t("match.penMissed")}
+                    </span>
+                  ) : null}
                 </span>
                 {isEvent && event!.kind === "sub" && (
                   <span className="goal-assist">{t("match.substitution")}</span>
                 )}
                 <span className="goal-end">
                   <span className="goal-min">
-                    {incMin(i)}'
-                    {incET(i) ? ` ${t("match.etShort")}` : ""}
+                    {isPen ? `P${pen!.round}` : `${incMin(i)}'`}
+                    {!isPen && incET(i) ? ` ${t("match.etShort")}` : ""}
                   </span>
                   <span className="goal-team">{teamFlag(teamId)}</span>
                 </span>

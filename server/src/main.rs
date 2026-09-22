@@ -1,19 +1,22 @@
+pub mod attrs;
 pub mod auth;
 pub mod db;
-pub mod detail;
 pub mod error;
 pub mod fixture;
 pub mod handlers;
 pub mod models;
 pub mod names;
-pub mod sim;
 
 use std::sync::{Arc, Mutex};
 
 use axum::{
+    body::Body,
+    extract::Request,
     routing::{get, post},
     Router,
 };
+use tower::service_fn;
+use tower::ServiceExt;
 use rusqlite::Connection;
 use tower_http::{
     cors::{Any, CorsLayer},
@@ -73,15 +76,9 @@ async fn main() {
             post(handlers::import_tournament),
         )
         .route(
-            "/api/tournaments/{id}/simulate",
-            post(handlers::simulate_tournament),
+            "/api/tournaments/{id}/oracle",
+            get(handlers::tournament_oracle),
         )
-        .route(
-            "/api/tournaments/{id}/run",
-            post(handlers::run_tournament_detail),
-        )
-        .route("/api/runs", get(handlers::list_runs))
-        .route("/api/runs/{id}", get(handlers::get_run))
         .route("/api/teams", get(handlers::list_teams).post(handlers::create_team))
         .route(
             "/api/teams/{id}/players",
@@ -126,20 +123,43 @@ async fn cache_control(
 }
 
 /// Attaches static-file serving for `client/dist` (or `$WCS_STATIC_DIR`),
-/// with a SPA fallback to `index.html`.
+/// with an SPA fallback: unknown extensionless paths serve `index.html` so the
+/// client router can own every route (e.g. the `/lab` lab page). Existing
+/// files (assets, photos) are served verbatim.
 fn with_frontend<S: Clone + Send + Sync + 'static>(api: Router<S>) -> Router<S> {
     let static_dir =
         std::env::var("WCS_STATIC_DIR").unwrap_or_else(|_| "../client/dist".to_string());
-    if !std::path::Path::new(&static_dir).join("index.html").is_file() {
+    let index_html = format!("{static_dir}/index.html");
+    if !std::path::Path::new(&index_html).is_file() {
         tracing::warn!(
             "no built frontend found at {static_dir}/index.html — serving API only"
         );
         return api.fallback(fallback_msg);
     }
     tracing::info!("serving frontend from {static_dir}");
-    api.fallback_service(
-        ServeDir::new(&static_dir).not_found_service(ServeFile::new(format!("{static_dir}/index.html"))),
-    )
+    let dir = static_dir.clone();
+    api.fallback_service(service_fn(move |req: Request<Body>| {
+        let dir = dir.clone();
+        let index_html = index_html.clone();
+        async move {
+            let path = req.uri().path().trim_start_matches('/');
+            let on_disk = if path.is_empty() {
+                false
+            } else {
+                let candidate = std::path::Path::new(&dir).join(path);
+                candidate.starts_with(&dir) && candidate.is_file()
+            };
+            let target = if on_disk { format!("{dir}/{path}") } else { index_html };
+            let mut res = ServeFile::new(target.as_str())
+                .oneshot(req)
+                .await
+                .expect("infallible ServeFile");
+            if !on_disk {
+                *res.status_mut() = axum::http::StatusCode::OK;
+            }
+            Ok::<_, std::convert::Infallible>(res)
+        }
+    }))
 }
 
 async fn fallback_msg() -> &'static str {

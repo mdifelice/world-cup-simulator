@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n, flagFor } from "../i18n";
 import PlayerCard from "../components/PlayerCard";
 import FormationPanel from "../components/FormationPanel";
@@ -87,6 +87,9 @@ export default function Overview({
   const focusId = run?.focus_team_id ?? null;
   const total = run?.matches.length ?? 0;
   const { t, stage, country } = useI18n();
+  const [bracketOpen, setBracketOpen] = useState(false);
+  const [scorersOpen, setScorersOpen] = useState(false);
+  const [countryFilter, setCountryFilter] = useState("");
 
   // Scroll a row into view inside the matches list only, never the page.
   const matchScrollRef = useRef<HTMLDivElement>(null);
@@ -312,7 +315,10 @@ export default function Overview({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phases.length, focusId]);
 
-  const scorers = (() => {
+  /** Full scorer table (up to 50) from completed matches, with assists and own
+ *  goals ignored. Assists are credited from the goal assist field so every one
+ *  of a scorer's teammates' assists shows on them. */
+  const scorersAll = (() => {
     interface Entry {
       id: number;
       name: string;
@@ -320,6 +326,7 @@ export default function Overview({
       team_name: string;
       photo?: string | null;
       goals: number;
+      assists: number;
     }
     const by = new Map<number, Entry>();
     // Only use completed matches (revealedMatches) so the table is empty
@@ -330,17 +337,70 @@ export default function Overview({
         const teamName = m.home_team_id === g.team_id ? m.home_team_name : m.away_team_name;
         let e = by.get(g.scorer_id);
         if (!e) {
-          e = { id: g.scorer_id, name: g.scorer, team_id: g.team_id, team_name: teamName, photo: g.scorer_photo, goals: 0 };
+          e = {
+            id: g.scorer_id,
+            name: g.scorer,
+            team_id: g.team_id,
+            team_name: teamName,
+            photo: g.scorer_photo,
+            goals: 0,
+            assists: 0,
+          };
           by.set(g.scorer_id, e);
         }
         e.goals += 1;
+        if (g.assist_id != null && g.assist_id !== g.scorer_id) {
+          let a = by.get(g.assist_id);
+          if (!a) {
+            a = {
+              id: g.assist_id,
+              name: g.assist ?? "",
+              team_id: g.team_id,
+              team_name: teamName,
+              photo: g.assist_photo,
+              goals: 0,
+              assists: 0,
+            };
+            by.set(g.assist_id, a);
+          }
+          a.assists += 1;
+        }
       }
     }
     return [...by.values()]
       .filter((e) => e.goals > 0)
-      .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name))
-      .slice(0, 10);
+      .sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name))
+      .slice(0, 50);
   })();
+  // Sidebar keeps the classic top-10 table.
+  const scorers = scorersAll.slice(0, 10);
+
+  const matchRatings = run?.ratings ?? {};
+
+  type SortKey = "goals" | "assists" | "rating";
+  const [sortKey, setSortKey] = useState<SortKey>("goals");
+  const [sortDesc, setSortDesc] = useState(true);
+
+  const filteredScorers =
+    countryFilter === ""
+      ? scorersAll
+      : scorersAll.filter((s) => s.team_name === countryFilter);
+
+  const sortScorers = (arr: typeof filteredScorers) => {
+    return [...arr].sort((a, b) => {
+      let va: number, vb: number;
+      if (sortKey === "goals") { va = a.goals; vb = b.goals; }
+      else if (sortKey === "assists") { va = a.assists; vb = b.assists; }
+      else { va = matchRatings[a.id] ?? 0; vb = matchRatings[b.id] ?? 0; }
+      if (va !== vb) return sortDesc ? vb - va : va - vb;
+      return a.name.localeCompare(b.name);
+    });
+  };
+
+  const sortedScorers = sortScorers(filteredScorers);
+  const scorerCountries = [...new Set(scorersAll.map((s) => s.team_name))].sort(
+    (a, b) => a.localeCompare(b),
+  );
 
   const allRevealed = total > 0 && revealedIds.size >= total;
   const champion = run?.champion ?? null;
@@ -537,7 +597,21 @@ export default function Overview({
               <div className="group-scroll" ref={groupScrollRef}>
                 {run && hasKnockout && (
                   <div className="table-card">
-                    <h2 className="table-title">{t("cup.bracket")}</h2>
+                    <h2
+                      className="table-title t-click"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => setBracketOpen(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setBracketOpen(true);
+                        }
+                      }}
+                      title={t("cup.expand")}
+                    >
+                      {t("cup.bracket")} <span className="t-expand" aria-hidden>⤢</span>
+                    </h2>
                     <Bracket
                       matches={run.matches}
                       order={run.order}
@@ -588,7 +662,21 @@ export default function Overview({
 
               {scorers.length > 0 && (
                 <div className="table-card">
-                  <h2 className="table-title">{t("cup.scorers")}</h2>
+                  <h2
+                    className="table-title t-click"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setScorersOpen(true)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setScorersOpen(true);
+                      }
+                    }}
+                    title={t("cup.expand")}
+                  >
+                    {t("cup.scorers")} <span className="t-expand" aria-hidden>⤢</span>
+                  </h2>
                   <div className="stat-list">
                     {scorers.map((s, i) => (
                       <PlayerCard
@@ -607,6 +695,131 @@ export default function Overview({
             </aside>
           </div>
         </>
+      )}
+
+      {bracketOpen && run && hasKnockout && (
+        <div className="modal-backdrop" onClick={() => setBracketOpen(false)}>
+          <div className="bracket-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="share-head">
+              <div className="share-title">{t("cup.bracket")}</div>
+              <button
+                className="live-x"
+                onClick={() => setBracketOpen(false)}
+                aria-label={t("match.close")}
+                title={t("match.close")}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="bracket-modal-scroll">
+              <Bracket
+                matches={run.matches}
+                order={run.order}
+                revealedIds={revealedIds}
+                focusId={focusId}
+                codes={runCodes}
+                onOpen={(m) => {
+                  setBracketOpen(false);
+                  onOpenDetail(m);
+                }}
+                scale={1.5}
+                className="bk-lg"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {scorersOpen && scorersAll.length > 0 && (
+        <div className="modal-backdrop" onClick={() => setScorersOpen(false)}>
+          <div className="share-modal scorers-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="share-head">
+              <div className="share-title">{t("cup.scorers")}</div>
+              <button
+                className="live-x"
+                onClick={() => setScorersOpen(false)}
+                aria-label={t("match.close")}
+                title={t("match.close")}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="scorers-toolbar">
+              <select
+                className="scorers-filter"
+                value={countryFilter}
+                onChange={(e) => setCountryFilter(e.target.value)}
+                aria-label={t("cup.scorersAll")}
+              >
+                <option value="">{t("cup.scorersAll")}</option>
+                {scorerCountries.map((c) => (
+                  <option key={c} value={c}>
+                    {flagFor(c)} {country(c)}
+                  </option>
+                ))}
+              </select>
+              <span className="scorers-count">{filteredScorers.length}</span>
+            </div>
+            <div className="scorers-table">
+              <div className="scorers-header">
+                <span className="scorers-col scorers-col-rank">{t("cup.sort")}</span>
+                <span className="scorers-col scorers-col-name">{t("cup.player")}</span>
+                <button
+                  className={`scorers-col scorers-col-goals ${sortKey === "goals" ? "active" : ""}`}
+                  onClick={() => { setSortKey("goals"); setSortDesc(!sortDesc); }}
+                  title={t("cup.sort")}
+                >
+                  {t("cup.goals")}
+                  {sortKey === "goals" && (sortDesc ? " ▼" : " ▲")}
+                </button>
+                <button
+                  className={`scorers-col scorers-col-assists ${sortKey === "assists" ? "active" : ""}`}
+                  onClick={() => { setSortKey("assists"); setSortDesc(!sortDesc); }}
+                  title={t("cup.sort")}
+                >
+                  {t("cup.assists")}
+                  {sortKey === "assists" && (sortDesc ? " ▼" : " ▲")}
+                </button>
+                <button
+                  className={`scorers-col scorers-col-rating ${sortKey === "rating" ? "active" : ""}`}
+                  onClick={() => { setSortKey("rating"); setSortDesc(!sortDesc); }}
+                  title={t("cup.ratingHint")}
+                >
+                  {t("cup.rating")}
+                  {sortKey === "rating" && (sortDesc ? " ▼" : " ▲")}
+                </button>
+              </div>
+              <div className="scorers-scroll">
+                {sortedScorers.map((s, i) => (
+                  <div key={s.id} className="scorers-row" style={{ minHeight: "52px" }}>
+                    <span className="scorers-rank">{i + 1}</span>
+                    <span className="scorers-photo">
+                      {s.photo ? (
+                        <img src={s.photo} alt="" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+                      ) : (
+                        <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true">
+                          <circle cx="12" cy="8" r="4.5" fill="currentColor" opacity="0.85" />
+                          <path d="M3.5 20.5c1.4-4.2 4.6-6 8.5-6s7.1 1.8 8.5 6" fill="currentColor" opacity="0.85" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="scorers-name">
+                      <span className="scorers-surname">{s.name.split(/\s+/).pop() ?? s.name}</span>
+                      <span className="scorers-sub">
+                        {flagFor(s.team_name)} {country(s.team_name)}
+                      </span>
+                    </span>
+                    <span className="scorers-cell">{s.goals}</span>
+                    <span className="scorers-cell">{s.assists}</span>
+                    <span className="scorers-cell scorers-rating">
+                      {(matchRatings[s.id] ?? 0).toFixed(1)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

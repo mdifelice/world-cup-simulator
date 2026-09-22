@@ -56,6 +56,25 @@ export interface Player {
   photo_url?: string | null;
   /** Market-style rating (0–100); drives the stars. Falls back to `overall`. */
   rating?: number;
+  // ---- The 18 match-engine attributes (server always sends them) ----
+  pace?: number | null;
+  stamina?: number | null;
+  strength?: number | null;
+  dribbling?: number | null;
+  passing?: number | null;
+  shooting?: number | null;
+  tackling?: number | null;
+  vision?: number | null;
+  positioning?: number | null;
+  composure?: number | null;
+  reflexes?: number | null;
+  handling?: number | null;
+  kicking?: number | null;
+  aerial?: number | null;
+  decisions?: number | null;
+  aggression?: number | null;
+  concentration?: number | null;
+  leadership?: number | null;
 }
 
 export interface User {
@@ -259,6 +278,8 @@ export interface PenKick {
   team_id: number;
   taker: string;
   scored: boolean;
+  /** True when the keeper saved a non-scored kick (otherwise it was off target). */
+  saved?: boolean;
 }
 
 export interface PenResult {
@@ -280,6 +301,8 @@ export interface Goal {
   assist: string | null;
   assist_photo?: string | null;
   own_goal?: boolean;
+  /** Goal scored from a penalty kick in regular/extra time. */
+  penalty?: boolean;
   shirt_number?: number;
 }
 
@@ -400,6 +423,8 @@ export interface RunPayload {
   groups: GroupInfo[];
   awards: Awards;
   champion: string | null;
+  /** Average match rating per player (player_id → rating 4.0–10.0, 1 decimal). */
+  ratings?: Record<number, number>;
 }
 
 export interface RunListItem {

@@ -9,6 +9,10 @@ interface Props {
   focusId: number | null;
   codes: Map<number, string>;
   onOpen?: (m: RunMatch) => void;
+  /** Layout multiplier for a larger popup view (1 = sidebar size). */
+  scale?: number;
+  /** Extra class on the scroll wrapper (e.g. "bk-lg" for popup typography). */
+  className?: string;
 }
 
 // Knockout stage keys, in the order they are played. `THIRD` is laid out as a
@@ -44,10 +48,19 @@ export default function Bracket({
   focusId,
   codes,
   onOpen,
+  scale = 1,
+  className,
 }: Props) {
   const { t, stage } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastRevealedRef = useRef<number | null>(null);
+  const R = scale;
+  const boxW = BOX_W * R;
+  const boxH = BOX_H * R;
+  const gapX = GAP_X * R;
+  const gapY = GAP_Y * R;
+  const pad = PAD * R;
+  const labelH = LABEL_H * R;
 
   const { cols, width, height, lines } = useMemo(() => {
     const rank = new Map(order.map((id, i) => [id, i]));
@@ -63,17 +76,17 @@ export default function Bracket({
     const keys = KO_ORDER.filter((k) => (byStage.get(k)?.length ?? 0) > 0);
     const mainKeys = keys.filter((k) => k !== "THIRD");
 
-    const slot = BOX_H + GAP_Y;
-    const top = LABEL_H + PAD;
+    const slot = boxH + gapY;
+    const top = labelH + pad;
     const cols: Col[] = [];
     let py = top;
-    let px = PAD;
+    let px = pad;
     for (let r = 0; r < mainKeys.length; r++) {
       const key = mainKeys[r];
       const list = byStage.get(key) ?? [];
       const centers: number[] = [];
       if (r === 0) {
-        for (let i = 0; i < list.length; i++) centers.push(top + i * slot + BOX_H / 2);
+        for (let i = 0; i < list.length; i++) centers.push(top + i * slot + boxH / 2);
       } else {
         const prev = cols[r - 1].centers;
         for (let j = 0; j < list.length; j++) {
@@ -90,8 +103,8 @@ export default function Bracket({
         x: px,
         centers,
       });
-      px += BOX_W + GAP_X;
-      py = Math.max(py, ...centers.map((c) => c + BOX_H / 2));
+      px += boxW + gapX;
+      py = Math.max(py, ...centers.map((c) => c + boxH / 2));
     }
 
     const lines: Line[] = [];
@@ -100,11 +113,11 @@ export default function Bracket({
       const prev = cols[r - 1];
       for (let j = 0; j < cur.matches.length; j++) {
         const childY = cur.centers[j];
-        const midX = cur.x - GAP_X / 2;
+        const midX = cur.x - gapX / 2;
         for (const fi of [2 * j, 2 * j + 1]) {
           const fy = prev.centers[fi];
           if (fy == null) continue;
-          const fx = prev.x + BOX_W;
+          const fx = prev.x + boxW;
           lines.push({
             key: `${prev.key}-${fi}-${cur.key}-${j}`,
             points: `${fx},${fy} ${midX},${fy} ${midX},${childY} ${cur.x},${childY}`,
@@ -122,17 +135,17 @@ export default function Bracket({
     if (thirdMatches.length > 0) {
       const x = finalCol?.x ?? px;
       const fy = finalCol?.centers[0];
-      const cy = (fy ?? top) + BOX_H + GAP_Y * 3;
+      const cy = (fy ?? top) + boxH + gapY * 3;
       third = {
         key: "THIRD",
         name: thirdMatches[0]?.stage_name ?? "THIRD",
         matches: thirdMatches,
         x,
         centers: [cy],
-        labelTop: cy - BOX_H / 2 - 16,
+        labelTop: cy - boxH / 2 - 16 * R,
       };
       if (finalCol) {
-        const midX = x - GAP_X / 2;
+        const midX = x - gapX / 2;
         lines.push({
           key: "THIRD-UP",
           // The third-place match joins the bracket spine with a single
@@ -141,14 +154,14 @@ export default function Bracket({
           dashed: true,
         });
       }
-      py = Math.max(py, cy + BOX_H / 2);
+      py = Math.max(py, cy + boxH / 2);
     }
 
     const allCols = third ? [...cols, third] : cols;
-    const width = px + BOX_W + PAD;
-    const height = py + PAD;
+    const width = px + boxW + pad;
+    const height = py + pad;
     return { cols: allCols, width, height, lines };
-  }, [matches, order]);
+  }, [matches, order, boxW, boxH, gapX, gapY, pad, labelH, R]);
 
   // Follow the newest revealed knockout match: scroll the bracket horizontally to
   // its column and vertically to its box inside the sidebar. Runs on every reveal
@@ -176,7 +189,7 @@ export default function Bracket({
     // a new round) by scrolling on the next frame.
     requestAnimationFrame(() => {
       el.scrollTo({
-        left: Math.max(0, colX + BOX_W + PAD - el.clientWidth),
+        left: Math.max(0, colX + boxW + pad - el.clientWidth),
         behavior: "smooth",
       });
       const parent = el.closest(".group-scroll") as HTMLElement | null;
@@ -199,8 +212,21 @@ export default function Bracket({
 
   if (cols.length === 0) return null;
 
+  // Helper to get winner of a played match
+  const winnerOf = (m: RunMatch): { id: number; name: string } | null => {
+    if (!revealedIds.has(m.id)) return null;
+    if (m.penalties) {
+      const w = m.penalties.winner_id;
+      if (w == null) return null;
+      return { id: w, name: w === m.home_team_id ? m.home_team_name : m.away_team_name };
+    }
+    if (m.home_score === m.away_score) return null;
+    const w = m.home_score > m.away_score ? m.home_team_id : m.away_team_id;
+    return { id: w, name: w === m.home_team_id ? m.home_team_name : m.away_team_name };
+  };
+
   return (
-    <div className="bracket-scroll" ref={scrollRef}>
+    <div className={"bracket-scroll" + (className ? ` ${className}` : "")} ref={scrollRef}>
       <div className="bk-canvas" style={{ width, height }}>
         <svg className="bk-lines" width={width} height={height}>
           {lines.map((l) => (
@@ -221,7 +247,7 @@ export default function Bracket({
             </span>
             {c.matches.map((m, i) => {
               const played = revealedIds.has(m.id);
-              const y = c.centers[i] - BOX_H / 2;
+              const y = c.centers[i] - boxH / 2;
               const win = played
                 ? m.penalties
                   ? m.penalties.winner_id
@@ -243,7 +269,7 @@ export default function Bracket({
                       ? " focus"
                       : "")
                   }
-                  style={{ left: c.x, top: y, width: BOX_W, height: BOX_H }}
+                  style={{ left: c.x, top: y, width: boxW, height: boxH }}
                   onClick={played && onOpen ? () => onOpen(m) : undefined}
                   role={played && onOpen ? "button" : undefined}
                 >
@@ -266,8 +292,42 @@ export default function Bracket({
                       )}
                     </>
                   ) : (
-                    <div className="bk-tbd">{t("match.tbd")}</div>
-)}
+                      (() => {
+                        const colIdx = cols.findIndex((col) => col.key === c.key);
+                        if (colIdx <= 0) return <div className="bk-tbd">{t("match.tbd")}</div>;
+                        const prevCol = cols[colIdx - 1];
+                        const fa = prevCol.matches[2 * i];
+                        const fb = prevCol.matches[2 * i + 1];
+                        const qHome = fa ? winnerOf(fa) : null;
+                        const qAway = fb ? winnerOf(fb) : null;
+                        if (!qHome && !qAway) return <div className="bk-tbd">{t("match.tbd")}</div>;
+                        const codeFromName = (name: string) => name.slice(0, 3).toUpperCase();
+                        return (
+                          <div className="bk-qual">
+                            <div className="bk-line">
+                              {qHome ? (
+                                <>
+                                  <span className="bk-flag">{flagFor(qHome.name)}</span>
+                                  <span className="bk-code">{codeFromName(qHome.name)}</span>
+                                </>
+                              ) : (
+                                <span className="bk-tbd-min">{t("match.tbd")}</span>
+                              )}
+                            </div>
+                            <div className="bk-line">
+                              {qAway ? (
+                                <>
+                                  <span className="bk-flag">{flagFor(qAway.name)}</span>
+                                  <span className="bk-code">{codeFromName(qAway.name)}</span>
+                                </>
+                              ) : (
+                                <span className="bk-tbd-min">{t("match.tbd")}</span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })()
+                    )}
                  </div>
               );
             })}

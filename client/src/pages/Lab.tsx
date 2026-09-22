@@ -1,328 +1,550 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useI18n, flagFor } from "../i18n";
 import LiveMatch from "../components/LiveMatch";
-import type { Goal, LiveEvent, RedCard, RunMatch } from "../types";
+import type { Participant, Player, RunMatch, Strategy, Tournament } from "../types";
+import { STRATEGIES } from "../types";
+import type { LabTeam } from "../sim/run";
+import { playLabMatch, randomSeed } from "../sim/run";
+import { api } from "../api";
 
-const emptyGoal = (): Goal => ({
-  minute: 1,
-  extra_time: false,
-  team_id: 1,
-  scorer_id: 0,
-  scorer: "New",
-  scorer_photo: null,
-  shirt_number: undefined,
-  assist_id: null,
-  assist: null,
-  assist_photo: null,
-  own_goal: false,
-});
+interface HistoryEntry {
+  id: number;
+  ts: number;
+  source: string;
+  match: RunMatch;
+}
 
-const emptyRed = (): RedCard => ({
-  minute: 1,
-  extra_time: false,
-  team_id: 1,
-  player_id: 0,
-  player: "New",
-  player_photo: null,
-  shirt_number: undefined,
-});
+interface Score {
+  h: number;
+  a: number;
+}
 
-const emptyEvent = (): LiveEvent => ({
-  minute: 1,
-  extra_time: false,
-  kind: "sub",
-  team_id: 1,
-  detail: "",
-  out_player: null,
-  out_player_photo: null,
-  in_player: null,
-  in_player_photo: null,
-});
+const HISTORY_KEY = "wcs_lab_history";
+const HISTORY_CAP = 20;
+const SCORES_CAP = 2000;
 
-const DEFAULT_HOME_TEAM = "Brazil";
-const DEFAULT_AWAY_TEAM = "Germany";
+const clampOverall = (v: number) => Math.max(30, Math.min(99, Math.round(v)));
+
+const strategyShift = (s: Strategy | undefined): number =>
+  s === "attacking" ? 2 : s === "defensive" ? -1 : 0;
+
+function loadHistory(): HistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistHistory(entries: HistoryEntry[]): void {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(entries));
+  } catch {
+    /* storage full/blocked — history stays in memory */
+  }
+}
+
+function statsFrom(scores: Score[]) {
+  let h = 0;
+  let a = 0;
+  let hw = 0;
+  let dr = 0;
+  let aw = 0;
+  let mh = 0;
+  let ma = 0;
+  for (const s of scores) {
+    h += s.h;
+    a += s.a;
+    if (s.h > s.a) hw++;
+    else if (s.h === s.a) dr++;
+    else aw++;
+    mh = Math.max(mh, s.h);
+    ma = Math.max(ma, s.a);
+  }
+  const n = scores.length;
+  return {
+    n,
+    homeAvg: n ? h / n : 0,
+    awayAvg: n ? a / n : 0,
+    totalAvg: n ? (h + a) / n : 0,
+    homePct: n ? (hw / n) * 100 : 0,
+    drawPct: n ? (dr / n) * 100 : 0,
+    awayPct: n ? (aw / n) * 100 : 0,
+    maxH: mh,
+    maxA: ma,
+  };
+}
 
 export default function Lab() {
   const { t } = useI18n();
+  const [showLiveMatch, setShowLiveMatch] = useState(false);
+  const [showSummary, setShowSummary] = useState<RunMatch | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [seedInput, setSeedInput] = useState("");
+  // Match format toggles.
+  const [extraTime, setExtraTime] = useState(false);
+  const [usePens, setUsePens] = useState(false);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [selectedTournamentId, setSelectedTournamentId] = useState<number | null>(null);
+  const [teams, setTeams] = useState<Participant[]>([]);
+  const [selectedHomeTeamId, setSelectedHomeTeamId] = useState<number | null>(null);
+  const [selectedAwayTeamId, setSelectedAwayTeamId] = useState<number | null>(null);
   const [match, setMatch] = useState<RunMatch | null>(null);
 
-  // Config state
-  const [homeTeam, setHomeTeam] = useState(DEFAULT_HOME_TEAM);
-  const [awayTeam, setAwayTeam] = useState(DEFAULT_AWAY_TEAM);
-  const [homeScore, setHomeScore] = useState(2);
-  const [awayScore, setAwayScore] = useState(1);
-  const [extraTime, setExtraTime] = useState(false);
-  const [penalties, setPenalties] = useState<RunMatch["penalties"]>(null);
-  const [addedTimeHt, setAddedTimeHt] = useState(2);
-  const [addedTimeFt, setAddedTimeFt] = useState(5);
-  const [addedTimeEt1, setAddedTimeEt1] = useState(0);
-  const [addedTimeEt2, setAddedTimeEt2] = useState(0);
+  // Lab-only overrides (never persisted): squads + per-team stat sliders
+  // feeding the client-side run engine.
+  const [squads, setSquads] = useState<Record<number, Player[]>>({});
+  const [strategies, setStrategies] = useState<Record<number, Strategy>>({});
+  const [teamShifts, setTeamShifts] = useState<Record<number, number>>({});
 
-  // Goals
-  const [goals, setGoals] = useState<Goal[]>([
-    { minute: 12, extra_time: false, team_id: 1, scorer_id: 1, scorer: "Pelé", scorer_photo: null, shirt_number: 10, assist_id: null, assist: null, assist_photo: null, own_goal: false },
-    { minute: 45, extra_time: false, team_id: 2, scorer_id: 2, scorer: "Müller", scorer_photo: null, shirt_number: 13, assist_id: null, assist: null, assist_photo: null, own_goal: false },
-    { minute: 67, extra_time: false, team_id: 1, scorer_id: 3, scorer: "Ronaldo", scorer_photo: null, shirt_number: 9, assist_id: 1, assist: "Pelé", assist_photo: null, own_goal: false },
-  ]);
+  // Match history (localStorage-persisted across sessions).
+  const [history, setHistory] = useState<HistoryEntry[]>(loadHistory);
+  // Every generated scoreline, for the aggregate panel (session-scoped).
+  const [allScores, setAllScores] = useState<Score[]>([]);
 
-  // Red cards
-  const [reds, setReds] = useState<RedCard[]>([
-    { minute: 89, extra_time: false, team_id: 2, player_id: 4, player: "Kahn", player_photo: null, shirt_number: 1 },
-  ]);
-
-  // Events
-  const [events, setEvents] = useState<LiveEvent[]>([
-    { minute: 46, extra_time: false, kind: "strategy", team_id: 1, detail: "attacking", out_player: null, out_player_photo: null, in_player: null, in_player_photo: null },
-    { minute: 62, extra_time: false, kind: "sub", team_id: 1, detail: "", out_player: "Pelé", out_player_photo: null, in_player: "Zico", in_player_photo: null },
-    { minute: 75, extra_time: false, kind: "tactics", team_id: 1, detail: "4-3-3", out_player: null, out_player_photo: null, in_player: null, in_player_photo: null },
-    { minute: 78, extra_time: false, kind: "sub", team_id: 2, detail: "", out_player: "Beckenbauer", out_player_photo: null, in_player: "Breitner", in_player_photo: null },
-  ]);
-
-  const buildMatch = (): RunMatch => ({
-    id: 1,
-    day: 1,
-    stage_key: "F",
-    stage_name: "Final",
-    home_team_id: 1,
-    away_team_id: 2,
-    home_team_name: homeTeam,
-    away_team_name: awayTeam,
-    home_score: homeScore,
-    away_score: awayScore,
-    extra_time: extraTime,
-    penalties,
-    result_label: `${homeScore}–${awayScore}${extraTime ? " aet" : ""}${penalties ? ` (${penalties.home_score}–${penalties.away_score} pens)` : ""}`,
-    goals,
-    reds,
-    unavailable: [],
-    date: null,
-    momentum: { home: Array(90 + (extraTime ? 30 : 0)).fill(0.5), away: Array(90 + (extraTime ? 30 : 0)).fill(0.5) },
-    bans: [],
-    events,
-    added_time_ht: addedTimeHt,
-    added_time_ft: addedTimeFt,
-    added_time_et1: addedTimeEt1,
-    added_time_et2: addedTimeEt2,
-  });
-
-  const regenerate = () => {
-    setMatch(buildMatch());
-  };
-
-  // Auto-regenerate when config changes
+  // Load tournaments on mount
   useEffect(() => {
-    regenerate();
-  }, [
-    homeTeam, awayTeam, homeScore, awayScore, extraTime, penalties,
-    addedTimeHt, addedTimeFt, addedTimeEt1, addedTimeEt2,
-    goals, reds, events
-  ]);
+    api.tournaments().then(setTournaments).catch(() => {});
+  }, []);
 
-  if (!match) return <div className="lab-page">Loading...</div>;
+  // Load teams when tournament selected
+  useEffect(() => {
+    if (!selectedTournamentId) {
+      setTeams([]);
+      return;
+    }
+    api.participants(selectedTournamentId).then(setTeams).catch(() => setTeams([]));
+  }, [selectedTournamentId]);
 
-  const updateGoal = (i: number, field: keyof Goal, value: string | number | boolean) => {
-    setGoals(g => g.map((goal, idx) => idx === i ? { ...goal, [field]: value } : goal));
+  // Load the two squads when both teams are picked (stats come from the
+  // server; simulation itself is entirely client-side).
+  useEffect(() => {
+    if (!selectedTournamentId || !selectedHomeTeamId || !selectedAwayTeamId) return;
+    const ids = [...new Set([selectedHomeTeamId, selectedAwayTeamId])];
+    ids.forEach(async (teamId) => {
+      if (squads[teamId]) return;
+      try {
+        const players = await api.players(teamId, selectedTournamentId);
+        setSquads((cur) => ({ ...cur, [teamId]: players }));
+      } catch {
+        /* keep previously loaded squads */
+      }
+    });
+  }, [selectedTournamentId, selectedHomeTeamId, selectedAwayTeamId]);
+
+  const selectedTournament = useMemo(
+    () => tournaments.find((tr) => tr.id === selectedTournamentId) ?? null,
+    [tournaments, selectedTournamentId],
+  );
+
+  const sortedTeams = useMemo(
+    () => [...teams].sort((a, b) => a.name.localeCompare(b.name)),
+    [teams],
+  );
+
+  const teamLabel = (id: number | null, fallback: string): string => {
+    if (id == null) return fallback;
+    return teams.find((tm) => tm.id === id)?.name ?? `Team ${id}`;
   };
 
-  const updateRed = (i: number, field: keyof RedCard, value: string | number | boolean) => {
-    setReds(r => r.map((red, idx) => idx === i ? { ...red, [field]: value } : red));
+  const squadsReady =
+    selectedHomeTeamId != null &&
+    selectedAwayTeamId != null &&
+    (squads[selectedHomeTeamId]?.length ?? 0) > 0 &&
+    (squads[selectedAwayTeamId]?.length ?? 0) > 0;
+
+  // -----------------------------------------------------------------------
+  // Lab engines
+  // -----------------------------------------------------------------------
+
+  /** Effective rating for a player honoring the team stat slider + strategy. */
+  const effectiveOverall = (p: Player, teamId: number): number =>
+    clampOverall((p.rating ?? p.overall) + (teamShifts[teamId] ?? 0) + strategyShift(strategies[teamId]));
+
+  const buildLabTeam = (teamId: number): LabTeam | null => {
+    const team = teams.find((tm) => tm.id === teamId);
+    if (!team) return null;
+    const players = (squads[teamId] ?? []).map((p) => ({
+      id: p.id,
+      name: p.name,
+      position: p.position,
+      positions: p.positions?.length ? p.positions : [p.position],
+      photo_url: p.photo_url ?? null,
+      shirt_number: p.shirt_number,
+      overall: effectiveOverall(p, teamId),
+      aggression: p.aggression ?? 60,
+      leadership: p.leadership ?? null,
+    }));
+    if (players.length === 0) return null;
+    return {
+      id: team.id,
+      name: team.name,
+      code: team.code,
+      rating: team.rating,
+      pedigree: team.pedigree,
+      home_support: team.home_support,
+      form: team.form,
+      morale: team.morale,
+      players,
+    };
   };
 
-  const updateEvent = (i: number, field: keyof LiveEvent, value: string | number | boolean) => {
-    setEvents(e => e.map((evt, idx) => idx === i ? { ...evt, [field]: value } : evt));
+  const recordScore = (h: number, a: number) => {
+    setAllScores((cur) => [...cur, { h, a }].slice(-SCORES_CAP));
   };
 
-  const addGoal = () => setGoals(g => [...g, emptyGoal()]);
-  const addRed = () => setReds(r => [...r, emptyRed()]);
-  const addEvent = () => setEvents(e => [...e, emptyEvent()]);
+  const addHistory = (run: RunMatch) => {
+    setHistory((cur) => {
+      const entry: HistoryEntry = { id: Date.now() + Math.random(), ts: Date.now(), source: "engine", match: run };
+      const next = [entry, ...cur].slice(0, HISTORY_CAP);
+      persistHistory(next);
+      return next;
+    });
+  };
 
-  const removeGoal = (i: number) => setGoals(g => g.filter((_, idx) => idx !== i));
-  const removeRed = (i: number) => setReds(r => r.filter((_, idx) => idx !== i));
-  const removeEvent = (i: number) => setEvents(e => e.filter((_, idx) => idx !== i));
+  const removeHistory = (id: number) => {
+    setHistory((cur) => {
+      const next = cur.filter((e) => e.id !== id);
+      persistHistory(next);
+      return next;
+    });
+  };
 
-  if (!match) return <div className="lab-page">Loading...</div>;
+  const resolveSeed = (): bigint => {
+    const s = seedInput.trim();
+    if (/^\d+$/.test(s)) return BigInt(s);
+    return BigInt(randomSeed());
+  };
+
+  const generateEngine = (live: boolean) => {
+    if (!selectedTournament || !selectedHomeTeamId || !selectedAwayTeamId) return;
+    const home = buildLabTeam(selectedHomeTeamId);
+    const away = buildLabTeam(selectedAwayTeamId);
+    if (!home || !away || home.players.length === 0 || away.players.length === 0) return;
+    setGenerating(true);
+    // Let the paint flush so the "Generating…" state shows before the work.
+    setTimeout(() => {
+      const seed = resolveSeed();
+      setSeedInput(seed.toString());
+      const run = playLabMatch(selectedTournament.id, selectedTournament.year, home, away, seed, {
+        extraTime,
+        penalties: usePens,
+      });
+      recordScore(run.home_score, run.away_score);
+      addHistory(run);
+      setMatch(run);
+      setShowSummary(null);
+      if (live) setShowLiveMatch(true);
+      else setShowSummary(run);
+      setGenerating(false);
+    }, 30);
+  };
+
+  const openLive = () => {
+    if (!match) return;
+    setShowSummary(null);
+    setShowLiveMatch(true);
+  };
+
+  const stats = useMemo(() => statsFrom(allScores), [allScores]);
 
   return (
     <div className="lab-page">
-      <div className="lab-header">
-        <h1>🔬 Live Match Lab</h1>
-        <p className="hint">Hidden page for testing live match dialog. Configure the match in the sidebar.</p>
+      <div className="lab-header lab-header-row">
+        <div>
+          <h1>🔬 Live Match Lab</h1>
+          <p className="hint">Pick two teams, tweak their stats, then simulate or play the match live.</p>
+        </div>
+        <div className="lab-toolbar">
+          <div className="lab-toolgroup">
+            <label>{t("lab.seed")}</label>
+            <div className="lab-seed-row">
+              <input
+                className="lab-seed-input"
+                value={seedInput}
+                onChange={(e) => setSeedInput(e.target.value)}
+                placeholder={t("lab.seedRandom")}
+                inputMode="numeric"
+              />
+              <button
+                className="btn secondary"
+                title={t("lab.seedRandom")}
+                onClick={() => setSeedInput(randomSeed().toString())}
+              >
+                🎲
+              </button>
+            </div>
+          </div>
+          <div className="lab-toolgroup">
+            <label>&nbsp;</label>
+            <button className="btn primary" onClick={() => generateEngine(true)} disabled={generating || !squadsReady}>
+              {generating ? t("lab.generating") : t("lab.play")}
+            </button>
+          </div>
+          <div className="lab-toolgroup">
+            <label>&nbsp;</label>
+            <button className="btn primary" onClick={() => generateEngine(false)} disabled={generating || !squadsReady}>
+              {generating ? t("lab.generating") : t("lab.simulate")}
+            </button>
+          </div>
+          <div className="lab-toolgroup lab-format">
+            <label>{t("lab.format")}</label>
+            <div className="lab-format-row">
+              <label className="lab-format-label">
+                <input type="checkbox" checked={extraTime} onChange={(e) => setExtraTime(e.target.checked)} />
+                {t("lab.extraTime")}
+              </label>
+              <label className="lab-format-label">
+                <input type="checkbox" checked={usePens} onChange={(e) => setUsePens(e.target.checked)} />
+                {t("lab.pens")}
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="lab-layout">
         <aside className="lab-sidebar">
           <div className="lab-section">
+            <h3>{t("lab.tournament")}</h3>
+            <div className="lab-field">
+              <label>{t("lab.selectTournament")}</label>
+              <select value={selectedTournamentId ?? ""} onChange={(e) => setSelectedTournamentId(e.target.value ? parseInt(e.target.value) : null)}>
+                <option value="">{t("lab.selectTournamentPlaceholder")}</option>
+                {tournaments.map(tr => (
+                  <option key={tr.id} value={tr.id}>{tr.year} - {tr.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="lab-section">
             <h3>{t("lab.teams")}</h3>
-            <div className="lab-field">
-              <label>{t("lab.homeTeam")}</label>
-              <input value={homeTeam} onChange={(e) => setHomeTeam(e.target.value)} />
-            </div>
-            <div className="lab-field">
-              <label>{t("lab.awayTeam")}</label>
-              <input value={awayTeam} onChange={(e) => setAwayTeam(e.target.value)} />
-            </div>
-          </div>
-
-          <div className="lab-section">
-            <h3>{t("lab.score")}</h3>
             <div className="lab-field-row">
               <div className="lab-field">
-                <label>{t("lab.homeScore")}</label>
-                <input type="number" min="0" max="20" value={homeScore} onChange={(e) => setHomeScore(parseInt(e.target.value) || 0)} />
+                <label>{t("lab.homeTeam")}</label>
+                <select value={selectedHomeTeamId ?? ""} onChange={(e) => setSelectedHomeTeamId(e.target.value ? parseInt(e.target.value) : null)}>
+                  <option value="">{t("lab.selectTeam")}</option>
+                  {sortedTeams.map(tm => (
+                    <option key={tm.id} value={tm.id}>{tm.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="lab-field">
-                <label>{t("lab.awayScore")}</label>
-                <input type="number" min="0" max="20" value={awayScore} onChange={(e) => setAwayScore(parseInt(e.target.value) || 0)} />
+                <label>{t("lab.awayTeam")}</label>
+                <select value={selectedAwayTeamId ?? ""} onChange={(e) => setSelectedAwayTeamId(e.target.value ? parseInt(e.target.value) : null)}>
+                  <option value="">{t("lab.selectTeam")}</option>
+                  {sortedTeams.map(tm => (
+                    <option key={tm.id} value={tm.id}>{tm.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
-            <div className="lab-field">
-              <label>
-                <input type="checkbox" checked={extraTime} onChange={(e) => setExtraTime(e.target.checked)} />
-                {t("lab.extraTime")}
-              </label>
+          </div>
+
+          {selectedHomeTeamId != null && selectedAwayTeamId != null && (
+            <div className="lab-section">
+              <h3>{t("lab.overrides")}</h3>
+              {[
+                { id: selectedHomeTeamId, side: "home" },
+                { id: selectedAwayTeamId, side: "away" },
+              ].map((side) => {
+                const sid = side.id;
+                const squad = squads[sid] ?? [];
+                return (
+                  <div key={side.side} className="lab-ov-team">
+                    <h4>{teamLabel(sid, t("lab.selectTeam"))}</h4>
+                    <div className="lab-field-row">
+                      <div className="lab-field">
+                        <label>{t("lab.strategy")}</label>
+                        <select
+                          value={strategies[sid] ?? "normal"}
+                          onChange={(e) =>
+                            setStrategies((cur) => ({
+                              ...cur,
+                              [sid]: e.target.value as Strategy,
+                            }))
+                          }
+                        >
+                          {STRATEGIES.map((s) => (
+                            <option key={s} value={s}>{t(`lab.strat.${s}`)}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="lab-field">
+                        <label>
+                          {t("lab.teamShift")} · ({teamShifts[sid] ?? 0})
+                        </label>
+                        <input
+                          type="range"
+                          min={-20}
+                          max={20}
+                          step={1}
+                          value={teamShifts[sid] ?? 0}
+                          onChange={(e) =>
+                            setTeamShifts((cur) => ({
+                              ...cur,
+                              [sid]: parseInt(e.target.value) || 0,
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                    {(squad.length ?? 0) === 0 && (
+                      <p className="hint">{t("lab.squadLoading")}</p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            {extraTime && (
-              <div className="lab-field-row">
-                <div className="lab-field">
-                  <label>{t("lab.pensHome")}</label>
-                  <input type="number" min="0" max="10" value={penalties?.home_score ?? 0} onChange={(e) => setPenalties({ ...(penalties ?? { home_score: 0, away_score: 0, winner_id: 1, sudden_death: false, kicks: [] }), home_score: parseInt(e.target.value) || 0 })} />
-                </div>
-                <div className="lab-field">
-                  <label>{t("lab.pensAway")}</label>
-                  <input type="number" min="0" max="10" value={penalties?.away_score ?? 0} onChange={(e) => setPenalties({ ...(penalties ?? { home_score: 0, away_score: 0, winner_id: 1, sudden_death: false, kicks: [] }), away_score: parseInt(e.target.value) || 0 })} />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="lab-section">
-            <h3>{t("lab.addedTime")}</h3>
-            <div className="lab-field-row">
-              <div className="lab-field">
-                <label>{t("lab.addedTimeHt")}</label>
-                <input type="number" min="0" max="10" value={addedTimeHt} onChange={(e) => setAddedTimeHt(parseInt(e.target.value) || 0)} />
-              </div>
-              <div className="lab-field">
-                <label>{t("lab.addedTimeFt")}</label>
-                <input type="number" min="0" max="10" value={addedTimeFt} onChange={(e) => setAddedTimeFt(parseInt(e.target.value) || 0)} />
-              </div>
-            </div>
-            {extraTime && (
-              <div className="lab-field-row">
-                <div className="lab-field">
-                  <label>{t("lab.addedTimeEt1")}</label>
-                  <input type="number" min="0" max="5" value={addedTimeEt1} onChange={(e) => setAddedTimeEt1(parseInt(e.target.value) || 0)} />
-                </div>
-                <div className="lab-field">
-                  <label>{t("lab.addedTimeEt2")}</label>
-                  <input type="number" min="0" max="5" value={addedTimeEt2} onChange={(e) => setAddedTimeEt2(parseInt(e.target.value) || 0)} />
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="lab-section">
-            <h3>{t("lab.goals")}</h3>
-            {goals.map((g, i) => (
-              <div key={i} className="lab-event-row">
-                <input type="number" min="1" max={extraTime ? 120 : 90} value={g.minute} onChange={(e) => updateGoal(i, "minute", parseInt(e.target.value) || g.minute)} />
-                <select value={g.team_id} onChange={(e) => updateGoal(i, "team_id", parseInt(e.target.value))}>
-                  <option value={1}>{homeTeam}</option>
-                  <option value={2}>{awayTeam}</option>
-                </select>
-                <input value={g.scorer} onChange={(e) => updateGoal(i, "scorer", e.target.value)} placeholder="Scorer" />
-                <input type="checkbox" checked={g.extra_time} onChange={(e) => updateGoal(i, "extra_time", e.target.checked)} />
-                <button className="btn danger" onClick={() => removeGoal(i)}>✕</button>
-              </div>
-            ))}
-            <button className="btn secondary" onClick={addGoal}>+ {t("lab.addGoal")}</button>
-          </div>
-
-          <div className="lab-section">
-            <h3>{t("lab.redCards")}</h3>
-            {reds.map((r, i) => (
-              <div key={i} className="lab-event-row">
-                <input type="number" min="1" max={extraTime ? 120 : 90} value={r.minute} onChange={(e) => updateRed(i, "minute", parseInt(e.target.value) || r.minute)} />
-                <select value={r.team_id} onChange={(e) => updateRed(i, "team_id", parseInt(e.target.value))}>
-                  <option value={1}>{homeTeam}</option>
-                  <option value={2}>{awayTeam}</option>
-                </select>
-                <input value={r.player} onChange={(e) => updateRed(i, "player", e.target.value)} placeholder="Player" />
-                <input type="checkbox" checked={r.extra_time} onChange={(e) => updateRed(i, "extra_time", e.target.checked)} />
-                <button className="btn danger" onClick={() => removeRed(i)}>✕</button>
-              </div>
-            ))}
-            <button className="btn secondary" onClick={addRed}>+ {t("lab.addRed")}</button>
-          </div>
-
-          <div className="lab-section">
-            <h3>{t("lab.events")}</h3>
-            {events.map((evt, i) => (
-              <div key={i} className="lab-event-row">
-                <input type="number" min="1" max={extraTime ? 120 : 90} value={evt.minute} onChange={(ev) => updateEvent(i, "minute", parseInt(ev.target.value) || evt.minute)} />
-                <select value={evt.kind} onChange={(ev) => updateEvent(i, "kind", ev.target.value as LiveEvent["kind"])}>
-                  <option value="sub">{t("lab.sub")}</option>
-                  <option value="injury">{t("lab.injury")}</option>
-                  <option value="strategy">{t("lab.strategy")}</option>
-                  <option value="tactics">{t("lab.tactics")}</option>
-                </select>
-                <select value={evt.team_id} onChange={(ev) => updateEvent(i, "team_id", parseInt(ev.target.value))}>
-                  <option value={1}>{homeTeam}</option>
-                  <option value={2}>{awayTeam}</option>
-                </select>
-                <input value={evt.detail ?? ""} onChange={(ev) => updateEvent(i, "detail", ev.target.value)} placeholder="Detail" />
-                <input value={evt.out_player ?? ""} onChange={(ev) => updateEvent(i, "out_player", ev.target.value)} placeholder="Out" />
-                <input value={evt.in_player ?? ""} onChange={(ev) => updateEvent(i, "in_player", ev.target.value)} placeholder="In" />
-                <input type="checkbox" checked={evt.extra_time} onChange={(ev) => updateEvent(i, "extra_time", ev.target.checked)} />
-                <button className="btn danger" onClick={() => removeEvent(i)}>✕</button>
-              </div>
-            ))}
-            <button className="btn secondary" onClick={addEvent}>+ {t("lab.addEvent")}</button>
-          </div>
-
-          <button className="btn primary lab-regenerate" onClick={regenerate}>{t("lab.regenerate")}</button>
+          )}
         </aside>
 
         <main className="lab-main">
-          <div className="lab-match-info">
-            <div className="team-info">
-              <span className="flag">{flagFor(match.home_team_name)}</span>
-              <span className="name">{match.home_team_name}</span>
-              <span className="xg">Score: {match.home_score}</span>
+          {showLiveMatch && match ? (
+            <div className="lab-live-match">
+              <LiveMatch
+                match={match}
+                focusTeamId={match.home_team_id}
+                onReveal={() => {}}
+                onClose={() => {
+                  setShowLiveMatch(false);
+                  setShowSummary(match);
+                }}
+              />
             </div>
-            <div className="vs">vs</div>
-            <div className="team-info">
-              <span className="flag">{flagFor(match.away_team_name)}</span>
-              <span className="name">{match.away_team_name}</span>
-              <span className="xg">Score: {match.away_score}</span>
-            </div>
-          </div>
+          ) : (
+            <>
+              <div className="lab-section lab-allstats">
+                <h3>{t("lab.allStats")}</h3>
+                {stats.n === 0 ? (
+                  <p className="hint">{t("lab.historyEmpty")}</p>
+                ) : (
+                  <div className="lab-bulk-result">
+                    <h4>{t("lab.bulkResult", { n: stats.n })}</h4>
+                    <table>
+                      <tbody>
+                        <tr><td>{t("lab.avgHome")}</td><td>{stats.homeAvg.toFixed(2)}</td></tr>
+                        <tr><td>{t("lab.avgAway")}</td><td>{stats.awayAvg.toFixed(2)}</td></tr>
+                        <tr><td>{t("lab.avgTotal")}</td><td>{stats.totalAvg.toFixed(2)}</td></tr>
+                        <tr><td>{t("lab.pctHome")}</td><td>{stats.homePct.toFixed(1)}%</td></tr>
+                        <tr><td>{t("lab.pctDraw")}</td><td>{stats.drawPct.toFixed(1)}%</td></tr>
+                        <tr><td>{t("lab.pctAway")}</td><td>{stats.awayPct.toFixed(1)}%</td></tr>
+                        <tr><td>{t("lab.maxScore")}</td><td>{stats.maxH}–{stats.maxA}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
 
-          <div className="lab-live-match">
-            <LiveMatch
-              match={match}
-              focusTeamId={match.home_team_id}
-              onReveal={() => {}}
-              onClose={() => {}}
-            />
-          </div>
-
-          <div className="lab-debug">
-            <h3>{t("lab.debugInfo")}</h3>
-            <pre>{JSON.stringify({
-              addedTime: {
-                ht: match.added_time_ht,
-                ft: match.added_time_ft,
-                et1: match.added_time_et1,
-                et2: match.added_time_et2,
-              },
-              events: match.events,
-              goals: match.goals,
-              reds: match.reds,
-            }, null, 2)}</pre>
-          </div>
+              <div className="lab-section">
+                <h3>{t("lab.history")}</h3>
+                {history.length === 0 && <p className="hint">{t("lab.historyEmpty")}</p>}
+                <ul className="lab-history">
+                  {history.map((entry) => (
+                    <li key={entry.id} className="lab-history-entry">
+                      <button
+                        className="lab-history-main"
+                        onClick={() => {
+                          setMatch(entry.match);
+                          setShowLiveMatch(false);
+                          setShowSummary(entry.match);
+                        }}
+                        title={new Date(entry.ts).toLocaleString()}
+                      >
+                        <span className={`lab-source lab-source-${entry.source}`}>{t(`lab.source.${entry.source}`)}</span>
+                        <span className="lab-history-score">
+                          {flagFor(entry.match.home_team_name)} {entry.match.home_team_name} {entry.match.home_score}–{entry.match.away_score} {entry.match.away_team_name} {flagFor(entry.match.away_team_name)}
+                        </span>
+                      </button>
+                      <button className="btn secondary" onClick={() => {
+                        setMatch(entry.match);
+                        setShowSummary(null);
+                        setShowLiveMatch(true);
+                      }}>
+                        {t("lab.replay")}
+                      </button>
+                      <button className="btn danger" onClick={() => removeHistory(entry.id)}>🗑</button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </>
+          )}
         </main>
       </div>
+
+      {showSummary && (
+        <div className="lab-backdrop" onClick={() => setShowSummary(null)}>
+          <div className="lab-summary" onClick={(e) => e.stopPropagation()}>
+            <header>
+              <h3>{t("lab.summary")}</h3>
+              <button className="btn secondary" onClick={() => setShowSummary(null)}>✕</button>
+            </header>
+            <div className="lab-summary-head">
+              <div className="team-info">
+                <span className="flag">{flagFor(showSummary.home_team_name)}</span>
+                <span className="name">{showSummary.home_team_name}</span>
+                <span className="xg">{showSummary.home_score}</span>
+              </div>
+              <div className="vs">–</div>
+              <div className="team-info">
+                <span className="flag">{flagFor(showSummary.away_team_name)}</span>
+                <span className="name">{showSummary.away_team_name}</span>
+                <span className="xg">{showSummary.away_score}</span>
+              </div>
+            </div>
+            <p className="lab-summary-label">{showSummary.result_label}</p>
+            {showSummary.penalties && (
+              <p className="lab-summary-pens">{t("match.pensScore", { home: showSummary.penalties.home_score, away: showSummary.penalties.away_score })}</p>
+            )}
+            {showSummary.goals.length > 0 && (
+              <ul className="lab-summary-list">
+                {showSummary.goals.map((g, i) => (
+                  <li key={i}>
+                    <span className="lab-summary-min">{g.minute}{g.extra_time ? "' ET" : "'"}</span>
+                    <span>{flagFor(g.team_id === showSummary.home_team_id ? showSummary.home_team_name : showSummary.away_team_name)} {showSummary.home_team_id === g.team_id ? showSummary.home_team_name : showSummary.away_team_name}</span>
+                    <span className="lab-summary-player">{g.scorer}{g.penalty ? <span className="pen-badge">{t("match.penShort")}</span> : null}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {(showSummary.reds?.length ?? 0) > 0 && (
+              <div className="lab-summary-section">
+                <h4>{t("lab.redCards")}</h4>
+                <ul className="lab-summary-list">
+                  {showSummary.reds!.map((r, i) => (
+                    <li key={i}>
+                      <span className="lab-summary-min">{r.minute}'</span>
+                      <span>🟥 {r.player}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(showSummary.events?.length ?? 0) > 0 && (
+              <details className="lab-summary-section">
+                <summary>{t("lab.events")}</summary>
+                <ul className="lab-summary-list">
+                  {showSummary.events!.map((e, i) => (
+                    <li key={i}>
+                      <span className="lab-summary-min">{e.minute}'</span>
+                      <span>[{e.kind}] {e.team_id === showSummary.home_team_id ? showSummary.home_team_name : showSummary.away_team_name}{e.out_player ? ` · ${e.out_player}${e.in_player ? ` → ${e.in_player}` : ""}` : e.detail ? ` · ${e.detail}` : ""}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
+            <div className="lab-summary-actions">
+              <button className="btn primary" onClick={openLive}>{t("lab.playLive")}</button>
+              <button className="btn secondary" onClick={() => setShowSummary(null)}>{t("lab.closeSummary")}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

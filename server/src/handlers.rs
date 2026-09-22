@@ -9,16 +9,14 @@ use rusqlite::{params, OptionalExtension};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    auth::{AuthUser, OptionalUser},
-    detail::{self, RunRequest},
+    auth::AuthUser,
     error::{ApiError, ApiResult},
     fixture,
     models::{
         AddParticipants, CreateMatch, CreatePlayer, CreateTeam, CreateTournament, ImportPayload,
-        Match, Participant, Phase, Player, RunPayload, SimulateOut, Team, Tournament,
+        Match, Participant, Phase, Player, Team, Tournament,
     },
     names,
-    sim::{self, SimRequest},
     Db,
 };
 
@@ -507,34 +505,214 @@ pub async fn create_players(
 }
 
 // ---------------------------------------------------------------------------
-// Simulation
+// Run oracle (data only — no simulation)
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Deserialize)]
-pub struct SimulateIn {
-    #[serde(default)]
-    pub focus_team_id: Option<i64>,
-    #[serde(default)]
-    pub focus_boost: i32,
+/// Everything the client's run engine needs to replay a tournament locally:
+/// tournament meta, phases, participants with team context, every squad (with
+/// a `generated` flag when the server manufactured a fictional roster), the
+/// seeded group fixtures/kickoffs and manual group placement. Pure data: no
+/// match is ever simulated here.
+#[derive(Debug, Serialize)]
+pub struct Oracle {
+    tournament: OracleTournament,
+    phases: Vec<Phase>,
+    participants: Vec<OracleTeam>,
+    /// team_id -> squad (final roster the run engine picks XIs from).
+    squads: HashMap<i64, OracleSquad>,
+    /// Manual group placement (fixture UI), preserving group + name order.
+    groups: Vec<OracleGroup>,
+    /// Scheduled group-stage fixtures (rounds, kickoffs).
+    fixtures: Vec<OracleFixture>,
 }
 
-pub async fn simulate_tournament(
-    State(db): State<Db>,
-    Path(id): Path<i64>,
-    body: Option<Json<SimulateIn>>,
-) -> ApiResult<Json<SimulateOut>> {
-    let req = body
-        .map(|Json(b)| SimRequest {
-            focus_team_id: b.focus_team_id,
-            focus_boost: b.focus_boost.clamp(0, 6),
-        })
-        .unwrap_or(SimRequest {
-            focus_team_id: None,
-            focus_boost: 0,
-        });
+#[derive(Debug, Serialize)]
+pub struct OracleTournament {
+    id: i64,
+    name: String,
+    year: i32,
+    host: String,
+    shirt_numbers: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OracleTeam {
+    id: i64,
+    name: String,
+    code: Option<String>,
+    rating: i32,
+    pedigree: i32,
+    home_support: i32,
+    form: i32,
+    morale: i32,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OraclePlayer {
+    id: i64,
+    name: String,
+    position: String,
+    positions: Vec<String>,
+    photo_url: Option<String>,
+    shirt_number: Option<i32>,
+    overall: f64,
+    aggression: i32,
+    /// Present for real squads; `None` for generated rosters.
+    leadership: Option<i32>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OracleSquad {
+    generated: bool,
+    players: Vec<OraclePlayer>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OracleGroup {
+    name: String,
+    team_ids: Vec<i64>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct OracleFixture {
+    home_team_id: i64,
+    away_team_id: i64,
+    matchday: Option<i32>,
+    kickoff: Option<String>,
+}
+
+/// GET /api/tournaments/{id}/oracle
+pub async fn tournament_oracle(State(db): State<Db>, Path(id): Path<i64>) -> ApiResult<Json<Oracle>> {
     let conn = db.lock().unwrap();
-    let out = sim::simulate_tournament(&conn, id, &req)?;
-    Ok(Json(out))
+    let (name, year, host, shirt_numbers) = conn
+        .query_row(
+            "SELECT name, year, host, shirt_numbers FROM tournaments WHERE id = ?1",
+            [id],
+            |r| {
+                Ok((
+                    r.get::<_, String>(0)?,
+                    r.get::<_, i32>(1)?,
+                    r.get::<_, String>(2)?,
+                    r.get::<_, i32>(3)? != 0,
+                ))
+            },
+        )
+        .optional()?
+        .ok_or_else(|| ApiError::not_found("tournament not found"))?;
+    let phases = load_phases(&conn, id)?;
+
+    let mut pstmt = conn.prepare(
+        "SELECT t.id, t.name, t.code, t.rating, t.pedigree, t.home_support, t.form, t.morale
+         FROM tournament_teams tt
+         JOIN teams t ON t.id = tt.team_id
+         WHERE tt.tournament_id = ?1
+         ORDER BY t.rating DESC",
+    )?;
+    let participants = pstmt
+        .query_map([id], |r| {
+            Ok(OracleTeam {
+                id: r.get(0)?,
+                name: r.get(1)?,
+                code: r.get(2)?,
+                rating: r.get(3)?,
+                pedigree: r.get(4)?,
+                home_support: r.get(5)?,
+                form: r.get(6)?,
+                morale: r.get(7)?,
+            })
+        })?
+        .collect::<rusqlite::Result<Vec<_>>>()?;
+
+    let mut squads = HashMap::new();
+    for t in &participants {
+        let base = names::squad_for_team(&conn, id, t.id, shirt_numbers)?;
+        let generated = base.is_empty() || base.iter().any(|p| p.id < 0);
+        let leadership = if generated {
+            HashMap::new()
+        } else {
+            let mut lstmt = conn.prepare(
+                "SELECT c.player_id, COALESCE(p.leadership, 60)
+                 FROM player_callups c
+                 JOIN players p ON p.id = c.player_id
+                 WHERE c.tournament_id = ?1 AND c.team_id = ?2",
+            )?;
+            let rows =
+                lstmt.query_map(params![id, t.id], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i32>(1)?)))?;
+            let mut m = HashMap::new();
+            for row in rows {
+                let (pid, lead) = row?;
+                m.insert(pid, lead);
+            }
+            m
+        };
+        let players = base
+            .into_iter()
+            .map(|p| OraclePlayer {
+                id: p.id,
+                name: p.name,
+                position: p.position,
+                positions: p.positions,
+                photo_url: p.photo_url,
+                shirt_number: p.shirt_number,
+                overall: p.overall,
+                aggression: p.aggression,
+                leadership: leadership.get(&p.id).copied(),
+            })
+            .collect();
+        squads.insert(t.id, OracleSquad { generated, players });
+    }
+
+    let mut gstmt = conn.prepare(
+        "SELECT g.group_name, t.id
+         FROM tournament_groups g
+         JOIN teams t ON t.id = g.team_id
+         WHERE g.tournament_id = ?1
+         ORDER BY g.group_name, t.name",
+    )?;
+    let mut groups: Vec<OracleGroup> = Vec::new();
+    for row in gstmt
+        .query_map([id], |r| Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?)))?
+    {
+        let (name, tid) = row?;
+        match groups.iter_mut().find(|g| g.name == name) {
+            Some(g) => g.team_ids.push(tid),
+            None => groups.push(OracleGroup {
+                name,
+                team_ids: vec![tid],
+            }),
+        }
+    }
+
+    let mut fstmt = conn.prepare(
+        "SELECT home_team_id, away_team_id, matchday, kickoff FROM matches
+         WHERE tournament_id = ?1 AND stage = 'GROUP' AND status = 'scheduled'
+         ORDER BY matchday, id",
+    )?;
+    let fixtures = fstmt
+        .query_map([id], |r| {
+            Ok(OracleFixture {
+                home_team_id: r.get(0)?,
+                away_team_id: r.get(1)?,
+                matchday: r.get(2)?,
+                kickoff: r.get(3)?,
+            })
+        })?
+        .collect::<rusqlite::Result<Vec<_>>>()?;
+
+    Ok(Json(Oracle {
+        tournament: OracleTournament {
+            id,
+            name,
+            year,
+            host,
+            shirt_numbers,
+        },
+        phases,
+        participants,
+        squads,
+        groups,
+        fixtures,
+    }))
 }
 
 // ---------------------------------------------------------------------------
@@ -663,8 +841,8 @@ fn map_player(r: &rusqlite::Row) -> rusqlite::Result<Player> {
         r.get::<_, Option<i32>>(23)?,
     ];
     let position: String = r.get(4)?;
-    let overall = crate::sim::composite_rating(&position, &attrs);
-    let rating = crate::sim::star_rating(&position, &attrs);
+    let overall = crate::attrs::composite_rating(&position, &attrs);
+    let rating = crate::attrs::star_rating(&position, &attrs);
     let positions: Vec<String> = r
         .get::<_, Option<String>>(24)?
         .map(|s| crate::names::parse_positions(&s))
@@ -756,133 +934,5 @@ fn map_match(r: &rusqlite::Row) -> rusqlite::Result<Match> {
 }
 
 // ---------------------------------------------------------------------------
-// Detailed runs
+// Run: computed client-side. The server only serves data + the oracle seed.
 // ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-pub struct RunRequestPayload {
-    #[serde(default)]
-    focus_team_id: Option<i64>,
-    #[serde(default)]
-    focus_boost: i32,
-    /// Deterministic seed (echoed back in the payload). Same seed + same
-    /// lineups → identical run.
-    #[serde(default)]
-    seed: Option<u64>,
-    /// Per-match lineup configs, keyed by "{stage}|{day}|{home}|{away}".
-    #[serde(default)]
-    lineups: HashMap<String, detail::LineupConfig>,
-    /// Persist the run to the user's history on this POST.
-    #[serde(default)]
-    save: bool,
-}
-
-#[derive(Debug, Serialize)]
-pub struct RunListItem {
-    id: i64,
-    tournament_id: i64,
-    tournament_name: String,
-    year: i32,
-    champion: Option<String>,
-    created_at: String,
-}
-
-/// POST /api/tournaments/{id}/run
-///
-/// Computes (and, for logged-in users, optionally saves) the detailed replay
-/// payload for a full tournament run.
-pub async fn run_tournament_detail(
-    State(db): State<Db>,
-    Path(id): Path<i64>,
-    user: OptionalUser,
-    Json(body): Json<RunRequestPayload>,
-) -> ApiResult<Json<RunPayload>> {
-    let conn = db.lock().unwrap();
-    if info_ok(&conn, id).is_err() {
-        return Err(ApiError::not_found("tournament not found"));
-    }
-    let mut payload = detail::simulate_run(
-        &conn,
-        id,
-        &RunRequest {
-            focus_team_id: body.focus_team_id,
-            focus_boost: body.focus_boost,
-            seed: body.seed,
-            lineups: body.lineups,
-            save: body.save,
-        },
-    )?;
-
-    if body.save {
-        if let Some(u) = &user.0 {
-            conn.execute(
-                "INSERT INTO sim_runs (user_id, tournament_id, payload) VALUES (?1, ?2, '{}')",
-                params![u.id, id],
-            )?;
-            let run_id = conn.last_insert_rowid();
-            payload.run_id = Some(run_id);
-            // Store the JSON including the id so reopened runs are self-describing.
-            let json = serde_json::to_string(&payload)?;
-            conn.execute(
-                "UPDATE sim_runs SET payload = ?1 WHERE id = ?2",
-                params![json, run_id],
-            )?;
-        }
-    }
-    Ok(Json(payload))
-}
-
-fn info_ok(conn: &rusqlite::Connection, id: i64) -> rusqlite::Result<()> {
-    conn.query_row(
-        "SELECT id FROM tournaments WHERE id = ?1",
-        [id],
-        |r| r.get::<_, i64>(0),
-    )?;
-    Ok(())
-}
-
-/// GET /api/runs — this user's saved runs (newest first).
-pub async fn list_runs(
-    State(db): State<Db>,
-    user: AuthUser,
-) -> ApiResult<Json<Vec<RunListItem>>> {
-    let conn = db.lock().unwrap();
-    let mut stmt = conn.prepare(
-        "SELECT r.id, r.tournament_id, t.name, t.year,
-                json_extract(r.payload, '$.champion'), r.created_at
-         FROM sim_runs r
-         JOIN tournaments t ON t.id = r.tournament_id
-         WHERE r.user_id = ?1
-         ORDER BY r.id DESC",
-    )?;
-    let rows = stmt.query_map([user.id], |r| {
-        Ok(RunListItem {
-            id: r.get(0)?,
-            tournament_id: r.get(1)?,
-            tournament_name: r.get(2)?,
-            year: r.get(3)?,
-            champion: r.get(4)?,
-            created_at: r.get(5)?,
-        })
-    })?;
-    Ok(Json(rows.collect::<Result<Vec<_>, _>>()?))
-}
-
-/// GET /api/runs/{id} — one saved run owned by this user.
-pub async fn get_run(
-    State(db): State<Db>,
-    Path(id): Path<i64>,
-    user: AuthUser,
-) -> ApiResult<Json<RunPayload>> {
-    let conn = db.lock().unwrap();
-    let payload: String = conn
-        .query_row(
-            "SELECT payload FROM sim_runs WHERE id = ?1 AND user_id = ?2",
-            params![id, user.id],
-            |r| r.get(0),
-        )
-        .optional()?
-        .ok_or_else(|| ApiError::not_found("saved run not found"))?;
-    let run: RunPayload = serde_json::from_str(&payload)?;
-    Ok(Json(run))
-}

@@ -5,11 +5,12 @@ import type {
   RunMatch,
   RunPayload,
   Tournament,
-  User,
 } from "./types";
-import { api, readToken, setToken } from "./api";
+import { api, setToken } from "./api";
 import { localeName, useI18n, type Locale } from "./i18n";
 import { trophyForYear } from "./trophies";
+import { generateRun, randomSeed, type Oracle } from "./sim/run";
+import { saveRun, hasRun } from "./sim/history";
 import ChooseTournament from "./pages/ChooseTournament";
 import TeamPick from "./pages/TeamPick";
 import Roster from "./pages/Roster";
@@ -52,10 +53,22 @@ const emptyFlow: Flow = {
 const matchKey = (m: Pick<RunMatch, "stage_key" | "day" | "home_team_id" | "away_team_id">) =>
   `${m.stage_key}|${m.day}|${m.home_team_id}|${m.away_team_id}`;
 
+/** Run oracle snapshot per tournament, fetched once and cached for the session
+ *  (pure data — resimulations re-run entirely in the browser). */
+const oracleCache = new Map<number, Oracle>();
+
+function getInitialStep(): Step {
+  if (typeof window !== "undefined") {
+    if (window.location.pathname === "/lab") return "lab";
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("lab") === "1") return "lab";
+  }
+  return "tournament";
+}
+
 export default function App() {
-  const [step, setStep] = useState<Step>("tournament");
+  const [step, setStep] = useState<Step>(getInitialStep);
   const [flow, setFlow] = useState<Flow>(emptyFlow);
-  const [user, setUser] = useState<User | null>(null);
   const [configs, setConfigs] = useState<Record<string, LineupConfig>>({});
   const [seed, setSeed] = useState<number | null>(null);
   const [interactive, setInteractive] = useState(false);
@@ -82,11 +95,6 @@ export default function App() {
       window.history.replaceState(null, "", window.location.pathname);
     }
   }, []);
-
-  useEffect(() => {
-    if (!readToken()) return;
-    api.me().then(setUser).catch(() => setUser(null));
-  }, [step]);
 
   const revealedMatches = useMemo(
     () => (flow.run?.matches ?? []).filter((m) => flow.revealed.has(m.id)),
@@ -137,10 +145,27 @@ export default function App() {
   runRef.current = flow.run;
   const revealedRef = useRef(flow.revealed);
   revealedRef.current = flow.revealed;
+  /** Seed keys already archived so a completed run is never double-saved. */
+  const archivedSeeds = useRef<Set<string>>(new Set());
 
-  /** Re-simulate the whole run. Same seed + same lineups → identical results,
-   *  so only the newly-configured match changes. Reveals up to (and including)
-   *  `target.matchId` only, so playing a match never simulates the ones after. */
+  const loadOracle = async (tournamentId: number): Promise<Oracle> => {
+    const cached = oracleCache.get(tournamentId);
+    if (cached) return cached;
+    const oracle = await api.oracle(tournamentId);
+    oracleCache.set(tournamentId, oracle);
+    return oracle;
+  };
+
+  const saveToHistory = (run: RunPayload) => {
+    if (hasRun(run.tournament_id, run.seed)) return;
+    archivedSeeds.current.add(`${run.tournament_id}:${run.seed}`);
+    saveRun(run);
+  };
+
+  /** Re-simulate the whole run in the browser. Same seed + same lineups →
+   *  identical results, so only the newly-configured match changes. Reveals up
+   *  to (and including) `target.matchId` only, so playing a match never
+   *  simulates the ones after. */
   const postRun = (
     save: boolean,
     target: { matchId: number; open: boolean } | null,
@@ -150,17 +175,20 @@ export default function App() {
     if (!id) return;
     if (runGuard.current === id) return;
     runGuard.current = id;
+    const runSeed = seed ?? randomSeed();
+    const focus = flow.team?.id ?? flow.run?.focus_team_id ?? null;
     // Keep the previous run (and the scroll position) visible while the
     // deterministic re-sim runs; the result is all but identical, so clearing
     // it would flash the list empty and bounce the scroll back to the top.
     setFlow((f) => ({ ...f, runError: null }));
-    api
-      .run(id, flow.team?.id ?? null, {
-        seed: seed ?? undefined,
-        lineups,
-        save,
-      })
-      .then((run) => {
+    loadOracle(id)
+      .then((oracle) => {
+        const run = generateRun(oracle, {
+          seed: BigInt(runSeed),
+          focus_team_id: focus,
+          lineups,
+        });
+        if (save) saveToHistory(run);
         setSeed(run.seed);
         runGuard.current = null;
         setFlow((f) => {
@@ -179,23 +207,11 @@ export default function App() {
       });
   };
 
-  /** Persist the current (deterministic) run to history without disturbing
-   *  the reveal state — used when the cup is complete. */
+  /** Archive the current (deterministic) run locally without disturbing the
+   *  reveal state — used when the cup is complete. */
   const saveRunSilently = () => {
-    const id = flow.tournament?.id;
-    if (!id || !flow.run || flow.run.run_id != null) return;
-    if (runGuard.current === id) return;
-    runGuard.current = id;
-    api
-      .run(id, flow.team?.id ?? null, { seed: seed ?? undefined, lineups: configs, save: true })
-      .then((run) => {
-        runGuard.current = null;
-        setSeed(run.seed);
-        setFlow((f) => ({ ...f, run }));
-      })
-      .catch(() => {
-        runGuard.current = null;
-      });
+    if (!flow.run || flow.run.run_id != null || runGuard.current != null) return;
+    saveToHistory(flow.run);
   };
 
   /** Commit a drafted lineup and re-run the (deterministic) sim so only the
@@ -445,7 +461,7 @@ export default function App() {
 
   /** Open the run-summary share popup; archive the completed run first. */
   const openShare = () => {
-    if (interactive && user && flow.run?.run_id == null) saveRunSilently();
+    if (interactive && flow.run) saveRunSilently();
     setShareOpen(true);
   };
 

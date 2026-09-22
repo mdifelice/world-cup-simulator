@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { canonSlot, useI18n } from "../i18n";
-import type { LineupConfig, Player, Strategy } from "../types";
+import type { LineupConfig, MatchBan, Player, Strategy } from "../types";
 import {
   bestEffectiveIn,
   eraFormation,
@@ -27,6 +27,8 @@ export interface LineupEditorProps {
   disabled?: boolean;
   /** Player ids serving a suspension: locked out of the XI and auto-pick. */
   unavailable?: number[];
+  /** Ban details for suspended players (reason + match count). */
+  bans?: MatchBan[];
   /** Reports the current lineup every time it changes: the config when the XI
    *  is complete, null otherwise. The parent decides when to commit/play. */
   onReady?: (cfg: LineupConfig | null) => void;
@@ -89,6 +91,7 @@ export default function LineupEditor({
   year,
   disabled = false,
   unavailable,
+  bans,
   onReady,
 }: LineupEditorProps) {
   const { t, pos } = useI18n();
@@ -98,6 +101,13 @@ export default function LineupEditor({
   const [armedId, setArmedId] = useState<number | null>(null);
 
   const blocked = useMemo(() => new Set(unavailable ?? []), [unavailable]);
+
+  // Ban details for each unavailable player (reason + match count)
+  const banDetails = useMemo(() => {
+    const map = new Map<number, MatchBan>();
+    (bans ?? []).forEach((ban) => map.set(ban.player_id, ban));
+    return map;
+  }, [bans]);
 
   const slots = useMemo(() => slotsFor(formation, strategy), [formation, strategy]);
   const markers = useMemo(() => layout(slots), [slots]);
@@ -381,6 +391,16 @@ export default function LineupEditor({
                         : ""}
                       {playerSurname(chosen.name)}
                     </span>
+                    {banDetails.has(chosen.id) && (
+                      <span className="mc-ban">
+                        {(() => {
+                          const ban = banDetails.get(chosen.id)!;
+                          const reason = ban.reason === "red" ? t("lineup.redCard") : t("lineup.injury");
+                          const matchText = ban.matches === 1 ? t("lineup.oneMatch") : t("lineup.matches", { n: ban.matches });
+                          return `${reason} · ${matchText}`;
+                        })()}
+                      </span>
+                    )}
                   </span>
                 )}
               </button>
@@ -409,7 +429,16 @@ export default function LineupEditor({
                   }
                   onClick={() => setArmedId((cur) => (cur === p.id ? null : p.id))}
                   disabled={disabled || sus}
-                  title={`${positionsLabel(p)} · ✦${Math.round(p.rating ?? p.overall)}`}
+                  title={
+                    sus && banDetails.has(p.id)
+                      ? (() => {
+                          const ban = banDetails.get(p.id)!;
+                          const reason = ban.reason === "red" ? t("lineup.redCard") : t("lineup.injury");
+                          const matchText = ban.matches === 1 ? t("lineup.oneMatch") : t("lineup.matches", { n: ban.matches });
+                          return `${reason} · ${matchText}`;
+                        })()
+                      : `${positionsLabel(p)} · ✦${Math.round(p.rating ?? p.overall)}`
+                  }
                 >
                   <span className="pp-photo">
                     {p.photo_url ? (
@@ -434,7 +463,15 @@ export default function LineupEditor({
                     <span className="pp-pos">{positionsLabel(p)}</span>
                   </span>
                   {sus ? (
-                    <span className="pp-badge sus">{t("lineup.suspended")}</span>
+                    <span className="pp-badge sus">
+                      {(() => {
+                        const ban = banDetails.get(p.id);
+                        if (!ban) return t("lineup.suspended");
+                        const reason = ban.reason === "red" ? t("lineup.redCard") : t("lineup.injury");
+                        const matchText = ban.matches === 1 ? t("lineup.oneMatch") : t("lineup.matches", { n: ban.matches });
+                        return `${reason} · ${matchText}`;
+                      })()}
+                    </span>
                   ) : used ? (
                     <span className="pp-badge">{t("lineup.picked")}</span>
                   ) : null}

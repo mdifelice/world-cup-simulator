@@ -8,7 +8,7 @@
 
 use rusqlite::{params, Connection};
 
-use crate::sim;
+use crate::attrs;
 
 #[derive(Debug, Clone)]
 pub struct SquadPlayer {
@@ -102,7 +102,7 @@ fn read_callups(
             .get::<_, Option<String>>(4)?
             .map(|s| parse_positions(&s))
             .unwrap_or_else(|| vec![position.clone()]);
-        let overall = sim::composite_rating(&position, &attrs);
+        let overall = attrs::composite_rating(&position, &attrs);
         Ok(SquadPlayer {
             id: r.get(0)?,
             name: r.get(1)?,

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { api } from "../api";
 import { useI18n } from "../i18n";
-import type { RunListItem, RunPayload } from "../types";
+import { listRuns, loadRun, type HistoryEntry } from "../sim/history";
+import type { RunPayload } from "../types";
 
 interface Props {
   onOpen: (run: RunPayload) => void;
@@ -9,27 +9,18 @@ interface Props {
 }
 
 export default function History({ onOpen, onStartFlow }: Props) {
-  const [runs, setRuns] = useState<RunListItem[] | null>(null);
+  const [entries, setEntries] = useState<HistoryEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [opening, setOpening] = useState<number | null>(null);
   const { t, country } = useI18n();
 
   useEffect(() => {
-    setRuns(null);
-    setError(null);
-    api
-      .runs()
-      .then(setRuns)
-      .catch((e) => setError(e.message));
+    setEntries(listRuns());
   }, []);
 
-  const open = (id: number) => {
-    setOpening(id);
-    api
-      .runById(id)
-      .then(onOpen)
-      .catch((e) => setError(e.message))
-      .finally(() => setOpening(null));
+  const open = (entry: HistoryEntry) => {
+    const run = loadRun(entry.id);
+    if (run) onOpen(run);
+    else setError(t("history.missing"));
   };
 
   return (
@@ -43,26 +34,22 @@ export default function History({ onOpen, onStartFlow }: Props) {
       </div>
 
       {error && <p className="error">{error}</p>}
-      {!runs && !error && <p className="hint">{t("history.loading")}</p>}
-      {runs && runs.length === 0 && (
+      {!entries && <p className="hint">{t("history.loading")}</p>}
+      {entries && entries.length === 0 && (
         <div className="empty">
           <p>{t("history.empty")}</p>
         </div>
       )}
-      {runs && runs.length > 0 && (
+      {entries && entries.length > 0 && (
         <div className="card-list">
-          {runs.map((r) => (
+          {entries.map((r) => (
             <div key={r.id} className="card run-card">
               <span className="run-year">{r.year}</span>
               <span className="run-name">{r.tournament_name}</span>
               {r.champion && <span className="run-champ">🏆 {country(r.champion)}</span>}
               <span className="run-date dim">{r.created_at}</span>
-              <button
-                className="btn secondary"
-                disabled={opening === r.id}
-                onClick={() => open(r.id)}
-              >
-                {opening === r.id ? t("history.opening") : t("history.relive")}
+              <button className="btn secondary" onClick={() => open(r)}>
+                {t("history.relive")}
               </button>
             </div>
           ))}

@@ -41,27 +41,11 @@ export const api = {
       `/api/teams/${teamId}/players` +
         (tournamentId ? `?tournament_id=${tournamentId}` : ""),
     ),
-  run: (
-    id: number,
-    focusTeamId: number | null,
-    opts: {
-      seed?: number;
-      lineups?: Record<string, import("./types").LineupConfig>;
-      save?: boolean;
-    } = {},
-  ) =>
-    req<import("./types").RunPayload>(`/api/tournaments/${id}/run`, {
-      method: "POST",
-      body: JSON.stringify({
-        focus_team_id: focusTeamId,
-        seed: opts.seed,
-        lineups: opts.lineups ?? {},
-        save: opts.save ?? false,
-      }),
-    }),
-  runs: () => req<import("./types").RunListItem[]>("/api/runs"),
-  runById: (id: number) =>
-    req<import("./types").RunPayload>(`/api/runs/${id}`),
+  /** Data-only run oracle: tournament meta, phases, participants, squads,
+   *  manual groups and scheduled group fixtures. No simulation happens
+   *  server-side — the client runs the tournament from this snapshot. */
+  oracle: (id: number) =>
+    req<import("./sim/run").Oracle>(`/api/tournaments/${id}/oracle`),
   me: () => req<import("./types").User>("/api/auth/me"),
 };
 

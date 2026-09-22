@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../api";
 import { useI18n } from "../i18n";
 import LineupEditor from "./LineupEditor";
@@ -47,18 +47,6 @@ export default function FormationPanel({
   const opponent =
     match.home_team_id === teamId ? match.away_team_name : match.home_team_name;
 
-  const banDetails = useMemo(
-    () =>
-      (bans ?? [])
-        .filter((ban: MatchBan) => (unavailable ?? []).includes(ban.player_id))
-        .map((ban: MatchBan) => {
-          const reasonText = ban.reason === "red" ? t("lineup.redCard") : t("lineup.injury");
-          const matchText = ban.matches === 1 ? t("lineup.oneMatch") : t("lineup.matches", { n: ban.matches });
-          return `${ban.player} (${reasonText}, ${matchText})`;
-        }),
-    [bans, unavailable, t],
-  );
-
   return (
     <div className="form-panel form-wrap">
       <div className="form-head">
@@ -75,12 +63,6 @@ export default function FormationPanel({
       {!squad && !error && <p className="hint">{t("squad.loading")}</p>}
       {squad && (
         <>
-          {banDetails.length > 0 && (
-            <p className="sus-note">
-              <span className="red-card tiny" aria-hidden />
-              {t("lineup.suspendedNote", { names: banDetails.join(", ") })}
-            </p>
-          )}
           <LineupEditor
             shirtNumbers={shirtNumbers}
             squad={squad}
@@ -88,6 +70,7 @@ export default function FormationPanel({
             year={year}
             disabled={disabled}
             unavailable={unavailable}
+            bans={bans}
             onReady={onReady}
           />
         </>
