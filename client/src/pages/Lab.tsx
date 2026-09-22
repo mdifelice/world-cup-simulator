@@ -174,6 +174,7 @@ export default function Lab() {
   useEffect(() => {
     if (!showLiveMatch) return;
     const handleKey = (e: KeyboardEvent) => {
+      // Only handle keys when no input element is focused
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === " ") {
         e.preventDefault();
@@ -181,14 +182,16 @@ export default function Lab() {
         liveMatchRef.current?.togglePause();
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
+        e.stopPropagation();
         liveMatchRef.current?.stepBackward();
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
+        e.stopPropagation();
         liveMatchRef.current?.stepForward();
       }
     };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    window.addEventListener("keydown", handleKey, true); // Use capture phase
+    return () => window.removeEventListener("keydown", handleKey, true);
   }, [showLiveMatch]);
 
   const squadsReady =
