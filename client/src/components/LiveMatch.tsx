@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from "react";
 import { flagFor, useI18n } from "../i18n";
 import type { Goal, LiveEvent, PenKick, RedCard, RunMatch } from "../types";
 
@@ -9,23 +9,48 @@ interface Props {
   onClose: () => void;
 }
 
+interface LiveMatchControls {
+  pause: () => void;
+  play: () => void;
+  togglePause: () => void;
+  stepForward: () => void;
+  stepBackward: () => void;
+  isPaused: boolean;
+  currentMinute: number;
+  totalLength: number;
+}
+
 const UP = "#2da562";
 const DOWN = "#c8443a";
 const BASE_LIVE_MS = 150;
 // Between penalty kicks the reveal pauses a beat, mirroring the minute-to-minute
 // tick but long enough to read each outcome.
 const PEN_MS = 900;
+// Base pause duration at boundaries (HT, FT, ET) - adjusted by speed
+const BASE_PAUSE_MS = 1000;
 
-export default function LiveMatch({
+interface LiveMatchControls {
+  pause: () => void;
+  play: () => void;
+  togglePause: () => void;
+  stepForward: () => void;
+  stepBackward: () => void;
+  isPaused: boolean;
+  currentMinute: number;
+  totalLength: number;
+}
+
+export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   match: m,
   focusTeamId,
   onReveal,
   onClose,
-}: Props) {
+}, ref) => {
   const { t, stage, country, speed } = useI18n();
 
   // Live match tick interval adjusted by speed selector
   const LIVE_MS = BASE_LIVE_MS / speed;
+  const PAUSE_MS = BASE_PAUSE_MS / speed;
   const addedHT = m.added_time_ht ?? 0;
   const addedFT = m.added_time_ft ?? 0;
   const addedET1 = m.added_time_et1 ?? 0;
@@ -57,16 +82,36 @@ export default function LiveMatch({
   const stopBoundaryET1 = m.extra_time ? 105 + addedET1 : 0;
   const stopBoundaryET2 = m.extra_time ? 120 + addedET2 : 0;
   const [min, setMin] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const pauseUntilRef = useRef(0);
   const halfPausedRef = useRef(false);
+
+  const pause = useCallback(() => setIsPaused(true), []);
+  const play = useCallback(() => setIsPaused(false), []);
+  const togglePause = useCallback(() => setIsPaused(p => !p), []);
+  const stepForward = useCallback(() => setMin(cur => Math.min(cur + 1, totalLength)), [totalLength]);
+  const stepBackward = useCallback(() => setMin(cur => Math.max(cur - 1, 0)), []);
+
+  useImperativeHandle(ref, () => ({
+    pause,
+    play,
+    togglePause,
+    stepForward,
+    stepBackward,
+    isPaused,
+    currentMinute: min,
+    totalLength,
+  }), [min, totalLength, isPaused]);
 
   useEffect(() => {
     setMin(0);
     pauseUntilRef.current = 0;
     halfPausedRef.current = false;
+    setIsPaused(false);
     const iv = setInterval(() => {
       setMin((cur) => {
+        if (isPaused) return cur;
         const now = Date.now();
         if (now < pauseUntilRef.current) return cur;
         // Pause at each boundary (HT, FT, ET halves) for a beat
@@ -76,7 +121,7 @@ export default function LiveMatch({
             halfPausedRef.current = false;
             return cur + 1;
           }
-          pauseUntilRef.current = now + 1000;
+          pauseUntilRef.current = now + PAUSE_MS;
           halfPausedRef.current = true;
           return cur;
         }
@@ -85,7 +130,7 @@ export default function LiveMatch({
       });
     }, LIVE_MS);
     return () => clearInterval(iv);
-  }, [m.id, totalLength, stopBoundaryHT, stopBoundaryFT, stopBoundaryET1, stopBoundaryET2]);
+  }, [m.id, totalLength, stopBoundaryHT, stopBoundaryFT, stopBoundaryET1, stopBoundaryET2, isPaused, LIVE_MS, PAUSE_MS]);
 
   const done = min >= totalLength;
 
@@ -698,4 +743,4 @@ export default function LiveMatch({
       </div>
     </div>
   );
-}
+});

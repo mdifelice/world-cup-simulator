@@ -18,7 +18,7 @@ import Roster from "./pages/Roster";
 import Overview from "./pages/Overview";
 import History from "./pages/History";
 import Lab from "./pages/Lab";
-import LiveMatch from "./components/LiveMatch";
+import { LiveMatch } from "./components/LiveMatch";
 import MatchDetail from "./components/MatchDetail";
 import ShareModal from "./components/ShareModal";
 

@@ -13,6 +13,17 @@ export interface Tournament {
 export type Locale = "en" | "es";
 export type Speed = 0.5 | 1 | 2 | 4;
 
+export interface LiveMatchControls {
+  pause: () => void;
+  play: () => void;
+  togglePause: () => void;
+  stepForward: () => void;
+  stepBackward: () => void;
+  isPaused: boolean;
+  currentMinute: number;
+  totalLength: number;
+}
+
 export interface Team {
   id: number;
   name: string;
