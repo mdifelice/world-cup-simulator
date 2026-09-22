@@ -257,9 +257,11 @@ export default function App() {
   const firstUnrevealed = (run: RunPayload, revealed: Set<number>) =>
     run.matches.find((m) => !revealed.has(m.id)) ?? null;
 
-  /** Hub fast-forward: simulate match by match (result only, 500ms apart) until
+  /** Hub fast-forward: simulate match by match (result only, interval adjusted by speed) until
    *  a focus match is reached so it can be played, or until the end of the
    *  tournament. It keeps going across round boundaries. */
+  const { speed } = useI18n();
+  const FF_BASE_MS = 500;
   const runFastForward = () => {
     if (!flow.run || ffRunning) return;
     const run = flow.run;
@@ -280,7 +282,7 @@ export default function App() {
         next.add(m.id);
         return { ...f, revealed: next };
       });
-    }, 500);
+    }, FF_BASE_MS / speed);
   };
 
   /** The Forward button can act only while the next pending match is not ours. */

@@ -10,6 +10,9 @@ export interface Tournament {
   shirt_numbers: boolean;
 }
 
+export type Locale = "en" | "es";
+export type Speed = 0.5 | 1 | 2 | 4;
+
 export interface Team {
   id: number;
   name: string;

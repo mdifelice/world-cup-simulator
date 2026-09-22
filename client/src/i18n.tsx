@@ -1,14 +1,18 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type Locale = "en" | "es";
+type Speed = 0.5 | 1 | 2 | 4;
 
 const STORAGE_KEY = "wcs_locale";
+const SPEED_STORAGE_KEY = "wcs_speed";
 
 export type Vars = Record<string, string | number>;
 
 export interface I18n {
   locale: Locale;
   setLocale: (l: Locale) => void;
+  speed: Speed;
+  setSpeed: (s: Speed) => void;
   t: (key: string, vars?: Vars) => string;
   stage: (name: string, vars?: Vars) => string;
   /** Localise a country/team name (e.g. "Brazil" → "Brasil" in es). */
@@ -139,6 +143,12 @@ const en: Record<string, string> = {
   "cup.ratingHint": "Average match rating (4.0–10.0)",
   "cup.sort": "Sort",
   "cup.assisters": "Top assister",
+  "cup.speed": "Speed",
+  "cup.slow": "Slow",
+  "cup.normal": "Normal",
+  "cup.fast": "Fast",
+  "cup.ultraFast": "Ultra Fast",
+  "cup.language": "Language",
   "cup.recent": "Recent results",
   "cup.complete": "· tournament complete",
   "cup.noMatches": "No matches played yet.",
@@ -448,6 +458,12 @@ const es: Record<string, string> = {
   "cup.ratingHint": "Valoración media por partido (4,0–10,0)",
   "cup.sort": "Ordenar",
   "cup.assisters": "Máximos asistentes",
+  "cup.speed": "Velocidad",
+  "cup.slow": "Lento",
+  "cup.normal": "Normal",
+  "cup.fast": "Rápido",
+  "cup.ultraFast": "Ultra rápido",
+  "cup.language": "Idioma",
   "cup.recent": "Resultados recientes",
   "cup.complete": "· torneo completo",
   "cup.noMatches": "Todavía no se ha jugado ningún partido.",
@@ -659,9 +675,19 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     return lang.startsWith("es") ? "es" : "en";
   });
 
+  const [speed, setSpeed] = useState<Speed>(() => {
+    const saved = window.localStorage.getItem(SPEED_STORAGE_KEY);
+    if (saved) return parseFloat(saved) as Speed;
+    return 1;
+  });
+
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, locale);
   }, [locale]);
+
+  useEffect(() => {
+    window.localStorage.setItem(SPEED_STORAGE_KEY, String(speed));
+  }, [speed]);
 
   const value = useMemo<I18n>(() => {
     const t = (key: string, vars?: Vars): string => {
@@ -684,12 +710,14 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     return {
       locale,
       setLocale: (l: Locale) => setLocale(l),
+      speed,
+      setSpeed: (s: Speed) => setSpeed(s),
       t,
       stage,
       country: (name: string): string => countryNames[locale]?.[name] ?? name,
       pos: (code: string): string => t("abbr." + normalizePos(code)),
     };
-  }, [locale]);
+  }, [locale, speed]);
 
   return <I18nCtx.Provider value={value}>{children}</I18nCtx.Provider>;
 }

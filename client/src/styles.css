@@ -1881,7 +1881,7 @@ body {
   font-size: 12px;
 }
 .scorers-modal {
-  max-width: 560px;
+  max-width: 720px;
 }
 .scorers-toolbar {
   display: flex;
@@ -1936,7 +1936,7 @@ body {
 }
 .scorers-header {
   display: grid;
-  grid-template-columns: 36px 1fr 48px 48px 56px;
+  grid-template-columns: 36px 36px 1fr 48px 48px 56px;
   gap: 4px;
   padding: 4px 8px;
   font-size: 11px;
@@ -1974,7 +1974,7 @@ body {
 }
 .scorers-row {
   display: grid;
-  grid-template-columns: 36px 1fr 48px 48px 56px;
+  grid-template-columns: 36px 36px 1fr 48px 48px 56px;
   gap: 4px;
   align-items: center;
   padding: 4px 8px;

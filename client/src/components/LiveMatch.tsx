@@ -11,7 +11,7 @@ interface Props {
 
 const UP = "#2da562";
 const DOWN = "#c8443a";
-const LIVE_MS = 150;
+const BASE_LIVE_MS = 150;
 // Between penalty kicks the reveal pauses a beat, mirroring the minute-to-minute
 // tick but long enough to read each outcome.
 const PEN_MS = 900;
@@ -22,9 +22,10 @@ export default function LiveMatch({
   onReveal,
   onClose,
 }: Props) {
-  const { t, stage, country } = useI18n();
+  const { t, stage, country, speed } = useI18n();
 
-  // Total match minutes including added time
+  // Live match tick interval adjusted by speed selector
+  const LIVE_MS = BASE_LIVE_MS / speed;
   const addedHT = m.added_time_ht ?? 0;
   const addedFT = m.added_time_ft ?? 0;
   const addedET1 = m.added_time_et1 ?? 0;
@@ -218,29 +219,27 @@ export default function LiveMatch({
   const botLane = 90;
   const legendY = 104;
 
-  // Growing/zoom axis: the visible span grows as the match progresses.
-  // - First half (min ≤ 45): span = 45
-  // - HT added time (min 46..45+addedHT): span = min (grows with each added minute)
-  // - Second half regular: span = 90 + addedHT
-  // - FT added time: span = min (grows)
-  // - ET: similar pattern with 105/120 boundaries.
-  // This makes the chart "zoom" to the current period, with period lines
-  // at the right edge during their active period, then settling to their
-  // final fraction once the next period begins.
-  const baseSH = 90 + addedHT + addedFT;
-  const visTotal = (() => {
-    if (min <= 45) return 45;
-    if (min <= 45 + addedHT) return min; // HT added time: grow
-    if (min <= 90 + addedHT) return 90 + addedHT; // 2nd half regular
-    if (min <= 90 + addedHT + addedFT) return min; // FT added time: grow
-    if (!m.extra_time) return 90 + addedHT + addedFT;
-    // Extra time
-    if (min <= baseSH + 15) return baseSH + 15; // ET1 regular
-    if (min <= baseSH + 15 + addedET1) return min; // ET1 added: grow
-    if (min <= baseSH + 30 + addedET1) return baseSH + 30 + addedET1; // ET2 regular
-    return Math.min(min, totalLength); // ET2 added: grow
-  })();
+  // Fixed axis showing full 90 minutes (+ added time) from the start,
+  // with a small right margin so the FT label isn't cut off.
+  const marginRatio = 0.04; // 4% right margin for FT label
+  const visTotal = regulationLength / (1 - marginRatio);
   const bw = W / visTotal;
+
+  // Period boundary chrono positions (used for line placement)
+  const baseSH = 90 + addedHT + addedFT;
+  const HT_CHRONO = 45 + addedHT;
+  const FT_CHRONO = 90 + addedHT + addedFT;
+  const ET1_CHRONO = baseSH + 15 + addedET1;
+
+  // Period line positions on the fixed axis with right margin:
+  // - HT line at (45+addedHT) / visTotal
+  // - FT line at (90+addedHT+addedFT) / visTotal
+  // - ET1 line at (baseSH+15+addedET1) / visTotal
+  // - Final FT line at totalLength / visTotal
+  const htLine = HT_CHRONO / visTotal;
+  const ftLine = FT_CHRONO / visTotal;
+  const et1Line = m.extra_time ? ET1_CHRONO / visTotal : 0;
+  const et2Line = m.extra_time ? totalLength / visTotal : 0;
 
   // Map a chart minute to an index of the momentum series. The engine only builds
   // samples for the regulation (90) or extra-time (120) minutes, so added-time
@@ -319,27 +318,6 @@ export default function LiveMatch({
   }, [series, min, visTotal, W, maxHalf]);
 
   const isAwayFocusMomentum = momentum != null && focusTeamId === m.away_team_id;
-
-  // Period line positions on the growing axis:
-  // - HT line: right edge (1.0) during 1st half + HT added time; then at (45+addedHT)/visTotal
-  // - FT line: right edge during 2nd half + FT added; then at (90+addedHT+addedFT)/visTotal (or 1.0 if no ET)
-  // - ET1 line (105'): right edge during ET1, then at its fraction
-  // - Final FT: always at 1.0 when done, or right edge during ET2
-  const HT_CHRONO = 45 + addedHT;
-  const FT_CHRONO = 90 + addedHT + addedFT;
-  const ET1_CHRONO = baseSH + 15 + addedET1;
-  const ET2_CHRONO = baseSH + 30 + addedET1 + addedET2; // = totalLength
-
-  const htLine = min <= HT_CHRONO ? 1 : HT_CHRONO / visTotal;
-  const ftLine = m.extra_time
-    ? (min <= FT_CHRONO ? 1 : FT_CHRONO / visTotal)
-    : (min <= FT_CHRONO ? 1 : FT_CHRONO / visTotal); // for non-ET, FT_CHRONO = totalLength, so always 1 when min>FT_CHRONO (which never happens)
-  const et1Line = m.extra_time
-    ? (min <= ET1_CHRONO ? 1 : ET1_CHRONO / visTotal)
-    : 0;
-  const et2Line = m.extra_time
-    ? (min <= ET2_CHRONO ? 1 : ET2_CHRONO / visTotal)
-    : 0;
 
   const goalMarks = goalsUpTo.map((g, i) => {
     const x = (seqForMinute(g.minute, g.extra_time) / visTotal) * W;

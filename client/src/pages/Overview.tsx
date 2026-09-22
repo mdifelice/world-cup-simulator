@@ -3,7 +3,7 @@ import { useI18n, flagFor } from "../i18n";
 import PlayerCard from "../components/PlayerCard";
 import FormationPanel from "../components/FormationPanel";
 import Bracket from "../components/Bracket";
-import type { LineupConfig, MatchBan, RunMatch, RunPayload } from "../types";
+import type { LineupConfig, MatchBan, RunMatch, RunPayload, Locale, Speed } from "../types";
 
 interface Props {
   run: RunPayload | null;
@@ -86,7 +86,7 @@ export default function Overview({
 }: Props) {
   const focusId = run?.focus_team_id ?? null;
   const total = run?.matches.length ?? 0;
-  const { t, stage, country } = useI18n();
+  const { t, stage, country, locale, setLocale, speed, setSpeed } = useI18n();
   const [bracketOpen, setBracketOpen] = useState(false);
   const [scorersOpen, setScorersOpen] = useState(false);
   const [countryFilter, setCountryFilter] = useState("");
@@ -377,7 +377,7 @@ export default function Overview({
 
   const matchRatings = run?.ratings ?? {};
 
-  type SortKey = "goals" | "assists" | "rating";
+  type SortKey = "rank" | "name" | "goals" | "assists" | "rating";
   const [sortKey, setSortKey] = useState<SortKey>("goals");
   const [sortDesc, setSortDesc] = useState(true);
 
@@ -388,11 +388,16 @@ export default function Overview({
 
   const sortScorers = (arr: typeof filteredScorers) => {
     return [...arr].sort((a, b) => {
-      let va: number, vb: number;
+      let va: number | string, vb: number | string;
       if (sortKey === "goals") { va = a.goals; vb = b.goals; }
       else if (sortKey === "assists") { va = a.assists; vb = b.assists; }
-      else { va = matchRatings[a.id] ?? 0; vb = matchRatings[b.id] ?? 0; }
-      if (va !== vb) return sortDesc ? vb - va : va - vb;
+      else if (sortKey === "rating") { va = matchRatings[a.id] ?? 0; vb = matchRatings[b.id] ?? 0; }
+      else if (sortKey === "rank") { va = 0; vb = 0; } // rank is just display order
+      else { va = a.name; vb = b.name; } // name
+      if (va !== vb) {
+        if (typeof va === "number") return sortDesc ? (vb as number) - (va as number) : (va as number) - (vb as number);
+        return sortDesc ? (vb as string).localeCompare(va as string) : (va as string).localeCompare(vb as string);
+      }
       return a.name.localeCompare(b.name);
     });
   };
@@ -431,6 +436,28 @@ export default function Overview({
           <p className="hint">
             {focusId ? t("cup.managing") : t("cup.neutral")}
           </p>
+        </div>
+        <div className="top-controls">
+          <select
+            className="ctrl-select"
+            value={locale}
+            onChange={(e) => setLocale(e.target.value as Locale)}
+            aria-label={t("cup.language")}
+          >
+            <option value="en">English</option>
+            <option value="es">Español</option>
+          </select>
+          <select
+            className="ctrl-select"
+            value={speed}
+            onChange={(e) => setSpeed(parseFloat(e.target.value) as Speed)}
+            aria-label={t("cup.speed")}
+          >
+            <option value="0.5">{t("cup.slow")}</option>
+            <option value="1">{t("cup.normal")}</option>
+            <option value="2">{t("cup.fast")}</option>
+            <option value="4">{t("cup.ultraFast")}</option>
+          </select>
         </div>
         {run && !allRevealed && (
           <div className="top-actions cmd">
@@ -762,8 +789,21 @@ export default function Overview({
             </div>
             <div className="scorers-table">
               <div className="scorers-header">
-                <span className="scorers-col scorers-col-rank">{t("cup.sort")}</span>
-                <span className="scorers-col scorers-col-name">{t("cup.player")}</span>
+                <button
+                  className={`scorers-col scorers-col-rank ${sortKey === "rank" ? "active" : ""}`}
+                  onClick={() => { setSortKey("rank"); setSortDesc(!sortDesc); }}
+                  title={t("cup.sort")}
+                >
+                  #{sortKey === "rank" && (sortDesc ? " ▼" : " ▲")}
+                </button>
+                <button
+                  className={`scorers-col scorers-col-name ${sortKey === "name" ? "active" : ""}`}
+                  onClick={() => { setSortKey("name"); setSortDesc(!sortDesc); }}
+                  title={t("cup.sort")}
+                >
+                  {t("cup.player")}
+                  {sortKey === "name" && (sortDesc ? " ▼" : " ▲")}
+                </button>
                 <button
                   className={`scorers-col scorers-col-goals ${sortKey === "goals" ? "active" : ""}`}
                   onClick={() => { setSortKey("goals"); setSortDesc(!sortDesc); }}
