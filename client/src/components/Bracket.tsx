@@ -211,7 +211,9 @@ export default function Bracket({
   const codeOf = (m: RunMatch, home: boolean) => {
     const id = home ? m.home_team_id : m.away_team_id;
     const name = home ? m.home_team_name : m.away_team_name;
-    return codes.get(id) ?? nameOf(name);
+    // With full names requested (Round of 16 / Round of 8) the name wins, so the
+    // stage shows countries instead of three-letter codes.
+    return fullName ? nameOf(name) : codes.get(id) ?? nameOf(name);
   };
 
   if (cols.length === 0) return null;

@@ -16,6 +16,43 @@ export interface ClockCtx {
 /** Sum of the regulation stoppage minutes (half + full time). */
 export const stoppageShift = (c: ClockCtx): number => c.addedHT + c.addedFT;
 
+/** Fixed display width of one added-time minute (a narrow band at a half's end). */
+const BAND = 0.28;
+
+/** Total width of the display axis, in display units. */
+export function axisSpan(c: ClockCtx): number {
+  const reg = c.extra_time ? 120 : 90;
+  return (
+    reg +
+    (c.addedHT + c.addedFT) * BAND +
+    (c.extra_time ? (c.addedET1 + c.addedET2) * BAND : 0)
+  );
+}
+
+/** Display-axis position (in display units) of a walked minute n.
+ *
+ * Regulation play maps one-to-one. Each period's added time compresses into a
+ * narrow band right after the period's last regular minute, so stoppage only
+ * ever extends the axis at the end of each half - it never pushes new bars
+ * towards the start of the match.
+ */
+export function axisPos(c: ClockCtx, n: number): number {
+  const bandHT = c.addedHT * BAND;
+  const bandFT = c.addedFT * BAND;
+  if (n <= 45) return n;
+  if (n <= 45 + c.addedHT) return 45 + ((n - 45) * BAND);
+  if (n <= 90 + c.addedHT) return 45 + bandHT + (n - 45 - c.addedHT);
+  if (n <= 90 + c.addedHT + c.addedFT) return 90 + bandHT + ((n - 90 - c.addedHT) * BAND);
+  const bandET1 = c.addedET1 * BAND;
+  const d0 = 90 + bandHT + bandFT;
+  if (!c.extra_time) return d0 + (n - 90 - c.addedHT - c.addedFT);
+  const SH = stoppageShift(c);
+  if (n <= 105 + SH) return d0 + (n - 90 - SH);
+  if (n <= 105 + SH + c.addedET1) return d0 + 15 + ((n - 105 - SH) * BAND);
+  if (n <= 120 + SH + c.addedET1) return d0 + 15 + bandET1 + (n - 105 - SH - c.addedET1);
+  return d0 + 30 + bandET1 + ((n - 120 - SH - c.addedET1) * BAND);
+}
+
 /** Display label of a walked minute n. */
 export function labelOf(c: ClockCtx, n: number): string {
   const SH = stoppageShift(c);

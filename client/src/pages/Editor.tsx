@@ -337,38 +337,42 @@ function TournamentForm({
         {open ? t("editor.cancel") : "＋ " + t("editor.newTournament")}
       </button>
       {open && (
-        <div className="editor-card">
-          <div className="editor-field">
-            <label>{t("editor.name")}</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} />
+        <div className="modal-backdrop" onClick={() => setOpen(false)}>
+          <div className="share-modal editor-player-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="editor-card">
+              <div className="editor-field">
+                <label>{t("editor.name")}</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.year")}</label>
+                <input
+                  type="number"
+                  value={year}
+                  onChange={(e) => setYear(parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.host")}</label>
+                <input value={host} onChange={(e) => setHost(e.target.value)} />
+              </div>
+              <label className="editor-check">
+                <input
+                  type="checkbox"
+                  checked={shirtNumbers}
+                  onChange={(e) => setShirtNumbers(e.target.checked)}
+                />
+                {t("editor.shirtNumbers")}
+              </label>
+              <button
+                className="btn primary"
+                disabled={busy || !name.trim() || !year}
+                onClick={save}
+              >
+                {t("editor.create")}
+              </button>
+            </div>
           </div>
-          <div className="editor-field">
-            <label>{t("editor.year")}</label>
-            <input
-              type="number"
-              value={year}
-              onChange={(e) => setYear(parseInt(e.target.value) || 0)}
-            />
-          </div>
-          <div className="editor-field">
-            <label>{t("editor.host")}</label>
-            <input value={host} onChange={(e) => setHost(e.target.value)} />
-          </div>
-          <label className="editor-check">
-            <input
-              type="checkbox"
-              checked={shirtNumbers}
-              onChange={(e) => setShirtNumbers(e.target.checked)}
-            />
-            {t("editor.shirtNumbers")}
-          </label>
-          <button
-            className="btn primary"
-            disabled={busy || !name.trim() || !year}
-            onClick={save}
-          >
-            {t("editor.create")}
-          </button>
         </div>
       )}
     </div>
@@ -439,50 +443,54 @@ function TournamentMeta({
         {t("editor.delete")}
       </button>
       {open && (
-        <div className="editor-card editor-grid">
-          <div className="editor-field">
-            <label>{t("editor.name")}</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} />
+        <div className="modal-backdrop" onClick={() => setOpen(false)}>
+          <div className="share-modal editor-player-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="editor-card editor-grid">
+              <div className="editor-field">
+                <label>{t("editor.name")}</label>
+                <input value={name} onChange={(e) => setName(e.target.value)} />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.year")}</label>
+                <input type="number" value={year} onChange={(e) => setYear(parseInt(e.target.value) || 0)} />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.host")}</label>
+                <input value={host} onChange={(e) => setHost(e.target.value)} />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.winner")}</label>
+                <input value={winner} onChange={(e) => setWinner(e.target.value)} />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.startDate")}</label>
+                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.endDate")}</label>
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.logo")}</label>
+                <input value={logo} onChange={(e) => setLogo(e.target.value)} />
+              </div>
+              <label className="editor-check">
+                <input
+                  type="checkbox"
+                  checked={shirtNumbers}
+                  onChange={(e) => setShirtNumbers(e.target.checked)}
+                />
+                {t("editor.shirtNumbers")}
+              </label>
+              <button
+                className="btn primary"
+                disabled={busy || !name.trim() || !year}
+                onClick={save}
+              >
+                {t("editor.save")}
+              </button>
+            </div>
           </div>
-          <div className="editor-field">
-            <label>{t("editor.year")}</label>
-            <input type="number" value={year} onChange={(e) => setYear(parseInt(e.target.value) || 0)} />
-          </div>
-          <div className="editor-field">
-            <label>{t("editor.host")}</label>
-            <input value={host} onChange={(e) => setHost(e.target.value)} />
-          </div>
-          <div className="editor-field">
-            <label>{t("editor.winner")}</label>
-            <input value={winner} onChange={(e) => setWinner(e.target.value)} />
-          </div>
-          <div className="editor-field">
-            <label>{t("editor.startDate")}</label>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-          </div>
-          <div className="editor-field">
-            <label>{t("editor.endDate")}</label>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-          </div>
-          <div className="editor-field">
-            <label>{t("editor.logo")}</label>
-            <input value={logo} onChange={(e) => setLogo(e.target.value)} />
-          </div>
-          <label className="editor-check">
-            <input
-              type="checkbox"
-              checked={shirtNumbers}
-              onChange={(e) => setShirtNumbers(e.target.checked)}
-            />
-            {t("editor.shirtNumbers")}
-          </label>
-          <button
-            className="btn primary"
-            disabled={busy || !name.trim() || !year}
-            onClick={save}
-          >
-            {t("editor.save")}
-          </button>
         </div>
       )}
     </div>
@@ -660,7 +668,9 @@ function ParticipantList({
         {open ? t("editor.cancel") : t("editor.participants")}
       </button>
       {open && (
-        <div className="editor-card">
+        <div className="modal-backdrop" onClick={() => setOpen(false)}>
+          <div className="share-modal editor-player-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="editor-card">
           {participants.length === 0 && <p className="editor-muted">{t("editor.noParticipants")}</p>}
           <table className="editor-table">
             <thead>
@@ -718,6 +728,8 @@ function ParticipantList({
             <button className="btn primary" disabled={busy || sel === ""} onClick={add}>
               ＋
             </button>
+            </div>
+            </div>
           </div>
         </div>
       )}
@@ -818,7 +830,9 @@ function TeamEditList({
       </table>
 
       {editing && draft && (
-        <div className="editor-card editor-grid">
+        <div className="modal-backdrop" onClick={() => setEditing(null)}>
+          <div className="share-modal editor-player-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="editor-card editor-grid">
           <div className="editor-field">
             <label>{t("editor.name")}</label>
             <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
@@ -850,6 +864,8 @@ function TeamEditList({
             <button className="btn" onClick={() => setEditing(null)}>
               {t("editor.cancel")}
             </button>
+            </div>
+            </div>
           </div>
         </div>
       )}
@@ -890,7 +906,9 @@ function TeamForm({
         {open ? t("editor.cancel") : "＋ " + t("editor.newTeam")}
       </button>
       {open && (
-        <div className="editor-card editor-grid">
+        <div className="modal-backdrop" onClick={() => setOpen(false)}>
+          <div className="share-modal editor-player-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="editor-card editor-grid">
           <div className="editor-field">
             <label>{t("editor.name")}</label>
             <input value={name} onChange={(e) => setName(e.target.value)} />
@@ -910,6 +928,8 @@ function TeamForm({
           <button className="btn primary" disabled={busy || !name.trim()} onClick={save}>
             {t("editor.create")}
           </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

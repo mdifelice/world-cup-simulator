@@ -6,6 +6,18 @@ import Bracket from "../components/Bracket";
 import { computeOverallStandings, finalPositionOf } from "../sim/standings";
 import type { LineupConfig, MatchBan, RunMatch, RunPayload } from "../types";
 
+/** Row used by the "Player Stats" table (engine stats or revealed-match fallback). */
+interface Entry {
+  id: number;
+  name: string;
+  team_id: number;
+  team_name: string;
+  photo?: string | null;
+  goals: number;
+  assists: number;
+  matches: number;
+}
+
 interface Props {
   run: RunPayload | null;
   revealedIds: Set<number>;
@@ -326,17 +338,7 @@ export default function Overview({
   /** Full scorer table (up to 50) from completed matches, with assists and own
  *  goals ignored. Assists are credited from the goal assist field so every one
  *  of a scorer's teammates' assists shows on them. */
-  const scorersAll = (() => {
-    interface Entry {
-      id: number;
-      name: string;
-      team_id: number;
-      team_name: string;
-      photo?: string | null;
-      goals: number;
-      assists: number;
-      matches: number;
-    }
+  const goalScorersAll = (() => {
     const by = new Map<number, Entry>();
     // Only use completed matches (revealedMatches) so the table is empty
     // before any game is played, matching the share dialog behavior.
@@ -387,11 +389,28 @@ export default function Overview({
       }
     }
     return [...by.values()]
-      .filter((e) => e.goals > 0)
-      .sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name));
+      .sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name))
+      .map((e) => e);
   })();
-  // Sidebar keeps the classic top-10 table.
-  const scorers = scorersAll.slice(0, 10);
+  // Prefer the engine's authoritative per-player stats: every player who took
+  // the field appears (even with no goals) and "matches" is actual games played.
+  const scorersAll: Entry[] = (() => {
+    if (run?.player_stats?.length) {
+      return run.player_stats.map((s) => ({
+        id: s.player_id,
+        name: s.name,
+        team_id: s.team_id,
+        team_name: s.team_name,
+        photo: s.photo,
+        goals: s.goals,
+        assists: s.assists,
+        matches: s.games,
+      }));
+    }
+    return goalScorersAll;
+  })();
+  // Sidebar keeps the classic top-10 scorers table.
+  const scorers = scorersAll.filter((s) => s.goals > 0).slice(0, 10);
 
   const matchRatings = run?.ratings ?? {};
 
@@ -774,7 +793,7 @@ export default function Overview({
         <div className="modal-backdrop" onClick={() => setScorersOpen(false)}>
           <div className="share-modal scorers-modal" onClick={(e) => e.stopPropagation()}>
             <div className="share-head">
-              <div className="share-title">{t("cup.scorers")}</div>
+              <div className="share-title">{t("cup.playerStats")}</div>
               <button
                 className="live-x"
                 onClick={() => setScorersOpen(false)}

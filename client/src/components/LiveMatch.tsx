@@ -1,7 +1,7 @@
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from "react";
 import { flagFor, useI18n } from "../i18n";
 import type { Goal, LiveEvent, LiveMatchControls, PenKick, RedCard, RunMatch } from "../types";
-import { incLabel, labelOf, minuteText, seqForMinute, stoppageShift } from "../sim/minutes";
+import { axisPos, axisSpan, incLabel, labelOf, minuteText, seqForMinute, stoppageShift } from "../sim/minutes";
 
 interface Props {
   match: RunMatch;
@@ -239,10 +239,8 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
     return list
       .filter((i) => (i.kind === "pen" ? true : incChrono(i) <= min))
       .sort((a, b) => {
-        const byMin = incMin(b) - incMin(a);
-        if (byMin !== 0) return byMin;
-        const byEt = Number(incET(b)) - Number(incET(a));
-        if (byEt !== 0) return byEt;
+        const byChrono = incChrono(a) - incChrono(b);
+        if (byChrono !== 0) return byChrono;
         const kindOrder = { goal: 0, red: 1, event: 2, pen: 3 };
         return kindOrder[a.kind] - kindOrder[b.kind];
       });
@@ -261,8 +259,8 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   // Fixed axis showing full 90 minutes (+ added time) from the start,
   // with a small right margin so the FT label isn't cut off.
   const marginRatio = 0.04; // 4% right margin for FT label
-  const visTotal = regulationLength / (1 - marginRatio);
-  const bw = W / visTotal;
+  const spanTotal = axisSpan(clock) / (1 - marginRatio);
+  const bw = W / spanTotal;
 
   // Period boundary chrono positions (used for line placement)
   const baseSH = 90 + addedHT + addedFT;
@@ -270,15 +268,12 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const FT_CHRONO = 90 + addedHT + addedFT;
   const ET1_CHRONO = baseSH + 15 + addedET1;
 
-  // Period line positions on the fixed axis with right margin:
-  // - HT line at (45+addedHT) / visTotal
-  // - FT line at (90+addedHT+addedFT) / visTotal
-  // - ET1 line at (baseSH+15+addedET1) / visTotal
-  // - Final FT line at totalLength / visTotal
-  const htLine = HT_CHRONO / visTotal;
-  const ftLine = FT_CHRONO / visTotal;
-  const et1Line = m.extra_time ? ET1_CHRONO / visTotal : 0;
-  const et2Line = m.extra_time ? totalLength / visTotal : 0;
+  // Period line positions on the display axis (added time forms a narrow band
+  // at each half's end) with the right margin.
+  const htLine = axisPos(clock, HT_CHRONO) / spanTotal;
+  const ftLine = axisPos(clock, FT_CHRONO) / spanTotal;
+  const et1Line = m.extra_time ? axisPos(clock, ET1_CHRONO) / spanTotal : 0;
+  const et2Line = m.extra_time ? axisPos(clock, totalLength) / spanTotal : 0;
 
   // Map a chart minute to an index of the momentum series. The engine only builds
   // samples for the regulation (90) or extra-time (120) minutes, so added-time
@@ -335,18 +330,18 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
       const d = s - 0.5;
       out.push({
         m: mm,
-        x: ((mm - 0.5) / visTotal) * W,
+        x: (axisPos(clock, mm - 0.5) / spanTotal) * W,
         up: d >= 0,
         h: Math.max(1, Math.round(Math.abs(d) * 2 * maxHalf)),
       });
     }
     return out;
-  }, [series, min, visTotal, W, maxHalf]);
+  }, [series, min, spanTotal, W, maxHalf, clock]);
 
   const isAwayFocusMomentum = momentum != null && focusTeamId === m.away_team_id;
 
   const goalMarks = goalsUpTo.map((g, i) => {
-    const x = (seqForMinute(clock, g.minute, g.extra_time, g.added_time === true) / visTotal) * W;
+    const x = (axisPos(clock, seqForMinute(clock, g.minute, g.extra_time, g.added_time === true)) / spanTotal) * W;
     const isFocusGoal =
       focusTeamId != null && g.team_id === focusTeamId
         ? !isAwayFocusMomentum
@@ -359,7 +354,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   });
 
   const redMarks = redsUpTo.map((r, i) => {
-    const x = (seqForMinute(clock, r.minute, r.extra_time, false) / visTotal) * W;
+    const x = (axisPos(clock, seqForMinute(clock, r.minute, r.extra_time, false)) / spanTotal) * W;
     const isFocusRed =
       focusTeamId != null && r.team_id === focusTeamId
         ? !isAwayFocusMomentum
@@ -503,7 +498,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
             {m.extra_time && tick(et2Line, t("match.ft"))}
             {done
               ? null
-              : tick(Math.min(min, visTotal) / visTotal, min === 0 ? "" : labelOf(clock, min))}
+              : tick(axisPos(clock, Math.min(min, totalLength)) / spanTotal, min === 0 ? "" : labelOf(clock, min))}
             {bars.map((b) => (
               <rect
                 key={b.m}

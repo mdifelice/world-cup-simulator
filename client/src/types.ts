@@ -521,6 +521,20 @@ export interface Awards {
   top_scorers: TopScorer[];
 }
 
+export interface PlayerStat {
+  player_id: number;
+  name: string;
+  team_id: number;
+  team_name: string;
+  position: string;
+  photo: string | null;
+  games: number;
+  goals: number;
+  assists: number;
+  /** Average match rating, 4.0–10.0, 1 decimal. */
+  rating: number | null;
+}
+
 export interface RunPayload {
   run_id: number | null;
   tournament_id: number;
@@ -538,6 +552,8 @@ export interface RunPayload {
   champion: string | null;
   /** Average match rating per player (player_id → rating 4.0–10.0, 1 decimal). */
   ratings?: Record<number, number>;
+  /** Full per-player stats for every player who took the field (games > 0). */
+  player_stats?: PlayerStat[];
 }
 
 export interface RunListItem {

@@ -31,6 +31,7 @@ import {
   type Awards,
   type PlayerAward,
   type TopScorer,
+  type PlayerStat,
 } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -829,7 +830,7 @@ class Engine {
     for (let i = 0; i < minutes.length; i++) {
       const team = i < teams.length ? teams[i] : home;
       const [xi, opp, red] = team === home ? [homeXi, awayXi, homeRed] : [awayXi, homeXi, awayRed];
-      goals.push(this.makeGoal(xi, opp, baseMinute + minutes[i], baseMinute >= 90, team, red, true));
+      goals.push(this.makeGoal(xi, opp, baseMinute + minutes[i], baseMinute >= 105, team, red, true));
     }
     return goals;
   }
@@ -1205,9 +1206,38 @@ class Engine {
       goals.push(this.makeGoal(xi, opp, minute, false, team, red));
     }
 
-    // Additional time: half-time (2-3 min) and full-time (4-6 min).
-    const addedHt = 2 + Math.floor(this.rng.unit() * 2);
-    const addedFt = 4 + Math.floor(this.rng.unit() * 3);
+    // Players suspended at kickoff, needed up-front for event generation.
+    const bannedAtKickoff = new Set<number>();
+    for (const team of [home, away]) {
+      for (const p of this.squad(team)) {
+        if (this.suspended(p.id)) bannedAtKickoff.add(p.id);
+      }
+    }
+
+    // Live feed (subs, injuries, reds, strategy, tactics) for this match.
+    const events: LiveEvent[] = [];
+    {
+      const maxSubs = maxSubsFor(this.year);
+      this.genMatchEvents(events, home, homeXi, goals, homeRed, maxSubs, bannedAtKickoff);
+      this.genMatchEvents(events, away, awayXi, goals, awayRed, maxSubs, bannedAtKickoff);
+      events.sort((a, b) => a.minute - b.minute);
+    }
+
+    // Additional time is derived from the match's incidents: the more goals,
+    // cards and stoppages (subs/injuries), the longer the wait. Half-time runs
+    // 1-4', full-time 3-6'.
+    const htGoals = goals.filter((g) => g.minute <= 45).length;
+    const ftGoals = totalReg - htGoals;
+    const htReds = [homeRed, awayRed].filter(
+      (r): r is [number, SquadPlayer] => r !== null && r[0] <= 45,
+    ).length;
+    const ftReds = (homeRed ? 1 : 0) + (awayRed ? 1 : 0) - htReds;
+    const htEvents = events.filter((e) => (e.kind === "sub" || e.kind === "injury") && e.minute <= 45).length;
+    const ftEvents = events.filter((e) => (e.kind === "sub" || e.kind === "injury") && e.minute > 45).length;
+    const clampSt = (v: number, lo: number, hi: number): number =>
+      Math.max(lo, Math.min(hi, Math.round(v)));
+    const addedHt = clampSt(1 + htGoals * 0.4 + htReds * 1.25 + htEvents * 0.12, 1, 4);
+    const addedFt = clampSt(2 + ftGoals * 0.4 + ftReds * 1.25 + ftEvents * 0.12, 3, 6);
     let addedEt1 = 0;
     let addedEt2 = 0;
     const htXgRate = ((hXgS + aXgS) / 90) * 0.3;
@@ -1240,10 +1270,10 @@ class Engine {
       hs += eh;
       aw += ea;
       winner = hs > aw ? home : aw > hs ? away : null;
-      // Extra-time added time: 0-2 min per half.
+      // Extra-time added time is driven by the goals scored in extra time.
       if (extraTime) {
-        addedEt1 = Math.floor(this.rng.unit() * 3);
-        addedEt2 = Math.floor(this.rng.unit() * 3);
+        addedEt1 = clampSt((eh + ea) * 0.4, 0, 2);
+        addedEt2 = clampSt((eh + ea) * 0.25, 0, 2);
         const etXgRate = ((hXgS + aXgS) / 90) * 0.2;
         goals.push(
           ...this.genAddedTimeGoals(105, addedEt1, etXgRate, home, away, homeXi, awayXi, homeRed, awayRed),
@@ -1310,13 +1340,6 @@ class Engine {
     }
 
     // Players suspended at kickoff (captured before the per-match tick).
-    const bannedAtKickoff = new Set<number>();
-    for (const team of [home, away]) {
-      for (const p of this.squad(team)) {
-        if (this.suspended(p.id)) bannedAtKickoff.add(p.id);
-      }
-    }
-
     // Per-match ratings + per-player event stats.
     const [hResult, aResult] =
       winner === home ? [1.0, 0.2] : winner === away ? [0.2, 1.0] : [0.6, 0.6];
@@ -1337,15 +1360,6 @@ class Engine {
     }
     for (const r of reds) {
       this.suspensions.set(r.player_id, [1, "red"]);
-    }
-
-    // Live feed only for the user's team's matches.
-    const events: LiveEvent[] = [];
-    if (this.focus === home || this.focus === away) {
-      const maxSubs = maxSubsFor(this.year);
-      this.genMatchEvents(events, home, homeXi, goals, homeRed, maxSubs, bannedAtKickoff);
-      this.genMatchEvents(events, away, awayXi, goals, awayRed, maxSubs, bannedAtKickoff);
-      events.sort((a, b) => a.minute - b.minute);
     }
 
     const totalMinutes = extraTime ? 120 : 90;
@@ -1575,6 +1589,28 @@ class Engine {
     return out;
   }
 
+  /** Full per-player stats for every player who took the field (games > 0). */
+  allPlayerStats(): PlayerStat[] {
+    const out: PlayerStat[] = [];
+    for (const [id, p] of this.perfs) {
+      if (p.games < 1) continue;
+      out.push({
+        player_id: id,
+        name: p.name,
+        team_id: p.team_id,
+        team_name: this.teamName(p.team_id),
+        position: p.position,
+        photo: p.photo,
+        games: p.games,
+        goals: p.goals,
+        assists: p.assists,
+        rating: Math.round((p.rating_sum / p.games) * 10) / 10,
+      });
+    }
+    out.sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name));
+    return out;
+  }
+
   bump(teamId: number, bonus: number): void {
     this.teamBonus.set(teamId, (this.teamBonus.get(teamId) ?? 0) + bonus);
   }
@@ -1748,6 +1784,7 @@ export function generateRun(oracle: Oracle, opts: RunOptions): RunPayload {
     awards: eng.finalizeAwards(),
     champion: eng.champion,
     ratings: eng.avgMatchRatings(),
+    player_stats: eng.allPlayerStats(),
   };
   return run;
 }

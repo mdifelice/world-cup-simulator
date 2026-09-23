@@ -495,13 +495,6 @@ export default function App() {
           </div>
         </div>
         <div className="top-actions">
-          <button
-            className="btn"
-            onClick={() => goStep(step === "editor" ? "tournament" : "editor")}
-            title={t("editor.title")}
-          >
-            {step === "editor" ? t("editor.back") : t("editor.link")}
-          </button>
           <select
             className="lang"
             value={locale}
