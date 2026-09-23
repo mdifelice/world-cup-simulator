@@ -152,6 +152,12 @@ export const api = {
       `/api/teams/${teamId}/players/${playerId}?tournament_id=${tournamentId}`,
       { method: "DELETE" },
     ),
+  /** Upload a photo (data URL) → served URL. */
+  uploadPhoto: (dataUrl: string) =>
+    req<{ url: string }>("/api/photos", {
+      method: "POST",
+      body: JSON.stringify({ data: dataUrl }),
+    }).then((r) => r.url),
 };
 
 export const googleSignInUrl = () => `${BASE}/api/auth/google`;

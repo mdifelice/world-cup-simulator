@@ -26,6 +26,8 @@ import {
   slotsFor,
   positionFamily,
   eraFormation,
+  famPenalty,
+  parsePosItem,
   type LineupConfig,
   type Goal,
   type Momentum,
@@ -145,11 +147,15 @@ interface SquadPlayer {
 }
 
 /** Best (lowest) slot penalty across a player's positions — mirrors
- *  models.rs `best_slot_penalty`. */
+ *  models.rs `best_slot_penalty`, plus each position's familiarity cost. */
 function bestSlotPenalty(positions: string[], slot: string): number {
-  if (!positions.length) return slotPenalty("MF", slot);
+  if (!positions.length) return slotPenalty("MF", slot) + famPenalty(100);
   let best = Infinity;
-  for (const pos of positions) best = Math.min(best, slotPenalty(pos, slot));
+  for (const item of positions) {
+    const { position, family } = parsePosItem(item);
+    const p = slotPenalty(position, slot) + famPenalty(family);
+    if (p < best) best = p;
+  }
   return best;
 }
 

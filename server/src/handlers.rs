@@ -25,6 +25,21 @@ pub async fn health() -> &'static str {
     "ok"
 }
 
+#[derive(Deserialize)]
+pub struct PhotoIn {
+    pub data: String,
+}
+
+/// Upload a player photo as a base64 data URL; the bytes are stored under
+/// `data/photos/` and served back through the existing `/photos` static route.
+pub async fn upload_photo(
+    _user: OptionalUser,
+    Json(input): Json<PhotoIn>,
+) -> ApiResult<(StatusCode, Json<serde_json::Value>)> {
+    let url = crate::db::save_photo(&input.data).map_err(ApiError::bad_request)?;
+    Ok((StatusCode::CREATED, Json(serde_json::json!({ "url": url }))))
+}
+
 // ---------------------------------------------------------------------------
 // Tournaments
 // ---------------------------------------------------------------------------
@@ -841,19 +856,8 @@ pub async fn update_player(
             player_id,
         ],
     )?;
-    let mut positions: Vec<String> = input
-        .positions
-        .iter()
-        .map(|s| s.trim().to_uppercase())
-        .filter(|s| !s.is_empty())
-        .collect();
-    positions.insert(0, input.position.to_uppercase());
-    let mut dedup: Vec<String> = Vec::new();
-    for pos in positions {
-        if !dedup.contains(&pos) {
-            dedup.push(pos);
-        }
-    }
+    let dedup = build_positions(&input.position, &input.positions);
+    let primary = plain_pos(dedup.first().map(|s| s.as_str()).unwrap_or(&input.position)).to_string();
     conn.execute(
         "INSERT INTO player_callups (player_id, tournament_id, team_id, position, positions, shirt_number)
          VALUES (?1,?2,?3,?4,?5,?6)
@@ -866,7 +870,7 @@ pub async fn update_player(
             player_id,
             tournament_id,
             team_id,
-            input.position.to_uppercase(),
+            primary,
             dedup.join(","),
             input.shirt_number,
         ],
@@ -1158,6 +1162,54 @@ fn expand_attrs(p: &CreatePlayer) -> [i32; 18] {
     }
 }
 
+/// Normalize one "POS" or "POS:fam" token (fam 1..=100); fam 100 collapses to
+/// the bare position code.
+fn normalize_pos_token(s: &str) -> Option<String> {
+    let t = s.trim();
+    if let Some(idx) = t.find(':') {
+        let (p, f) = t.split_at(idx);
+        let p = p.trim().to_uppercase();
+        if p.is_empty() {
+            return None;
+        }
+        if let Ok(fam) = f[1..].trim().parse::<i32>() {
+            if (1..=100).contains(&fam) {
+                return if fam == 100 { Some(p) } else { Some(format!("{p}:{fam}")) };
+            }
+        }
+        return Some(p);
+    }
+    let p = t.to_uppercase();
+    (!p.is_empty()).then_some(p)
+}
+
+/// The bare position code of a token ("CB:80" → "CB").
+fn plain_pos(token: &str) -> &str {
+    token.split(':').next().unwrap_or(token)
+}
+
+/// Ordered, deduped positions list with the declared primary first. Encoded
+/// familiarity ("CB:80") survives; legacy plain tokens default to fam 100, so
+/// no player loses their existing rating by the switch.
+fn build_positions(position: &str, positions: &[String]) -> Vec<String> {
+    let mut out: Vec<String> = positions
+        .iter()
+        .filter_map(|s| normalize_pos_token(s))
+        .collect();
+    let primary_plain = plain_pos(&normalize_pos_token(position).unwrap_or_default()).to_string();
+    if let Some(idx) = out.iter().position(|t| plain_pos(t) == primary_plain) {
+        if idx != 0 {
+            let tok = out.remove(idx);
+            out.insert(0, tok);
+        }
+    } else if !primary_plain.is_empty() {
+        out.insert(0, primary_plain);
+    }
+    let mut seen = std::collections::HashSet::new();
+    out.retain(|t| seen.insert(plain_pos(t).to_string()));
+    out
+}
+
 fn insert_player(
     conn: &rusqlite::Connection,
     tournament_id: i64,
@@ -1192,24 +1244,13 @@ fn insert_player(
         ],
     )?;
     let player_id = conn.last_insert_rowid();
-    let mut positions: Vec<String> = p
-        .positions
-        .iter()
-        .map(|s| s.trim().to_uppercase())
-        .filter(|s| !s.is_empty())
-        .collect();
-    positions.insert(0, p.position.to_uppercase());
-    let mut dedup: Vec<String> = Vec::new();
-    for pos in positions {
-        if !dedup.contains(&pos) {
-            dedup.push(pos);
-        }
-    }
+    let dedup = build_positions(&p.position, &p.positions);
+    let primary = plain_pos(dedup.first().map(|s| s.as_str()).unwrap_or(&p.position)).to_string();
     let positions_str = dedup.join(",");
     conn.execute(
         "INSERT OR IGNORE INTO player_callups (player_id, tournament_id, team_id, position, positions, shirt_number)
          VALUES (?1,?2,?3,?4,?5,?6)",
-        params![player_id, tournament_id, team_id, p.position, positions_str, p.shirt_number],
+        params![player_id, tournament_id, team_id, primary, positions_str, p.shirt_number],
     )?;
     Ok(())
 }

@@ -3399,6 +3399,93 @@ body {
   gap: 6px;
 }
 
+.editor-select {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 7px 9px;
+  font-size: 13px;
+  min-width: 180px;
+}
+
+.editor-actions-row > .btn {
+  flex: 0 0 auto;
+}
+
+.editor-field-wide {
+  flex: 1 1 100%;
+}
+
+.editor-pos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.editor-pos-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.editor-pos-row select {
+  min-width: 70px;
+  width: auto;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.editor-pos-flag {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.editor-fam-slider {
+  flex: 1 1 120px;
+  min-width: 90px;
+  max-width: 220px;
+}
+
+.editor-random-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+}
+
+.editor-random-row input[type="range"] {
+  width: 140px;
+}
+
+.editor-list-photo {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.editor-th-photo,
+.editor-td-photo {
+  width: 44px;
+}
+
 .chip-active {
   border-color: var(--accent);
   color: var(--text);

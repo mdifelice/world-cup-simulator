@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useI18n } from "../i18n";
-import { playerSurname, ratingStars, starsString } from "../types";
+import { playerSurname, ratingStars, starsString, posToken } from "../types";
 
 /** Everything a card needs to render; callers may fill in gaps from aggregates. */
 export interface PlayerCardData {
@@ -110,7 +110,7 @@ export default function PlayerCard({
       {posList.length > 0 && (
         <div className="pc-pos">
           {posList.map((p, i) => (
-            <span key={i}>{pos(p)}</span>
+            <span key={i}>{pos(posToken(p))}</span>
           ))}
         </div>
       )}

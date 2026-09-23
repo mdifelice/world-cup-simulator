@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react";
 import type {
   CreateMatch,
   DbMatch,
@@ -7,11 +7,12 @@ import type {
   PhaseDraft,
   Player,
   PlayerDraft,
+  PositionFamiliarity,
   Team,
   Tournament,
   TournamentDetail,
 } from "../types";
-import { POSITIONS } from "../types";
+import { POSITIONS, encodePos, parsePosItem } from "../types";
 import { api } from "../api";
 import { useI18n } from "../i18n";
 
@@ -21,6 +22,44 @@ const ATTRIBUTES = [
   "tackling", "vision", "positioning", "composure", "reflexes", "handling",
   "kicking", "aerial", "decisions", "aggression", "concentration", "leadership",
 ] as const;
+
+type AttrKey = (typeof ATTRIBUTES)[number];
+
+/** Attribute emphasis per granular position (mirrors server attrs.rs
+ *  `position_weights`) — drives the position-aware random generator. */
+const POS_WEIGHTS: Record<string, Partial<Record<AttrKey, number>>> = {
+  GK: { reflexes: 1, handling: 1, kicking: 1, positioning: 0.7, decisions: 0.6, composure: 0.6, concentration: 0.5, aerial: 0.5, strength: 0.4, pace: 0.2 },
+  CB: { tackling: 1, aerial: 1, strength: 1, positioning: 0.9, decisions: 0.8, aggression: 0.7, concentration: 0.7, pace: 0.5, composure: 0.5, passing: 0.4 },
+  RB: { pace: 1, stamina: 1, tackling: 0.8, positioning: 0.7, dribbling: 0.6, passing: 0.6, aggression: 0.5, vision: 0.4, aerial: 0.4 },
+  LB: { pace: 1, stamina: 1, tackling: 0.8, positioning: 0.7, dribbling: 0.6, passing: 0.6, aggression: 0.5, vision: 0.4, aerial: 0.4 },
+  WB: { pace: 1, stamina: 1, dribbling: 0.8, passing: 0.7, positioning: 0.6, tackling: 0.6, vision: 0.6, aggression: 0.5, shooting: 0.4 },
+  DM: { tackling: 1, stamina: 0.9, positioning: 0.8, decisions: 0.8, vision: 0.7, passing: 0.8, strength: 0.7, aggression: 0.7, composure: 0.6 },
+  CM: { passing: 1, vision: 1, stamina: 0.9, decisions: 0.8, positioning: 0.7, dribbling: 0.7, composure: 0.7, tackling: 0.5, shooting: 0.4 },
+  AM: { passing: 1, vision: 1, dribbling: 0.9, shooting: 0.7, decisions: 0.7, positioning: 0.7, composure: 0.8, stamina: 0.5 },
+  RW: { pace: 1, dribbling: 1, shooting: 0.8, passing: 0.7, positioning: 0.7, vision: 0.6, stamina: 0.6, composure: 0.5 },
+  LW: { pace: 1, dribbling: 1, shooting: 0.8, passing: 0.7, positioning: 0.7, vision: 0.6, stamina: 0.6, composure: 0.5 },
+  ST: { shooting: 1, positioning: 0.9, pace: 0.9, aerial: 0.8, strength: 0.6, dribbling: 0.7, composure: 0.8, passing: 0.4 },
+};
+
+/** Generate a full attribute set biased towards a position. `bias` (0..10)
+ *  concentrates stats into the position's key attributes; `level` shifts the
+ *  whole curve up (stars) or down (bench fillers). */
+const randomForPosition = (
+  pos: string,
+  bias: number,
+  level: number,
+): Partial<Record<AttrKey, number>> => {
+  const w = POS_WEIGHTS[pos] ?? {};
+  const maxW = Math.max(...Object.values(w), 1);
+  const out: Partial<Record<AttrKey, number>> = {};
+  for (const a of ATTRIBUTES) {
+    const wv = w[a] ?? 0;
+    const target = 52 + (wv / maxW) * 28 * (bias / 10) + level;
+    const jitter = Math.random() * 16 - 8;
+    out[a] = Math.max(2, Math.min(99, Math.round(target + jitter)));
+  }
+  return out;
+};
 
 const PHASE_KEY_SUGGESTIONS = ["GROUP", "R32", "R16", "QF", "SF", "THIRD", "F"];
 
@@ -38,7 +77,7 @@ const emptyDraft: PlayerDraft = {
 const num = (v: string | number | null | undefined, fallback = ""): string =>
   v === null || v === undefined ? String(fallback) : String(v);
 
-export default function Editor({ onHome }: { onHome: () => void }) {
+export default function Editor() {
   const { t } = useI18n();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -49,6 +88,9 @@ export default function Editor({ onHome }: { onHome: () => void }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showPhases, setShowPhases] = useState(false);
+  const [confirmDeleteT, setConfirmDeleteT] = useState(false);
 
   const refreshTournaments = useCallback(async () => {
     setTournaments(await api.tournaments());
@@ -114,11 +156,6 @@ export default function Editor({ onHome }: { onHome: () => void }) {
     <div className="lab-page">
       <header className="lab-header lab-header-row">
         <h1>{t("editor.title")}</h1>
-        <div className="lab-toolbar">
-          <button className="btn secondary" onClick={onHome}>
-            ← {t("editor.back")}
-          </button>
-        </div>
       </header>
 
       {error && (
@@ -141,15 +178,18 @@ export default function Editor({ onHome }: { onHome: () => void }) {
         <section className="editor-section">
           <h3>{t("editor.tournaments")}</h3>
           <div className="editor-row editor-wrap">
-            {tournaments.map((tr) => (
-              <button
-                key={tr.id}
-                className={`chip${tr.id === tid ? " chip-active" : ""}`}
-                onClick={() => setTid(tr.id === tid ? null : tr.id)}
-              >
-                {tr.year} {tr.name}
-              </button>
-            ))}
+            <select
+              className="editor-select"
+              value={tid ?? ""}
+              onChange={(e) => setTid(e.target.value ? parseInt(e.target.value, 10) : null)}
+            >
+              <option value="">—</option>
+              {tournaments.map((tr) => (
+                <option key={tr.id} value={tr.id}>
+                  {tr.year} {tr.name}
+                </option>
+              ))}
+            </select>
             {tournaments.length === 0 && <span className="editor-muted">{t("editor.noTournaments")}</span>}
           </div>
           <TournamentForm
@@ -170,24 +210,63 @@ export default function Editor({ onHome }: { onHome: () => void }) {
                 {detail.name} · {detail.year}
                 {detail.ready && <span className="editor-ready">✓</span>}
               </h3>
-              <TournamentMeta
-                detail={detail}
-                busy={busy}
-                onSaved={() => void loadTournament(tid!)}
-                onDeleted={async () => {
-                  setTid(null);
-                  await refreshTournaments();
-                }}
-              />
-              <PhasesEditor
-                tid={tid!}
-                phases={detail.phases}
-                busy={busy}
-                onSaved={async () => {
-                  await loadTournament(tid!);
-                  setMsg(t("editor.phasesSaved"));
-                }}
-              />
+              <div className="editor-row editor-actions-row">
+                <button className="btn" disabled={busy} onClick={() => setShowEdit(true)}>
+                  {t("editor.editTournament")}
+                </button>
+                <button className="btn" disabled={busy} onClick={() => setShowPhases(true)}>
+                  {t("editor.phases")}
+                </button>
+                <button className="btn danger" disabled={busy} onClick={() => setConfirmDeleteT(true)}>
+                  {t("editor.delete")}
+                </button>
+              </div>
+              {showEdit && (
+                <TournamentMeta
+                  detail={detail}
+                  busy={busy}
+                  onClose={() => setShowEdit(false)}
+                  onSaved={() => void loadTournament(tid!)}
+                />
+              )}
+              {showPhases && (
+                <PhasesEditor
+                  tid={tid!}
+                  phases={detail.phases}
+                  busy={busy}
+                  onClose={() => setShowPhases(false)}
+                  onSaved={async () => {
+                    await loadTournament(tid!);
+                    setMsg(t("editor.phasesSaved"));
+                  }}
+                />
+              )}
+              {confirmDeleteT && (
+                <div className="modal-backdrop" onClick={() => setConfirmDeleteT(false)}>
+                  <div
+                    className="share-modal editor-player-modal"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <p>{t("editor.confirmDeleteTournament")}</p>
+                    <div className="editor-row">
+                      <button className="btn" onClick={() => setConfirmDeleteT(false)}>
+                        {t("editor.cancel")}
+                      </button>
+                      <button
+                        className="btn danger"
+                        onClick={async () => {
+                          setConfirmDeleteT(false);
+                          await api.deleteTournament(tid!);
+                          setTid(null);
+                          await refreshTournaments();
+                        }}
+                      >
+                        {t("editor.delete")}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
 
             {/* -------------------------------------------------------- */}
@@ -202,22 +281,6 @@ export default function Editor({ onHome }: { onHome: () => void }) {
                     setTeams(await api.teams());
                   }}
                 />
-                <button
-                  className="btn"
-                  disabled={busy}
-                  onClick={() =>
-                    void run(
-                      () =>
-                        api.addParticipants(
-                          tid!,
-                          teams.map((tm) => ({ team_id: tm.id })),
-                        ),
-                      () => loadTournament(tid!),
-                    )
-                  }
-                >
-                  {t("editor.addAllTeams")}
-                </button>
               </div>
               <ParticipantList
                 teams={teams}
@@ -382,16 +445,15 @@ function TournamentForm({
 function TournamentMeta({
   detail,
   busy,
+  onClose,
   onSaved,
-  onDeleted,
 }: {
   detail: TournamentDetail;
   busy: boolean;
+  onClose: () => void;
   onSaved: () => void;
-  onDeleted: () => void | Promise<void>;
 }) {
   const { t } = useI18n();
-  const [open, setOpen] = useState(false);
   const [name, setName] = useState(detail.name);
   const [year, setYear] = useState(detail.year);
   const [host, setHost] = useState(detail.host);
@@ -423,76 +485,59 @@ function TournamentMeta({
       logo: logo.trim() ? logo.trim() : null,
       shirt_numbers: shirtNumbers,
     });
-    setOpen(false);
+    onClose();
     onSaved();
   };
 
-  const del = async () => {
-    if (!confirm(t("editor.confirmDeleteTournament"))) return;
-    await api.deleteTournament(detail.id);
-    setOpen(false);
-    await onDeleted();
-  };
-
   return (
-    <div className="editor-inline">
-      <button className="btn" onClick={() => setOpen((o) => !o)}>
-        {open ? t("editor.cancel") : t("editor.editTournament")}
-      </button>
-      <button className="btn danger" disabled={busy} onClick={del}>
-        {t("editor.delete")}
-      </button>
-      {open && (
-        <div className="modal-backdrop" onClick={() => setOpen(false)}>
-          <div className="share-modal editor-player-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="editor-card editor-grid">
-              <div className="editor-field">
-                <label>{t("editor.name")}</label>
-                <input value={name} onChange={(e) => setName(e.target.value)} />
-              </div>
-              <div className="editor-field">
-                <label>{t("editor.year")}</label>
-                <input type="number" value={year} onChange={(e) => setYear(parseInt(e.target.value) || 0)} />
-              </div>
-              <div className="editor-field">
-                <label>{t("editor.host")}</label>
-                <input value={host} onChange={(e) => setHost(e.target.value)} />
-              </div>
-              <div className="editor-field">
-                <label>{t("editor.winner")}</label>
-                <input value={winner} onChange={(e) => setWinner(e.target.value)} />
-              </div>
-              <div className="editor-field">
-                <label>{t("editor.startDate")}</label>
-                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-              </div>
-              <div className="editor-field">
-                <label>{t("editor.endDate")}</label>
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-              </div>
-              <div className="editor-field">
-                <label>{t("editor.logo")}</label>
-                <input value={logo} onChange={(e) => setLogo(e.target.value)} />
-              </div>
-              <label className="editor-check">
-                <input
-                  type="checkbox"
-                  checked={shirtNumbers}
-                  onChange={(e) => setShirtNumbers(e.target.checked)}
-                />
-                {t("editor.shirtNumbers")}
-              </label>
-              <button
-                className="btn primary"
-                disabled={busy || !name.trim() || !year}
-                onClick={save}
-              >
-                {t("editor.save")}
-              </button>
-            </div>
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="share-modal editor-player-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="editor-card editor-grid">
+          <div className="editor-field">
+            <label>{t("editor.name")}</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} />
           </div>
+          <div className="editor-field">
+            <label>{t("editor.year")}</label>
+            <input type="number" value={year} onChange={(e) => setYear(parseInt(e.target.value) || 0)} />
+          </div>
+          <div className="editor-field">
+            <label>{t("editor.host")}</label>
+            <input value={host} onChange={(e) => setHost(e.target.value)} />
+          </div>
+          <div className="editor-field">
+            <label>{t("editor.winner")}</label>
+            <input value={winner} onChange={(e) => setWinner(e.target.value)} />
+          </div>
+          <div className="editor-field">
+            <label>{t("editor.startDate")}</label>
+            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          </div>
+          <div className="editor-field">
+            <label>{t("editor.endDate")}</label>
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+          </div>
+          <div className="editor-field">
+            <label>{t("editor.logo")}</label>
+            <input value={logo} onChange={(e) => setLogo(e.target.value)} />
+          </div>
+          <label className="editor-check">
+            <input
+              type="checkbox"
+              checked={shirtNumbers}
+              onChange={(e) => setShirtNumbers(e.target.checked)}
+            />
+            {t("editor.shirtNumbers")}
+          </label>
+          <button
+            className="btn primary"
+            disabled={busy || !name.trim() || !year}
+            onClick={save}
+          >
+            {t("editor.save")}
+          </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -505,15 +550,16 @@ function PhasesEditor({
   tid,
   phases,
   busy,
+  onClose,
   onSaved,
 }: {
   tid: number;
   phases: Phase[];
   busy: boolean;
+  onClose: () => void;
   onSaved: () => void;
 }) {
   const { t } = useI18n();
-  const [open, setOpen] = useState(false);
   const [rows, setRows] = useState<PhaseDraft[]>([]);
 
   useEffect(() => {
@@ -526,11 +572,11 @@ function PhasesEditor({
         entry_teams: p.entry_teams,
       })),
     );
-  }, [phases, open]);
+  }, [phases]);
 
   const save = async () => {
     await api.setPhases(tid, rows);
-    setOpen(false);
+    onClose();
     onSaved();
   };
 
@@ -538,11 +584,8 @@ function PhasesEditor({
     setRows((r) => r.map((row, j) => (j === i ? { ...row, ...patch } : row)));
 
   return (
-    <div className="editor-inline">
-      <button className="btn" onClick={() => setOpen((o) => !o)}>
-        {open ? t("editor.cancel") : t("editor.phases")}
-      </button>
-      {open && (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="share-modal editor-player-modal" onClick={(e) => e.stopPropagation()}>
         <div className="editor-card editor-phases">
           <p className="editor-muted">{t("editor.phasesHint")}</p>
           <table className="editor-table">
@@ -623,7 +666,7 @@ function PhasesEditor({
             </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -1214,6 +1257,21 @@ function InputList({
 // Squads
 // ---------------------------------------------------------------------------
 
+const posTokenCell = (p: Player): string => {
+  const i = (p.position ?? "").indexOf(":");
+  return i < 0 ? p.position : p.position.slice(0, i);
+};
+
+const positionsCell = (p: Player): string =>
+  (p.positions ?? []).length === 0
+    ? "—"
+    : (p.positions ?? [])
+        .map((item) => {
+          const { position, family } = parsePosItem(item);
+          return family >= 100 ? position : `${position} ${family}%`;
+        })
+        .join(" · ");
+
 function PlayersEditor({
   participants,
   tid,
@@ -1227,6 +1285,7 @@ function PlayersEditor({
   const [teamId, setTeamId] = useState<number | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [editing, setEditing] = useState<Player | "new" | null>(null);
+  const [confirmDel, setConfirmDel] = useState<Player | null>(null);
 
   const refreshScoped = useCallback(async (id: number) => {
     setPlayers(await api.players(id, tid));
@@ -1236,6 +1295,13 @@ function PlayersEditor({
     if (teamId !== null) void refreshScoped(teamId);
     else setPlayers([]);
   }, [teamId, refreshScoped]);
+
+  const del = async () => {
+    if (!confirmDel || teamId === null) return;
+    await api.deletePlayer(teamId, confirmDel.id, tid);
+    setConfirmDel(null);
+    await refreshScoped(teamId);
+  };
 
   return (
     <div className="editor-inline">
@@ -1261,6 +1327,7 @@ function PlayersEditor({
           <table className="editor-table editor-players">
             <thead>
               <tr>
+                <th className="editor-th-photo"></th>
                 <th>#</th>
                 <th>{t("editor.player")}</th>
                 <th>{t("editor.position")}</th>
@@ -1272,22 +1339,32 @@ function PlayersEditor({
             <tbody>
               {players.map((p) => (
                 <tr key={p.id}>
+                  <td className="editor-td-photo">
+                    {p.photo_url ? (
+                      <img className="editor-list-photo" src={p.photo_url} alt="" onError={(e) => ((e.target as HTMLImageElement).style.display = "none")} />
+                    ) : (
+                      <span className="editor-list-photo editor-photo-fallback" aria-hidden>
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                          <circle cx="12" cy="8" r="4.5" fill="currentColor" opacity="0.85" />
+                          <path
+                            d="M3.5 20.5c1.4-4.2 4.6-6 8.5-6s7.1 1.8 8.5 6"
+                            fill="currentColor"
+                            opacity="0.85"
+                          />
+                        </svg>
+                      </span>
+                    )}
+                  </td>
                   <td>{p.shirt_number ?? "—"}</td>
                   <td>{p.name}</td>
-                  <td>{p.position}</td>
+                  <td>{posTokenCell(p)}</td>
                   <td>{Math.round(p.overall)}</td>
-                  <td className="editor-muted">{(p.positions ?? []).join(", ") || "—"}</td>
+                  <td className="editor-muted">{positionsCell(p)}</td>
                   <td className="editor-nowrap">
                     <button className="btn" disabled={busy} onClick={() => setEditing(p)}>
                       {t("editor.edit")}
                     </button>{" "}
-                    <button
-                      className="btn"
-                      disabled={busy}
-                      onClick={() => {
-                        void api.deletePlayer(teamId, p.id, tid).then(() => refreshScoped(teamId));
-                      }}
-                    >
+                    <button className="btn" disabled={busy} onClick={() => setConfirmDel(p)}>
                       ✕
                     </button>
                   </td>
@@ -1295,6 +1372,22 @@ function PlayersEditor({
               ))}
             </tbody>
           </table>
+
+          {confirmDel && (
+            <div className="modal-backdrop" onClick={() => setConfirmDel(null)}>
+              <div className="share-modal editor-player-modal" onClick={(e) => e.stopPropagation()}>
+                <p>{t("editor.confirmDeletePlayer", { name: confirmDel.name })}</p>
+                <div className="editor-row">
+                  <button className="btn" onClick={() => setConfirmDel(null)}>
+                    {t("editor.cancel")}
+                  </button>
+                  <button className="btn danger" onClick={() => void del()}>
+                    {t("editor.delete")}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {editing && (
             <div className="modal-backdrop" onClick={() => setEditing(null)}>
@@ -1330,6 +1423,17 @@ function PlayerForm({
 }) {
   const { t } = useI18n();
   const [photoErr, setPhotoErr] = useState(false);
+  const [bias, setBias] = useState(5);
+  const [posRows, setPosRows] = useState<PositionFamiliarity[]>(() =>
+    player
+      ? (player.positions?.length
+          ? player.positions
+          : player.position
+            ? [player.position]
+            : []
+        ).map(parsePosItem)
+      : [{ position: emptyDraft.position, family: 100 }],
+  );
   const [draft, setDraft] = useState<PlayerDraft>(() =>
     player
       ? {
@@ -1357,11 +1461,15 @@ function PlayerForm({
           concentration: player.concentration ?? 60,
           leadership: player.leadership ?? 60,
         }
-      : { ...emptyDraft, positions: [] },
+      : { ...emptyDraft },
   );
 
   const save = async () => {
-    const payload: PlayerDraft = { ...draft, positions: (draft.positions ?? []).filter(Boolean) };
+    const payload: PlayerDraft = {
+      ...draft,
+      position: posRows[0]?.position ?? "",
+      positions: posRows.map(encodePos),
+    };
     if (!participant) return;
     if (player) {
       await api.updatePlayer(participant.id, player.id, tid, payload);
@@ -1371,7 +1479,36 @@ function PlayerForm({
     onDone();
   };
 
-  const setAttr = (k: (typeof ATTRIBUTES)[number], v: number) => setDraft((d) => ({ ...d, [k]: v }));
+  const setAttr = (k: AttrKey, v: number) => setDraft((d) => ({ ...d, [k]: v }));
+
+  const randomize = (level: number, b = bias) =>
+    setDraft((d) => ({ ...d, ...randomForPosition(posRows[0]?.position ?? "CM", b, level) }));
+
+  const updPos = (i: number, patch: Partial<PositionFamiliarity>) =>
+    setPosRows((rs) => rs.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+
+  const addPos = () =>
+    setPosRows((rs) => {
+      const used = new Set(rs.map((r) => r.position));
+      const free = POSITIONS.find((p) => !used.has(p)) ?? "CM";
+      return [...rs, { position: free, family: 100 }];
+    });
+
+  const onFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      void api
+        .uploadPhoto(reader.result as string)
+        .then((url) => {
+          setPhotoErr(false);
+          setDraft({ ...draft, photo_url: url });
+        })
+        .catch(() => setPhotoErr(true));
+    };
+    reader.readAsDataURL(f);
+  };
 
   return (
     <div className="editor-card editor-player-form">
@@ -1380,33 +1517,53 @@ function PlayerForm({
           <label>{t("editor.player")}</label>
           <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
         </div>
-        <div className="editor-field">
-          <label>{t("editor.position")}</label>
-          <select
-            value={draft.position}
-            onChange={(e) => setDraft({ ...draft, position: e.target.value })}
-          >
-            {POSITIONS.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="editor-field">
+        <div className="editor-field editor-field-wide">
           <label>{t("editor.positions2")}</label>
-          <input
-            value={(draft.positions ?? []).join(", ")}
-            onChange={(e) =>
-              setDraft({
-                ...draft,
-                positions: e.target.value
-                  .split(/[,;\s]+/)
-                  .map((s) => s.trim().toUpperCase())
-                  .filter(Boolean),
-              })
-            }
-          />
+          <div className="editor-pos-list">
+            {posRows.map((r, i) => (
+              <div className="editor-pos-row" key={i}>
+                {i === 0 && <span className="editor-pos-flag">{t("editor.main")}</span>}
+                <select
+                  value={r.position}
+                  onChange={(e) => updPos(i, { position: e.target.value })}
+                >
+                  {POSITIONS.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+                <span className="editor-attr-val">{r.family}%</span>
+                <input
+                  className="editor-fam-slider"
+                  type="range"
+                  min={50}
+                  max={100}
+                  value={r.family}
+                  onChange={(e) => updPos(i, { family: parseInt(e.target.value) })}
+                />
+                {i > 0 && (
+                  <button
+                    className="btn"
+                    title={t("editor.removePosition")}
+                    onClick={() => setPosRows((rs) => rs.filter((_, j) => j !== i))}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="editor-row">
+            <button
+              className="btn"
+              disabled={posRows.length >= POSITIONS.length}
+              onClick={addPos}
+            >
+              ＋ {t("editor.addPosition")}
+            </button>
+            <span className="editor-muted">{t("editor.famHint")}</span>
+          </div>
         </div>
         <div className="editor-field">
           <label>{t("editor.shirt")}</label>
@@ -1441,13 +1598,8 @@ function PlayerForm({
                 </svg>
               </span>
             )}
-            <input
-              value={draft.photo_url ?? ""}
-              onChange={(e) => {
-                setPhotoErr(false);
-                setDraft({ ...draft, photo_url: e.target.value || null });
-              }}
-            />
+            <input type="file" accept="image/*" onChange={onFile} />
+            <span className="editor-muted">{t("editor.photoUploadHint")}</span>
             {draft.photo_url && (
               <button
                 className="btn"
@@ -1462,6 +1614,28 @@ function PlayerForm({
             )}
           </div>
         </div>
+      </div>
+      <div className="editor-random-row">
+        <label>
+          {t("editor.randomBias")} <span className="editor-attr-val">{bias}</span>
+        </label>
+        <input
+          type="range"
+          min={0}
+          max={10}
+          value={bias}
+          onChange={(e) => setBias(parseInt(e.target.value))}
+        />
+        <button className="btn" onClick={() => randomize(0)}>
+          {t("editor.randomize")}
+        </button>
+        <button className="btn" onClick={() => randomize(12, 10)}>
+          {t("editor.star")}
+        </button>
+        <button className="btn" onClick={() => randomize(-8)}>
+          {t("editor.squad")}
+        </button>
+        <span className="editor-muted">{t("editor.randomBiasHint", { pos: posRows[0]?.position ?? "" })}</span>
       </div>
       <div className="editor-attr-grid">
         {ATTRIBUTES.map((a) => (

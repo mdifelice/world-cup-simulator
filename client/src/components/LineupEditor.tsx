@@ -8,6 +8,7 @@ import {
   FORMATIONS,
   playerSurname,
   playerPositions,
+  posToken,
   positionFamilies,
   positionFamily,
   ratingStars,
@@ -212,13 +213,13 @@ export default function LineupEditor({
   const effFor = (p: Player, slot: string) =>
     bestEffectiveIn(playerPositions(p), p.rating ?? p.overall, slot);
   const positionsLabel = (p: Player) =>
-    playerPositions(p).map((x) => pos(x)).join(" / ");
+    playerPositions(p).map((x) => pos(posToken(x))).join(" / ");
 
   /** A player "owns" a slot when one of their positions carries no out-of-
    *  position penalty for it. Auto-pick only uses owners, so a star forward is
    *  never picked ahead of a real defender (or a keeper ahead of an outfielder). */
   const owns = (p: Player, slot: string) =>
-    playerPositions(p).some((x) => slotPenalty(x, slot) === 0);
+    playerPositions(p).some((x) => slotPenalty(posToken(x), slot) === 0);
 
   const bestIn = (slot: string, used: Set<number>) => {
     let best: Player | null = null;

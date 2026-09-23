@@ -73,14 +73,6 @@ function getInitialStep(): Step {
 export default function App() {
   const [step, setStep] = useState<Step>(getInitialStep);
 
-  /** In-app navigation: mirror the step in the URL so the back button and
-   *  direct links (/lab, /editor) still land on the right page. */
-  const goStep = (s: Step) => {
-    const path =
-      s === "tournament" ? "/" : s === "lab" ? "/lab" : s === "editor" ? "/editor" : "/";
-    if (window.location.pathname !== path) window.history.pushState(null, "", path);
-    setStep(s);
-  };
   const [flow, setFlow] = useState<Flow>(emptyFlow);
   const [configs, setConfigs] = useState<Record<string, LineupConfig>>({});
   const [seed, setSeed] = useState<number | null>(null);
@@ -589,12 +581,7 @@ export default function App() {
           <Lab />
         )}
         {step === "editor" && (
-          <Editor
-            onHome={() => {
-              reset();
-              goStep("tournament");
-            }}
-          />
+          <Editor />
         )}
       </main>
 

@@ -50,6 +50,7 @@ async fn main() {
     let app = Router::new()
         .route("/health", get(handlers::health))
         .nest_service("/photos", ServeDir::new(photos_dir.as_str()))
+        .route("/api/photos", post(handlers::upload_photo))
         .route("/api/auth/google", get(google_authorize))
         .route("/api/auth/callback", get(google_callback))
         .route("/api/auth/me", get(me))

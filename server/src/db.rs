@@ -509,6 +509,71 @@ pub fn data_dir() -> String {
     std::env::var("WCS_DATA_DIR").unwrap_or_else(|_| "data".to_string())
 }
 
+/// Save a base64 data-URL image (`data:image/png;base64,….`) into the photos
+/// directory, returning its public `/photos/<name>` URL.
+pub fn save_photo(data_url: &str) -> Result<String, String> {
+    let (mime, b64) = data_url
+        .split_once(',')
+        .filter(|(head, _)| head.starts_with("data:image/"))
+        .ok_or_else(|| "expected a data:image/… URL".to_string())?;
+    let mime = mime.split_once(';').map(|(h, _)| h).unwrap_or(mime);
+    let ext = match mime.trim_start_matches("data:image/") {
+        "png" => "png",
+        "jpeg" | "jpg" => "jpg",
+        "webp" => "webp",
+        "gif" => "gif",
+        _ => return Err("unsupported image type".to_string()),
+    };
+    let bytes = base64_decode(b64).map_err(|_| "malformed base64 image".to_string())?;
+    if bytes.is_empty() || bytes.len() > 8 * 1024 * 1024 {
+        return Err("photo too large (max 8 MB)".to_string());
+    }
+    let dir = Path::new(&data_dir()).join("photos");
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    let nanos = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0);
+    let name = format!("u-{nanos}.{ext}");
+    std::fs::write(dir.join(&name), &bytes).map_err(|e| e.to_string())?;
+    Ok(format!("/photos/{name}"))
+}
+
+/// Minimal dependency-free base64 decoder (whitespace-tolerant; trailing '='
+/// padding optional).
+fn base64_decode(s: &str) -> Result<Vec<u8>, ()> {
+    const T: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let val = |c: u8| -> Option<u8> { T.iter().position(|&t| t == c).map(|i| i as u8) };
+    let raw: Vec<u8> = s
+        .bytes()
+        .filter(|b| !b"\t\r\n ".contains(b) && *b != b'=')
+        .map(|b| val(b).ok_or(()))
+        .collect::<Result<_, _>>()?;
+    let mut out = Vec::with_capacity(raw.len() / 4 * 3);
+    let full = raw.len() / 4 * 4;
+    let mut i = 0;
+    while i + 3 < full {
+        let (a, b, c, d) = (raw[i], raw[i + 1], raw[i + 2], raw[i + 3]);
+        out.push((a << 2) | (b >> 4));
+        out.push(((b & 0x0F) << 4) | (c >> 2));
+        out.push(((c & 0x03) << 6) | d);
+        i += 4;
+    }
+    match raw.len() - full {
+        2 => {
+            let (a, b) = (raw[full], raw[full + 1]);
+            out.push((a << 2) | (b >> 4));
+        }
+        3 => {
+            let (a, b, c) = (raw[full], raw[full + 1], raw[full + 2]);
+            out.push((a << 2) | (b >> 4));
+            out.push(((b & 0x0F) << 4) | (c >> 2));
+        }
+        _ => {}
+    }
+    Ok(out)
+}
+
 /// Seeds one edition from `seed/{year}.json`, falling back to demo rosters.
 fn seed_edition(conn: &Connection, year: i32) -> rusqlite::Result<()> {
     let path = Path::new(&data_dir()).join("seed").join(format!("{year}.json"));

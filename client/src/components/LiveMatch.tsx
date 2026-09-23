@@ -239,7 +239,10 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
     return list
       .filter((i) => (i.kind === "pen" ? true : incChrono(i) <= min))
       .sort((a, b) => {
-        const byChrono = incChrono(a) - incChrono(b);
+        // Newest incidents first; the shootout stays in kick order.
+        const aChrono = a.kind === "pen" ? -(130 + a.idx) : incChrono(a);
+        const bChrono = b.kind === "pen" ? -(130 + b.idx) : incChrono(b);
+        const byChrono = bChrono - aChrono;
         if (byChrono !== 0) return byChrono;
         const kindOrder = { goal: 0, red: 1, event: 2, pen: 3 };
         return kindOrder[a.kind] - kindOrder[b.kind];
@@ -256,11 +259,14 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const botLane = 90;
   const legendY = 104;
 
-  // Fixed axis showing full 90 minutes (+ added time) from the start,
-  // with a small right margin so the FT label isn't cut off.
-  const marginRatio = 0.04; // 4% right margin for FT label
-  const spanTotal = axisSpan(clock) / (1 - marginRatio);
-  const bw = W / spanTotal;
+  // Fixed axis showing full 90 minutes (+ added time) from the start, padded
+  // by 3px so the 0' and Final-time lines never kiss the chart border.
+  const LX = 3;
+  const RX = 3;
+  const plotW = W - LX - RX;
+  const spanTotal = axisSpan(clock);
+  const bw = plotW / spanTotal;
+  const sxRatio = (r: number) => LX + r * plotW;
 
   // Period boundary chrono positions (used for line placement)
   const baseSH = 90 + addedHT + addedFT;
@@ -269,31 +275,49 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const ET1_CHRONO = baseSH + 15 + addedET1;
 
   // Period line positions on the display axis (added time forms a narrow band
-  // at each half's end) with the right margin.
+  // at each half's end).
   const htLine = axisPos(clock, HT_CHRONO) / spanTotal;
   const ftLine = axisPos(clock, FT_CHRONO) / spanTotal;
   const et1Line = m.extra_time ? axisPos(clock, ET1_CHRONO) / spanTotal : 0;
   const et2Line = m.extra_time ? axisPos(clock, totalLength) / spanTotal : 0;
 
-  // Map a chart minute to an index of the momentum series. The engine only builds
-  // samples for the regulation (90) or extra-time (120) minutes, so added-time
-  // minutes borrow the last sample of their half, and the second-half and
-  // extra-time samples are reached at the duration the clock walks through.
-  const sampleAt = (mm: number): number => {
-    if (!series) return 0;
+  // The real minute a walked minute corresponds to on the pitch. Added-time
+  // minutes reuse the last regular minute of their period, so the animation
+  // never pushes new bars (or moves the marker) past 45' / 90' / 105' / 120'.
+  const lastRealMinute = (mm: number): number => {
     if (mm <= 0) return 0;
-    if (mm <= 45) return mm - 1;
-    if (mm <= 45 + addedHT) return 44;
-    if (mm <= 90 + addedHT) return mm - 1 - addedHT;
-    if (mm <= 90 + addedHT + addedFT) return 89;
-    if (m.extra_time) {
-      if (mm <= 105 + addedHT + addedFT) return mm - 1 - addedHT - addedFT;
-      if (mm <= 105 + addedHT + addedFT + addedET1) return 104;
-      if (mm <= 120 + addedHT + addedFT + addedET1) return mm - 1 - addedHT - addedFT - addedET1;
-      return Math.min(119, series.length - 1);
-    }
-    return Math.min(mm - 1, series.length - 1);
+    if (mm <= 45) return mm;
+    if (mm <= 45 + addedHT) return 45;
+    if (mm <= 90 + addedHT) return mm - addedHT;
+    if (mm <= 90 + addedHT + addedFT) return 90;
+    if (!m.extra_time) return 90;
+    const SH = addedHT + addedFT;
+    if (mm <= 105 + SH + addedET1) return Math.min(mm - SH, 105);
+    if (mm <= 120 + SH + addedET1 + addedET2) return Math.min(mm - SH - addedET1, 120);
+    return 120;
   };
+
+  // Map a real minute (1..90/1..120) straight to a momentum sample index.
+  const sampleAtReal = (mr: number): number => {
+    if (!series) return 0;
+    return Math.max(0, Math.min(mr - 1, series.length - 1));
+  };
+
+  const bars = useMemo(() => {
+    if (!series || series.length === 0) return [] as { m: number; x: number; up: boolean; h: number }[];
+    const out: { m: number; x: number; up: boolean; h: number }[] = [];
+    const last = lastRealMinute(Math.min(min, totalLength));
+    for (let mr = 1; mr <= last; mr++) {
+      const d = series[sampleAtReal(mr)] - 0.5;
+      out.push({
+        m: mr,
+        x: sxRatio(axisPos(clock, mr - 0.5) / spanTotal),
+        up: d >= 0,
+        h: Math.max(1, Math.round(Math.abs(d) * 2 * maxHalf)),
+      });
+    }
+    return out;
+  }, [series, min, spanTotal, W, maxHalf, clock, totalLength]);
 
   // The chart is stretched to the dialog width (preserveAspectRatio="none"), so
   // its text would be distorted. Counter-scale it back to a natural aspect.
@@ -313,35 +337,10 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
     return () => ro.disconnect();
   }, []);
 
-  const bars = useMemo(() => {
-    if (!series || series.length === 0) return [] as { m: number; x: number; up: boolean; h: number }[];
-    const out: { m: number; x: number; up: boolean; h: number }[] = [];
-    // Each bar summarises the momentum of the last minute rather than a single
-    // sample, smoothing the chart while keeping goal spikes visible.
-    const ROLL = 1;
-    for (let mm = 1; mm <= Math.min(min, totalLength); mm++) {
-      let sum = 0;
-      let n = 0;
-      for (let j = Math.max(0, mm - ROLL); j < mm; j++) {
-        sum += series[sampleAt(j)];
-        n += 1;
-      }
-      const s = n > 0 ? sum / n : series[sampleAt(mm)];
-      const d = s - 0.5;
-      out.push({
-        m: mm,
-        x: (axisPos(clock, mm - 0.5) / spanTotal) * W,
-        up: d >= 0,
-        h: Math.max(1, Math.round(Math.abs(d) * 2 * maxHalf)),
-      });
-    }
-    return out;
-  }, [series, min, spanTotal, W, maxHalf, clock]);
-
   const isAwayFocusMomentum = momentum != null && focusTeamId === m.away_team_id;
 
   const goalMarks = goalsUpTo.map((g, i) => {
-    const x = (axisPos(clock, seqForMinute(clock, g.minute, g.extra_time, g.added_time === true)) / spanTotal) * W;
+    const x = sxRatio(axisPos(clock, seqForMinute(clock, g.minute, g.extra_time, g.added_time === true)) / spanTotal);
     const isFocusGoal =
       focusTeamId != null && g.team_id === focusTeamId
         ? !isAwayFocusMomentum
@@ -354,7 +353,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   });
 
   const redMarks = redsUpTo.map((r, i) => {
-    const x = (axisPos(clock, seqForMinute(clock, r.minute, r.extra_time, false)) / spanTotal) * W;
+    const x = sxRatio(axisPos(clock, seqForMinute(clock, r.minute, r.extra_time, false)) / spanTotal);
     const isFocusRed =
       focusTeamId != null && r.team_id === focusTeamId
         ? !isAwayFocusMomentum
@@ -365,25 +364,28 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   });
 
   // Continuous momentum gauge: the home team's live dominance (-1 away … +1
-  // home) drives a green centre fill that always moves with the series.
+  // home) drives a green centre fill that always moves with the series. It is
+  // anchored at the exact centre — ready, away-leaning or home-leaning – the
+  // near edge never wanders while the momentum animates.
   const gauge = useMemo(() => {
     if (!momentum || momentum.home.length === 0) return 0;
-    const idx = Math.min(Math.max(min, 1), momentum.home.length) - 1;
+    const idx = Math.max(0, lastRealMinute(Math.min(min, totalLength)) - 1);
     const v = (momentum.home[idx] - 0.5) * 2;
     return Math.max(-1, Math.min(1, v));
-  }, [momentum, min]);
+  }, [momentum, min, totalLength]);
 
   const yourLead = focusTeamId === m.home_team_id ? gauge >= 0 : gauge <= 0;
 
-  const tick = (p: number, label: string) => {
-    const x = p * W;
+  const tick = (p: number, label: string, left = false) => {
+    const x = sxRatio(p);
     return (
       <g key={p}>
         <line x1={x} y1={0} x2={x} y2={H} stroke="rgba(27,37,48,0.15)" strokeWidth="1" />
         <text
-          transform={`translate(${x + 3} ${legendY}) scale(${textSx} 1)`}
+          transform={`translate(${left ? x - 3 : x + 3} ${legendY}) scale(${textSx} 1)`}
           fill="rgba(27,37,48,0.5)"
           fontSize="9"
+          textAnchor={left ? "end" : "start"}
         >
           {label}
         </text>
@@ -493,12 +495,18 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
             />
             {tick(0, "0'")}
             {tick(htLine, t("match.ht"))}
-            {tick(ftLine, m.extra_time ? "90'" : t("match.ft"))}
-            {m.extra_time && tick(et1Line, "105'")}
-            {m.extra_time && tick(et2Line, t("match.ft"))}
+            {m.extra_time ? (
+              <>
+                {tick(ftLine, "90'")}
+                {tick(et1Line, "105'")}
+                {tick(et2Line, t("match.ft"), true)}
+              </>
+            ) : (
+              tick(ftLine, t("match.ft"), true)
+            )}
             {done
               ? null
-              : tick(axisPos(clock, Math.min(min, totalLength)) / spanTotal, min === 0 ? "" : labelOf(clock, min))}
+              : tick(axisPos(clock, lastRealMinute(Math.min(min, totalLength))) / spanTotal, "")}
             {bars.map((b) => (
               <rect
                 key={b.m}
@@ -580,7 +588,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
               <div
                 className="mg-fill"
                 style={{
-                  left: gauge >= 0 ? `${50 - gauge * 50}%` : "50%",
+                  left: gauge >= 0 ? "50%" : `${50 - Math.abs(gauge) * 50}%`,
                   width: `${Math.abs(gauge) * 50}%`,
                   background: yourLead ? UP : DOWN,
                 }}

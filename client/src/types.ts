@@ -330,6 +330,44 @@ const POSITION_SLOTS: Record<string, [string, number][]> = {
   CF: [["FW", 0], ["RFW", 1], ["LFW", 1], ["AMF", 4]],
 };
 
+/** A granular position with how comfortable the player is at it (0–100). */
+export interface PositionFamiliarity {
+  position: string;
+  family: number;
+}
+
+/** Parse a stored position token: "RB" → (RB, 100), "RB:85" → (RB, 85). */
+export function parsePosItem(item: string): PositionFamiliarity {
+  const i = item.indexOf(":");
+  if (i < 0) return { position: item.trim().toUpperCase(), family: 100 };
+  return {
+    position: item.slice(0, i).trim().toUpperCase(),
+    family: Math.max(1, Math.min(100, parseInt(item.slice(i + 1), 10) || 100)),
+  };
+}
+
+/** The position code of a stored token (strips the ":fam" suffix). */
+export function posToken(item: string): string {
+  return parsePosItem(item).position;
+}
+
+/** Familiarity of a stored token (defaults to 100 when absent). */
+export function famOf(item: string): number {
+  return parsePosItem(item).family;
+}
+
+/** Penalty index for a familiarity under 100: 1 point per 10 missing. */
+export function famPenalty(family: number): number {
+  return Math.max(0, Math.round((100 - family) / 10));
+}
+
+/** Canonical storage form of one position+familiarity ("RB" for 100, "RB:85" otherwise). */
+export function encodePos(pos: PositionFamiliarity): string {
+  const p = pos.position.trim().toUpperCase();
+  const f = Math.max(1, Math.min(100, Math.round(pos.family)));
+  return f >= 100 ? p : `${p}:${f}`;
+}
+
 /** Out-of-position penalty index for a player (granular position) in a slot. */
 export function slotPenalty(position: string, slot: string): number {
   for (const [s, p] of POSITION_SLOTS[position] ?? []) {
@@ -340,17 +378,19 @@ export function slotPenalty(position: string, slot: string): number {
   return 9;
 }
 
-/** Effective (post-penalty) rating a player brings to a slot. */
-export function effectiveIn(position: string, overall: number, slot: string): number {
-  return overall - slotPenalty(position, slot) * 2;
+/** Effective (post-penalty) rating a player brings to a slot, honouring both
+ *  the out-of-position cost and any under-100 familiarity in that position. */
+export function effectiveIn(position: string, overall: number, slot: string, family = 100): number {
+  return overall - (slotPenalty(position, slot) + famPenalty(family)) * 2;
 }
 
 /** Best effective rating a player brings among any of their positions. */
 export function bestEffectiveIn(positions: string[], overall: number, slot: string): number {
   if (positions.length === 0) return effectiveIn("MF", overall, slot);
   let best = -Infinity;
-  for (const pos of positions) {
-    best = Math.max(best, effectiveIn(pos, overall, slot));
+  for (const item of positions) {
+    const { position, family } = parsePosItem(item);
+    best = Math.max(best, effectiveIn(position, overall, slot, family));
   }
   return best;
 }
