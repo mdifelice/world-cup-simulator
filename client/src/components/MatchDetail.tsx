@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { flagFor, useI18n } from "../i18n";
 import type { Goal, RedCard, RunMatch } from "../types";
+import { incLabel } from "../sim/minutes";
 
 interface Props {
   match: RunMatch;
@@ -31,6 +32,15 @@ function incidentNumber(i: Incident) {
 
 export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
   const { t, stage, country } = useI18n();
+
+  const clock = {
+    extra_time: m.extra_time,
+    addedHT: m.added_time_ht ?? 0,
+    addedFT: m.added_time_ft ?? 0,
+    addedET1: m.added_time_et1 ?? 0,
+    addedET2: m.added_time_et2 ?? 0,
+  };
+  const incidentAdded = (i: Incident): boolean => i.kind === "goal" && i.g.added_time === true;
 
   const focused = (teamId: number) => focusTeamId != null && focusTeamId === teamId;
   const flagName = (n: string) => [flagFor(n), country(n)].filter(Boolean).join(" ");
@@ -140,8 +150,8 @@ export default function MatchDetail({ match: m, focusTeamId, onClose }: Props) {
                 ) : null}
                 <span className="goal-end">
                   <span className="goal-min">
-                    {incidentMinute(inc)}'
-                    {incidentET(inc) ? ` ${t("match.etShort")}` : ""}
+                    {incLabel(clock, incidentMinute(inc), incidentET(inc), incidentAdded(inc))}
+                    {incidentET(inc) && !incidentAdded(inc) ? ` ${t("match.etShort")}` : ""}
                   </span>
                   <span
                     className={`goal-team${focused(incidentTeam(inc)) ? " focus-tag" : ""}`}

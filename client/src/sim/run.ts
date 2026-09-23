@@ -759,6 +759,7 @@ class Engine {
     extraTime: boolean,
     teamId: number,
     red: [number, SquadPlayer] | null,
+    added = false,
   ): Goal {
     if (this.rng.unit() < 0.02) {
       const og = this.pickOwnGoal(oppXi);
@@ -766,6 +767,7 @@ class Engine {
         return {
           minute,
           extra_time: extraTime,
+          added_time: added || undefined,
           team_id: teamId,
           scorer_id: og.id,
           scorer: og.name,
@@ -792,6 +794,7 @@ class Engine {
     return {
       minute,
       extra_time: extraTime,
+      added_time: added || undefined,
       team_id: teamId,
       scorer_id: scorer.id,
       scorer: scorer.name,
@@ -826,7 +829,7 @@ class Engine {
     for (let i = 0; i < minutes.length; i++) {
       const team = i < teams.length ? teams[i] : home;
       const [xi, opp, red] = team === home ? [homeXi, awayXi, homeRed] : [awayXi, homeXi, awayRed];
-      goals.push(this.makeGoal(xi, opp, baseMinute + minutes[i], baseMinute >= 90, team, red));
+      goals.push(this.makeGoal(xi, opp, baseMinute + minutes[i], baseMinute >= 90, team, red, true));
     }
     return goals;
   }

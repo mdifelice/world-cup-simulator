@@ -1,6 +1,7 @@
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from "react";
 import { flagFor, useI18n } from "../i18n";
 import type { Goal, LiveEvent, LiveMatchControls, PenKick, RedCard, RunMatch } from "../types";
+import { incLabel, labelOf, minuteText, seqForMinute, stoppageShift } from "../sim/minutes";
 
 interface Props {
   match: RunMatch;
@@ -33,32 +34,18 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const addedFT = m.added_time_ft ?? 0;
   const addedET1 = m.added_time_et1 ?? 0;
   const addedET2 = m.added_time_et2 ?? 0;
-  const regulationLength = 90 + addedHT + addedFT;
+  const clock = { extra_time: m.extra_time, addedHT, addedFT, addedET1, addedET2 };
+  const SH = stoppageShift(clock);
+  const regulationLength = 90 + SH;
   const extraTimeLength = m.extra_time ? 30 + addedET1 + addedET2 : 0;
   const totalLength = regulationLength + extraTimeLength;
 
-  // Clock label: show 45' until added time starts, then 45+1, 45+2...
-  // Same for 90', 105', 120'
-  const clockLabel = (n: number) => {
-    if (n < 45) return `${n}'`;
-    if (n === 45) return `${n}'`;
-    if (n <= 45 + addedHT) return `45+${n - 45}'`;
-    if (n < 90) return `${n}'`;
-    if (n === 90) return `${n}'`;
-    if (n <= 90 + addedFT) return `90+${n - 90}'`;
-    if (!m.extra_time) return `${n}'`;
-    if (n < 105) return `${n}'`;
-    if (n === 105) return `${n}'`;
-    if (n <= 105 + addedET1) return `105+${n - 105}'`;
-    if (n < 120) return `${n}'`;
-    if (n === 120) return `${n}'`;
-    return `120+${n - 120}'`;
-  };
-
+  // Pause beats at the end of each half, including its stoppage time, except
+  // the final one (the match simply ends there).
   const stopBoundaryHT = 45 + addedHT;
-  const stopBoundaryFT = 90 + addedFT;
-  const stopBoundaryET1 = m.extra_time ? 105 + addedET1 : 0;
-  const stopBoundaryET2 = m.extra_time ? 120 + addedET2 : 0;
+  const stopBoundaryFT = 90 + addedHT;
+  const stopBoundaryET1 = m.extra_time ? 105 + SH + addedET1 : 0;
+  const stopBoundaryET2 = m.extra_time ? 120 + SH + addedET1 : 0;
   const [min, setMin] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -191,14 +178,20 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
     : null;
 
   const goalsUpTo = useMemo(
-    () => m.goals.filter((g) => g.minute <= min),
+    () =>
+      m.goals.filter(
+        (g) => seqForMinute(clock, g.minute, g.extra_time, g.added_time === true) <= min,
+      ),
     [m.goals, min],
   );
   const homeGoals = goalsUpTo.filter((g) => g.team_id === m.home_team_id).length;
   const awayGoals = goalsUpTo.filter((g) => g.team_id === m.away_team_id).length;
 
   const redsUpTo = useMemo(
-    () => (m.reds ?? []).filter((r) => r.minute <= min),
+    () =>
+      (m.reds ?? []).filter(
+        (r) => seqForMinute(clock, r.minute, r.extra_time, false) <= min,
+      ),
     [m.reds, min],
   );
 
@@ -227,6 +220,13 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
         : i.kind === "event"
           ? i.e.extra_time
           : false;
+
+  // Only goals land in stoppage time in the engine today.
+  const incAdded = (i: Incident): boolean => i.kind === "goal" && i.g.added_time === true;
+  const incChrono = (i: Incident): number =>
+    i.kind === "pen" ? incMin(i) : seqForMinute(clock, incMin(i), incET(i), incAdded(i));
+  const rowLabel = (i: Incident): string => incLabel(clock, incMin(i), incET(i), incAdded(i));
+
   const incidents = useMemo(() => {
     const list: Incident[] = [
       ...(m.goals ?? []).map((g) => ({ kind: "goal" as const, g })),
@@ -237,7 +237,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
       ...kicks.slice(0, penShown).map((k, idx) => ({ kind: "pen" as const, k, idx })),
     ];
     return list
-      .filter((i) => (i.kind === "pen" ? true : incMin(i) <= min))
+      .filter((i) => (i.kind === "pen" ? true : incChrono(i) <= min))
       .sort((a, b) => {
         const byMin = incMin(b) - incMin(a);
         if (byMin !== 0) return byMin;
@@ -251,7 +251,9 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const W = 900;
   const H = 108;
   const midY = 52;
-  const maxHalf = 18;
+  // Max bar half-height. Kept below the incident lanes (topLane 14 / botLane 90)
+  // so even full bars never brush the goal/card markers.
+  const maxHalf = 26;
   const topLane = 14;
   const botLane = 90;
   const legendY = 104;
@@ -296,19 +298,6 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
       return Math.min(119, series.length - 1);
     }
     return Math.min(mm - 1, series.length - 1);
-  };
-
-  // Chronological slot of an incident on the fixed axis. Minute values overlap
-  // across halves (e.g. 46' can be a first-half added-time goal or a second-half
-  // one), so the rare added-time goals in the overlapping range lean on the
-  // position of their more common regular-play counterpart.
-  const seqForMinute = (v: number, et: boolean): number => {
-    if (!et) return v <= 45 ? v : v + addedHT;
-    if (!m.extra_time) return v + addedHT;
-    const baseSH = 90 + addedHT + addedFT;
-    if (v <= 105 + addedET1) return baseSH + (v - 90);
-    if (v <= 120) return baseSH + 15 + addedET1 + (v - 105);
-    return baseSH + 30 + addedET1 + (v - 120);
   };
 
   // The chart is stretched to the dialog width (preserveAspectRatio="none"), so
@@ -357,26 +346,27 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const isAwayFocusMomentum = momentum != null && focusTeamId === m.away_team_id;
 
   const goalMarks = goalsUpTo.map((g, i) => {
-    const x = (seqForMinute(g.minute, g.extra_time) / visTotal) * W;
+    const x = (seqForMinute(clock, g.minute, g.extra_time, g.added_time === true) / visTotal) * W;
     const isFocusGoal =
       focusTeamId != null && g.team_id === focusTeamId
         ? !isAwayFocusMomentum
         : isAwayFocusMomentum;
     const y = isFocusGoal ? topLane : botLane;
-    let note = g.extra_time ? ` ${t("match.etShort")}` : "";
+    const mtext = minuteText(clock, g.minute, g.extra_time, g.added_time === true);
+    let note = g.extra_time && !g.added_time ? ` ${t("match.etShort")}` : "";
     if (g.penalty) note += ` ${t("match.penShort")}`;
-    return { x, y, minute: g.minute, note, key: i };
+    return { x, y, minute: mtext, note, key: i };
   });
 
   const redMarks = redsUpTo.map((r, i) => {
-    const x = (seqForMinute(r.minute, r.extra_time) / visTotal) * W;
+    const x = (seqForMinute(clock, r.minute, r.extra_time, false) / visTotal) * W;
     const isFocusRed =
       focusTeamId != null && r.team_id === focusTeamId
         ? !isAwayFocusMomentum
         : isAwayFocusMomentum;
     const y = isFocusRed ? topLane : botLane;
     const note = r.extra_time ? ` ${t("match.etShort")}` : "";
-    return { x, y, minute: r.minute, note, key: i };
+    return { x, y, minute: minuteText(clock, r.minute, r.extra_time, false), note, key: i };
   });
 
   // Continuous momentum gauge: the home team's live dominance (-1 away … +1
@@ -484,7 +474,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
             resultLabel
           )
         ) : (
-          <span className="match-clock">{clockLabel(min)}</span>
+          <span className="match-clock">{labelOf(clock, min)}</span>
         )}
       </p>
 
@@ -513,7 +503,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
             {m.extra_time && tick(et2Line, t("match.ft"))}
             {done
               ? null
-              : tick(Math.min(min, visTotal) / visTotal, min === 0 ? "" : clockLabel(min))}
+              : tick(Math.min(min, visTotal) / visTotal, min === 0 ? "" : labelOf(clock, min))}
             {bars.map((b) => (
               <rect
                 key={b.m}
@@ -716,8 +706,8 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
                 )}
                 <span className="goal-end">
                   <span className="goal-min">
-                    {isPen ? `P${pen!.round}` : `${incMin(i)}'`}
-                    {!isPen && incET(i) ? ` ${t("match.etShort")}` : ""}
+                    {isPen ? `P${pen!.round}` : rowLabel(i)}
+                    {!isPen && incET(i) && !incAdded(i) ? ` ${t("match.etShort")}` : ""}
                   </span>
                   <span className="goal-team">{teamFlag(teamId)}</span>
                 </span>

@@ -1305,6 +1305,7 @@ function PlayerForm({
   onDone: () => void;
 }) {
   const { t } = useI18n();
+  const [photoErr, setPhotoErr] = useState(false);
   const [draft, setDraft] = useState<PlayerDraft>(() =>
     player
       ? {
@@ -1396,10 +1397,46 @@ function PlayerForm({
         </div>
         <div className="editor-field">
           <label>{t("editor.photo")}</label>
-          <input
-            value={draft.photo_url ?? ""}
-            onChange={(e) => setDraft({ ...draft, photo_url: e.target.value || null })}
-          />
+          <div className="editor-photo-row">
+            {draft.photo_url && !photoErr ? (
+              <img
+                className="editor-photo-preview"
+                src={draft.photo_url}
+                alt=""
+                onError={() => setPhotoErr(true)}
+              />
+            ) : (
+              <span className="editor-photo-preview editor-photo-fallback" aria-hidden>
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                  <circle cx="12" cy="8" r="4.5" fill="currentColor" opacity="0.85" />
+                  <path
+                    d="M3.5 20.5c1.4-4.2 4.6-6 8.5-6s7.1 1.8 8.5 6"
+                    fill="currentColor"
+                    opacity="0.85"
+                  />
+                </svg>
+              </span>
+            )}
+            <input
+              value={draft.photo_url ?? ""}
+              onChange={(e) => {
+                setPhotoErr(false);
+                setDraft({ ...draft, photo_url: e.target.value || null });
+              }}
+            />
+            {draft.photo_url && (
+              <button
+                className="btn"
+                title={t("editor.photoClear")}
+                onClick={() => {
+                  setPhotoErr(false);
+                  setDraft({ ...draft, photo_url: null });
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <div className="editor-attr-grid">

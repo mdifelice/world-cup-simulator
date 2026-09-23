@@ -2936,6 +2936,16 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.lab-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.lab-section-head h3 {
+  margin: 0;
+}
 .lab-field {
   display: flex;
   flex-direction: column;
@@ -3461,6 +3471,32 @@ body {
 
 .editor-check input {
   accent-color: var(--accent);
+}
+
+.editor-photo-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.editor-photo-row input {
+  width: auto;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.editor-photo-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+}
+.editor-photo-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel2, #eef2f6);
+  color: var(--muted, #8593a3);
 }
 
 .editor-small {

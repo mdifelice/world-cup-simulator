@@ -258,6 +258,12 @@ export default function Lab() {
     });
   };
 
+  const clearHistory = () => {
+    setHistory([]);
+    persistHistory([]);
+    setAllScores([]);
+  };
+
   const resolveSeed = (): bigint => {
     const s = seedInput.trim();
     if (/^\d+$/.test(s)) return BigInt(s);
@@ -450,10 +456,7 @@ export default function Lab() {
                 match={match}
                 focusTeamId={match.home_team_id}
                 onReveal={() => {}}
-                onClose={() => {
-                  setShowLiveMatch(false);
-                  setShowSummary(match);
-                }}
+                onClose={() => setShowLiveMatch(false)}
               />
             </div>
           ) : (
@@ -481,7 +484,14 @@ export default function Lab() {
               </div>
 
               <div className="lab-section">
-                <h3>{t("lab.history")}</h3>
+                <div className="lab-section-head">
+                  <h3>{t("lab.history")}</h3>
+                  {(history.length > 0 || stats.n > 0) && (
+                    <button className="btn danger" onClick={clearHistory}>
+                      {t("lab.clearAll")}
+                    </button>
+                  )}
+                </div>
                 {history.length === 0 && <p className="hint">{t("lab.historyEmpty")}</p>}
                 <ul className="lab-history">
                   {history.map((entry) => (

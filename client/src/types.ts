@@ -402,6 +402,8 @@ export interface PenResult {
 export interface Goal {
   minute: number;
   extra_time: boolean;
+  /** Goal scored during the stoppage (added) time of its period (45+x / 90+x / 105+x / 120+x). */
+  added_time?: boolean;
   team_id: number;
   scorer_id: number;
   scorer: string;
