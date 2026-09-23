@@ -1277,15 +1277,19 @@ function PlayersEditor({
           </table>
 
           {editing && (
-            <PlayerForm
-              tid={tid}
-              participant={participants.find((p) => p.id === teamId)}
-              player={editing === "new" ? null : editing}
-              onDone={async () => {
-                setEditing(null);
-                await refreshScoped(teamId);
-              }}
-            />
+            <div className="modal-backdrop" onClick={() => setEditing(null)}>
+              <div className="share-modal editor-player-modal" onClick={(e) => e.stopPropagation()}>
+                <PlayerForm
+                  tid={tid}
+                  participant={participants.find((p) => p.id === teamId)}
+                  player={editing === "new" ? null : editing}
+                  onDone={async () => {
+                    setEditing(null);
+                    await refreshScoped(teamId);
+                  }}
+                />
+              </div>
+            </div>
           )}
         </>
       )}
