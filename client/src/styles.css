@@ -2411,6 +2411,13 @@ body {
   max-width: 720px;
   overflow-y: auto;
 }
+.editor-matches-modal {
+  max-width: 860px;
+}
+.editor-phases {
+  max-height: 68vh;
+  overflow-y: auto;
+}
 .share-scroll {
   overflow-y: auto;
   flex: 1 1 auto;

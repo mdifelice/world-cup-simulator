@@ -1002,7 +1002,7 @@ function MatchList({
 }) {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<number | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
   // add form
   const [stage, setStage] = useState("GROUP");
   const [roundNum, setRoundNum] = useState(1);
@@ -1025,6 +1025,7 @@ function MatchList({
         kickoff: kickoff.trim() || null,
       },
     ]);
+    setShowAdd(false);
     setStage("GROUP");
     setRoundNum(1);
     setMatchday(1);
@@ -1033,103 +1034,146 @@ function MatchList({
     setKickoff("");
   };
 
-  useEffect(() => {
-    if (editing !== null) {
-      const m = matches.find((x) => x.id === editing);
-      if (m) {
-        setEditingMatch({
-          ...m,
-          stage: m.stage,
-          round_num: m.round_num,
-          matchday: m.matchday,
-          home_team_id: m.home_team_id,
-          away_team_id: m.away_team_id,
-          kickoff: m.kickoff ?? "",
-        });
-      }
-    } else setEditingMatch(null);
-  }, [editing, matches]);
-
-  if (matches.length === 0 && !open) {
-    return (
-      <button className="btn" onClick={() => setOpen(true)}>
-        {t("editor.addMatch")}
-      </button>
-    );
-  }
+  const startEdit = (m: DbMatch) =>
+    setEditingMatch({
+      ...m,
+      stage: m.stage,
+      round_num: m.round_num,
+      matchday: m.matchday,
+      home_team_id: m.home_team_id,
+      away_team_id: m.away_team_id,
+      kickoff: m.kickoff ?? "",
+    });
 
   return (
-    <div className="editor-inline">
-      <button className="btn" onClick={() => setOpen((o) => !o)}>
-        {open ? t("editor.cancel") : t("editor.matches")}
+    <>
+      <button className="btn" onClick={() => setOpen(true)}>
+        {t("editor.matches")}
       </button>
+
       {open && (
-        <div>
-          <div className="editor-row editor-card">
-            <InputList placeholder={t("editor.stage")} value={stage} onChange={setStage} suggestions={stageSuggestions} />
-            <input type="number" min={1} className="editor-small" value={roundNum} onChange={(e) => setRoundNum(parseInt(e.target.value) || 1)} />
-            <input type="number" min={1} className="editor-small" value={matchday} onChange={(e) => setMatchday(parseInt(e.target.value) || 0)} />
-            <select value={home} onChange={(e) => setHome(e.target.value === "" ? "" : parseInt(e.target.value))}>
-              <option value="">{t("editor.home")}</option>
-              {participants.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <select value={away} onChange={(e) => setAway(e.target.value === "" ? "" : parseInt(e.target.value))}>
-              <option value="">{t("editor.away")}</option>
-              {participants.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <input placeholder={t("editor.kickoff")} value={kickoff} onChange={(e) => setKickoff(e.target.value)} />
-            <button className="btn primary" disabled={busy || home === "" || away === ""} onClick={add}>
-              ＋
-            </button>
+        <div className="modal-backdrop" onClick={() => setOpen(false)}>
+          <div
+            className="share-modal editor-player-modal editor-matches-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="editor-card editor-phases">
+              <div className="editor-row">
+                <button className="btn" disabled={busy} onClick={() => setShowAdd(true)}>
+                  ＋ {t("editor.addMatch")}
+                </button>
+                <span className="editor-muted">{matches.length} · {t("editor.matches")}</span>
+              </div>
+              {matches.length === 0 ? (
+                <p className="editor-muted">{t("editor.noFixtures")}</p>
+              ) : (
+                <table className="editor-table">
+                  <thead>
+                    <tr>
+                      <th>{t("editor.stage")}</th>
+                      <th>{t("editor.md")}</th>
+                      <th>{t("editor.home")}</th>
+                      <th></th>
+                      <th>{t("editor.away")}</th>
+                      <th>{t("editor.score")}</th>
+                      <th>{t("editor.status")}</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {matches.map((m) => (
+                      <tr key={m.id}>
+                        <td>{m.stage}</td>
+                        <td>{m.matchday ?? "—"}</td>
+                        <td>{m.home_team_name}</td>
+                        <td className="editor-muted">—</td>
+                        <td>{m.away_team_name}</td>
+                        <td>
+                          {m.home_score === null ? "–" : `${m.home_score}–${m.away_score}`}
+                        </td>
+                        <td>{m.status}</td>
+                        <td className="editor-nowrap">
+                          <button className="btn" disabled={busy} onClick={() => startEdit(m)}>
+                            {t("editor.edit")}
+                          </button>{" "}
+                          <button className="btn" disabled={busy} onClick={() => onDelete(m.id)}>
+                            ✕
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
+        </div>
+      )}
 
-          <table className="editor-table">
-            <thead>
-              <tr>
-                <th>{t("editor.stage")}</th>
-                <th>{t("editor.md")}</th>
-                <th>{t("editor.home")}</th>
-                <th></th>
-                <th>{t("editor.away")}</th>
-                <th>{t("editor.score")}</th>
-                <th>{t("editor.status")}</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {matches.map((m) => (
-                <tr key={m.id}>
-                  <td>{m.stage}</td>
-                  <td>{m.matchday ?? "—"}</td>
-                  <td>{m.home_team_name}</td>
-                  <td className="editor-muted">—</td>
-                  <td>{m.away_team_name}</td>
-                  <td>
-                    {m.home_score === null ? "–" : `${m.home_score}–${m.away_score}`}
-                  </td>
-                  <td>{m.status}</td>
-                  <td className="editor-nowrap">
-                    <button className="btn" disabled={busy} onClick={() => setEditing(m.id)}>
-                      {t("editor.edit")}
-                    </button>{" "}
-                    <button className="btn" disabled={busy} onClick={() => onDelete(m.id)}>
-                      ✕
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {showAdd && (
+        <div className="modal-backdrop" onClick={() => setShowAdd(false)}>
+          <div
+            className="share-modal editor-player-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="editor-card editor-grid">
+              <div className="editor-field">
+                <label>{t("editor.stage")}</label>
+                <InputList placeholder={t("editor.stage")} value={stage} onChange={setStage} suggestions={stageSuggestions} />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.roundNum")}</label>
+                <input type="number" min={1} className="editor-small" value={roundNum} onChange={(e) => setRoundNum(parseInt(e.target.value) || 1)} />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.md")}</label>
+                <input type="number" min={1} className="editor-small" value={matchday} onChange={(e) => setMatchday(parseInt(e.target.value) || 0)} />
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.home")}</label>
+                <select value={home} onChange={(e) => setHome(e.target.value === "" ? "" : parseInt(e.target.value))}>
+                  <option value="">{t("editor.home")}</option>
+                  {participants.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.away")}</label>
+                <select value={away} onChange={(e) => setAway(e.target.value === "" ? "" : parseInt(e.target.value))}>
+                  <option value="">{t("editor.away")}</option>
+                  {participants.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="editor-field">
+                <label>{t("editor.kickoff")}</label>
+                <input placeholder={t("editor.kickoff")} value={kickoff} onChange={(e) => setKickoff(e.target.value)} />
+              </div>
+              <div className="editor-row">
+                <button className="btn primary" disabled={busy || home === "" || away === ""} onClick={add}>
+                  {t("editor.addMatch")}
+                </button>
+                <button className="btn" onClick={() => setShowAdd(false)}>
+                  {t("editor.cancel")}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-          {editingMatch && (
+      {editingMatch && (
+        <div className="modal-backdrop" onClick={() => setEditingMatch(null)}>
+          <div
+            className="share-modal editor-player-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="editor-card editor-grid">
               <div className="editor-field">
                 <label>{t("editor.stage")}</label>
@@ -1208,20 +1252,20 @@ function MatchList({
                       away_team_id: editingMatch.away_team_id,
                       kickoff: editingMatch.kickoff,
                     });
-                    setEditing(null);
+                    setEditingMatch(null);
                   }}
                 >
                   {t("editor.save")}
                 </button>
-                <button className="btn" onClick={() => setEditing(null)}>
+                <button className="btn" onClick={() => setEditingMatch(null)}>
                   {t("editor.cancel")}
                 </button>
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

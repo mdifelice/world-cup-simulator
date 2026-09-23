@@ -125,6 +125,8 @@ export interface RunOptions {
   focus_team_id: number | null;
   /** Per-match lineup configs keyed by "{stage_key}|{day}|{home}|{away}". */
   lineups?: Record<string, LineupConfig>;
+  /** Per-team config overrides that always apply to both squads (Lab). */
+  teamConfig?: Record<number, LineupConfig>;
 }
 
 // Expected-goals calibration (mirrors detail.rs).
@@ -378,6 +380,7 @@ class Engine {
   readonly focus: number | null;
   readonly runSeed: bigint;
   readonly lineups: Record<string, LineupConfig>;
+  readonly teamConfig: Record<number, LineupConfig>;
 
   rng: Rng;
   matches: RunMatch[] = [];
@@ -412,6 +415,7 @@ class Engine {
     this.focus = opts.focus_team_id;
     this.runSeed = opts.seed ?? (BigInt(Date.now()) ^ (BigInt(Math.floor(Math.random() * 2 ** 31)) << 21n));
     this.lineups = opts.lineups ?? {};
+    this.teamConfig = opts.teamConfig ?? {};
     this.rng = new Rng(1n); // re-seeded per match inside playMatch
 
     for (const f of this.oracle.fixtures) {
@@ -1044,11 +1048,12 @@ class Engine {
     const cfg = this.lineups[key] ?? null;
     const focus = this.focus;
     const focusCfg = (team: number) => (focus === team ? cfg : null);
-    const cfgStrategy = (team: number) => focusCfg(team)?.strategy ?? "normal";
-    const cfgFormation = (team: number) => focusCfg(team)?.formation ?? eraFormation(this.year);
+    const teamCfg = (team: number) => this.teamConfig[team] ?? focusCfg(team);
+    const cfgStrategy = (team: number) => teamCfg(team)?.strategy ?? "normal";
+    const cfgFormation = (team: number) => teamCfg(team)?.formation ?? eraFormation(this.year);
 
-    const homeXi = this.pickXiFor(home, focusCfg(home));
-    const awayXi = this.pickXiFor(away, focusCfg(away));
+    const homeXi = this.pickXiFor(home, teamCfg(home));
+    const awayXi = this.pickXiFor(away, teamCfg(away));
 
     const homeRed = this.drawRed(homeXi);
     const awayRed = this.drawRed(awayXi);
@@ -1086,7 +1091,14 @@ class Engine {
     const goals: Goal[] = [];
     let hs = 0;
     let aw = 0;
-    const momentumSeries: number[] = [];
+    // Momentum per walked clock minute (regulation, stoppage and extra time).
+    // Stoppage minutes are simulated in the middle—after the 90' loop—so the
+    // results are recorded as (walked minute, sample) pairs and re-sorted into
+    // clock order at the end. That keeps each `simMinute` call in the exact
+    // same order (the RNG sequence is untouched) while the final series reads
+    // naturally: 1..45, HT stoppage, 46..90, FT stoppage, ET…
+    const momentumRecs: Array<[number, number]> = [];
+    const rec = (mm: number, r: MinuteResult) => momentumRecs.push([mm, momentumOf(r)]);
 
     // Simulate from minute to minute (regulation, stoppage or extra time).
     // Every minute is a sequence of possession duels; AI coaches retune their
@@ -1111,7 +1123,7 @@ class Engine {
     };
 
     for (let m = 1; m <= 90; m++) {
-      momentumSeries.push(momentumOf(simMinute(m, false, false)));
+      rec(m, simMinute(m, false, false));
     }
 
     // Players suspended at kickoff, needed up-front for event generation.
@@ -1148,8 +1160,8 @@ class Engine {
     const addedFt = clampSt(2 + ftGoals * 0.4 + ftReds * 1.25 + ftEvents * 0.12, 3, 6);
     let addedEt1 = 0;
     let addedEt2 = 0;
-    for (let i = 1; i <= addedHt; i++) simMinute(45 + i, false, true);
-    for (let i = 1; i <= addedFt; i++) simMinute(90 + i, false, true);
+    for (let i = 1; i <= addedHt; i++) rec(45 + i, simMinute(45 + i, false, true));
+    for (let i = 1; i <= addedFt; i++) rec(90 + i, simMinute(90 + i, false, true));
 
     let winner = hs > aw ? home : aw > hs ? away : null;
     let extraTime = false;
@@ -1158,16 +1170,18 @@ class Engine {
     if (knockout && winner == null) {
       extraTime = true;
       for (let m = 91; m <= 120; m++) {
-        momentumSeries.push(momentumOf(simMinute(m, true, false)));
+        rec(m, simMinute(m, true, false));
       }
       // Extra-time added time is driven by the goals scored in extra time.
       const etGoals = goals.filter((g) => g.minute > 90 && !g.added_time).length;
       addedEt1 = clampSt(etGoals * 0.4, 0, 2);
       addedEt2 = clampSt(etGoals * 0.25, 0, 2);
-      for (let i = 1; i <= addedEt1; i++) simMinute(105 + i, true, true);
-      for (let i = 1; i <= addedEt2; i++) simMinute(120 + i, true, true);
+      for (let i = 1; i <= addedEt1; i++) rec(105 + i, simMinute(105 + i, true, true));
+      for (let i = 1; i <= addedEt2; i++) rec(120 + i, simMinute(120 + i, true, true));
       winner = hs > aw ? home : aw > hs ? away : null;
     }
+
+    const momentumSeries = momentumRecs.sort((a, b) => a[0] - b[0]).map(([, v]) => v);
 
     if (usePens && winner == null) {
       const p = this.playPenalties(home, homeXi, away, awayXi);
@@ -1708,6 +1722,10 @@ export interface LabMatchOptions {
   extraTime?: boolean;
   /** Decide a still-level match on penalties (can be combined with extra time). */
   penalties?: boolean;
+  /** Formation per team id; teams without an entry use the era default. */
+  formations?: Record<number, string>;
+  /** Strategy per team id; teams without an entry play "normal". */
+  strategies?: Record<number, Strategy>;
 }
 
 /** Play a single match between two squads with exactly the same engine the
@@ -1741,7 +1759,27 @@ export function playLabMatch(
     groups: [],
     fixtures: [],
   };
-  const eng = new Engine(oracle, { seed, focus_team_id: home.id });
+  const eng = new Engine(
+    oracle,
+    opts.formations || opts.strategies
+      ? {
+          seed,
+          focus_team_id: home.id,
+          teamConfig: {
+            [home.id]: {
+              formation: opts.formations?.[home.id] ?? eraFormation(year),
+              strategy: opts.strategies?.[home.id] ?? "normal",
+              starting: {},
+            },
+            [away.id]: {
+              formation: opts.formations?.[away.id] ?? eraFormation(year),
+              strategy: opts.strategies?.[away.id] ?? "normal",
+              starting: {},
+            },
+          },
+        }
+      : { seed, focus_team_id: home.id },
+  );
   eng.playMatch(home.id, away.id, "LAB", "Lab match", !!opts.extraTime, !!opts.penalties);
   return eng.matches[0];
 }

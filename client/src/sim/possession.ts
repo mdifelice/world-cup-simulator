@@ -251,7 +251,7 @@ export function simulateMinute(
       0.03,
       Math.min(
         0.32,
-        0.098 +
+        0.079 +
           (shooter.overall - gkOverall) * 0.008 +
           atk.risk * 0.018 -
           fromRange * 0.04 +

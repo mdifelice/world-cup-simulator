@@ -3,7 +3,7 @@ import { useI18n, flagFor } from "../i18n";
 import { LiveMatch } from "../components/LiveMatch";
 import MatchDetail from "../components/MatchDetail";
 import type { Participant, Player, RunMatch, Strategy, Tournament, LiveMatchControls } from "../types";
-import { STRATEGIES } from "../types";
+import { STRATEGIES, eraFormation, eraFormations } from "../types";
 import type { LabTeam } from "../sim/run";
 import { playLabMatch, randomSeed } from "../sim/run";
 import { api } from "../api";
@@ -25,9 +25,6 @@ const HISTORY_CAP = 20;
 const SCORES_CAP = 2000;
 
 const clampOverall = (v: number) => Math.max(30, Math.min(99, Math.round(v)));
-
-const strategyShift = (s: Strategy | undefined): number =>
-  s === "attacking" ? 2 : s === "defensive" ? -1 : 0;
 
 function loadHistory(): HistoryEntry[] {
   try {
@@ -100,6 +97,7 @@ export default function Lab() {
   const [squads, setSquads] = useState<Record<number, Player[]>>({});
   const [strategies, setStrategies] = useState<Record<number, Strategy>>({});
   const [teamShifts, setTeamShifts] = useState<Record<number, number>>({});
+  const [formations, setFormations] = useState<Record<number, string>>({});
 
   // Match history (localStorage-persisted across sessions).
   const [history, setHistory] = useState<HistoryEntry[]>(loadHistory);
@@ -205,9 +203,11 @@ export default function Lab() {
   // Lab engines
   // -----------------------------------------------------------------------
 
-  /** Effective rating for a player honoring the team stat slider + strategy. */
+  /** Effective rating for a player honoring the team stat slider. The chosen
+   *  strategy is passed straight to the engine, which now applies it to both
+   *  squads (tactical behavior), so no extra rating bonus is needed here. */
   const effectiveOverall = (p: Player, teamId: number): number =>
-    clampOverall((p.rating ?? p.overall) + (teamShifts[teamId] ?? 0) + strategyShift(strategies[teamId]));
+    clampOverall((p.rating ?? p.overall) + (teamShifts[teamId] ?? 0));
 
   const buildLabTeam = (teamId: number): LabTeam | null => {
     const team = teams.find((tm) => tm.id === teamId);
@@ -283,6 +283,8 @@ export default function Lab() {
       const run = playLabMatch(selectedTournament.id, selectedTournament.year, home, away, seed, {
         extraTime,
         penalties: usePens,
+        formations,
+        strategies,
       });
       recordScore(run.home_score, run.away_score);
       addHistory(run);
@@ -403,6 +405,22 @@ export default function Lab() {
                   <div key={side.side} className="lab-ov-team">
                     <h4>{teamLabel(sid, t("lab.selectTeam"))}</h4>
                     <div className="lab-field-row">
+                      <div className="lab-field">
+                        <label>{t("lab.formation")}</label>
+                        <select
+                          value={formations[sid] ?? eraFormation(selectedTournament?.year ?? 2020)}
+                          onChange={(e) =>
+                            setFormations((cur) => ({
+                              ...cur,
+                              [sid]: e.target.value,
+                            }))
+                          }
+                        >
+                          {eraFormations(selectedTournament?.year ?? 2020).map((f) => (
+                            <option key={f} value={f}>{f}</option>
+                          ))}
+                        </select>
+                      </div>
                       <div className="lab-field">
                         <label>{t("lab.strategy")}</label>
                         <select

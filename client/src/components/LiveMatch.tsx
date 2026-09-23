@@ -260,9 +260,9 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const legendY = 104;
 
   // Fixed axis showing full 90 minutes (+ added time) from the start, padded
-  // by 3px so the 0' and Final-time lines never kiss the chart border.
-  const LX = 3;
-  const RX = 3;
+  // so the 0' and Final-time lines sit clear of the chart border.
+  const LX = 10;
+  const RX = 10;
   const plotW = W - LX - RX;
   const spanTotal = axisSpan(clock);
   const bw = plotW / spanTotal;
@@ -297,18 +297,31 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
     return 120;
   };
 
-  // Map a real minute (1..90/1..120) straight to a momentum sample index.
+  // Map a real minute (1..90/1..120) to its momentum sample index. The series
+  // is ordered by walk slot, so second-half minutes are pushed past the
+  // half-time stoppage band, ET past the first-half and full-time bands too.
   const sampleAtReal = (mr: number): number => {
     if (!series) return 0;
-    return Math.max(0, Math.min(mr - 1, series.length - 1));
+    const SH = addedHT + addedFT;
+    let idx: number;
+    if (mr <= 45) idx = mr - 1;
+    else if (mr <= 90) idx = mr - 1 + addedHT;
+    else if (mr <= 105) idx = mr - 1 + SH;
+    else idx = mr - 1 + SH + addedET1;
+    return Math.max(0, Math.min(idx, series.length - 1));
   };
 
   const bars = useMemo(() => {
     if (!series || series.length === 0) return [] as { m: number; x: number; up: boolean; h: number }[];
     const out: { m: number; x: number; up: boolean; h: number }[] = [];
     const last = lastRealMinute(Math.min(min, totalLength));
+    // The series now covers every walked slot (stoppage included), and `min`
+    // is the walk slot, so the last real minute's bar keeps updating with the
+    // stoppage momentum instead of freezing.
+    const liveIdx = Math.max(0, Math.min(min, totalLength) - 1);
     for (let mr = 1; mr <= last; mr++) {
-      const d = series[sampleAtReal(mr)] - 0.5;
+      const idx = mr === last ? liveIdx : sampleAtReal(mr);
+      const d = series[idx] - 0.5;
       out.push({
         m: mr,
         x: sxRatio(axisPos(clock, mr - 0.5) / spanTotal),
@@ -369,7 +382,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   // near edge never wanders while the momentum animates.
   const gauge = useMemo(() => {
     if (!momentum || momentum.home.length === 0) return 0;
-    const idx = Math.max(0, lastRealMinute(Math.min(min, totalLength)) - 1);
+    const idx = Math.max(0, Math.min(min, totalLength) - 1);
     const v = (momentum.home[idx] - 0.5) * 2;
     return Math.max(-1, Math.min(1, v));
   }, [momentum, min, totalLength]);
@@ -506,7 +519,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
             )}
             {done
               ? null
-              : tick(axisPos(clock, lastRealMinute(Math.min(min, totalLength))) / spanTotal, "")}
+              : tick(axisPos(clock, Math.max(lastRealMinute(Math.min(min, totalLength)) - 0.5, 0)) / spanTotal, "")}
             {bars.map((b) => (
               <rect
                 key={b.m}
