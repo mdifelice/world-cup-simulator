@@ -10,7 +10,17 @@
 // home, away, knockout)` (see seed.ts). Same oracle + same seed + same lineups
 // → identical run, so committing a lineup only ever changes that match.
 
-import { Rng, poisson, match_seed } from "./seed";
+import { Rng, match_seed } from "./seed";
+import {
+  aiStrategy,
+  momentumOf,
+  type MinuteResult,
+  type PlayShape,
+  type PlayerRow,
+  retune,
+  shapeOf,
+  simulateMinute,
+} from "./possession";
 import {
   slotPenalty,
   slotsFor,
@@ -32,6 +42,7 @@ import {
   type PlayerAward,
   type TopScorer,
   type PlayerStat,
+  type Strategy,
 } from "../types";
 
 // ---------------------------------------------------------------------------
@@ -146,70 +157,11 @@ function bestSlotPenalty(positions: string[], slot: string): number {
 // Phase helpers (ports of sim.rs + fixture.rs)
 // ---------------------------------------------------------------------------
 
-/** detail.rs strategy_adj */
-function strategyAdj(strategy: string, scoring: boolean): number {
-  if (strategy === "attacking") return scoring ? 0.14 : 0.08;
-  if (strategy === "defensive") return scoring ? -0.08 : -0.14;
-  return 0;
-}
-
 /** detail.rs max_subs_for */
 function maxSubsFor(year: number): number {
   if (year >= 2022) return 5;
   if (year >= 1998) return 3;
   return 2;
-}
-
-/** detail.rs team_labels — n home then n away labels (unshuffled). */
-function teamLabels(home: number, away: number, homeN: number, awayN: number): number[] {
-  const v: number[] = [];
-  for (let i = 0; i < homeN; i++) v.push(home);
-  for (let i = 0; i < awayN; i++) v.push(away);
-  return v;
-}
-
-/** detail.rs shuffled — Fisher–Yates on the shared PRNG. */
-function shuffled(rng: Rng, v: number[]): number[] {
-  for (let i = v.length - 1; i >= 1; i--) {
-    const j = Math.floor(rng.unit() * (i + 1));
-    const tmp = v[i];
-    v[i] = v[j];
-    v[j] = tmp;
-  }
-  return v;
-}
-
-/** detail.rs spaced_minutes — minutes far apart so goals never cluster. */
-function spacedMinutes(rng: Rng, n: number, max: number): number[] {
-  const gap = 8;
-  const mins: number[] = [];
-  let guard = 0;
-  while (mins.length < n) {
-    const m = 1 + Math.floor(rng.unit() * max);
-    if (mins.every((x) => Math.abs(x - m) >= gap)) {
-      mins.push(m);
-    }
-    guard += 1;
-    if (guard > 3000) {
-      mins.sort((a, b) => a - b);
-      let fill = 0;
-      while (mins.length < n) {
-        let m = Math.min((fill + 1) * gap, max);
-        if (!mins.includes(m)) {
-          mins.push(m);
-        } else {
-          let m2 = m - 1;
-          while (m2 >= 1 && mins.includes(m2)) m2 -= 1;
-          if (m2 >= 1) mins.push(m2);
-          else mins.push(1);
-        }
-        fill += 1;
-      }
-      break;
-    }
-  }
-  mins.sort((a, b) => a - b);
-  return mins;
 }
 
 /** fixture.rs round_robin — circle method, (home, away, round). */
@@ -761,78 +713,56 @@ class Engine {
     teamId: number,
     red: [number, SquadPlayer] | null,
     added = false,
+    forcedScorer: SquadPlayer | null = null,
   ): Goal {
-    if (this.rng.unit() < 0.02) {
-      const og = this.pickOwnGoal(oppXi);
-      if (og) {
-        return {
-          minute,
-          extra_time: extraTime,
-          added_time: added || undefined,
-          team_id: teamId,
-          scorer_id: og.id,
-          scorer: og.name,
-          scorer_photo: og.photo_url,
-          shirt_number: og.shirt_number ?? undefined,
-          assist_id: null,
-          assist: null,
-          assist_photo: null,
-          own_goal: true,
-        };
+    const sentOff = red && minute >= red[0] ? red[1].id : null;
+    const forced = forcedScorer && forcedScorer.id !== sentOff ? forcedScorer : null;
+    if (!forced) {
+      if (this.rng.unit() < 0.02) {
+        const og = this.pickOwnGoal(oppXi);
+        if (og) {
+          return {
+            minute,
+            extra_time: extraTime,
+            added_time: added || undefined,
+            team_id: teamId,
+            scorer_id: og.id,
+            scorer: og.name,
+            scorer_photo: og.photo_url,
+            shirt_number: og.shirt_number ?? undefined,
+            assist_id: null,
+            assist: null,
+            assist_photo: null,
+            own_goal: true,
+          };
+        }
       }
     }
-    const sentOff = red && minute >= red[0] ? red[1].id : null;
     const eff = xi.filter((p) => p.id !== sentOff);
-    const scorer = this.pickScorer(eff);
-    const family = positionFamily(scorer.position);
+    const goalScorer = forced ?? this.pickScorer(eff);
+    const family = positionFamily(goalScorer.position);
     const assistProb = family === "GK" ? 0 : family === "DF" ? 0.6 : family === "MF" ? 0.7 : 0.72;
     // Reuse the assist decision draw to mark a small share of goals as penalty
     // kicks (no assist, ~2%): same number of RNG draws, so seed streams are
     // unchanged from the previous engine.
     const assistRoll = this.rng.unit();
     const isPen = assistRoll > 0.98;
-    const assist = isPen ? null : assistRoll < assistProb ? this.pickAssist(eff, scorer) : null;
+    const assist = isPen ? null : assistRoll < assistProb ? this.pickAssist(eff, goalScorer) : null;
     return {
       minute,
       extra_time: extraTime,
       added_time: added || undefined,
       team_id: teamId,
-      scorer_id: scorer.id,
-      scorer: scorer.name,
-      scorer_photo: scorer.photo_url,
-      shirt_number: scorer.shirt_number ?? undefined,
+      scorer_id: goalScorer.id,
+      scorer: goalScorer.name,
+      scorer_photo: goalScorer.photo_url,
+      shirt_number: goalScorer.shirt_number ?? undefined,
       assist_id: assist ? assist.id : null,
       assist: assist ? assist.name : null,
       assist_photo: assist ? assist.photo_url : null,
       own_goal: false,
       penalty: isPen || undefined,
     };
-  }
-
-  genAddedTimeGoals(
-    baseMinute: number,
-    added: number,
-    xgPerMinute: number,
-    home: number,
-    away: number,
-    homeXi: SquadPlayer[],
-    awayXi: SquadPlayer[],
-    homeRed: [number, SquadPlayer] | null,
-    awayRed: [number, SquadPlayer] | null,
-  ): Goal[] {
-    if (added <= 0) return [];
-    const totalXg = clamp(xgPerMinute * added, 0.01, 2.0);
-    const nGoals = poisson(this.rng, totalXg);
-    if (nGoals === 0) return [];
-    const minutes = spacedMinutes(this.rng, nGoals, added);
-    const teams = shuffled(this.rng, teamLabels(home, away, nGoals, 0));
-    const goals: Goal[] = [];
-    for (let i = 0; i < minutes.length; i++) {
-      const team = i < teams.length ? teams[i] : home;
-      const [xi, opp, red] = team === home ? [homeXi, awayXi, homeRed] : [awayXi, homeXi, awayRed];
-      goals.push(this.makeGoal(xi, opp, baseMinute + minutes[i], baseMinute >= 105, team, red, true));
-    }
-    return goals;
   }
 
   takeOrder(xi: SquadPlayer[]): SquadPlayer[] {
@@ -950,63 +880,6 @@ class Engine {
     if (extra) s = `${s} aet`;
     if (pen) s = `${s} (${pen.home_score}–${pen.away_score} pens)`;
     return s;
-  }
-
-  buildMomentum(
-    home: number,
-    hXg: number,
-    aXg: number,
-    goals: Goal[],
-    totalMinutes: number,
-  ): Momentum {
-    const base = clamp(0.5 + clamp(hXg - aXg, -2.0, 2.0) * 0.06, 0.15, 0.85);
-    const neutral = 0.5 + clamp(hXg - aXg, -2.0, 2.0) * 0.03;
-    const gs = goals.slice().sort((a, b) => a.minute - b.minute);
-    const homeSeries: number[] = [];
-    let cur = base;
-    let scoreH = 0;
-    let scoreA = 0;
-    let gi = 0;
-    for (let m = 1; m <= totalMinutes; m++) {
-      let goalNow = false;
-      while (gi < gs.length && gs[gi].minute <= m) {
-        if (gs[gi].team_id === home) scoreH += 1;
-        else scoreA += 1;
-        goalNow = true;
-        gi += 1;
-      }
-      if (goalNow) cur = neutral;
-      const lead = scoreH - scoreA;
-      let target = neutral;
-      if (lead !== 0) {
-        const trailXg = lead > 0 ? aXg : hXg;
-        const leadXg = lead > 0 ? hXg : aXg;
-        const rel = clamp(trailXg / Math.max(leadXg, 0.05), 0.35, 2.0);
-        const amp = Math.min(0.06 + 0.1 * Math.abs(lead) * rel, 0.42);
-        target = lead > 0 ? Math.max(neutral - amp, 0.05) : Math.min(neutral + amp, 0.95);
-      }
-      cur += (target - cur) * 0.05;
-      cur += (this.rng.unit() - 0.5) * 0.18;
-      if (this.rng.unit() < 0.07) {
-        cur += (this.rng.unit() - 0.5) * 0.48;
-      }
-      cur = clamp(cur, 0.05, 0.95);
-      homeSeries.push(cur);
-    }
-    const ramp = 5;
-    for (const g of gs) {
-      const minute = clamp(g.minute, 1, totalMinutes);
-      const target = g.team_id === home ? 1.0 : 0.0;
-      homeSeries[minute - 1] = target;
-      for (let k = 1; k <= ramp; k++) {
-        if (minute <= k) break;
-        const idx = minute - 1 - k;
-        const w = (0.7 * (ramp + 1 - k)) / (ramp + 1);
-        homeSeries[idx] = homeSeries[idx] * (1 - w) + target * w;
-      }
-    }
-    const awaySeries = homeSeries.map((v) => 1 - v);
-    return { home: homeSeries, away: awaySeries };
   }
 
   genMatchEvents(
@@ -1166,44 +1039,73 @@ class Engine {
     const focus = this.focus;
     const focusCfg = (team: number) => (focus === team ? cfg : null);
     const cfgStrategy = (team: number) => focusCfg(team)?.strategy ?? "normal";
+    const cfgFormation = (team: number) => focusCfg(team)?.formation ?? eraFormation(this.year);
 
     const homeXi = this.pickXiFor(home, focusCfg(home));
     const awayXi = this.pickXiFor(away, focusCfg(away));
 
-    const homeStrat = cfgStrategy(home);
-    const awayStrat = cfgStrategy(away);
-    const [hXg0, aXg0] = this.xg(home, away, knockout);
-    const hXg = clamp(
-      hXg0 + this.xiStrengthAdj(home, homeXi) + strategyAdj(homeStrat, true) + strategyAdj(awayStrat, false),
-      0.1,
-      4.5,
-    );
-    const aXg = clamp(
-      aXg0 + this.xiStrengthAdj(away, awayXi) + strategyAdj(awayStrat, true) + strategyAdj(homeStrat, false),
-      0.1,
-      4.5,
-    );
-
     const homeRed = this.drawRed(homeXi);
     const awayRed = this.drawRed(awayXi);
-    const swing = (red: [number, SquadPlayer] | null, own: boolean): number => {
-      if (!red) return 1.0;
-      const frac = (90 - red[0] > 0 ? 90 - red[0] : 0) / 90;
-      const factor = own ? 0.55 : 1.35;
-      return 1.0 + (factor - 1.0) * frac;
+
+    const toRow = (p: SquadPlayer): PlayerRow => ({
+      id: p.id,
+      name: p.name,
+      position: p.position,
+      overall: p.overall,
+      aggression: p.aggression,
+    });
+
+    const makeShape = (
+      team: number,
+      xi: SquadPlayer[],
+      strategy: Strategy,
+      red: [number, SquadPlayer] | null,
+    ): PlayShape => {
+      const ctx = this.teamContext(team);
+      return shapeOf({
+        id: team,
+        name: this.teamName(team),
+        xi: xi.map(toRow),
+        strategy,
+        formation: cfgFormation(team),
+        redMinute: red ? red[0] : null,
+        form: ctx.form / 100,
+        morale: ctx.morale / 100,
+      });
     };
-    const hXgS = clamp(hXg * swing(homeRed, true) * swing(awayRed, false), 0.05, 5.0);
-    const aXgS = clamp(aXg * swing(awayRed, true) * swing(homeRed, false), 0.05, 5.0);
 
-    const hs0 = poisson(this.rng, hXgS);
-    const aw0 = poisson(this.rng, aXgS);
+    const hShape = makeShape(home, homeXi, cfgStrategy(home), homeRed);
+    const aShape = makeShape(away, awayXi, cfgStrategy(away), awayRed);
 
-    let goals: Goal[] = [];
-    const totalReg = hs0 + aw0;
-    const regMinutes = spacedMinutes(this.rng, totalReg, 90);
-    for (const [minute, team] of zip(regMinutes, shuffled(this.rng, teamLabels(home, away, hs0, aw0)))) {
-      const [xi, opp, red] = team === home ? [homeXi, awayXi, homeRed] : [awayXi, homeXi, awayRed];
-      goals.push(this.makeGoal(xi, opp, minute, false, team, red));
+    const goals: Goal[] = [];
+    let hs = 0;
+    let aw = 0;
+    const momentumSeries: number[] = [];
+
+    // Simulate from minute to minute (regulation, stoppage or extra time).
+    // Every minute is a sequence of possession duels; AI coaches retune their
+    // strategy against the scoreboard every minute (the focus team stays
+    // player-controlled).
+    const simMinute = (minute: number, extraTime: boolean, added: boolean): MinuteResult => {
+      if (focus !== home)
+        retune(hShape, aiStrategy(hs - aw, minute, homeRed != null), homeRed ? homeRed[0] : null);
+      if (focus !== away)
+        retune(aShape, aiStrategy(aw - hs, minute, awayRed != null), awayRed ? awayRed[0] : null);
+      const r = simulateMinute(() => this.rng.unit(), hShape, aShape, minute);
+      if (r.goal) {
+        const team = r.goal.teamId;
+        const [xi, opp, red] = team === home ? [homeXi, awayXi, homeRed] : [awayXi, homeXi, awayRed];
+        const scorer = xi.find((p) => p.id === r.goal!.scorer.id) ?? null;
+        const g = this.makeGoal(xi, opp, minute, extraTime, team, red, added, scorer);
+        goals.push(g);
+        if (g.team_id === home) hs += 1;
+        else aw += 1;
+      }
+      return r;
+    };
+
+    for (let m = 1; m <= 90; m++) {
+      momentumSeries.push(momentumOf(simMinute(m, false, false)));
     }
 
     // Players suspended at kickoff, needed up-front for event generation.
@@ -1227,7 +1129,7 @@ class Engine {
     // cards and stoppages (subs/injuries), the longer the wait. Half-time runs
     // 1-4', full-time 3-6'.
     const htGoals = goals.filter((g) => g.minute <= 45).length;
-    const ftGoals = totalReg - htGoals;
+    const ftGoals = hs + aw - htGoals;
     const htReds = [homeRed, awayRed].filter(
       (r): r is [number, SquadPlayer] => r !== null && r[0] <= 45,
     ).length;
@@ -1240,52 +1142,25 @@ class Engine {
     const addedFt = clampSt(2 + ftGoals * 0.4 + ftReds * 1.25 + ftEvents * 0.12, 3, 6);
     let addedEt1 = 0;
     let addedEt2 = 0;
-    const htXgRate = ((hXgS + aXgS) / 90) * 0.3;
-    const ftXgRate = ((hXgS + aXgS) / 90) * 0.25;
-    goals.push(
-      ...this.genAddedTimeGoals(45, addedHt, htXgRate, home, away, homeXi, awayXi, homeRed, awayRed),
-    );
-    goals.push(
-      ...this.genAddedTimeGoals(90, addedFt, ftXgRate, home, away, homeXi, awayXi, homeRed, awayRed),
-    );
-    goals.sort((a, b) => (a.minute - b.minute) || (a.team_id - b.team_id));
-    let hs = goals.filter((g) => g.team_id === home).length;
-    let aw = goals.filter((g) => g.team_id === away).length;
-    let winner = hs > aw ? home : aw > hs ? away : null;
+    for (let i = 1; i <= addedHt; i++) simMinute(45 + i, false, true);
+    for (let i = 1; i <= addedFt; i++) simMinute(90 + i, false, true);
 
+    let winner = hs > aw ? home : aw > hs ? away : null;
     let extraTime = false;
     let penalties: PenResult | null = null;
 
     if (knockout && winner == null) {
-      const hex = clamp(hXgS * 0.45, 0.05, 2.5);
-      const aex = clamp(aXgS * 0.45, 0.05, 2.5);
-      const [eh, ea] = [poisson(this.rng, hex), poisson(this.rng, aex)];
       extraTime = true;
-      const etMinutes = spacedMinutes(this.rng, eh + ea, 30);
-      for (const [minute, team] of zip(etMinutes, shuffled(this.rng, teamLabels(home, away, eh, ea)))) {
-        const [xi, opp, red] = team === home ? [homeXi, awayXi, homeRed] : [awayXi, homeXi, awayRed];
-        goals.push(this.makeGoal(xi, opp, 90 + minute, true, team, red));
+      for (let m = 91; m <= 120; m++) {
+        momentumSeries.push(momentumOf(simMinute(m, true, false)));
       }
-      goals.sort((a, b) => (a.minute - b.minute) || (a.team_id - b.team_id));
-      hs += eh;
-      aw += ea;
-      winner = hs > aw ? home : aw > hs ? away : null;
       // Extra-time added time is driven by the goals scored in extra time.
-      if (extraTime) {
-        addedEt1 = clampSt((eh + ea) * 0.4, 0, 2);
-        addedEt2 = clampSt((eh + ea) * 0.25, 0, 2);
-        const etXgRate = ((hXgS + aXgS) / 90) * 0.2;
-        goals.push(
-          ...this.genAddedTimeGoals(105, addedEt1, etXgRate, home, away, homeXi, awayXi, homeRed, awayRed),
-        );
-        goals.push(
-          ...this.genAddedTimeGoals(120, addedEt2, etXgRate, home, away, homeXi, awayXi, homeRed, awayRed),
-        );
-        goals.sort((a, b) => (a.minute - b.minute) || (a.team_id - b.team_id));
-        hs = goals.filter((g) => g.team_id === home).length;
-        aw = goals.filter((g) => g.team_id === away).length;
-        winner = hs > aw ? home : aw > hs ? away : null;
-      }
+      const etGoals = goals.filter((g) => g.minute > 90 && !g.added_time).length;
+      addedEt1 = clampSt(etGoals * 0.4, 0, 2);
+      addedEt2 = clampSt(etGoals * 0.25, 0, 2);
+      for (let i = 1; i <= addedEt1; i++) simMinute(105 + i, true, true);
+      for (let i = 1; i <= addedEt2; i++) simMinute(120 + i, true, true);
+      winner = hs > aw ? home : aw > hs ? away : null;
     }
 
     if (usePens && winner == null) {
@@ -1293,6 +1168,8 @@ class Engine {
       winner = p.winner_id === home ? home : away;
       penalties = p;
     }
+
+    goals.sort((a, b) => (a.minute - b.minute) || (a.team_id - b.team_id));
 
     // Sending-offs, in minute order.
     const reds: RedCard[] = [];
@@ -1339,12 +1216,11 @@ class Engine {
       }
     }
 
-    // Players suspended at kickoff (captured before the per-match tick).
-    // Per-match ratings + per-player event stats.
+    // Per-match ratings + per-player event stats (conceded from the real score).
     const [hResult, aResult] =
       winner === home ? [1.0, 0.2] : winner === away ? [0.2, 1.0] : [0.6, 0.6];
-    this.rateXi(homeXi, home, hResult, goals, aw0);
-    this.rateXi(awayXi, away, aResult, goals, hs0);
+    this.rateXi(homeXi, home, hResult, goals, aw);
+    this.rateXi(awayXi, away, aResult, goals, hs);
 
     if (!knockout) this.addGroupResult(home, away, hs, aw);
     this.applyDrift(home, away, hs, aw);
@@ -1362,10 +1238,9 @@ class Engine {
       this.suspensions.set(r.player_id, [1, "red"]);
     }
 
-    const totalMinutes = extraTime ? 120 : 90;
-    const momentum =
+    const momentum: Momentum | null =
       this.focus === home || this.focus === away
-        ? this.buildMomentum(home, hXgS, aXgS, goals, totalMinutes)
+        ? { home: momentumSeries, away: momentumSeries.map((v) => 1 - v) }
         : null;
 
     const resultLabel = this.resultLabel(hs, aw, extraTime, penalties);
@@ -1760,10 +1635,6 @@ class Engine {
 
 const clamp = (v: number, min: number, max: number): number =>
   Math.max(min, Math.min(max, v));
-
-function zip<A, B>(a: A[], b: B[]): Array<[A, B]> {
-  return a.map((x, i) => [x, b[i]]);
-}
 
 /** Run the full tournament in the browser. Same oracle + seed → identical run. */
 export function generateRun(oracle: Oracle, opts: RunOptions): RunPayload {
