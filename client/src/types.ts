@@ -8,6 +8,8 @@ export interface Tournament {
   start_date: string | null;
   end_date: string | null;
   shirt_numbers: boolean;
+  /** Optional branding image for this edition (trophy/logo URL). */
+  logo?: string | null;
 }
 
 export type Locale = "en" | "es";
@@ -38,6 +40,99 @@ export interface Team {
 
 export interface Participant extends Team {
   group_letter: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// Editor CRUD types (mirror server/src/models.rs)
+// ---------------------------------------------------------------------------
+
+/** A phase of a tournament (GROUP round-robin or KNOCKOUT). */
+export interface Phase {
+  id: number;
+  tournament_id: number;
+  seq: number;
+  key: string;
+  name: string;
+  phase_type: string;
+  group_count: number | null;
+  entry_teams: number | null;
+}
+
+export interface PhaseDraft {
+  key: string;
+  name: string;
+  phase_type: string;
+  group_count?: number | null;
+  entry_teams?: number | null;
+}
+
+export interface TournamentDetail extends Tournament {
+  phases: Phase[];
+}
+
+/** Fields accepted when creating a tournament. */
+export interface TournamentDraft {
+  name: string;
+  year: number;
+  host: string;
+  winner?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  shirt_numbers: boolean;
+  logo?: string | null;
+}
+
+/** A real fixture row in the DB (as staged before reveal). */
+export interface DbMatch {
+  id: number;
+  tournament_id: number;
+  stage: string;
+  round_num: number;
+  matchday: number | null;
+  home_team_id: number;
+  away_team_id: number;
+  kickoff: string | null;
+  home_team_name: string;
+  away_team_name: string;
+  home_score: number | null;
+  away_score: number | null;
+  status: string;
+}
+
+export interface CreateMatch {
+  stage: string;
+  round_num?: number;
+  matchday?: number | null;
+  home_team_id: number;
+  away_team_id: number;
+  kickoff?: string | null;
+}
+
+/** Everything a player row + call-up needs (all 18 attributes required). */
+export interface PlayerDraft {
+  name: string;
+  position: string;
+  positions?: string[];
+  photo_url?: string | null;
+  shirt_number?: number | null;
+  pace: number;
+  stamina: number;
+  strength: number;
+  dribbling: number;
+  passing: number;
+  shooting: number;
+  tackling: number;
+  vision: number;
+  positioning: number;
+  composure: number;
+  reflexes: number;
+  handling: number;
+  kicking: number;
+  aerial: number;
+  decisions: number;
+  aggression: number;
+  concentration: number;
+  leadership: number;
 }
 
 export const POSITIONS = [

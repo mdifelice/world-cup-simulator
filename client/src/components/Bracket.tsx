@@ -13,13 +13,15 @@ interface Props {
   scale?: number;
   /** Extra class on the scroll wrapper (e.g. "bk-lg" for popup typography). */
   className?: string;
+  /** Show full (localised) country names instead of abbreviated codes. */
+  fullName?: boolean;
 }
 
 // Knockout stage keys, in the order they are played. `THIRD` is laid out as a
 // side column after the final.
 const KO_ORDER = ["R32", "R16", "QF", "SF", "F", "THIRD"] as const;
 
-const BOX_W = 150;
+const BOX_W = 124;
 const BOX_H = 48;
 const GAP_X = 38;
 const GAP_Y = 14;
@@ -50,8 +52,9 @@ export default function Bracket({
   onOpen,
   scale = 1,
   className,
+  fullName = false,
 }: Props) {
-  const { t, stage } = useI18n();
+  const { t, stage, country } = useI18n();
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastRevealedRef = useRef<number | null>(null);
   const R = scale;
@@ -204,10 +207,11 @@ export default function Bracket({
     });
   }, [cols, revealedIds, order]);
 
+  const nameOf = (name: string) => (fullName ? country(name) : name.slice(0, 3).toUpperCase());
   const codeOf = (m: RunMatch, home: boolean) => {
     const id = home ? m.home_team_id : m.away_team_id;
     const name = home ? m.home_team_name : m.away_team_name;
-    return codes.get(id) ?? name.slice(0, 3).toUpperCase();
+    return codes.get(id) ?? nameOf(name);
   };
 
   if (cols.length === 0) return null;
@@ -331,14 +335,14 @@ export default function Bracket({
                         const qHome = fa ? winnerOf(fa) : null;
                         const qAway = fb ? winnerOf(fb) : null;
                         if (!qHome && !qAway) return <div className="bk-tbd">{t("match.tbd")}</div>;
-                        const codeFromName = (name: string) => name.slice(0, 3).toUpperCase();
+                        const labelWinner = (w: { id: number; name: string }) => w.name;
                         return (
                           <div className="bk-qual">
                             <div className="bk-line">
                               {qHome ? (
                                 <>
                                   <span className="bk-flag">{flagFor(qHome.name)}</span>
-                                  <span className="bk-code">{codeFromName(qHome.name)}</span>
+                                  <span className="bk-code">{nameOf(labelWinner(qHome))}</span>
                                 </>
                               ) : (
                                 <span className="bk-tbd-min">{t("match.tbd")}</span>
@@ -348,7 +352,7 @@ export default function Bracket({
                               {qAway ? (
                                 <>
                                   <span className="bk-flag">{flagFor(qAway.name)}</span>
-                                  <span className="bk-code">{codeFromName(qAway.name)}</span>
+                                  <span className="bk-code">{nameOf(labelWinner(qAway))}</span>
                                 </>
                               ) : (
                                 <span className="bk-tbd-min">{t("match.tbd")}</span>

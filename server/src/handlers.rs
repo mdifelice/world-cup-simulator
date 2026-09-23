@@ -9,12 +9,13 @@ use rusqlite::{params, OptionalExtension};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    auth::AuthUser,
+    auth::OptionalUser,
     error::{ApiError, ApiResult},
     fixture,
     models::{
-        AddParticipants, CreateMatch, CreatePlayer, CreateTeam, CreateTournament, ImportPayload,
-        Match, Participant, Phase, Player, Team, Tournament,
+        AddParticipants, CreateMatch, CreatePlayer, CreateTeam, CreateTournament, GroupLetter,
+        ImportPayload, Match, Participant, Phase, Player, Team, Tournament, UpdateMatch,
+        UpdatePlayer, UpdateTeam, UpdateTournament,
     },
     names,
     Db,
@@ -140,7 +141,7 @@ pub async fn get_tournament(State(db): State<Db>, Path(id): Path<i64>) -> ApiRes
 }
 
 pub async fn create_tournament(
-    _user: AuthUser,
+    _user: OptionalUser,
     State(db): State<Db>,
     Json(input): Json<CreateTournament>,
 ) -> ApiResult<(StatusCode, Json<Tournament>)> {
@@ -166,7 +167,7 @@ pub async fn create_tournament(
 }
 
 pub async fn set_tournament_phases(
-    _user: AuthUser,
+    _user: OptionalUser,
     State(db): State<Db>,
     Path(id): Path<i64>,
     Json(input): Json<crate::models::CreatePhases>,
@@ -182,6 +183,69 @@ pub async fn set_tournament_phases(
     }
     conn.execute("DELETE FROM matches WHERE tournament_id = ?1", [id])?;
     Ok((StatusCode::CREATED, Json(input.phases.len())))
+}
+
+pub async fn update_tournament(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path(id): Path<i64>,
+    Json(input): Json<UpdateTournament>,
+) -> ApiResult<Json<Tournament>> {
+    let conn = db.lock().unwrap();
+    if !conn
+        .query_row("SELECT EXISTS(SELECT 1 FROM tournaments WHERE id = ?1)", [id], |r| r.get(0))
+        .optional()?
+        .unwrap_or(false)
+    {
+        return Err(ApiError::not_found("tournament"));
+    }
+    let (name, year, host, winner, start_date, end_date, shirt_numbers, logo): (
+        String,
+        i32,
+        String,
+        Option<String>,
+        Option<String>,
+        Option<String>,
+        bool,
+        Option<String>,
+    ) = conn.query_row(
+        "SELECT name, year, host, winner, start_date, end_date, shirt_numbers, logo FROM tournaments WHERE id = ?1",
+        [id],
+        |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?, r.get(5)?, r.get(6)?, r.get(7)?)),
+    )?;
+    conn.execute(
+        "UPDATE tournaments SET name = ?1, year = ?2, host = ?3, winner = ?4, start_date = ?5, end_date = ?6, shirt_numbers = ?7, logo = ?8 WHERE id = ?9",
+        params![
+            input.name.unwrap_or(name),
+            input.year.unwrap_or(year),
+            input.host.unwrap_or(host),
+            input.winner.or(winner),
+            input.start_date.or(start_date),
+            input.end_date.or(end_date),
+            input.shirt_numbers.unwrap_or(shirt_numbers),
+            input.logo.or(logo),
+            id,
+        ],
+    )?;
+    let t: Tournament = conn.query_row(
+        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo FROM tournaments WHERE id = ?1",
+        [id],
+        map_tournament,
+    )?;
+    Ok(Json(t))
+}
+
+pub async fn delete_tournament(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path(id): Path<i64>,
+) -> ApiResult<StatusCode> {
+    let conn = db.lock().unwrap();
+    let n = conn.execute("DELETE FROM tournaments WHERE id = ?1", [id])?;
+    if n == 0 {
+        return Err(ApiError::not_found("tournament"));
+    }
+    Ok(StatusCode::NO_CONTENT)
 }
 
 // ---------------------------------------------------------------------------
@@ -221,7 +285,7 @@ pub async fn list_participants(State(db): State<Db>, Path(id): Path<i64>) -> Api
 }
 
 pub async fn add_participants(
-    _user: AuthUser,
+    _user: OptionalUser,
     State(db): State<Db>,
     Path(id): Path<i64>,
     Json(input): Json<AddParticipants>,
@@ -242,6 +306,89 @@ pub async fn add_participants(
         inserted += 1;
     }
     Ok((StatusCode::CREATED, Json(inserted)))
+}
+
+/// Edit a participant's group placement (replace its single group row).
+pub async fn update_participant(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path((id, team_id)): Path<(i64, i64)>,
+    Json(input): Json<GroupLetter>,
+) -> ApiResult<(StatusCode, Json<Participant>)> {
+    let conn = db.lock().unwrap();
+    if !conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM tournament_teams WHERE tournament_id = ?1 AND team_id = ?2)",
+            params![id, team_id],
+            |r| r.get(0),
+        )?
+    {
+        return Err(ApiError::not_found("participant"));
+    }
+    conn.execute(
+        "DELETE FROM tournament_groups WHERE tournament_id = ?1 AND team_id = ?2",
+        params![id, team_id],
+    )?;
+    if let Some(g) = &input.group_letter {
+        conn.execute(
+            "INSERT OR IGNORE INTO tournament_groups (tournament_id, group_name, team_id) VALUES (?1, ?2, ?3)",
+            params![id, g, team_id],
+        )?;
+    }
+    let p: Participant = conn.query_row(
+        "SELECT t.id, t.name, t.code, t.flag, t.rating, g.group_name,
+                t.pedigree, t.home_support, t.form, t.morale
+         FROM tournament_teams tt
+         JOIN teams t ON t.id = tt.team_id
+         LEFT JOIN tournament_groups g ON g.tournament_id = tt.tournament_id AND g.team_id = t.id
+         WHERE tt.tournament_id = ?1 AND t.id = ?2",
+        params![id, team_id],
+        |r| {
+            Ok(Participant {
+                id: r.get(0)?,
+                name: r.get(1)?,
+                code: r.get(2)?,
+                flag: r.get(3)?,
+                rating: r.get(4)?,
+                group_letter: r.get(5)?,
+                pedigree: r.get(6)?,
+                home_support: r.get(7)?,
+                form: r.get(8)?,
+                morale: r.get(9)?,
+            })
+        },
+    )?;
+    Ok((StatusCode::OK, Json(p)))
+}
+
+/// Remove a team from a tournament: membership, group placement, call-ups and
+/// any fixtures the team appears in are all dropped.
+pub async fn delete_participant(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path((id, team_id)): Path<(i64, i64)>,
+) -> ApiResult<StatusCode> {
+    let conn = db.lock().unwrap();
+    let n = conn.execute(
+        "DELETE FROM tournament_teams WHERE tournament_id = ?1 AND team_id = ?2",
+        params![id, team_id],
+    )?;
+    if n == 0 {
+        return Err(ApiError::not_found("participant"));
+    }
+    conn.execute(
+        "DELETE FROM tournament_groups WHERE tournament_id = ?1 AND team_id = ?2",
+        params![id, team_id],
+    )?;
+    conn.execute(
+        "DELETE FROM player_callups WHERE tournament_id = ?1 AND team_id = ?2",
+        params![id, team_id],
+    )?;
+    conn.execute(
+        "DELETE FROM matches WHERE tournament_id = ?1 AND (home_team_id = ?2 OR away_team_id = ?2)",
+        params![id, team_id],
+    )?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 // ---------------------------------------------------------------------------
@@ -270,7 +417,7 @@ pub async fn list_matches(State(db): State<Db>, Path(id): Path<i64>) -> ApiResul
 }
 
 pub async fn create_matches(
-    _user: AuthUser,
+    _user: OptionalUser,
     State(db): State<Db>,
     Path(id): Path<i64>,
     Json(input): Json<Vec<CreateMatch>>,
@@ -286,8 +433,63 @@ pub async fn create_matches(
     Ok((StatusCode::CREATED, Json(input.len())))
 }
 
+pub async fn update_match(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path((id, match_id)): Path<(i64, i64)>,
+    Json(input): Json<UpdateMatch>,
+) -> ApiResult<(StatusCode, Json<Match>)> {
+    let conn = db.lock().unwrap();
+    let n = conn.execute(
+        "UPDATE matches SET stage = ?1, round_num = ?2, matchday = ?3, home_team_id = ?4, away_team_id = ?5, kickoff = ?6, status = 'scheduled'
+         WHERE id = ?7 AND tournament_id = ?8",
+        params![
+            input.stage,
+            input.round_num,
+            input.matchday,
+            input.home_team_id,
+            input.away_team_id,
+            input.kickoff,
+            match_id,
+            id
+        ],
+    )?;
+    if n == 0 {
+        return Err(ApiError::not_found("match"));
+    }
+    let m: Match = conn.query_row(
+        "SELECT m.id, m.tournament_id, m.stage, m.round_num, m.matchday,
+                m.home_team_id, m.away_team_id, m.kickoff,
+                m.home_score, m.away_score, m.status,
+                ht.name, at.name
+         FROM matches m
+         JOIN teams ht ON ht.id = m.home_team_id
+         JOIN teams at ON at.id = m.away_team_id
+         WHERE m.id = ?1",
+        [match_id],
+        map_match,
+    )?;
+    Ok((StatusCode::OK, Json(m)))
+}
+
+pub async fn delete_match(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path((id, match_id)): Path<(i64, i64)>,
+) -> ApiResult<StatusCode> {
+    let conn = db.lock().unwrap();
+    let n = conn.execute(
+        "DELETE FROM matches WHERE id = ?1 AND tournament_id = ?2",
+        params![match_id, id],
+    )?;
+    if n == 0 {
+        return Err(ApiError::not_found("match"));
+    }
+    Ok(StatusCode::NO_CONTENT)
+}
+
 pub async fn generate_fixture(
-    _user: AuthUser,
+    _user: OptionalUser,
     State(db): State<Db>,
     Path(id): Path<i64>,
 ) -> ApiResult<Json<usize>> {
@@ -298,7 +500,7 @@ pub async fn generate_fixture(
 
 /// One-shot import of teams + players (as produced by the scraper).
 pub async fn import_tournament(
-    _user: AuthUser,
+    _user: OptionalUser,
     State(db): State<Db>,
     Path(id): Path<i64>,
     Json(payload): Json<ImportPayload>,
@@ -352,7 +554,7 @@ pub async fn list_teams(State(db): State<Db>) -> ApiResult<Json<Vec<Team>>> {
 }
 
 pub async fn create_team(
-    _user: AuthUser,
+    _user: OptionalUser,
     State(db): State<Db>,
     Json(input): Json<CreateTeam>,
 ) -> ApiResult<(StatusCode, Json<Team>)> {
@@ -393,6 +595,84 @@ pub async fn create_team(
         map_team,
     )?;
     Ok((StatusCode::CREATED, Json(team)))
+}
+
+pub async fn update_team(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path(id): Path<i64>,
+    Json(input): Json<UpdateTeam>,
+) -> ApiResult<Json<Team>> {
+    let conn = db.lock().unwrap();
+    if !conn
+        .query_row("SELECT EXISTS(SELECT 1 FROM teams WHERE id = ?1)", [id], |r| r.get(0))
+        .optional()?
+        .unwrap_or(false)
+    {
+        return Err(ApiError::not_found("team"));
+    }
+    let (name, code, flag, rating, pedigree, home_support, form, morale): (
+        String,
+        Option<String>,
+        Option<String>,
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+    ) = conn.query_row(
+        "SELECT name, code, flag, rating, pedigree, home_support, form, morale FROM teams WHERE id = ?1",
+        [id],
+        |r| {
+            Ok((
+                r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?, r.get(4)?,
+                r.get(5)?, r.get(6)?, r.get(7)?,
+            ))
+        },
+    )?;
+    conn.execute(
+        "UPDATE teams SET name = ?1, code = ?2, flag = ?3, rating = ?4, pedigree = ?5, home_support = ?6, form = ?7, morale = ?8 WHERE id = ?9",
+        params![
+            input.name.unwrap_or(name),
+            input.code.or(code),
+            input.flag.or(flag),
+            input.rating.unwrap_or(rating),
+            input.pedigree.unwrap_or(pedigree),
+            input.home_support.unwrap_or(home_support),
+            input.form.unwrap_or(form),
+            input.morale.unwrap_or(morale),
+            id,
+        ],
+    )?;
+    let team: Team = conn.query_row(
+        "SELECT id, name, code, flag, rating, pedigree, home_support, form, morale FROM teams WHERE id = ?1",
+        [id],
+        map_team,
+    )?;
+    Ok(Json(team))
+}
+
+pub async fn delete_team(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path(id): Path<i64>,
+) -> ApiResult<StatusCode> {
+    let conn = db.lock().unwrap();
+    let in_matches: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM matches WHERE home_team_id = ?1 OR away_team_id = ?1",
+        [id],
+        |r| r.get(0),
+    )?;
+    if in_matches > 0 {
+        return Err(ApiError::Conflict(
+            "team is referenced by fixtures and cannot be deleted".into(),
+        ));
+    }
+    let n = conn.execute("DELETE FROM teams WHERE id = ?1", [id])?;
+    if n == 0 {
+        return Err(ApiError::not_found("team"));
+    }
+    Ok(StatusCode::NO_CONTENT)
 }
 
 #[derive(Debug, Deserialize)]
@@ -490,7 +770,7 @@ pub struct CreatePlayersIn {
 }
 
 pub async fn create_players(
-    _user: AuthUser,
+    _user: OptionalUser,
     State(db): State<Db>,
     Path(team_id): Path<i64>,
     Json(input): Json<CreatePlayersIn>,
@@ -502,6 +782,136 @@ pub async fn create_players(
         count += 1;
     }
     Ok((StatusCode::CREATED, Json(count)))
+}
+
+/// Update a player's record plus their call-up for `?tournament_id` (their
+/// position(s) and shirt number live on the call-up).
+pub async fn update_player(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path((team_id, player_id)): Path<(i64, i64)>,
+    Query(q): Query<PlayersQuery>,
+    Json(input): Json<UpdatePlayer>,
+) -> ApiResult<Json<Player>> {
+    let tournament_id = q.tournament_id.ok_or_else(|| {
+        ApiError::bad_request("tournament_id is required to scope the call-up")
+    })?;
+    let conn = db.lock().unwrap();
+    if !conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM players WHERE id = ?1)",
+            [player_id],
+            |r| r.get(0),
+        )
+        .optional()?
+        .unwrap_or(false)
+    {
+        return Err(ApiError::not_found("player"));
+    }
+    conn.execute(
+        "UPDATE players SET name = ?1, pace = ?2, stamina = ?3, strength = ?4, dribbling = ?5,
+                passing = ?6, shooting = ?7, tackling = ?8, vision = ?9, positioning = ?10,
+                composure = ?11, reflexes = ?12, handling = ?13, kicking = ?14, aerial = ?15,
+                decisions = ?16, aggression = ?17, concentration = ?18, leadership = ?19,
+                photo_url = ?20, dob = ?21, nationality = ?22
+         WHERE id = ?23",
+        params![
+            input.name,
+            input.pace.clamp(1, 99),
+            input.stamina.clamp(1, 99),
+            input.strength.clamp(1, 99),
+            input.dribbling.clamp(1, 99),
+            input.passing.clamp(1, 99),
+            input.shooting.clamp(1, 99),
+            input.tackling.clamp(1, 99),
+            input.vision.clamp(1, 99),
+            input.positioning.clamp(1, 99),
+            input.composure.clamp(1, 99),
+            input.reflexes.clamp(1, 99),
+            input.handling.clamp(1, 99),
+            input.kicking.clamp(1, 99),
+            input.aerial.clamp(1, 99),
+            input.decisions.clamp(1, 99),
+            input.aggression.clamp(1, 99),
+            input.concentration.clamp(1, 99),
+            input.leadership.clamp(1, 99),
+            input.photo_url,
+            input.dob,
+            input.nationality,
+            player_id,
+        ],
+    )?;
+    let mut positions: Vec<String> = input
+        .positions
+        .iter()
+        .map(|s| s.trim().to_uppercase())
+        .filter(|s| !s.is_empty())
+        .collect();
+    positions.insert(0, input.position.to_uppercase());
+    let mut dedup: Vec<String> = Vec::new();
+    for pos in positions {
+        if !dedup.contains(&pos) {
+            dedup.push(pos);
+        }
+    }
+    conn.execute(
+        "INSERT INTO player_callups (player_id, tournament_id, team_id, position, positions, shirt_number)
+         VALUES (?1,?2,?3,?4,?5,?6)
+         ON CONFLICT(player_id, tournament_id) DO UPDATE SET
+            team_id = excluded.team_id,
+            position = excluded.position,
+            positions = excluded.positions,
+            shirt_number = excluded.shirt_number",
+        params![
+            player_id,
+            tournament_id,
+            team_id,
+            input.position.to_uppercase(),
+            dedup.join(","),
+            input.shirt_number,
+        ],
+    )?;
+    let p: Player = conn.query_row(
+        "SELECT p.id, p.name, p.dob, p.nationality, c.position, c.shirt_number,
+                p.pace, p.stamina, p.strength, p.dribbling, p.passing,
+                p.shooting, p.tackling, p.vision, p.positioning, p.composure,
+                p.reflexes, p.handling, p.kicking, p.aerial,
+                p.decisions, p.aggression, p.concentration, p.leadership,
+                c.positions, p.photo_url
+         FROM players p
+         JOIN player_callups c ON c.player_id = p.id
+         WHERE c.tournament_id = ?1 AND c.team_id = ?2 AND p.id = ?3",
+        params![tournament_id, team_id, player_id],
+        map_player,
+    )?;
+    Ok(Json(p))
+}
+
+/// Remove a player from a team within a tournament; once their last call-up is
+/// gone the player record itself is deleted.
+pub async fn delete_player(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path((team_id, player_id)): Path<(i64, i64)>,
+    Query(q): Query<PlayersQuery>,
+) -> ApiResult<StatusCode> {
+    let tournament_id = q.tournament_id.ok_or_else(|| {
+        ApiError::bad_request("tournament_id is required to scope the call-up")
+    })?;
+    let conn = db.lock().unwrap();
+    let removed = conn.execute(
+        "DELETE FROM player_callups WHERE player_id = ?1 AND tournament_id = ?2 AND team_id = ?3",
+        params![player_id, tournament_id, team_id],
+    )?;
+    if removed == 0 {
+        return Err(ApiError::not_found("player"));
+    }
+    let remaining: i64 =
+        conn.query_row("SELECT COUNT(*) FROM player_callups WHERE player_id = ?1", [player_id], |r| r.get(0))?;
+    if remaining == 0 {
+        conn.execute("DELETE FROM players WHERE id = ?1", [player_id])?;
+    }
+    Ok(StatusCode::NO_CONTENT)
 }
 
 // ---------------------------------------------------------------------------

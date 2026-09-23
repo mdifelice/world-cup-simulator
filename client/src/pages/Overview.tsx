@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useI18n, flagFor } from "../i18n";
 import PlayerCard from "../components/PlayerCard";
 import FormationPanel from "../components/FormationPanel";
 import Bracket from "../components/Bracket";
+import { computeOverallStandings, finalPositionOf } from "../sim/standings";
 import type { LineupConfig, MatchBan, RunMatch, RunPayload } from "../types";
 
 interface Props {
@@ -89,6 +90,7 @@ export default function Overview({
   const { t, stage, country } = useI18n();
   const [bracketOpen, setBracketOpen] = useState(false);
   const [scorersOpen, setScorersOpen] = useState(false);
+  const [standingsOpen, setStandingsOpen] = useState(false);
   const [countryFilter, setCountryFilter] = useState("");
 
   // Scroll a row into view inside the matches list only, never the page.
@@ -133,6 +135,12 @@ export default function Overview({
   const hasKnockout = run?.matches.some((m) =>
     ["R32", "R16", "QF", "SF", "F", "THIRD"].includes(m.stage_key),
   ) ?? false;
+
+  /** Overall multi-phase standings with the final position of the focus team
+   *  (only meaningful once the team is out / the cup is decided). */
+  const overallStandings = run ? computeOverallStandings(run, revealedIds) : [];
+  const focusFinalPosition =
+    focusId != null && run ? finalPositionOf(run, revealedIds, focusId) : null;
 
   /** Standings for a group/league phase: members come from the seeded groups
    *  when available, otherwise from the phase's own fixtures (union-find). */
@@ -605,6 +613,7 @@ export default function Overview({
                     unavailable={formationUnavailable}
                     bans={formationBans}
                     onReady={onDraft}
+                    finalPosition={formationDisabled ? focusFinalPosition : null}
                   />
                 </div>
               )}
@@ -644,7 +653,21 @@ export default function Overview({
                   .flatMap((p) =>
                     p.tables.map((tb) => (
                       <div key={p.key + tb.name} className="table-card">
-                        <h2 className="table-title">{stage(tb.name)}</h2>
+                        <h2
+                          className="table-title t-click"
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setStandingsOpen(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setStandingsOpen(true);
+                            }
+                          }}
+                          title={t("cup.expand")}
+                        >
+                          {stage(tb.name)} <span className="t-expand" aria-hidden>⤢</span>
+                        </h2>
                         <table className="mini-table">
                           <thead>
                             <tr>
@@ -740,6 +763,7 @@ export default function Overview({
                 }}
                 scale={1.5}
                 className="bk-lg"
+                fullName
               />
             </div>
           </div>
@@ -861,6 +885,76 @@ export default function Overview({
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+    {standingsOpen && run && (
+        <div className="modal-backdrop" onClick={() => setStandingsOpen(false)}>
+          <div className="share-modal standings-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="share-head">
+              <div className="share-title">{t("cup.standings")}</div>
+              <button
+                className="live-x"
+                onClick={() => setStandingsOpen(false)}
+                aria-label={t("match.close")}
+                title={t("match.close")}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="standings-scroll">
+              <table className="mini-table standings-table">
+                <thead>
+                  <tr>
+                    <th></th><th className="l">{t("cup.team")}</th>
+                    <th>{t("cup.p")}</th><th>{t("cup.w")}</th><th>{t("cup.d")}</th><th>{t("cup.l")}</th>
+                    <th>{t("cup.gd")}</th><th>{t("cup.pts")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {overallStandings.map((r, i) => {
+                    const bucketLabel =
+                      r.bucketLabel === "alive"
+                        ? t("hub.alive")
+                        : r.bucketLabel === "champ"
+                          ? t("share.pos.1")
+                          : r.bucketLabel === "runnerup"
+                            ? t("share.pos.2")
+                            : r.bucketLabel === "third"
+                              ? t("share.pos.3")
+                              : r.bucketLabel === "fourth"
+                                ? t("share.pos.4")
+                                : r.reachedName
+                                  ? stage(r.reachedName)
+                                  : t("stage.group");
+                    const newBucket = i === 0 || overallStandings[i - 1].bucket !== r.bucket;
+                    return (
+                      <Fragment key={r.id}>
+                        {newBucket && (
+                          <tr className="standings-bucket">
+                            <td colSpan={8}>{bucketLabel}</td>
+                          </tr>
+                        )}
+                        <tr className={focusId === r.id ? "focus-row" : ""}>
+                          <td className="num">{i + 1}</td>
+                          <td className="l team-cell">
+                            <span className="code-cell">
+                              {flagFor(r.name)} {codeOf(runCodes, r.id, r.name)}
+                            </span>
+                          </td>
+                          <td className="num">{r.p}</td>
+                          <td className="num">{r.w}</td>
+                          <td className="num">{r.d}</td>
+                          <td className="num">{r.l}</td>
+                          <td className="num">{r.gd > 0 ? `+${r.gd}` : r.gd}</td>
+                          <td className="num strong">{r.pts}</td>
+                        </tr>
+                      </Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

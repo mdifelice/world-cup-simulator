@@ -1,23 +1,12 @@
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, useCallback, forwardRef } from "react";
 import { flagFor, useI18n } from "../i18n";
-import type { Goal, LiveEvent, PenKick, RedCard, RunMatch } from "../types";
+import type { Goal, LiveEvent, LiveMatchControls, PenKick, RedCard, RunMatch } from "../types";
 
 interface Props {
   match: RunMatch;
   focusTeamId: number | null;
   onReveal: (m: RunMatch) => void;
   onClose: () => void;
-}
-
-interface LiveMatchControls {
-  pause: () => void;
-  play: () => void;
-  togglePause: () => void;
-  stepForward: () => void;
-  stepBackward: () => void;
-  isPaused: boolean;
-  currentMinute: number;
-  totalLength: number;
 }
 
 const UP = "#2da562";
@@ -28,17 +17,6 @@ const BASE_LIVE_MS = 150;
 const PEN_MS = 900;
 // Base pause duration at boundaries (HT, FT, ET) - adjusted by speed
 const BASE_PAUSE_MS = 1000;
-
-interface LiveMatchControls {
-  pause: () => void;
-  play: () => void;
-  togglePause: () => void;
-  stepForward: () => void;
-  stepBackward: () => void;
-  isPaused: boolean;
-  currentMinute: number;
-  totalLength: number;
-}
 
 export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   match: m,
@@ -84,6 +62,14 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const [min, setMin] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
+  // The tick interval reads the pause flag from a ref so toggling the pause
+  // state never re-runs the interval effect (which used to reset the clock and
+  // cancel the pause — pressing Space "restarted" the match).
+  const isPausedRef = useRef(false);
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+
   const pauseUntilRef = useRef(0);
   const halfPausedRef = useRef(false);
 
@@ -104,14 +90,20 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
     totalLength,
   }), [min, totalLength, isPaused]);
 
+  // Reset the timeline only when a new match mounts — never when the pause
+  // state flips.
   useEffect(() => {
     setMin(0);
     pauseUntilRef.current = 0;
     halfPausedRef.current = false;
     setIsPaused(false);
+    isPausedRef.current = false;
+  }, [m.id]);
+
+  useEffect(() => {
     const iv = setInterval(() => {
       setMin((cur) => {
-        if (isPaused) return cur;
+        if (isPausedRef.current) return cur;
         const now = Date.now();
         if (now < pauseUntilRef.current) return cur;
         // Pause at each boundary (HT, FT, ET halves) for a beat
@@ -130,7 +122,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
       });
     }, LIVE_MS);
     return () => clearInterval(iv);
-  }, [m.id, totalLength, stopBoundaryHT, stopBoundaryFT, stopBoundaryET1, stopBoundaryET2, isPaused, LIVE_MS, PAUSE_MS]);
+  }, [m.id, totalLength, stopBoundaryHT, stopBoundaryFT, stopBoundaryET1, stopBoundaryET2, LIVE_MS, PAUSE_MS]);
 
   const done = min >= totalLength;
 

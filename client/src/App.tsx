@@ -18,6 +18,7 @@ import Roster from "./pages/Roster";
 import Overview from "./pages/Overview";
 import History from "./pages/History";
 import Lab from "./pages/Lab";
+import Editor from "./pages/Editor";
 import { LiveMatch } from "./components/LiveMatch";
 import MatchDetail from "./components/MatchDetail";
 import ShareModal from "./components/ShareModal";
@@ -28,7 +29,8 @@ export type Step =
   | "roster"
   | "overview"
   | "history"
-  | "lab";
+  | "lab"
+  | "editor";
 
 interface Flow {
   tournament: Tournament | null;
@@ -60,6 +62,7 @@ const oracleCache = new Map<number, Oracle>();
 
 function getInitialStep(): Step {
   if (typeof window !== "undefined") {
+    if (window.location.pathname === "/editor") return "editor";
     if (window.location.pathname === "/lab") return "lab";
     const params = new URLSearchParams(window.location.search);
     if (params.get("lab") === "1") return "lab";
@@ -69,6 +72,15 @@ function getInitialStep(): Step {
 
 export default function App() {
   const [step, setStep] = useState<Step>(getInitialStep);
+
+  /** In-app navigation: mirror the step in the URL so the back button and
+   *  direct links (/lab, /editor) still land on the right page. */
+  const goStep = (s: Step) => {
+    const path =
+      s === "tournament" ? "/" : s === "lab" ? "/lab" : s === "editor" ? "/editor" : "/";
+    if (window.location.pathname !== path) window.history.pushState(null, "", path);
+    setStep(s);
+  };
   const [flow, setFlow] = useState<Flow>(emptyFlow);
   const [configs, setConfigs] = useState<Record<string, LineupConfig>>({});
   const [seed, setSeed] = useState<number | null>(null);
@@ -483,6 +495,13 @@ export default function App() {
           </div>
         </div>
         <div className="top-actions">
+          <button
+            className="btn"
+            onClick={() => goStep(step === "editor" ? "tournament" : "editor")}
+            title={t("editor.title")}
+          >
+            {step === "editor" ? t("editor.back") : t("editor.link")}
+          </button>
           <select
             className="lang"
             value={locale}
@@ -575,6 +594,14 @@ export default function App() {
         )}
         {step === "lab" && (
           <Lab />
+        )}
+        {step === "editor" && (
+          <Editor
+            onHome={() => {
+              reset();
+              goStep("tournament");
+            }}
+          />
         )}
       </main>
 

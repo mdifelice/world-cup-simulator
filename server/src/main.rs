@@ -12,7 +12,7 @@ use std::sync::{Arc, Mutex};
 use axum::{
     body::Body,
     extract::Request,
-    routing::{get, post},
+    routing::{get, post, put},
     Router,
 };
 use tower::service_fn;
@@ -54,7 +54,12 @@ async fn main() {
         .route("/api/auth/callback", get(google_callback))
         .route("/api/auth/me", get(me))
         .route("/api/tournaments", get(handlers::list_tournaments).post(handlers::create_tournament))
-        .route("/api/tournaments/{id}", get(handlers::get_tournament))
+        .route(
+            "/api/tournaments/{id}",
+            get(handlers::get_tournament)
+                .put(handlers::update_tournament)
+                .delete(handlers::delete_tournament),
+        )
         .route(
             "/api/tournaments/{id}/phases",
             post(handlers::set_tournament_phases),
@@ -64,8 +69,16 @@ async fn main() {
             get(handlers::list_participants).post(handlers::add_participants),
         )
         .route(
+            "/api/tournaments/{id}/participants/{team_id}",
+            put(handlers::update_participant).delete(handlers::delete_participant),
+        )
+        .route(
             "/api/tournaments/{id}/matches",
             get(handlers::list_matches).post(handlers::create_matches),
+        )
+        .route(
+            "/api/tournaments/{id}/matches/{match_id}",
+            put(handlers::update_match).delete(handlers::delete_match),
         )
         .route(
             "/api/tournaments/{id}/fixture/generate",
@@ -81,8 +94,16 @@ async fn main() {
         )
         .route("/api/teams", get(handlers::list_teams).post(handlers::create_team))
         .route(
+            "/api/teams/{id}",
+            put(handlers::update_team).delete(handlers::delete_team),
+        )
+        .route(
             "/api/teams/{id}/players",
             get(handlers::list_players).post(handlers::create_players),
+        )
+        .route(
+            "/api/teams/{id}/players/{player_id}",
+            put(handlers::update_player).delete(handlers::delete_player),
         )
         .with_state(state)
         .layer(cors);

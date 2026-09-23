@@ -45,6 +45,27 @@ fn default_shirt_numbers() -> bool {
     true
 }
 
+/// Partial update for a tournament: absent fields keep their current value.
+#[derive(Debug, Deserialize)]
+pub struct UpdateTournament {
+    #[serde(default)]
+    pub name: Option<String>,
+    #[serde(default)]
+    pub year: Option<i32>,
+    #[serde(default)]
+    pub host: Option<String>,
+    #[serde(default)]
+    pub winner: Option<String>,
+    #[serde(default)]
+    pub start_date: Option<String>,
+    #[serde(default)]
+    pub end_date: Option<String>,
+    #[serde(default)]
+    pub shirt_numbers: Option<bool>,
+    #[serde(default)]
+    pub logo: Option<String>,
+}
+
 /// A phase of a tournament (e.g. group stage, Round of 16, final).
 ///
 /// `phase_type` is `GROUP` (round-robin; `group_count` groups) or
@@ -163,6 +184,103 @@ pub struct CreateTeam {
 
 fn default_rating() -> i32 {
     70
+}
+
+/// Partial update for a team: absent fields keep their current value
+/// (`winner`-style clears are never needed for teams).
+#[derive(Debug, Deserialize)]
+pub struct UpdateTeam {
+    #[serde(default)]
+    pub name: Option<String>,
+    #[serde(default)]
+    pub code: Option<String>,
+    #[serde(default)]
+    pub flag: Option<String>,
+    #[serde(default)]
+    pub rating: Option<i32>,
+    #[serde(default)]
+    pub pedigree: Option<i32>,
+    #[serde(default)]
+    pub home_support: Option<i32>,
+    #[serde(default)]
+    pub form: Option<i32>,
+    #[serde(default)]
+    pub morale: Option<i32>,
+}
+
+/// Full replacement of a player (editor always sends every attribute).
+#[derive(Debug, Deserialize)]
+pub struct UpdatePlayer {
+    pub name: String,
+    #[serde(default = "default_position")]
+    pub position: String,
+    #[serde(default)]
+    pub positions: Vec<String>,
+    #[serde(default)]
+    pub photo_url: Option<String>,
+    #[serde(default)]
+    pub shirt_number: Option<i32>,
+    #[serde(default)]
+    pub dob: Option<String>,
+    #[serde(default)]
+    pub nationality: Option<String>,
+    #[serde(default = "default_attr")]
+    pub pace: i32,
+    #[serde(default = "default_attr")]
+    pub stamina: i32,
+    #[serde(default = "default_attr")]
+    pub strength: i32,
+    #[serde(default = "default_attr")]
+    pub dribbling: i32,
+    #[serde(default = "default_attr")]
+    pub passing: i32,
+    #[serde(default = "default_attr")]
+    pub shooting: i32,
+    #[serde(default = "default_attr")]
+    pub tackling: i32,
+    #[serde(default = "default_attr")]
+    pub vision: i32,
+    #[serde(default = "default_attr")]
+    pub positioning: i32,
+    #[serde(default = "default_attr")]
+    pub composure: i32,
+    #[serde(default = "default_attr")]
+    pub reflexes: i32,
+    #[serde(default = "default_attr")]
+    pub handling: i32,
+    #[serde(default = "default_attr")]
+    pub kicking: i32,
+    #[serde(default = "default_attr")]
+    pub aerial: i32,
+    #[serde(default = "default_attr")]
+    pub decisions: i32,
+    #[serde(default = "default_attr")]
+    pub aggression: i32,
+    #[serde(default = "default_attr")]
+    pub concentration: i32,
+    #[serde(default = "default_attr")]
+    pub leadership: i32,
+}
+
+/// Replacement for a participant's group placement.
+#[derive(Debug, Deserialize)]
+pub struct GroupLetter {
+    #[serde(default)]
+    pub group_letter: Option<String>,
+}
+
+/// Full replacement of a match row (staging before reveal).
+#[derive(Debug, Deserialize)]
+pub struct UpdateMatch {
+    pub stage: String,
+    #[serde(default)]
+    pub round_num: i32,
+    #[serde(default)]
+    pub matchday: Option<i32>,
+    pub home_team_id: i64,
+    pub away_team_id: i64,
+    #[serde(default)]
+    pub kickoff: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

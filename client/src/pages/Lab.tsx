@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useI18n, flagFor } from "../i18n";
 import { LiveMatch } from "../components/LiveMatch";
+import MatchDetail from "../components/MatchDetail";
 import type { Participant, Player, RunMatch, Strategy, Tournament, LiveMatchControls } from "../types";
 import { STRATEGIES } from "../types";
 import type { LabTeam } from "../sim/run";
@@ -287,12 +288,6 @@ export default function Lab() {
     }, 30);
   };
 
-  const openLive = () => {
-    if (!match) return;
-    setShowSummary(null);
-    setShowLiveMatch(true);
-  };
-
   const stats = useMemo(() => statsFrom(allScores), [allScores]);
 
   return (
@@ -523,72 +518,7 @@ export default function Lab() {
       </div>
 
       {showSummary && (
-        <div className="lab-backdrop" onClick={() => setShowSummary(null)}>
-          <div className="lab-summary" onClick={(e) => e.stopPropagation()}>
-            <header>
-              <h3>{t("lab.summary")}</h3>
-              <button className="btn secondary" onClick={() => setShowSummary(null)}>✕</button>
-            </header>
-            <div className="lab-summary-head">
-              <div className="team-info">
-                <span className="flag">{flagFor(showSummary.home_team_name)}</span>
-                <span className="name">{showSummary.home_team_name}</span>
-                <span className="xg">{showSummary.home_score}</span>
-              </div>
-              <div className="vs">–</div>
-              <div className="team-info">
-                <span className="flag">{flagFor(showSummary.away_team_name)}</span>
-                <span className="name">{showSummary.away_team_name}</span>
-                <span className="xg">{showSummary.away_score}</span>
-              </div>
-            </div>
-            <p className="lab-summary-label">{showSummary.result_label}</p>
-            {showSummary.penalties && (
-              <p className="lab-summary-pens">{t("match.pensScore", { home: showSummary.penalties.home_score, away: showSummary.penalties.away_score })}</p>
-            )}
-            {showSummary.goals.length > 0 && (
-              <ul className="lab-summary-list">
-                {showSummary.goals.map((g, i) => (
-                  <li key={i}>
-                    <span className="lab-summary-min">{g.minute}{g.extra_time ? "' ET" : "'"}</span>
-                    <span>{flagFor(g.team_id === showSummary.home_team_id ? showSummary.home_team_name : showSummary.away_team_name)} {showSummary.home_team_id === g.team_id ? showSummary.home_team_name : showSummary.away_team_name}</span>
-                    <span className="lab-summary-player">{g.scorer}{g.penalty ? <span className="pen-badge">{t("match.penShort")}</span> : null}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {(showSummary.reds?.length ?? 0) > 0 && (
-              <div className="lab-summary-section">
-                <h4>{t("lab.redCards")}</h4>
-                <ul className="lab-summary-list">
-                  {showSummary.reds!.map((r, i) => (
-                    <li key={i}>
-                      <span className="lab-summary-min">{r.minute}'</span>
-                      <span>🟥 {r.player}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {(showSummary.events?.length ?? 0) > 0 && (
-              <details className="lab-summary-section">
-                <summary>{t("lab.events")}</summary>
-                <ul className="lab-summary-list">
-                  {showSummary.events!.map((e, i) => (
-                    <li key={i}>
-                      <span className="lab-summary-min">{e.minute}'</span>
-                      <span>[{e.kind}] {e.team_id === showSummary.home_team_id ? showSummary.home_team_name : showSummary.away_team_name}{e.out_player ? ` · ${e.out_player}${e.in_player ? ` → ${e.in_player}` : ""}` : e.detail ? ` · ${e.detail}` : ""}</span>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
-            <div className="lab-summary-actions">
-              <button className="btn primary" onClick={openLive}>{t("lab.playLive")}</button>
-              <button className="btn secondary" onClick={() => setShowSummary(null)}>{t("lab.closeSummary")}</button>
-            </div>
-          </div>
-        </div>
+        <MatchDetail match={showSummary} onClose={() => setShowSummary(null)} />
       )}
     </div>
   );

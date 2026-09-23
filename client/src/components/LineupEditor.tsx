@@ -127,15 +127,69 @@ export default function LineupEditor({
     return out;
   });
 
-  // Changing formation/strategy reshapes the XI, so drop all picks (but not on
-  // first mount, which would wipe the `initial` lineup).
+  // Changing formation/strategy reshapes the XI. Instead of dropping every pick
+  // we keep the current players and re-place them: first onto the exact same
+  // slot when it still exists (and is free), otherwise onto their best
+  // remaining slot. (Skipped on first mount, which would wipe the `initial`
+  // lineup.)
   const firstRender = useRef(true);
+  const prevSlotsRef = useRef<string[]>(slots);
+  const squadRef = useRef(squad);
+  const blockedRef = useRef(blocked);
+  useEffect(() => {
+    squadRef.current = squad;
+  });
+  useEffect(() => {
+    blockedRef.current = blocked;
+  });
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
       return;
     }
-    setAssignments(new Array(slotsFor(formation, strategy).length).fill(null));
+    const oldSlots = prevSlotsRef.current;
+    const newSlots = slotsFor(formation, strategy);
+    prevSlotsRef.current = newSlots;
+    const s = squadRef.current;
+    const bl = blockedRef.current;
+    setAssignments((cur) => {
+      const next: (number | null)[] = new Array(newSlots.length).fill(null);
+      const picked: { pid: number; slot: string }[] = [];
+      const seen = new Set<number>();
+      for (let i = 0; i < cur.length; i++) {
+        const pid = cur[i];
+        if (pid == null || bl.has(pid) || seen.has(pid)) continue;
+        seen.add(pid);
+        picked.push({ pid, slot: oldSlots[i] ?? "" });
+      }
+      const placed = new Set<number>();
+      for (const { pid, slot } of picked) {
+        const idx = newSlots.findIndex((k, j) => k === slot && next[j] == null);
+        if (idx >= 0) {
+          next[idx] = pid;
+          placed.add(pid);
+        }
+      }
+      for (const { pid } of picked) {
+        if (placed.has(pid)) continue;
+        const player = s.find((p) => p.id === pid);
+        if (!player) continue;
+        const positions = playerPositions(player);
+        const rating = player.rating ?? player.overall;
+        let bestIdx = -1;
+        let bestScore = -Infinity;
+        for (let j = 0; j < newSlots.length; j++) {
+          if (next[j] != null) continue;
+          const score = bestEffectiveIn(positions, rating, newSlots[j]);
+          if (score > bestScore) {
+            bestScore = score;
+            bestIdx = j;
+          }
+        }
+        if (bestIdx >= 0) next[bestIdx] = pid;
+      }
+      return next;
+    });
   }, [formation, strategy]);
 
   const idsIn = new Set(assignments.filter((p): p is number => p != null));
@@ -299,7 +353,7 @@ export default function LineupEditor({
               title={t("lineup.auto")}
               disabled={filled || disabled}
             >
-              ⚙ {t("lineup.auto")}
+              {t("lineup.auto")}
             </button>
           </div>
 
@@ -406,6 +460,7 @@ export default function LineupEditor({
               </button>
             );
           })}
+          {disabled && <div className="pitch-veil" aria-hidden />}
           </div>
         </div>
 
