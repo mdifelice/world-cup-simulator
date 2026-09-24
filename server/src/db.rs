@@ -264,6 +264,9 @@ fn schema(conn: &Connection) -> rusqlite::Result<()> {
         CREATE TABLE IF NOT EXISTS tournament_teams (
             tournament_id INTEGER NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,
             team_id INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+            /* Edition-scoped strength. NULL = fall back to the team's global
+               rating, so a team can rated differently per tournament. */
+            rating INTEGER,
             PRIMARY KEY (tournament_id, team_id)
         );
 
@@ -372,6 +375,9 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
     }
     if !has("player_callups", "positions")? {
         conn.execute("ALTER TABLE player_callups ADD COLUMN positions TEXT", [])?;
+    }
+    if !has("tournament_teams", "rating")? {
+        conn.execute("ALTER TABLE tournament_teams ADD COLUMN rating INTEGER", [])?;
     }
     // Historical editions didn't (regularly) use squad numbers.
     conn.execute(
@@ -617,8 +623,8 @@ fn seed_edition(conn: &Connection, year: i32) -> rusqlite::Result<()> {
         by_code.insert(t.code.clone(), tid);
         rating_by_code.insert(t.code.clone(), t.rating);
         conn.execute(
-            "INSERT OR IGNORE INTO tournament_teams (tournament_id, team_id) VALUES (?1, ?2)",
-            rusqlite::params![tournament_id, tid],
+            "INSERT OR IGNORE INTO tournament_teams (tournament_id, team_id, rating) VALUES (?1, ?2, ?3)",
+            rusqlite::params![tournament_id, tid, t.rating],
         )?;
         if let Some(group) = t.group.as_deref().filter(|g| !g.is_empty()) {
             conn.execute(

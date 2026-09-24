@@ -252,8 +252,8 @@ pub async fn fork_tournament(
         params![new_id, id],
     )?;
     let _ = conn.execute(
-        "INSERT INTO tournament_teams (tournament_id, team_id)
-         SELECT ?1, team_id FROM tournament_teams WHERE tournament_id = ?2",
+        "INSERT INTO tournament_teams (tournament_id, team_id, rating)
+         SELECT ?1, team_id, rating FROM tournament_teams WHERE tournament_id = ?2",
         params![new_id, id],
     )?;
     let _ = conn.execute(
@@ -384,7 +384,7 @@ pub async fn delete_tournament(
 pub async fn list_participants(State(db): State<Db>, Path(id): Path<i64>) -> ApiResult<Json<Vec<Participant>>> {
     let conn = db.lock().unwrap();
     let mut stmt = conn.prepare(
-        "SELECT t.id, t.name, t.code, t.flag, t.rating, g.group_name,
+        "SELECT t.id, t.name, t.code, t.flag, COALESCE(tt.rating, t.rating), g.group_name,
                 t.pedigree, t.home_support, t.form, t.morale
          FROM tournament_teams tt
          JOIN teams t ON t.id = tt.team_id
@@ -465,7 +465,7 @@ pub async fn update_participant(
         )?;
     }
     let p: Participant = conn.query_row(
-        "SELECT t.id, t.name, t.code, t.flag, t.rating, g.group_name,
+        "SELECT t.id, t.name, t.code, t.flag, COALESCE(tt.rating, t.rating), g.group_name,
                 t.pedigree, t.home_support, t.form, t.morale
          FROM tournament_teams tt
          JOIN teams t ON t.id = tt.team_id
@@ -1130,11 +1130,11 @@ pub async fn tournament_oracle(State(db): State<Db>, Path(id): Path<i64>) -> Api
     let phases = load_phases(&conn, id)?;
 
     let mut pstmt = conn.prepare(
-        "SELECT t.id, t.name, t.code, t.rating, t.pedigree, t.home_support, t.form, t.morale
+        "SELECT t.id, t.name, t.code, COALESCE(tt.rating, t.rating), t.pedigree, t.home_support, t.form, t.morale
          FROM tournament_teams tt
          JOIN teams t ON t.id = tt.team_id
          WHERE tt.tournament_id = ?1
-         ORDER BY t.rating DESC",
+         ORDER BY COALESCE(tt.rating, t.rating) DESC",
     )?;
     let participants = pstmt
         .query_map([id], |r| {

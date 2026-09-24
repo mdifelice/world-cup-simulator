@@ -332,6 +332,15 @@ function nextPairings(winners: number[]): Array<[number, number]> {
   return out;
 }
 
+/** Real 2022 knockout dates by phase (Qatar 2022). */
+const KO_DATES_2022: Record<string, string[]> = {
+  R16: ["2022-12-03", "2022-12-04", "2022-12-05", "2022-12-06"],
+  QF: ["2022-12-09", "2022-12-10"],
+  SF: ["2022-12-13", "2022-12-14"],
+  THIRD: ["2022-12-17"],
+  F: ["2022-12-18"],
+};
+
 /** Real 2026 knockout dates by phase. Matches are spread inside each round's
  *  genuine date window (the group stage already carries real kickoffs from the
  *  seed; generated knockout pairings get their round's calendar here). */
@@ -345,10 +354,9 @@ const KO_DATES_2026: Record<string, string[]> = {
 };
 
 /** Deterministic date for knockout match i (0-based) of n in a phase, or null
- *  when the edition has no real knockout calendar (only 2026 does). */
+ *  when the edition has no real knockout calendar (2022 and 2026 do). */
 function koDate(year: number, key: string, i: number, n: number): string | null {
-  if (year !== 2026) return null;
-  const days = KO_DATES_2026[key];
+  const days = year === 2022 ? KO_DATES_2022[key] : year === 2026 ? KO_DATES_2026[key] : undefined;
   if (!days || days.length === 0 || n <= 0) return null;
   return days[Math.min(Math.floor((i * days.length) / n), days.length - 1)];
 }
@@ -1298,7 +1306,10 @@ class Engine {
     const day = this.day;
 
     const pair = home < away ? `${home}|${away}` : `${away}|${home}`;
-    const date = koDateOverride ?? this.kickoffs.get(pair) ?? null;
+    // Knockout matches get their date only from the phase calendar; the group
+    // kickoffs map must never leak a coincidental same-pair group date into a
+    // knockout tie (2022 R16 can re-pair teams that also met in the group).
+    const date = koDateOverride ?? (!knockout ? (this.kickoffs.get(pair) ?? null) : null);
 
     const rm: RunMatch = {
       id: matchId,

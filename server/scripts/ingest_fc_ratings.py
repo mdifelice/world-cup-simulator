@@ -10,7 +10,16 @@ decisions, aggression, concentration, leadership).
 
 Players absent from the dataset keep whatever attrs were already set. Run this
 against a freshly regenerated seed (scrape_wc2026.py first), and the server's
-deterministic nation-rating derivation covers the rest. Matches use
+deterministic nation-rating derivation covers the rest.
+
+Granular positions: every squad member also gets a distinct role. Players the
+dataset matches take their EA primary position (ST, LW, RB, ...); players it
+cannot match keep a deterministic role inside their declared family (Wikipedia
+squads only carry G/D/M/F, which is why the old 2022 seed collapsed to a bland
+GK/CB/CM/ST mix), drawn from an FNV-1a hash of "CODE|name" — the same recipe
+the server's era-role fallback uses, so rebuilds reproduce identical cards.
+
+Matches use
 (normalized NAME + country-to-team) with a GK/non-GK sanity check, so a
 namesake on the wrong team never leaks in. If that fails and the seed name is
 multi-word, a single-token surname row (e.g. FC26 "Oyarzabal" vs seed
@@ -31,9 +40,13 @@ Attribute mapping (EA column -> our attr):
     dribbling   Dribbling                   positioning Positioning
     passing     (Short Passing*2 + Long Passing + Crossing) / 4
     shooting    (Finishing*2 + Shot Power + Long Shots) / 4
-    composure   Composure                   reflexes  GK Reflexes (GK) | Reactions (field)
+    composure   GK (Reflexes + Positioning)/2 | Composure (field)
+    reflexes  GK Reflexes (GK) | Reactions (field)
     handling    GK Handling (GK) | Reactions-based (field)
     kicking     GK Kicking  (GK) | Shot Power       (field)
+    positioning GK Positioning (GK) | Positioning (field)
+    aerial      GK Diving (GK) | (Heading Accuracy + Jumping)/2 (field)
+    decisions   GK Positioning (GK) | Reactions (field)
     aerial      (Heading Accuracy + Jumping) / 2
     decisions   Reactions                   aggression Aggression
     concentration Interceptions             leadership Overall (no captain stat in EA)
@@ -85,6 +98,8 @@ COLS = {
     "gkreflexes": ("gkreflexes", "reflexes"),
     "gkhandling": ("gkhandling", "handling"),
     "gkkicking": ("gkkicking", "kicking"),
+    "gkpositioning": ("gkpositioning", "gkpos"),
+    "gkdiving": ("gkdiving", "diving"),
 }
 
 # dataset country spellings that differ from our seed team names
@@ -112,6 +127,44 @@ NICKNAMES = {
     "koke": "jorge", "gabi": "gabriel", "papu": "gonzalo", "cucho": "juan",
     "dibu": "emiliano", "gio": "giovanni", "sergi": "sergio", "taty": "julian",
 }
+
+# EA FC Position column -> our granular codes. Unknown values (e.g. legacy
+# datasets that only carry "G/D/M/F") fall through to the family role-bag.
+POS_MAP = {
+    "GK": "GK",
+    "CB": "CB", "LCB": "CB", "RCB": "CB",
+    "LB": "LB", "LWB": "LB",
+    "RB": "RB", "RWB": "RB",
+    "CDM": "CDM", "LDM": "CDM", "RDM": "CDM",
+    "CM": "CM", "LCM": "CM", "RCM": "CM",
+    "CAM": "CAM", "LAM": "CAM", "RAM": "CAM",
+    "LM": "LM",
+    "RM": "RM",
+    "LW": "LW", "LF": "LW",
+    "RW": "RW", "RF": "RW",
+    "ST": "ST", "LS": "ST", "RS": "ST",
+    "CF": "CF",
+}
+
+# Collapsed seed form (scraper POS_MAP output) -> family bucket.
+FAMILY_OF = {"GK": "GK", "CB": "DF", "CM": "MF", "ST": "FW"}
+
+# Deterministic role-bag per family for players the dataset cannot match.
+# Mirrors the server's era-role fallback arrays (db.rs era_positions).
+ROLE_BAGS = {
+    "GK": ["GK"],
+    "DF": ["CB", "CB", "RB", "LB"],
+    "MF": ["CM", "CM", "CDM", "CAM"],
+    "FW": ["ST", "ST", "CF", "LW", "RW"],
+}
+
+
+def fnv1a64(s: str) -> int:
+    h = 0xCBF29CE484222325
+    for b in s.encode("utf-8"):
+        h ^= b
+        h = (h * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
+    return h
 
 
 def toks(s: str) -> list[str]:
@@ -186,13 +239,28 @@ def attrs_for_row(row: dict, cols: dict, is_gk: bool) -> list[int]:
     reactions = val(row, cols.get("reactions"))
 
     if is_gk:
+        # Keepers: source every GK-facing slot from the GK-specific columns.
+        # The generic field stats (positioning, interceptions, composure...) are
+        # single digits on keeper cards and would crush their composite.
         reflexes = val(row, cols.get("gkreflexes"))
         handling = val(row, cols.get("gkhandling"))
         kicking = val(row, cols.get("gkkicking"))
+        gk_pos = val(row, cols.get("gkpositioning"))
+        positioning = gk_pos
+        composure = (reflexes + gk_pos) / 2.0
+        decisions = gk_pos
+        concentration = gk_pos
+        aerial = val(row, cols.get("gkdiving")) if cols.get("gkdiving") \
+            else (val(row, cols.get("heading")) + val(row, cols.get("jumping"))) / 2.0
     else:
         reflexes = reactions
         handling = reactions * 0.35 + 18.0
         kicking = shot_pow
+        positioning = val(row, cols.get("positioning"))
+        composure = val(row, cols.get("composure"))
+        decisions = reactions
+        concentration = val(row, cols.get("interceptions"))
+        aerial = (val(row, cols.get("heading")) + val(row, cols.get("jumping"))) / 2.0
 
     values = {
         "pace": clamp(pace),
@@ -205,15 +273,15 @@ def attrs_for_row(row: dict, cols: dict, is_gk: bool) -> list[int]:
                            + val(row, cols.get("longshots"))) / 4.0),
         "tackling": clamp(val(row, cols.get("tackle"))),
         "vision": clamp(val(row, cols.get("vision"))),
-        "positioning": clamp(val(row, cols.get("positioning"))),
-        "composure": clamp(val(row, cols.get("composure"))),
+        "positioning": clamp(positioning),
+        "composure": clamp(composure),
         "reflexes": clamp(reflexes),
         "handling": clamp(handling),
         "kicking": clamp(kicking),
-        "aerial": clamp((val(row, cols.get("heading")) + val(row, cols.get("jumping"))) / 2.0),
-        "decisions": clamp(reactions),
+        "aerial": clamp(aerial),
+        "decisions": clamp(decisions),
         "aggression": clamp(val(row, cols.get("aggression"))),
-        "concentration": clamp(val(row, cols.get("interceptions"))),
+        "concentration": clamp(concentration),
         "leadership": clamp(val(row, cols.get("overall"))),
     }
     return [values[k] for k in ATTR_ORDER]
@@ -313,7 +381,22 @@ def main() -> int:
                 unmatched.append((code, pl["name"], pl["positions"][0]))
                 continue
             pl["attrs"] = attrs_for_row(hit, cols, seed_gk)
+            if cols.get("position"):
+                pl["_ea_pos"] = (hit.get(cols["position"]) or "").strip()
             matched += 1
+
+    # Granular positions: matched players take their EA primary; the rest get a
+    # deterministic role inside their declared family (matching the server's
+    # era-role fallback recipe, so rebuilds reproduce the same cards).
+    for code, roster in seed["squads"].items():
+        for pl in roster:
+            family = FAMILY_OF.get(pl["positions"][0], "MF")
+            ea = pl.pop("_ea_pos", None)
+            primary = POS_MAP.get((ea or "").upper()) if ea else None
+            if primary is None:
+                bag = ROLE_BAGS[family]
+                primary = bag[fnv1a64(f"{code}|{pl['name']}") % len(bag)]
+            pl["positions"] = [primary]
 
     with open(seed_path, "w", encoding="utf-8") as f:
         json.dump(seed, f, ensure_ascii=False, indent=1)
