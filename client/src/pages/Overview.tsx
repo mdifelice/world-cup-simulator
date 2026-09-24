@@ -759,7 +759,7 @@ export default function Overview({
 
       {bracketOpen && run && hasKnockout && (
         <div className="modal-backdrop" onClick={() => setBracketOpen(false)}>
-          <div className="bracket-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="share-modal bracket-modal" onClick={(e) => e.stopPropagation()}>
             <div className="share-head">
               <div className="share-title">{t("cup.bracket")}</div>
               <button

@@ -34,6 +34,10 @@ export interface ShapeInputs {
   redMinute: number | null;
   form: number;
   morale: number;
+  /** Team strength rating (0–100). Anchors a small per-player quality bonus so
+   *  comfortably stronger teams bend duels their way without the raw squad
+   *  spread dictating every contest. */
+  rating: number;
 }
 
 export interface PlayShape {
@@ -82,6 +86,9 @@ const shapeCoeffs = (s: Strategy) => {
 const avg = (xs: PlayerRow[]): number =>
   xs.length ? xs.reduce((s, p) => s + p.overall, 0) / xs.length : 60;
 
+/** Rating bonus per point of team rating above the 75 anchor. */
+const RATING_BIAS = 0.45;
+
 /** Build the play shape of a team from its XI and tactical choices. */
 export function shapeOf(inp: ShapeInputs): PlayShape {
   const df: PlayerRow[] = [];
@@ -91,7 +98,11 @@ export function shapeOf(inp: ShapeInputs): PlayShape {
   for (const p of inp.xi) {
     const copy: PlayerRow = {
       ...p,
-      overall: clampN(p.overall + (inp.form - 0.5) * 4 + (inp.morale - 0.5) * 4, 30, 99),
+      overall: clampN(
+        p.overall + (inp.form - 0.5) * 4 + (inp.morale - 0.5) * 4 + (inp.rating - 75) * RATING_BIAS,
+        30,
+        99,
+      ),
     };
     const fam = familyOf(p.position);
     if (fam === "GK") gk = copy;

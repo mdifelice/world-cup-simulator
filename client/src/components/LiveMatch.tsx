@@ -254,7 +254,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const midY = 52;
   // Max bar half-height. Kept below the incident lanes (topLane 14 / botLane 90)
   // so even full bars never brush the goal/card markers.
-  const maxHalf = 26;
+  const maxHalf = 34;
   const topLane = 14;
   const botLane = 90;
   const legendY = 104;
@@ -526,7 +526,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
                 className={"mom-bar " + (b.up ? "up" : "down")}
                 x={b.x - bw / 2 + 1}
                 y={b.up ? midY - b.h : midY}
-                width={Math.max(1, bw - 2)}
+                width={Math.max(1, bw - 1)}
                 height={b.h}
                 rx={1.5}
                 fill={b.up ? UP : DOWN}
@@ -536,7 +536,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
               <g key={key}>
                 <line
                   x1={x}
-                  y1={y < midY ? midY - maxHalf : midY + maxHalf}
+                  y1={midY}
                   x2={x}
                   y2={y}
                   stroke="rgba(27,37,48,0.5)"
@@ -566,7 +566,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
               <g key={`r${key}`}>
                 <line
                   x1={x}
-                  y1={y < midY ? midY - maxHalf : midY + maxHalf}
+                  y1={midY}
                   x2={x}
                   y2={y}
                   stroke="rgba(200,67,61,0.55)"

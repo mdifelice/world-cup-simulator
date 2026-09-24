@@ -682,25 +682,25 @@ fn seed_edition(conn: &Connection, year: i32) -> rusqlite::Result<()> {
 
     // Group fixtures: prefer the real schedule (with kickoff) from the seed,
     // else let the round-robin generator fill in any edition with groups.
-    let existing: i64 = conn.query_row(
-        "SELECT COUNT(*) FROM matches WHERE tournament_id = ?1 AND stage = 'GROUP'",
-        [tournament_id],
-        |r| r.get(0),
+    // Re-seeding is idempotent: drop this edition's previous group fixtures so
+    // a repeated boot (or a regenerated fixture with stale team ids) never
+    // leaves duplicate pairings or orphaned rounds behind.
+    conn.execute(
+        "DELETE FROM matches WHERE tournament_id = ?1 AND stage = 'GROUP'",
+        rusqlite::params![tournament_id],
     )?;
-    if existing == 0 {
-        if file.fixtures.is_empty() {
-            fixture::generate(conn, tournament_id)?;
-        } else {
-            for f in &file.fixtures {
-                let Some(&home) = by_code.get(&f.home) else { continue };
-                let Some(&away) = by_code.get(&f.away) else { continue };
-                conn.execute(
-                    "INSERT INTO matches (tournament_id, stage, round_num, matchday, home_team_id,
-                                          away_team_id, kickoff, status)
-                     VALUES (?1, 'GROUP', 0, ?2, ?3, ?4, ?5, 'scheduled')",
-                    rusqlite::params![tournament_id, f.matchday, home, away, f.kickoff],
-                )?;
-            }
+    if file.fixtures.is_empty() {
+        fixture::generate(conn, tournament_id)?;
+    } else {
+        for f in &file.fixtures {
+            let Some(&home) = by_code.get(&f.home) else { continue };
+            let Some(&away) = by_code.get(&f.away) else { continue };
+            conn.execute(
+                "INSERT INTO matches (tournament_id, stage, round_num, matchday, home_team_id,
+                                      away_team_id, kickoff, status)
+                 VALUES (?1, 'GROUP', 0, ?2, ?3, ?4, ?5, 'scheduled')",
+                rusqlite::params![tournament_id, f.matchday, home, away, f.kickoff],
+            )?;
         }
     }
     Ok(())

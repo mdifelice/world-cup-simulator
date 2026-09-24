@@ -455,6 +455,7 @@ class Engine {
   teamContext(teamId: number) {
     const t = this.oracle.participants.find((p) => p.id === teamId);
     return {
+      rating: t?.rating ?? 75,
       pedigree: t?.pedigree ?? 50,
       home_support: t?.home_support ?? 50,
       form: t?.form ?? 50,
@@ -1077,6 +1078,7 @@ class Engine {
         redMinute: red ? red[0] : null,
         form: ctx.form / 100,
         morale: ctx.morale / 100,
+        rating: ctx.rating,
       });
     };
 
