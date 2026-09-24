@@ -212,8 +212,10 @@ export default function LineupEditor({
 
   const effFor = (p: Player, slot: string) =>
     bestEffectiveIn(playerPositions(p), p.rating ?? p.overall, slot);
+  // Canonical-ised position labels, deduped: "LB" and "LWB" both read LDF, so
+  // a full-back with both rows must not repeat the badge on the formation box.
   const positionsLabel = (p: Player) =>
-    playerPositions(p).map((x) => pos(posToken(x))).join(" / ");
+    Array.from(new Set(playerPositions(p).map((x) => pos(posToken(x))))).join(" / ");
 
   /** A player "owns" a slot when one of their positions carries no out-of-
    *  position penalty for it. Auto-pick only uses owners, so a star forward is

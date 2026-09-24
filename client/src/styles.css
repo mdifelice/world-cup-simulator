@@ -650,6 +650,11 @@ body {
   color: var(--muted);
   margin: 0 0 18px;
 }
+/* The "after extra time" and "Pens 2-1" result legends share one size so the
+   match label reads as a single sentence. */
+.live-box .match-label .pens {
+  font-size: inherit;
+}
 
 .chart-card {
   background: var(--panel);
@@ -678,7 +683,7 @@ body {
 }
 .momentum {
   width: 100%;
-  height: 110px;
+  height: 132px;
   display: block;
   background: linear-gradient(180deg, rgba(216, 164, 24, 0.06), rgba(216, 164, 24, 0.02));
   border-radius: 8px;

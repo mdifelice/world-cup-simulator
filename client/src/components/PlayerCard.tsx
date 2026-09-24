@@ -64,6 +64,9 @@ export default function PlayerCard({
       : player.position
         ? [player.position]
         : []);
+  // Granular positions collapse onto the canonical set ("LB"/"LWB" → LDF), so
+  // drop badges once the label repeats.
+  const posLabels = Array.from(new Set(posList.map((p) => pos(posToken(p)))));
   const starCount =
     stars ??
     (player.rating != null
@@ -107,10 +110,10 @@ export default function PlayerCard({
       <div className="pc-scrim" />
       {band && <div className="pc-band">{band}</div>}
       {num != null && <span className="pc-num">{num}</span>}
-      {posList.length > 0 && (
+      {posLabels.length > 0 && (
         <div className="pc-pos">
-          {posList.map((p, i) => (
-            <span key={i}>{pos(posToken(p))}</span>
+          {posLabels.map((p, i) => (
+            <span key={i}>{p}</span>
           ))}
         </div>
       )}

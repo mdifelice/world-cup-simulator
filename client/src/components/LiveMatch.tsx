@@ -253,14 +253,14 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   }, [m.goals, m.reds, m.events, min, kicks, penShown]);
 
   const W = 900;
-  const H = 108;
-  const midY = 52;
-  // Max bar half-height. Kept below the incident lanes (topLane 14 / botLane 90)
-  // so even full bars never brush the goal/card markers.
-  const maxHalf = 34;
-  const topLane = 14;
-  const botLane = 90;
-  const legendY = 104;
+  const H = 132;
+  const midY = 66;
+  // Max bar half-height. Kept below the incident lanes (topLane 18 / botLane
+  // 114) so even full bars never brush the goal/card markers.
+  const maxHalf = 44;
+  const topLane = 18;
+  const botLane = 114;
+  const legendY = 128;
 
   // Fixed axis showing full 90 minutes (+ added time) from the start, padded
   // so the 0' and Final-time lines sit clear of the chart border.
@@ -268,7 +268,6 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const RX = 10;
   const plotW = W - LX - RX;
   const spanTotal = axisSpan(clock);
-  const bw = plotW / spanTotal;
   const sxRatio = (r: number) => LX + r * plotW;
 
   // Period boundary chrono positions (used for line placement)
@@ -280,13 +279,19 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   // Extra-time ticks are hidden until the clock actually reaches full time, so
   // watching a match that will go to extra time never spoils it in advance.
   const showET = min >= FT_CHRONO;
+  // And the axis only spans what the crowd can see: while the match is still in
+  // play the wrist pad for extra time (and its future bars) simply doesn't
+  // exist, so no placeholder columns hint at the shootout ahead. The full axis
+  // springs open the moment the regulation clock hits 90'.
+  const spanDisp = showET ? spanTotal : axisPos(clock, FT_CHRONO);
+  const bw = plotW / spanDisp;
 
   // Period line positions on the display axis (added time forms a narrow band
   // at each half's end).
-  const htLine = axisPos(clock, HT_CHRONO) / spanTotal;
-  const ftLine = axisPos(clock, FT_CHRONO) / spanTotal;
-  const et1Line = m.extra_time ? axisPos(clock, ET1_CHRONO) / spanTotal : 0;
-  const et2Line = m.extra_time ? axisPos(clock, totalLength) / spanTotal : 0;
+  const htLine = axisPos(clock, HT_CHRONO) / spanDisp;
+  const ftLine = axisPos(clock, FT_CHRONO) / spanDisp;
+  const et1Line = m.extra_time ? axisPos(clock, ET1_CHRONO) / spanDisp : 0;
+  const et2Line = m.extra_time ? axisPos(clock, totalLength) / spanDisp : 0;
 
   // The real minute a walked minute corresponds to on the pitch. Added-time
   // minutes reuse the last regular minute of their period, so the animation
@@ -331,13 +336,13 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
       const d = series[idx] - 0.5;
       out.push({
         m: mr,
-        x: sxRatio(axisPos(clock, mr - 0.5) / spanTotal),
+        x: sxRatio(axisPos(clock, mr - 0.5) / spanDisp),
         up: d >= 0,
         h: Math.max(1, Math.round(Math.abs(d) * 2 * maxHalf)),
       });
     }
     return out;
-  }, [series, min, spanTotal, W, maxHalf, clock, totalLength]);
+  }, [series, min, spanDisp, W, maxHalf, clock, totalLength]);
 
   // The chart is stretched to the dialog width (preserveAspectRatio="none"), so
   // its text would be distorted. Counter-scale it back to a natural aspect.
@@ -360,7 +365,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const isAwayFocusMomentum = momentum != null && focusTeamId === m.away_team_id;
 
   const goalMarks = goalsUpTo.map((g, i) => {
-    const x = sxRatio(axisPos(clock, seqForMinute(clock, g.minute, g.extra_time, g.added_time === true)) / spanTotal);
+    const x = sxRatio(axisPos(clock, seqForMinute(clock, g.minute, g.extra_time, g.added_time === true)) / spanDisp);
     const isFocusGoal =
       focusTeamId != null && g.team_id === focusTeamId
         ? !isAwayFocusMomentum
@@ -373,7 +378,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   });
 
   const redMarks = redsUpTo.map((r, i) => {
-    const x = sxRatio(axisPos(clock, seqForMinute(clock, r.minute, r.extra_time, false)) / spanTotal);
+    const x = sxRatio(axisPos(clock, seqForMinute(clock, r.minute, r.extra_time, false)) / spanDisp);
     const isFocusRed =
       focusTeamId != null && r.team_id === focusTeamId
         ? !isAwayFocusMomentum
@@ -536,7 +541,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
             )}
             {done
               ? null
-              : tick(axisPos(clock, Math.max(lastRealMinute(Math.min(min, totalLength)) - 0.5, 0)) / spanTotal, "")}
+              : tick(axisPos(clock, Math.max(lastRealMinute(Math.min(min, totalLength)) - 0.5, 0)) / spanDisp, "")}
             {bars.map((b) => (
               <rect
                 key={b.m}
