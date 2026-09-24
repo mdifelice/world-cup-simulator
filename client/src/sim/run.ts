@@ -762,15 +762,19 @@ class Engine {
     const assistRoll = this.rng.unit();
     const isPen = assistRoll > 0.98;
     const assist = isPen ? null : assistRoll < assistProb ? this.pickAssist(eff, goalScorer) : null;
+    // Spot kicks go to the designated best outfield player on the pitch
+    // (deterministic, no extra RNG draws), so stars like Messi step up for
+    // penalties instead of the league scorer drill.
+    const scorer = isPen && !forced ? this.pickPenaltyTaker(eff) : goalScorer;
     return {
       minute,
       extra_time: extraTime,
       added_time: added || undefined,
       team_id: teamId,
-      scorer_id: goalScorer.id,
-      scorer: goalScorer.name,
-      scorer_photo: goalScorer.photo_url,
-      shirt_number: goalScorer.shirt_number ?? undefined,
+      scorer_id: scorer.id,
+      scorer: scorer.name,
+      scorer_photo: scorer.photo_url,
+      shirt_number: scorer.shirt_number ?? undefined,
       assist_id: assist ? assist.id : null,
       assist: assist ? assist.name : null,
       assist_photo: assist ? assist.photo_url : null,
@@ -781,6 +785,13 @@ class Engine {
 
   takeOrder(xi: SquadPlayer[]): SquadPlayer[] {
     return xi.slice().sort((a, b) => b.overall - a.overall);
+  }
+
+  /** Designated penalty taker: the highest-rated outfield player on the pitch. */
+  pickPenaltyTaker(xi: SquadPlayer[]): SquadPlayer {
+    const outfield = xi.filter((p) => p.position !== "GK");
+    if (outfield.length === 0) return xi[0];
+    return outfield.reduce((a, b) => (b.overall > a.overall ? b : a));
   }
 
   scoreProb(taker: SquadPlayer, gkOverall: number): number {
