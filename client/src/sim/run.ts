@@ -332,6 +332,27 @@ function nextPairings(winners: number[]): Array<[number, number]> {
   return out;
 }
 
+/** Real 2026 knockout dates by phase. Matches are spread inside each round's
+ *  genuine date window (the group stage already carries real kickoffs from the
+ *  seed; generated knockout pairings get their round's calendar here). */
+const KO_DATES_2026: Record<string, string[]> = {
+  R32: ["2026-06-28", "2026-06-29", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03"],
+  R16: ["2026-07-04", "2026-07-05", "2026-07-06", "2026-07-07"],
+  QF: ["2026-07-09", "2026-07-10", "2026-07-11"],
+  SF: ["2026-07-14", "2026-07-15"],
+  THIRD: ["2026-07-18"],
+  F: ["2026-07-19"],
+};
+
+/** Deterministic date for knockout match i (0-based) of n in a phase, or null
+ *  when the edition has no real knockout calendar (only 2026 does). */
+function koDate(year: number, key: string, i: number, n: number): string | null {
+  if (year !== 2026) return null;
+  const days = KO_DATES_2026[key];
+  if (!days || days.length === 0 || n <= 0) return null;
+  return days[Math.min(Math.floor((i * days.length) / n), days.length - 1)];
+}
+
 /** fixture.rs real_group_schedule — per-group per-round matchdays. */
 function realGroupSchedule(oracle: Oracle): Array<Array<Array<[number, number]>>> | null {
   const groups = oracle.groups;
@@ -1046,7 +1067,7 @@ class Engine {
   // Match engine
   // -------------------------------------------------------------------
 
-  playMatch(home: number, away: number, stageKey: string, stageName: string, knockout: boolean, usePens: boolean = knockout): number | null {
+  playMatch(home: number, away: number, stageKey: string, stageName: string, knockout: boolean, usePens: boolean = knockout, koDateOverride: string | null = null): number | null {
     const key = `${stageKey}|${this.day}|${home}|${away}`;
     this.rng = Rng.from_seed(
       match_seed(this.runSeed, key, this.day, BigInt(home), BigInt(away), knockout),
@@ -1277,7 +1298,7 @@ class Engine {
     const day = this.day;
 
     const pair = home < away ? `${home}|${away}` : `${away}|${home}`;
-    const date = this.kickoffs.get(pair) ?? null;
+    const date = koDateOverride ?? this.kickoffs.get(pair) ?? null;
 
     const rm: RunMatch = {
       id: matchId,
@@ -1631,8 +1652,9 @@ class Engine {
 
     const winners: number[] = [];
     const losers: number[] = [];
-    for (const [h, a] of pairings) {
-      const w = this.playMatch(h, a, key, name, true);
+    for (let i = 0; i < pairings.length; i++) {
+      const [h, a] = pairings[i];
+      const w = this.playMatch(h, a, key, name, true, true, koDate(this.year, key, i, pairings.length));
       if (w === h || w == null) {
         winners.push(h);
         losers.push(a);
