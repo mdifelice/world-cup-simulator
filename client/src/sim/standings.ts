@@ -7,7 +7,7 @@ export interface OverallRow {
    *  eliminated rounds (later round = lower bucket), worst for group exits. */
   bucket: number;
   /** Machine label for the bucket: "alive" | "champ" | "runnerup" |
-   *  "third" | "fourth" | <eliminated stage key>. */
+   *  "third" | "fourth" | "group" (group/league exits) | <eliminated stage key>. */
   bucketLabel: string;
   /** Display name of the round the team reached ("" for podium/alive). */
   reachedName: string;
@@ -154,10 +154,13 @@ export function computeOverallStandings(
     } else {
       const lm = lastMatch.get(id);
       const key = lm?.stage_key ?? "GROUP";
-      r.bucket = bucketForStage(key);
+      const bucket = bucketForStage(key);
+      r.bucket = bucket;
       r.stage_key = key;
       r.reachedName = stageName.get(key) ?? key;
-      r.bucketLabel = key;
+      // Group/league exits share one trailing bucket; give it a stable label
+      // instead of borrowing the leading team's group letter.
+      r.bucketLabel = bucket === 5 + n ? "group" : key;
     }
   }
 

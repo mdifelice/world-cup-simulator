@@ -937,17 +937,19 @@ export default function Overview({
                     const bucketLabel =
                       r.bucketLabel === "alive"
                         ? t("hub.alive")
-                        : r.bucketLabel === "champ"
-                          ? t("share.pos.1")
-                          : r.bucketLabel === "runnerup"
-                            ? t("share.pos.2")
-                            : r.bucketLabel === "third"
-                              ? t("share.pos.3")
-                              : r.bucketLabel === "fourth"
-                                ? t("share.pos.4")
-                                : r.reachedName
-                                  ? stage(r.reachedName)
-                                  : t("stage.group");
+                        : r.bucketLabel === "group"
+                          ? t("cup.stageGroup")
+                          : r.bucketLabel === "champ"
+                            ? t("share.pos.1")
+                            : r.bucketLabel === "runnerup"
+                              ? t("share.pos.2")
+                              : r.bucketLabel === "third"
+                                ? t("share.pos.3")
+                                : r.bucketLabel === "fourth"
+                                  ? t("share.pos.4")
+                                  : r.reachedName
+                                    ? stage(r.reachedName)
+                                    : t("stage.group");
                     const newBucket = i === 0 || overallStandings[i - 1].bucket !== r.bucket;
                     return (
                       <Fragment key={r.id}>
