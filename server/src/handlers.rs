@@ -113,14 +113,25 @@ fn load_phases(conn: &rusqlite::Connection, id: i64) -> rusqlite::Result<Vec<Pha
     rows.collect()
 }
 
+/// Editions that can be launched as new tournaments. Every other edition is
+/// still browsable (history/table/results) but won't be offered as playable.
+const PLAYABLE_YEARS: &[i32] = &[2026];
+
 pub async fn list_tournaments(State(db): State<Db>) -> ApiResult<Json<Vec<Tournament>>> {
     let conn = db.lock().unwrap();
-    let mut stmt = conn.prepare(
+    let years = PLAYABLE_YEARS
+        .iter()
+        .map(|y| y.to_string())
+        .collect::<Vec<_>>()
+        .join(",");
+    let sql = format!(
         "SELECT t.id, t.name, t.year, t.host, t.winner, t.start_date, t.end_date, t.shirt_numbers, t.logo, t.from_seed,
                 (SELECT COUNT(*) FROM tournament_teams WHERE tournament_id = t.id) > 0
-            AND (SELECT COUNT(*) FROM matches WHERE tournament_id = t.id) > 0 AS ready
-         FROM tournaments t ORDER BY t.year DESC",
-    )?;
+            AND (SELECT COUNT(*) FROM matches WHERE tournament_id = t.id) > 0
+            AND t.year IN ({years}) AS ready
+         FROM tournaments t ORDER BY t.year DESC"
+    );
+    let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map([], map_tournament_ready)?;
     let mut out = Vec::new();
     for r in rows {
@@ -140,8 +151,8 @@ fn map_tournament_ready(r: &rusqlite::Row) -> rusqlite::Result<Tournament> {
         end_date: r.get(6)?,
         shirt_numbers: r.get(7)?,
         logo: r.get(8)?,
-        ready: r.get(9)?,
-        from_seed: r.get::<_, i32>(10)? != 0,
+        ready: r.get(10)?,
+        from_seed: r.get::<_, i32>(9)? != 0,
     })
 }
 
