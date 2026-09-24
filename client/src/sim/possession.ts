@@ -67,8 +67,8 @@ export interface PlayShape {
 
 const familyOf = (pos: string): "GK" | "DF" | "MF" | "FW" => {
   if (pos === "GK") return "GK";
-  if (["DF", "RWB", "LWB"].includes(pos)) return "DF";
-  if (["DMF", "AMF", "RMF", "LMF"].includes(pos)) return "MF";
+  if (["CB", "LB", "RB", "RWB", "LWB"].includes(pos)) return "DF";
+  if (["CDM", "CM", "CAM", "LM", "RM"].includes(pos)) return "MF";
   return "FW";
 };
 
