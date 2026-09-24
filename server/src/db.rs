@@ -731,13 +731,113 @@ fn hash_str(s: &str) -> u64 {
 /// hash of his name — GKs, defenders, midfielders and forwards are spread
 /// across the squad instead of being blank "CM" boxes. Squads that do carry
 /// real positions (2018+, the 2022/2026 demo rosters) are left untouched.
+/// Secondary roles a granular position can credibly cover (slot, base
+/// familiarity). The engine treats a "POS:fam" token as playable at that slot
+/// with `(100 - fam)/10` penalty, so a high fam secondary genuinely beats
+/// playing the primary out of position (e.g. a CB asked to hold RWB).
+const SECONDARIES: &[(&str, &[(&str, u32)])] = &[
+    ("GK", &[]),
+    ("CB", &[("RB", 78), ("LB", 78), ("CDM", 64), ("LWB", 62), ("RWB", 62)]),
+    ("LB", &[("LWB", 92), ("CB", 76), ("LM", 70), ("RB", 58)]),
+    ("RB", &[("RWB", 92), ("CB", 76), ("RM", 70), ("LB", 58)]),
+    ("LWB", &[("LB", 94), ("LM", 72), ("CB", 62)]),
+    ("RWB", &[("RB", 94), ("RM", 72), ("CB", 62)]),
+    ("CDM", &[("CM", 90), ("CB", 66), ("CAM", 64)]),
+    ("CM", &[("CDM", 86), ("CAM", 84), ("RM", 74), ("LM", 74)]),
+    ("CAM", &[("CM", 90), ("LW", 70), ("RW", 70), ("ST", 66)]),
+    ("LM", &[("LW", 88), ("CM", 76), ("LWB", 68), ("RM", 60)]),
+    ("RM", &[("RW", 88), ("CM", 76), ("RWB", 68), ("LM", 60)]),
+    ("LW", &[("LM", 86), ("ST", 78), ("RW", 74), ("CAM", 72)]),
+    ("RW", &[("RM", 86), ("ST", 78), ("LW", 74), ("CAM", 72)]),
+    ("ST", &[("CF", 90), ("RW", 76), ("LW", 76), ("CAM", 72)]),
+    ("CF", &[("ST", 92), ("CAM", 78), ("RW", 70), ("LW", 70)]),
+];
+
+/// Multiple-position card for a player: the declared primary first (bare, no
+/// suffix — the call-up `position` column keeps it), then a deterministic
+/// roster of secondary roles drawn from that primary's pool. GKs stay single.
+/// Same primary + same name hash → identical card, so rebuilds reproduce it.
+fn enrich_positions(primary: &str, seed: u64) -> Vec<String> {
+    let mut out = vec![primary.to_string()];
+    if primary == "GK" {
+        return out;
+    }
+    let Some((_, cands)) = SECONDARIES.iter().find(|(p, _)| *p == primary) else {
+        return out;
+    };
+    let count = 1 + (seed % 3) as usize;
+    let start = (seed >> 2) % cands.len() as u64;
+    let mut added = 0;
+    for k in 0..cands.len() {
+        if added >= count {
+            break;
+        }
+        if (seed + k as u64) % 5 == 0 {
+            continue; // occasionally skip a candidate → natural variety
+        }
+        let (pos, fam) = cands[((start + k as u64) % cands.len() as u64) as usize];
+        let jitter = ((seed >> (4 + k * 2)) % 7) as i64 - 3;
+        let fam = (fam as i64 + jitter).clamp(55, 96) as u32;
+        out.push(format!("{pos}:{fam}"));
+        added += 1;
+    }
+    out
+}
+
+/// Position part of a familiarity token ("LB:90" -> "LB", "CM" -> "CM").
+fn pos_of_token(t: &str) -> &str {
+    match t.rfind(':') {
+        Some(i) => &t[..i],
+        None => t,
+    }
+}
+
+/// Familiarity value of a token ("LB:90" -> 90). A bare "LB" means full.
+fn fam_of_token(t: &str) -> u8 {
+    match t.rfind(':') {
+        Some(i) => t[i + 1..].parse().unwrap_or(100),
+        None => 100,
+    }
+}
+
 fn era_positions(year: i32, code: &str, players: &[SeedPlayer]) -> Vec<Vec<String>> {
     let distinct: HashSet<&str> = players
         .iter()
         .filter_map(|p| p.positions.first().map(|s| s.as_str()))
         .collect();
     if distinct.len() > 1 {
-        return players.iter().map(|p| p.positions.clone()).collect();
+        // Real positional data (2018+, 2022/2026 demo rosters): keep the
+        // declared primary, graft the multi-position secondaries on top.
+        return players
+            .iter()
+            .map(|p| {
+                let raw: Vec<&str> = p.positions.iter().map(|s| s.as_str()).collect();
+                // A trailing "!" pins the card exactly: strip the marker and
+                // skip enrichment, so a "RWB!" right-back stays RWB alone
+                // (a CB groomed as a pure full-back shouldn't inherit a
+                // box-to-box set of extras).
+                let pinned = raw.iter().any(|s| s.ends_with('!'));
+                let tokens: Vec<String> = raw
+                    .iter()
+                    .map(|s| s.trim_end_matches('!').to_string())
+                    .collect();
+                if pinned {
+                    return tokens;
+                }
+                let mut v = enrich_positions(
+                    tokens.first().map(|s| s.as_str()).unwrap_or("CM"),
+                    hash_str(&format!("{code}|{}", p.name)),
+                );
+                for extra in tokens.iter().skip(1) {
+                    match v.iter().position(|e| pos_of_token(e) == pos_of_token(extra)) {
+                        Some(i) if fam_of_token(extra) > fam_of_token(&v[i]) => v[i] = extra.clone(),
+                        None => v.push(extra.clone()),
+                        _ => {}
+                    }
+                }
+                v
+            })
+            .collect();
     }
 
     let n = players.len();
@@ -796,6 +896,13 @@ fn era_positions(year: i32, code: &str, players: &[SeedPlayer]) -> Vec<Vec<Strin
             _ => FW_ROLES[h % FW_ROLES.len()].to_string(),
         };
         out_v[i] = vec![role];
+    }
+    // Every era-resolved role gets its multi-position card too.
+    for (i, role) in out_v.iter_mut().enumerate() {
+        *role = enrich_positions(
+            role.first().map(|s| s.as_str()).unwrap_or("CM"),
+            hash_str(&format!("{code}|{}", players[i].name)),
+        );
     }
     out_v
 }

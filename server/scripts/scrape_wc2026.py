@@ -71,6 +71,318 @@ POS_MAP = {
 }
 
 
+# Curated positional overrides. The Wikipedia squad page only tags four generic
+# roles (GK/DF/MF/FW), so every full-back and wing-back lands on "CB", every
+# wide forward on "ST". Famous, unambiguous roles are pinned here; the seeding
+# step additionally grafts multi-position familiarity cards from the primary.
+# A trailing "!" pins the card to exactly that role (no secondaries).
+CORRECTIONS: dict[str, dict[str, list[str]]] = {
+    "ARG": {
+        "Nicolás Tagliafico": ["LWB!"],
+        "Gonzalo Montiel": ["RWB!"],
+        "Nahuel Molina": ["RWB!"],
+    },
+    "FRA": {
+        "Théo Hernandez": ["LWB"],
+        "Jules Koundé": ["RB"],
+        "Lucas Digne": ["LB"],
+        "Malo Gusto": ["RB"],
+        "Lucas Hernandez": ["CB", "LB:85"],
+        "Ousmane Dembélé": ["RW"],
+        "Bradley Barcola": ["LW"],
+        "Michael Olise": ["RW"],
+    },
+    "ESP": {
+        "Marc Cucurella": ["LWB"],
+        "Pedro Porro": ["RWB"],
+        "Álex Grimaldo": ["LWB"],
+        "Marc Pubill": ["RB"],
+        "Lamine Yamal": ["RW"],
+        "Nico Williams": ["LW"],
+        "Yéremy Pino": ["RW"],
+    },
+    "ENG": {
+        "Reece James": ["RWB"],
+        "Djed Spence": ["RB"],
+        "Dan Burn": ["LB"],
+        "Bukayo Saka": ["RW"],
+        "Anthony Gordon": ["LW"],
+    },
+    "BRA": {
+        "Alex Sandro": ["LWB"],
+        "Danilo Luiz": ["RB"],
+        "Douglas Santos": ["LWB"],
+        "Raphinha": ["RW"],
+        "Gabriel Martinelli": ["LW"],
+        "Vinícius Júnior": ["LW"],
+        "Luiz Henrique": ["RW"],
+    },
+    "POR": {
+        "Nuno Mendes": ["LB"],
+        "João Cancelo": ["RWB"],
+        "Diogo Dalot": ["RB"],
+        "Nélson Semedo": ["RWB"],
+        "Samú Costa": ["CM", "CDM:88"],
+        "Rafael Leão": ["LW"],
+        "Pedro Neto": ["RW"],
+        "Francisco Conceição": ["RW"],
+    },
+    "GER": {
+        "Joshua Kimmich": ["CM", "RB:88", "CDM:85"],
+        "David Raum": ["LWB"],
+        "Nathaniel Brown": ["LB"],
+    },
+    "NED": {
+        "Denzel Dumfries": ["RWB"],
+        "Mats Wieffer": ["CM", "CDM:90"],
+        "Lutsharel Geertruida": ["RB"],
+        "Jorrel Hato": ["LB"],
+        "Cody Gakpo": ["LW"],
+        "Donyell Malen": ["RW"],
+    },
+    "BEL": {
+        "Thomas Meunier": ["RWB"],
+        "Timothy Castagne": ["RB"],
+        "Maxim De Cuyper": ["LB"],
+        "Joaquin Seys": ["RB"],
+        "Dodi Lukébakio": ["RW"],
+        "Jérémy Doku": ["LW"],
+    },
+    "CRO": {
+        "Joško Gvardiol": ["CB", "LB:85"],
+        "Josip Stanišić": ["RB"],
+        "Kristijan Jakić": ["CM", "CDM:88"],
+        "Ivan Perišić": ["LW"],
+    },
+    "URU": {
+        "Mathías Olivera": ["LB"],
+        "Guillermo Varela": ["RB"],
+        "Matías Viña": ["LB"],
+        "Facundo Pellistri": ["RW"],
+    },
+    "COL": {
+        "Daniel Muñoz": ["RWB"],
+        "Johan Mojica": ["LB"],
+        "Deiver Machado": ["LB"],
+        "Santiago Arias": ["RB"],
+        "Gustavo Puerta": ["CM", "CDM:85"],
+        "Luis Díaz": ["LW"],
+    },
+    "MAR": {
+        "Achraf Hakimi": ["RWB"],
+        "Noussair Mazraoui": ["RB"],
+        "Anass Salah-Eddine": ["LB"],
+        "Zakaria El Ouahdi": ["RWB"],
+        "Brahim Díaz": ["RW", "CAM:88"],
+    },
+    "MEX": {
+        "Edson Álvarez": ["CM", "CDM:90"],
+        "Jorge Sánchez": ["RB"],
+        "Jesús Gallardo": ["LB"],
+        "Alexis Vega": ["LW"],
+        "Roberto Alvarado": ["RW"],
+    },
+    "USA": {
+        "Antonee Robinson": ["LB"],
+        "Sergiño Dest": ["RWB"],
+        "Joe Scally": ["RB"],
+        "Timothy Weah": ["RW"],
+        "Brenden Aaronson": ["CM", "CAM:85"],
+    },
+    "TUR": {
+        "Ferdi Kadıoğlu": ["RB", "LB:90"],
+        "Eren Elmalı": ["LB"],
+        "Zeki Çelik": ["RB"],
+        "Mert Müldür": ["RB"],
+        "Barış Alper Yılmaz": ["RW"],
+        "Kenan Yıldız": ["LW"],
+        "Kerem Aktürkoğlu": ["LW"],
+        "Oğuz Aydın": ["RW"],
+        "Arda Güler": ["CM", "CAM:92"],
+    },
+    "SUI": {
+        "Ricardo Rodriguez": ["LB"],
+        "Silvan Widmer": ["RWB"],
+        "Miro Muheim": ["LB"],
+        "Dan Ndoye": ["RW"],
+        "Rubén Vargas": ["RW"],
+    },
+    "JPN": {
+        "Yukinari Sugawara": ["RB"],
+        "Yūto Nagatomo": ["LWB"],
+        "Takehiro Tomiyasu": ["CB", "RB:85"],
+        "Keisuke Gotō": ["RW"],
+    },
+    "SEN": {
+        "Ismail Jakobs": ["LWB"],
+        "Sadio Mané": ["LW"],
+        "Ismaïla Sarr": ["RW"],
+        "Iliman Ndiaye": ["CM", "CAM:88"],
+        "Assane Diao": ["LW"],
+    },
+    "AUT": {
+        "Marco Friedl": ["LB"],
+        "Phillipp Mwene": ["RB"],
+        "Patrick Wimmer": ["RW"],
+        "David Alaba": ["CB", "LB:88"],
+    },
+    "SWE": {
+        "Gabriel Gudmundsson": ["LB"],
+        "Anthony Elanga": ["LW"],
+        "Eric Smith": ["CM", "CDM:85"],
+    },
+    "IRN": {
+        "Ramin Rezaeian": ["RB"],
+        "Milad Mohammadi": ["LB"],
+        "Mehdi Ghayedi": ["RW"],
+    },
+    "CAN": {
+        "Alphonso Davies": ["LWB"],
+        "Alistair Johnston": ["RB"],
+        "Richie Laryea": ["RWB"],
+        "Tajon Buchanan": ["RW"],
+    },
+    "ECU": {
+        "Piero Hincapié": ["LB"],
+        "Pervis Estupiñán": ["LB"],
+        "Ángelo Preciado": ["RB"],
+        "Gonzalo Plata": ["RW"],
+    },
+    "CZE": {
+        "Vladimír Coufal": ["RB"],
+        "David Jurásek": ["LB"],
+        "David Douděra": ["RWB"],
+        "Tomáš Holeš": ["CM", "CDM:85"],
+        "Adam Hložek": ["LW"],
+    },
+    "KOR": {
+        "Lee Tae-seok": ["LB"],
+        "Kim Moon-hwan": ["RB"],
+        "Seol Young-woo": ["RB"],
+        "Son Heung-min": ["LW"],
+    },
+    "EGY": {
+        "Mohamed Salah": ["RW"],
+        "Omar Marmoush": ["LW"],
+        "Mohamed Hany": ["RB"],
+        "Ahmed Fatouh": ["LB"],
+        "Trézéguet": ["RW"],
+    },
+    "SCO": {
+        "Andy Robertson": ["LB"],
+        "Kieran Tierney": ["LB"],
+        "Aaron Hickey": ["RB"],
+        "Nathan Patterson": ["RB"],
+        "Anthony Ralston": ["RB"],
+    },
+    "AUS": {
+        "Jordan Bos": ["LWB"],
+        "Aziz Behich": ["LB"],
+        "Nestory Irankunda": ["RW"],
+    },
+    "TUN": {
+        "Ali Abdi": ["LB"],
+        "Yan Valery": ["RB"],
+    },
+    "ALG": {
+        "Rayan Aït-Nouri": ["LWB"],
+        "Ramy Bensebaini": ["LB"],
+        "Jaouen Hadjam": ["LB"],
+        "Riyad Mahrez": ["RW"],
+        "Anis Hadj Moussa": ["RW"],
+    },
+    "CIV": {
+        "Wilfried Singo": ["RB"],
+        "Ghislain Konan": ["LB"],
+        "Guéla Doué": ["RB"],
+        "Christopher Opéri": ["LB"],
+        "Simon Adingra": ["LW"],
+        "Amad Diallo": ["RW"],
+        "Nicolas Pépé": ["RW"],
+        "Bazoumana Touré": ["RW"],
+    },
+    "PAR": {
+        "Julio Enciso": ["CM", "CAM:88"],
+    },
+    "RSA": {
+        "Aubrey Modiba": ["LB"],
+        "Khuliso Mudau": ["RWB"],
+        "Oswin Appollis": ["LW"],
+        "Relebohile Mofokeng": ["LW"],
+    },
+    "BIH": {
+        "Sead Kolašinac": ["LB"],
+        "Amar Dedić": ["RB"],
+    },
+    "GHA": {
+        "Abdul Rahman Baba": ["LB"],
+        "Gideon Mensah": ["LB"],
+        "Marvin Senaya": ["RB"],
+        "Iñaki Williams": ["RW"],
+        "Abdul Fatawu": ["RW"],
+        "Ernest Nuamah": ["LW"],
+        "Kamaldeen Sulemana": ["LW"],
+    },
+    "COD": {
+        "Aaron Wan-Bissaka": ["RWB"],
+        "Arthur Masuaku": ["LWB"],
+        "Gédéon Kalulu": ["RB"],
+        "Joris Kayembe": ["LB"],
+    },
+    "KSA": {
+        "Saud Abdulhamid": ["RWB"],
+        "Salem Al-Dawsari": ["LW"],
+    },
+    "UZB": {
+        "Khojiakbar Alijonov": ["RB"],
+    },
+    "CPV": {
+        "Steven Moreira": ["RB"],
+    },
+    "PAN": {
+        "Michael Amir Murillo": ["RB"],
+        "Andrés Andrade": ["LB"],
+        "César Blackman": ["RB"],
+        "Eric Davis": ["LB"],
+    },
+    "NZL": {
+        "Liberato Cacace": ["LB"],
+        "Francis de Vries": ["RB"],
+    },
+    "HAI": {
+        "Carlens Arcus": ["RB"],
+    },
+    "IRQ": {
+        "Merchas Doski": ["LB"],
+        "Hussein Ali": ["RB"],
+    },
+    "CUW": {
+        "Riechedly Bazoer": ["CM", "CDM:88"],
+        "Sherel Floranus": ["RB"],
+        "Shurandy Sambo": ["RB"],
+        "Joshua Brenet": ["RWB"],
+        "Sontje Hansen": ["RW"],
+    },
+    "NOR": {
+        "Julian Ryerson": ["RWB"],
+        "Marcus Holmgren Pedersen": ["RWB"],
+        "David Møller Wolfe": ["LB"],
+    },
+}
+
+
+def apply_corrections(squads: dict[str, list[dict]]) -> None:
+    """Overwrite declared positions for the curated players (prefix match so
+    disambiguation suffixes like "(footballer, born 1998)" still resolve)."""
+    for code, fixes in CORRECTIONS.items():
+        roster = squads.get(code, [])
+        for player in roster:
+            for fix_name, positions in fixes.items():
+                if player["name"] == fix_name or player["name"].startswith(fix_name):
+                    player["positions"] = list(positions)
+                    break
+
+
 def fetch(url: str) -> str:
     for attempt in range(10):
         try:
@@ -349,6 +661,9 @@ def main() -> int:
         squads[t["code"]] = squads_by_name.get(t["name"], [])
         if not squads[t["code"]]:
             print(f"  WARN no roster for {t['name']} ({t['code']})", file=sys.stderr)
+
+    # 3b) Curated positional overrides (Wikipedia only tags GK/DF/MF/FW).
+    apply_corrections(squads)
 
     # 4) Player headshots (Wikimedia Commons via prop=pageimages, 320px thumbs).
     photo_cache = load_photo_cache()
