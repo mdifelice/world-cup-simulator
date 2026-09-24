@@ -42,12 +42,6 @@ POSITION_WEIGHTS: dict[str, list[tuple[int, float]]] = {
     "RB": [(STAMINA, 0.20), (PACE, 0.20), (TACKLING, 0.20), (POSITIONING, 0.15),
            (PASSING, 0.15), (DRIBBLING, 0.10), (DECISIONS, 0.05), (AGGRESSION, 0.04),
            (CONCENTRATION, 0.06)],
-    "LWB": [(PACE, 0.25), (STAMINA, 0.20), (PASSING, 0.15), (DRIBBLING, 0.15),
-            (TACKLING, 0.15), (POSITIONING, 0.10), (DECISIONS, 0.05), (AGGRESSION, 0.04),
-            (CONCENTRATION, 0.05)],
-    "RWB": [(PACE, 0.25), (STAMINA, 0.20), (PASSING, 0.15), (DRIBBLING, 0.15),
-            (TACKLING, 0.15), (POSITIONING, 0.10), (DECISIONS, 0.05), (AGGRESSION, 0.04),
-            (CONCENTRATION, 0.05)],
     "CDM": [(TACKLING, 0.28), (PASSING, 0.20), (POSITIONING, 0.20), (STAMINA, 0.12),
             (COMPOSURE, 0.12), (VISION, 0.08), (DECISIONS, 0.06), (AGGRESSION, 0.07),
             (CONCENTRATION, 0.06), (LEADERSHIP, 0.05)],
@@ -88,7 +82,7 @@ SOFA_SUB_POSITION: dict[str, str] = {
 }
 
 FAMILY: dict[str, str] = {
-    "GK": "GK", "CB": "DF", "LB": "DF", "RB": "DF", "LWB": "DF", "RWB": "DF",
+    "GK": "GK", "CB": "DF", "LB": "DF", "RB": "DF",
     "CDM": "MF", "CM": "MF", "CAM": "MF", "LM": "MF", "RM": "MF",
     "LW": "FW", "RW": "FW", "ST": "FW", "CF": "FW", "SS": "FW",
 }
@@ -100,8 +94,6 @@ TEMPLATES: dict[str, list[int]] = {
     "CB": [-4, 2, 7, -8, -2, -10, 8, -4, 7, 3, -8, -8, -8, 6, 3, 4, 4, 2],
     "LB": [8, 8, -2, 2, 3, -8, 5, 1, 4, -1, -8, -8, -8, -3, 1, 1, 3, 0],
     "RB": [8, 8, -2, 2, 3, -8, 5, 1, 4, -1, -8, -8, -8, -3, 1, 1, 3, 0],
-    "LWB": [9, 8, -2, 4, 4, -6, 3, 1, 2, 0, -8, -8, -8, -3, 1, 0, 2, 0],
-    "RWB": [9, 8, -2, 4, 4, -6, 3, 1, 2, 0, -8, -8, -8, -3, 1, 0, 2, 0],
     "CDM": [-3, 5, 3, -2, 5, -8, 8, 3, 6, 4, -8, -8, -6, 1, 1, 4, 4, 2],
     "CM": [0, 6, -1, 4, 8, -2, 1, 7, 0, 5, -8, -8, -6, -3, 3, -2, 3, 2],
     "CAM": [2, 3, -3, 7, 8, 3, -6, 8, 0, 5, -8, -8, -6, -5, 3, -3, 2, 0],

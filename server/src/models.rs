@@ -307,8 +307,8 @@ pub struct ParticipationIn {
 
 /// Granular positions, each mapped to a formation family via `position->family`.
 pub const POSITIONS: &[&str] = &[
-    "GK", "CB", "LB", "RB", "LWB", "RWB", "CDM", "CM", "CAM", "LM", "RM", "LW",
-    "RW", "ST", "CF",
+    "GK", "CB", "LB", "RB", "CDM", "CM", "CAM", "LM", "RM", "LW", "RW", "ST",
+    "CF",
 ];
 
 /// Formation families that pitch slots are drawn from.
@@ -384,7 +384,7 @@ pub fn best_slot_penalty(positions: &[String], slot: &str) -> i32 {
 pub fn position_family(position: &str) -> &'static str {
     match position {
         "GK" => "GK",
-        "CB" | "LB" | "RB" | "LWB" | "RWB" => "DF",
+        "CB" | "LB" | "RB" => "DF",
         "CDM" | "CM" | "CAM" | "LM" | "RM" => "MF",
         "LW" | "RW" | "ST" | "CF" => "FW",
         _ => "MF",
@@ -450,7 +450,7 @@ pub struct CreatePlayer {
     pub name: String,
     #[serde(default = "default_position")]
     pub position: String,
-    /// Extra positions besides `position` (e.g. ["RB", "RWB"]).
+    /// Extra positions besides `position` (e.g. ["LB", "RB"]).
     #[serde(default)]
     pub positions: Vec<String>,
     #[serde(default)]

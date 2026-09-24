@@ -78,12 +78,12 @@ POS_MAP = {
 # A trailing "!" pins the card to exactly that role (no secondaries).
 CORRECTIONS: dict[str, dict[str, list[str]]] = {
     "ARG": {
-        "Nicolás Tagliafico": ["LWB!"],
-        "Gonzalo Montiel": ["RWB!"],
-        "Nahuel Molina": ["RWB!"],
+        "Nicolás Tagliafico": ["LB!"],
+        "Gonzalo Montiel": ["RB!"],
+        "Nahuel Molina": ["RB!"],
     },
     "FRA": {
-        "Théo Hernandez": ["LWB"],
+        "Théo Hernandez": ["LB"],
         "Jules Koundé": ["RB"],
         "Lucas Digne": ["LB"],
         "Malo Gusto": ["RB"],
@@ -93,25 +93,25 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
         "Michael Olise": ["RW"],
     },
     "ESP": {
-        "Marc Cucurella": ["LWB"],
-        "Pedro Porro": ["RWB"],
-        "Álex Grimaldo": ["LWB"],
+        "Marc Cucurella": ["LB"],
+        "Pedro Porro": ["RB"],
+        "Álex Grimaldo": ["LB"],
         "Marc Pubill": ["RB"],
         "Lamine Yamal": ["RW"],
         "Nico Williams": ["LW"],
         "Yéremy Pino": ["RW"],
     },
     "ENG": {
-        "Reece James": ["RWB"],
+        "Reece James": ["RB"],
         "Djed Spence": ["RB"],
         "Dan Burn": ["LB"],
         "Bukayo Saka": ["RW"],
         "Anthony Gordon": ["LW"],
     },
     "BRA": {
-        "Alex Sandro": ["LWB"],
+        "Alex Sandro": ["LB"],
         "Danilo Luiz": ["RB"],
-        "Douglas Santos": ["LWB"],
+        "Douglas Santos": ["LB"],
         "Raphinha": ["RW"],
         "Gabriel Martinelli": ["LW"],
         "Vinícius Júnior": ["LW"],
@@ -119,9 +119,9 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
     },
     "POR": {
         "Nuno Mendes": ["LB"],
-        "João Cancelo": ["RWB"],
+        "João Cancelo": ["RB"],
         "Diogo Dalot": ["RB"],
-        "Nélson Semedo": ["RWB"],
+        "Nélson Semedo": ["RB"],
         "Samú Costa": ["CM", "CDM:88"],
         "Rafael Leão": ["LW"],
         "Pedro Neto": ["RW"],
@@ -129,11 +129,11 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
     },
     "GER": {
         "Joshua Kimmich": ["CM", "RB:88", "CDM:85"],
-        "David Raum": ["LWB"],
+        "David Raum": ["LB"],
         "Nathaniel Brown": ["LB"],
     },
     "NED": {
-        "Denzel Dumfries": ["RWB"],
+        "Denzel Dumfries": ["RB"],
         "Mats Wieffer": ["CM", "CDM:90"],
         "Lutsharel Geertruida": ["RB"],
         "Jorrel Hato": ["LB"],
@@ -141,7 +141,7 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
         "Donyell Malen": ["RW"],
     },
     "BEL": {
-        "Thomas Meunier": ["RWB"],
+        "Thomas Meunier": ["RB"],
         "Timothy Castagne": ["RB"],
         "Maxim De Cuyper": ["LB"],
         "Joaquin Seys": ["RB"],
@@ -161,7 +161,7 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
         "Facundo Pellistri": ["RW"],
     },
     "COL": {
-        "Daniel Muñoz": ["RWB"],
+        "Daniel Muñoz": ["RB"],
         "Johan Mojica": ["LB"],
         "Deiver Machado": ["LB"],
         "Santiago Arias": ["RB"],
@@ -169,10 +169,10 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
         "Luis Díaz": ["LW"],
     },
     "MAR": {
-        "Achraf Hakimi": ["RWB"],
+        "Achraf Hakimi": ["RB"],
         "Noussair Mazraoui": ["RB"],
         "Anass Salah-Eddine": ["LB"],
-        "Zakaria El Ouahdi": ["RWB"],
+        "Zakaria El Ouahdi": ["RB"],
         "Brahim Díaz": ["RW", "CAM:88"],
     },
     "MEX": {
@@ -184,7 +184,7 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
     },
     "USA": {
         "Antonee Robinson": ["LB"],
-        "Sergiño Dest": ["RWB"],
+        "Sergiño Dest": ["RB"],
         "Joe Scally": ["RB"],
         "Timothy Weah": ["RW"],
         "Brenden Aaronson": ["CM", "CAM:85"],
@@ -202,19 +202,19 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
     },
     "SUI": {
         "Ricardo Rodriguez": ["LB"],
-        "Silvan Widmer": ["RWB"],
+        "Silvan Widmer": ["RB"],
         "Miro Muheim": ["LB"],
         "Dan Ndoye": ["RW"],
         "Rubén Vargas": ["RW"],
     },
     "JPN": {
         "Yukinari Sugawara": ["RB"],
-        "Yūto Nagatomo": ["LWB"],
+        "Yūto Nagatomo": ["LB"],
         "Takehiro Tomiyasu": ["CB", "RB:85"],
         "Keisuke Gotō": ["RW"],
     },
     "SEN": {
-        "Ismail Jakobs": ["LWB"],
+        "Ismail Jakobs": ["LB"],
         "Sadio Mané": ["LW"],
         "Ismaïla Sarr": ["RW"],
         "Iliman Ndiaye": ["CM", "CAM:88"],
@@ -237,9 +237,9 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
         "Mehdi Ghayedi": ["RW"],
     },
     "CAN": {
-        "Alphonso Davies": ["LWB"],
+        "Alphonso Davies": ["LB"],
         "Alistair Johnston": ["RB"],
-        "Richie Laryea": ["RWB"],
+        "Richie Laryea": ["RB"],
         "Tajon Buchanan": ["RW"],
     },
     "ECU": {
@@ -251,7 +251,7 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
     "CZE": {
         "Vladimír Coufal": ["RB"],
         "David Jurásek": ["LB"],
-        "David Douděra": ["RWB"],
+        "David Douděra": ["RB"],
         "Tomáš Holeš": ["CM", "CDM:85"],
         "Adam Hložek": ["LW"],
     },
@@ -276,7 +276,7 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
         "Anthony Ralston": ["RB"],
     },
     "AUS": {
-        "Jordan Bos": ["LWB"],
+        "Jordan Bos": ["LB"],
         "Aziz Behich": ["LB"],
         "Nestory Irankunda": ["RW"],
     },
@@ -285,7 +285,7 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
         "Yan Valery": ["RB"],
     },
     "ALG": {
-        "Rayan Aït-Nouri": ["LWB"],
+        "Rayan Aït-Nouri": ["LB"],
         "Ramy Bensebaini": ["LB"],
         "Jaouen Hadjam": ["LB"],
         "Riyad Mahrez": ["RW"],
@@ -306,7 +306,7 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
     },
     "RSA": {
         "Aubrey Modiba": ["LB"],
-        "Khuliso Mudau": ["RWB"],
+        "Khuliso Mudau": ["RB"],
         "Oswin Appollis": ["LW"],
         "Relebohile Mofokeng": ["LW"],
     },
@@ -324,13 +324,13 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
         "Kamaldeen Sulemana": ["LW"],
     },
     "COD": {
-        "Aaron Wan-Bissaka": ["RWB"],
-        "Arthur Masuaku": ["LWB"],
+        "Aaron Wan-Bissaka": ["RB"],
+        "Arthur Masuaku": ["LB"],
         "Gédéon Kalulu": ["RB"],
         "Joris Kayembe": ["LB"],
     },
     "KSA": {
-        "Saud Abdulhamid": ["RWB"],
+        "Saud Abdulhamid": ["RB"],
         "Salem Al-Dawsari": ["LW"],
     },
     "UZB": {
@@ -360,12 +360,12 @@ CORRECTIONS: dict[str, dict[str, list[str]]] = {
         "Riechedly Bazoer": ["CM", "CDM:88"],
         "Sherel Floranus": ["RB"],
         "Shurandy Sambo": ["RB"],
-        "Joshua Brenet": ["RWB"],
+        "Joshua Brenet": ["RB"],
         "Sontje Hansen": ["RW"],
     },
     "NOR": {
-        "Julian Ryerson": ["RWB"],
-        "Marcus Holmgren Pedersen": ["RWB"],
+        "Julian Ryerson": ["RB"],
+        "Marcus Holmgren Pedersen": ["RB"],
         "David Møller Wolfe": ["LB"],
     },
 }

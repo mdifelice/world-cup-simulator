@@ -734,19 +734,18 @@ fn hash_str(s: &str) -> u64 {
 /// Secondary roles a granular position can credibly cover (slot, base
 /// familiarity). The engine treats a "POS:fam" token as playable at that slot
 /// with `(100 - fam)/10` penalty, so a high fam secondary genuinely beats
-/// playing the primary out of position (e.g. a CB asked to hold RWB).
+/// playing the primary out of position (e.g. a CB asked to hold a full-back
+/// slot).
 const SECONDARIES: &[(&str, &[(&str, u32)])] = &[
     ("GK", &[]),
-    ("CB", &[("RB", 78), ("LB", 78), ("CDM", 64), ("LWB", 62), ("RWB", 62)]),
-    ("LB", &[("LWB", 92), ("CB", 76), ("LM", 70), ("RB", 58)]),
-    ("RB", &[("RWB", 92), ("CB", 76), ("RM", 70), ("LB", 58)]),
-    ("LWB", &[("LB", 94), ("LM", 72), ("CB", 62)]),
-    ("RWB", &[("RB", 94), ("RM", 72), ("CB", 62)]),
+    ("CB", &[("RB", 78), ("LB", 78), ("CDM", 64)]),
+    ("LB", &[("CB", 76), ("LM", 70), ("RB", 58)]),
+    ("RB", &[("CB", 76), ("RM", 70), ("LB", 58)]),
     ("CDM", &[("CM", 90), ("CB", 66), ("CAM", 64)]),
     ("CM", &[("CDM", 86), ("CAM", 84), ("RM", 74), ("LM", 74)]),
     ("CAM", &[("CM", 90), ("LW", 70), ("RW", 70), ("ST", 66)]),
-    ("LM", &[("LW", 88), ("CM", 76), ("LWB", 68), ("RM", 60)]),
-    ("RM", &[("RW", 88), ("CM", 76), ("RWB", 68), ("LM", 60)]),
+    ("LM", &[("LW", 88), ("CM", 76), ("RM", 60)]),
+    ("RM", &[("RW", 88), ("CM", 76), ("LM", 60)]),
     ("LW", &[("LM", 86), ("ST", 78), ("RW", 74), ("CAM", 72)]),
     ("RW", &[("RM", 86), ("ST", 78), ("LW", 74), ("CAM", 72)]),
     ("ST", &[("CF", 90), ("RW", 76), ("LW", 76), ("CAM", 72)]),
@@ -813,7 +812,7 @@ fn era_positions(year: i32, code: &str, players: &[SeedPlayer]) -> Vec<Vec<Strin
             .map(|p| {
                 let raw: Vec<&str> = p.positions.iter().map(|s| s.as_str()).collect();
                 // A trailing "!" pins the card exactly: strip the marker and
-                // skip enrichment, so a "RWB!" right-back stays RWB alone
+                // skip enrichment, so a pinned "LB!" card stays LB alone
                 // (a CB groomed as a pure full-back shouldn't inherit a
                 // box-to-box set of extras).
                 let pinned = raw.iter().any(|s| s.ends_with('!'));

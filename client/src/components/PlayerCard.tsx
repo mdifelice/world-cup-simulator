@@ -64,8 +64,8 @@ export default function PlayerCard({
       : player.position
         ? [player.position]
         : []);
-  // Granular positions collapse onto the canonical set ("LB"/"LWB" → LDF), so
-  // drop badges once the label repeats.
+  // Granular positions collapse onto the canonical set ("LB"/"RB" → LDF/RDF),
+  // so drop badges once the label repeats.
   const posLabels = Array.from(new Set(posList.map((p) => pos(posToken(p)))));
   const starCount =
     stars ??

@@ -20,8 +20,6 @@ function playerFamily(pos: string): "GK" | "DF" | "MF" | "FW" {
     case "CB":
     case "LB":
     case "RB":
-    case "LWB":
-    case "RWB":
       return "DF";
     case "LW":
     case "RW":

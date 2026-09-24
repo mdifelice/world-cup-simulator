@@ -66,17 +66,6 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
             (AGGRESSION, 0.04),
             (CONCENTRATION, 0.06),
         ],
-        "LWB" | "RWB" => &[
-            (PACE, 0.25),
-            (STAMINA, 0.20),
-            (PASSING, 0.15),
-            (DRIBBLING, 0.15),
-            (TACKLING, 0.15),
-            (POSITIONING, 0.10),
-            (DECISIONS, 0.05),
-            (AGGRESSION, 0.04),
-            (CONCENTRATION, 0.05),
-        ],
         "CDM" => &[
             (TACKLING, 0.28),
             (PASSING, 0.20),

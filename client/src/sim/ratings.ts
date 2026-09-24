@@ -7,8 +7,6 @@ const WEIGHTS: Record<string, [string, number][]> = {
   CB: [["tackling", 0.3], ["positioning", 0.2], ["strength", 0.2], ["pace", 0.1], ["composure", 0.1], ["passing", 0.1], ["decisions", 0.06], ["aggression", 0.05], ["concentration", 0.07], ["leadership", 0.04]],
   LB: [["stamina", 0.2], ["pace", 0.2], ["tackling", 0.2], ["positioning", 0.15], ["passing", 0.15], ["dribbling", 0.1], ["decisions", 0.05], ["aggression", 0.04], ["concentration", 0.06]],
   RB: [["stamina", 0.2], ["pace", 0.2], ["tackling", 0.2], ["positioning", 0.15], ["passing", 0.15], ["dribbling", 0.1], ["decisions", 0.05], ["aggression", 0.04], ["concentration", 0.06]],
-  LWB: [["pace", 0.25], ["stamina", 0.2], ["passing", 0.15], ["dribbling", 0.15], ["tackling", 0.15], ["positioning", 0.1], ["decisions", 0.05], ["aggression", 0.04], ["concentration", 0.05]],
-  RWB: [["pace", 0.25], ["stamina", 0.2], ["passing", 0.15], ["dribbling", 0.15], ["tackling", 0.15], ["positioning", 0.1], ["decisions", 0.05], ["aggression", 0.04], ["concentration", 0.05]],
   CDM: [["tackling", 0.28], ["passing", 0.2], ["positioning", 0.2], ["stamina", 0.12], ["composure", 0.12], ["vision", 0.08], ["decisions", 0.06], ["aggression", 0.07], ["concentration", 0.06], ["leadership", 0.05]],
   CM: [["passing", 0.3], ["vision", 0.2], ["stamina", 0.15], ["composure", 0.15], ["dribbling", 0.1], ["tackling", 0.1], ["decisions", 0.07], ["concentration", 0.05], ["leadership", 0.05]],
   CAM: [["passing", 0.25], ["vision", 0.25], ["dribbling", 0.2], ["composure", 0.15], ["stamina", 0.15], ["decisions", 0.07], ["concentration", 0.05]],
@@ -142,8 +140,6 @@ function isFamily(p: { position: string }, fam: "DF" | "MF" | "FW"): boolean {
     case "CB":
     case "LB":
     case "RB":
-    case "LWB":
-    case "RWB":
       return fam === "DF";
     case "CDM":
     case "CM":

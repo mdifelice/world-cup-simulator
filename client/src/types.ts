@@ -144,8 +144,6 @@ export const POSITIONS = [
   "CB",
   "LB",
   "RB",
-  "LWB",
-  "RWB",
   "CDM",
   "CM",
   "CAM",

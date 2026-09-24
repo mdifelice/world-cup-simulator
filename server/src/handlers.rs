@@ -803,9 +803,9 @@ pub struct PlayersQuery {
 /// defence, midfield, attack — matching the way rosters are laid out).
 const POS_ORDER_SQL: &str = "CASE c.position
                  WHEN 'GK' THEN 0 WHEN 'CB' THEN 1 WHEN 'LB' THEN 2 WHEN 'RB' THEN 3
-                 WHEN 'LWB' THEN 4 WHEN 'RWB' THEN 5 WHEN 'CDM' THEN 6 WHEN 'CM' THEN 7
-                 WHEN 'CAM' THEN 8 WHEN 'LM' THEN 9 WHEN 'RM' THEN 10 WHEN 'LW' THEN 11
-                 WHEN 'RW' THEN 12 WHEN 'ST' THEN 13 WHEN 'CF' THEN 14 ELSE 15 END";
+                 WHEN 'CDM' THEN 4 WHEN 'CM' THEN 5
+                 WHEN 'CAM' THEN 6 WHEN 'LM' THEN 7 WHEN 'RM' THEN 8 WHEN 'LW' THEN 9
+                 WHEN 'RW' THEN 10 WHEN 'ST' THEN 11 WHEN 'CF' THEN 12 ELSE 13 END";
 
 /// Squad for a team. Optionally scoped to one tournament (`?tournament_id=`)
 /// so position/shirt number come from that edition's call-up.

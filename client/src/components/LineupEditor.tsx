@@ -212,8 +212,8 @@ export default function LineupEditor({
 
   const effFor = (p: Player, slot: string) =>
     bestEffectiveIn(playerPositions(p), p.rating ?? p.overall, slot);
-  // Canonical-ised position labels, deduped: "LB" and "LWB" both read LDF, so
-  // a full-back with both rows must not repeat the badge on the formation box.
+  // Canonical-ised position labels, deduped: a full-back holding both a CB and
+  // an LB row must not repeat the badge on the formation box.
   const positionsLabel = (p: Player) =>
     Array.from(new Set(playerPositions(p).map((x) => pos(posToken(x))))).join(" / ");
 
