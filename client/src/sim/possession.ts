@@ -176,6 +176,32 @@ const pick = (unit: () => number, rows: PlayerRow[], skip?: number): PlayerRow |
   return last && last.id === skip ? (rows[0] ?? last) : last;
 };
 
+/** Family bias for the player finishing an in-box move: forwards convert most
+ *  chances, while a box-to-box arrival or a set-piece header keeps the scorer
+ *  mix close to real football (≈ 62% FW / 28% MF / 10% DF across a 4-3-3).
+ *  Combined with player quality so the nimble striker still draws the lion's
+ *  share of a team's shots. */
+const FINISH_W: Record<"GK" | "FW" | "MF" | "DF", number> = { GK: 0, FW: 1.0, MF: 0.5, DF: 0.14 };
+
+/** Weighted shot-taker across the whole outfield (family bias × quality).
+ *  Mirrors `pick`'s single-unit draw so the RNG stream per match is unchanged. */
+const finisherFor = (unit: () => number, s: PlayShape): PlayerRow | null => {
+  const rows = s.outfield;
+  if (!rows.length) return null;
+  let total = 0;
+  const weights = rows.map((p) => {
+    const w = (FINISH_W[familyOf(p.position)] ?? 0) * (p.overall + (p.aggression ?? 50) * 0.2);
+    total += w;
+    return w;
+  });
+  let roll = unit() * total;
+  for (let i = 0; i < rows.length; i++) {
+    roll -= weights[i];
+    if (roll <= 0) return rows[i];
+  }
+  return rows[rows.length - 1];
+};
+
 const D = (p: number): number => Math.max(0.15, Math.min(0.75, p));
 
 /**
@@ -263,7 +289,7 @@ export function simulateMinute(
     if (!inBox) continue;
 
     // Shot in the box (from range when the block sits deep).
-    const shooter = pick(unit, atk.fw.length ? atk.fw : atk.outfield);
+    const shooter = finisherFor(unit, atk);
     if (!shooter) continue;
     shots += 1;
     const gkOverall = def.gk ? def.gk.overall : def.gkAv;
