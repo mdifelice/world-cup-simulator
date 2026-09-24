@@ -55,6 +55,7 @@ pub struct TournamentDetail {
     end_date: Option<String>,
     shirt_numbers: bool,
     logo: Option<String>,
+    from_seed: bool,
     phases: Vec<Phase>,
 }
 
@@ -70,6 +71,7 @@ impl TournamentDetail {
             end_date: t.end_date,
             shirt_numbers: t.shirt_numbers,
             logo: t.logo,
+            from_seed: t.from_seed,
             phases,
         }
     }
@@ -87,6 +89,7 @@ fn map_tournament(r: &rusqlite::Row) -> rusqlite::Result<Tournament> {
         shirt_numbers: r.get::<_, i32>(7)? != 0,
         logo: r.get(8)?,
         ready: false,
+        from_seed: r.get::<_, i32>(9)? != 0,
     })
 }
 
@@ -113,7 +116,7 @@ fn load_phases(conn: &rusqlite::Connection, id: i64) -> rusqlite::Result<Vec<Pha
 pub async fn list_tournaments(State(db): State<Db>) -> ApiResult<Json<Vec<Tournament>>> {
     let conn = db.lock().unwrap();
     let mut stmt = conn.prepare(
-        "SELECT t.id, t.name, t.year, t.host, t.winner, t.start_date, t.end_date, t.shirt_numbers, t.logo,
+        "SELECT t.id, t.name, t.year, t.host, t.winner, t.start_date, t.end_date, t.shirt_numbers, t.logo, t.from_seed,
                 (SELECT COUNT(*) FROM tournament_teams WHERE tournament_id = t.id) > 0
             AND (SELECT COUNT(*) FROM matches WHERE tournament_id = t.id) > 0 AS ready
          FROM tournaments t ORDER BY t.year DESC",
@@ -138,6 +141,7 @@ fn map_tournament_ready(r: &rusqlite::Row) -> rusqlite::Result<Tournament> {
         shirt_numbers: r.get(7)?,
         logo: r.get(8)?,
         ready: r.get(9)?,
+        from_seed: r.get::<_, i32>(10)? != 0,
     })
 }
 
@@ -145,7 +149,7 @@ pub async fn get_tournament(State(db): State<Db>, Path(id): Path<i64>) -> ApiRes
     let conn = db.lock().unwrap();
     let t = conn
         .query_row(
-            "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo FROM tournaments WHERE id = ?1",
+            "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo, from_seed FROM tournaments WHERE id = ?1",
             [id],
             map_tournament,
         )
@@ -174,11 +178,110 @@ pub async fn create_tournament(
     }
     let id = conn.last_insert_rowid();
     let t: Tournament = conn.query_row(
-        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo FROM tournaments WHERE id = ?1",
+        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo, from_seed FROM tournaments WHERE id = ?1",
         [id],
         map_tournament,
     )?;
     Ok((StatusCode::CREATED, Json(t)))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ForkBody {
+    pub year: i32,
+}
+
+/// Duplicate a tournament (meta, phases, participants, groups, group fixtures
+/// and every call-up) into a brand-new editable edition at a caller-chosen
+/// year. Teams and players are shared globally, so no rows are re-created.
+pub async fn fork_tournament(
+    _user: OptionalUser,
+    State(db): State<Db>,
+    Path(id): Path<i64>,
+    Json(body): Json<ForkBody>,
+) -> ApiResult<(StatusCode, Json<TournamentDetail>)> {
+    let conn = db.lock().unwrap();
+    if conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM tournaments WHERE year = ?1)",
+            [body.year],
+            |r| r.get(0),
+        )
+        .optional()?
+        .unwrap_or(false)
+    {
+        return Err(ApiError::Conflict("a tournament with that year already exists".into()));
+    }
+    let src: Tournament = conn
+        .query_row(
+            "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo, from_seed FROM tournaments WHERE id = ?1",
+            [id],
+            map_tournament,
+        )
+        .optional()?
+        .ok_or_else(|| ApiError::not_found("tournament"))?;
+    conn.execute(
+        "INSERT INTO tournaments (name, year, host, winner, start_date, end_date, shirt_numbers, logo, from_seed)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 0)",
+        params![
+            src.name,
+            body.year,
+            src.host,
+            src.winner,
+            src.start_date,
+            src.end_date,
+            src.shirt_numbers,
+            src.logo
+        ],
+    )?;
+    let new_id = conn.last_insert_rowid();
+    let _ = conn.execute(
+        "INSERT INTO tournament_phases (tournament_id, seq, key, name, phase_type, group_count, entry_teams)
+         SELECT ?1, seq, key, name, phase_type, group_count, entry_teams
+         FROM tournament_phases WHERE tournament_id = ?2",
+        params![new_id, id],
+    )?;
+    let _ = conn.execute(
+        "INSERT INTO tournament_teams (tournament_id, team_id)
+         SELECT ?1, team_id FROM tournament_teams WHERE tournament_id = ?2",
+        params![new_id, id],
+    )?;
+    let _ = conn.execute(
+        "INSERT INTO tournament_groups (tournament_id, group_name, team_id)
+         SELECT ?1, group_name, team_id FROM tournament_groups WHERE tournament_id = ?2",
+        params![new_id, id],
+    )?;
+    let _ = conn.execute(
+        "INSERT INTO matches (tournament_id, stage, round_num, matchday, home_team_id, away_team_id, kickoff, status)
+         SELECT ?1, stage, round_num, matchday, home_team_id, away_team_id, kickoff, status
+         FROM matches WHERE tournament_id = ?2",
+        params![new_id, id],
+    )?;
+    let _ = conn.execute(
+        "INSERT INTO player_callups (player_id, tournament_id, team_id, position, positions, shirt_number)
+         SELECT player_id, ?1, team_id, position, positions, shirt_number
+         FROM player_callups WHERE tournament_id = ?2",
+        params![new_id, id],
+    )?;
+    let phases = load_phases(&conn, new_id)?;
+    Ok((
+        StatusCode::CREATED,
+        Json(TournamentDetail::from(
+            Tournament {
+                id: new_id,
+                name: src.name,
+                year: body.year,
+                host: src.host,
+                winner: src.winner,
+                start_date: src.start_date,
+                end_date: src.end_date,
+                shirt_numbers: src.shirt_numbers,
+                logo: src.logo,
+                ready: false,
+                from_seed: false,
+            },
+            phases,
+        )),
+    ))
 }
 
 pub async fn set_tournament_phases(

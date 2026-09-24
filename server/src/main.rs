@@ -66,6 +66,10 @@ async fn main() {
             post(handlers::set_tournament_phases),
         )
         .route(
+            "/api/tournaments/{id}/fork",
+            post(handlers::fork_tournament),
+        )
+        .route(
             "/api/tournaments/{id}/participants",
             get(handlers::list_participants).post(handlers::add_participants),
         )

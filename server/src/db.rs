@@ -232,7 +232,8 @@ fn schema(conn: &Connection) -> rusqlite::Result<()> {
             start_date TEXT,
             end_date TEXT,
             shirt_numbers INTEGER NOT NULL DEFAULT 1,
-            logo TEXT
+            logo TEXT,
+            from_seed INTEGER NOT NULL DEFAULT 0
         );
 
         CREATE TABLE IF NOT EXISTS tournament_phases (
@@ -359,6 +360,12 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
     }
     if !has("tournaments", "logo")? {
         conn.execute("ALTER TABLE tournaments ADD COLUMN logo TEXT", [])?;
+    }
+    if !has("tournaments", "from_seed")? {
+        conn.execute(
+            "ALTER TABLE tournaments ADD COLUMN from_seed INTEGER NOT NULL DEFAULT 0",
+            [],
+        )?;
     }
     if !has("players", "photo_url")? {
         conn.execute("ALTER TABLE players ADD COLUMN photo_url TEXT", [])?;
@@ -867,9 +874,13 @@ fn seed_tournaments(conn: &Connection) -> rusqlite::Result<()> {
     for (year, host, winner) in WORLD_CUPS {
         let shirt_numbers = if *year < 1954 { 0 } else { 1 };
         conn.execute(
-            "INSERT OR IGNORE INTO tournaments (name, year, host, winner, shirt_numbers) VALUES (?1, ?2, ?3, ?4, ?5)",
+            "INSERT OR IGNORE INTO tournaments (name, year, host, winner, shirt_numbers, from_seed)
+             VALUES (?1, ?2, ?3, ?4, ?5, 1)",
             rusqlite::params!["FIFA World Cup", year, host, winner, shirt_numbers],
         )?;
+        // Years are UNIQUE and only ever created by this seeder, so marking
+        // every WORLD_CUPS row seeded is safe even on an older DB.
+        conn.execute("UPDATE tournaments SET from_seed = 1 WHERE year = ?1", [year])?;
         let tournaments: i64 = conn.query_row(
             "SELECT COUNT(*) FROM tournament_phases WHERE tournament_id = (SELECT id FROM tournaments WHERE year = ?1)",
             [year],
@@ -965,7 +976,7 @@ pub fn insert_team(
 
 pub fn tournament_by_year(conn: &Connection, year: i32) -> rusqlite::Result<Option<Tournament>> {
     let mut stmt = conn.prepare(
-        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo FROM tournaments WHERE year = ?1",
+        "SELECT id, name, year, host, winner, start_date, end_date, shirt_numbers, logo, from_seed FROM tournaments WHERE year = ?1",
     )?;
     let mut rows = stmt.query_map([year], |r| {
         Ok(Tournament {
@@ -979,6 +990,7 @@ pub fn tournament_by_year(conn: &Connection, year: i32) -> rusqlite::Result<Opti
             shirt_numbers: r.get::<_, i32>(7)? != 0,
             logo: r.get(8)?,
             ready: false,
+            from_seed: r.get::<_, i32>(9)? != 0,
         })
     })?;
     Ok(rows.next().map(|r| r).transpose()?)

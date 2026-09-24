@@ -70,6 +70,12 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ phases }),
     }),
+  /** Clone a (seeded) tournament into an editable edition at a new year. */
+  forkTournament: (id: number, year: number) =>
+    req<import("./types").TournamentDetail>(`/api/tournaments/${id}/fork`, {
+      method: "POST",
+      body: JSON.stringify({ year }),
+    }),
   addParticipants: (
     id: number,
     list: Array<{ team_id: number; group_letter?: string }>,

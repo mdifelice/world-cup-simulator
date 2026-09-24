@@ -10,6 +10,10 @@ export interface Tournament {
   shirt_numbers: boolean;
   /** Optional branding image for this edition (trophy/logo URL). */
   logo?: string | null;
+  /** True when the edition was seeded from the built-in real data on boot.
+   *  Seeded editions have their tournament-scoped rows rebuilt at startup, so
+   *  the editor locks them until the user forks a copy. */
+  from_seed?: boolean;
 }
 
 export type Locale = "en" | "es";

@@ -22,6 +22,11 @@ pub struct Tournament {
     /// Whether participants and a fixture are loaded (the cup is playable).
     #[serde(default)]
     pub ready: bool,
+    /// Whether this edition was seeded from the built-in real data on boot.
+    /// Seeded editions get their participants/groups/fixtures/squads re-pruned
+    /// and rebuilt at startup, so the editor locks them until a fork is made.
+    #[serde(default)]
+    pub from_seed: bool,
 }
 
 #[derive(Debug, Deserialize)]
