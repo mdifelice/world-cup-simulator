@@ -629,12 +629,15 @@ class Engine {
   }
 
   pickInFromBench(bench: SquadPlayer[], family: string | null, subbedIn: Set<number>): SquadPlayer | null {
+    // family === "GK" asks for a keeper; otherwise (null or a field family)
+    // only outfielders are eligible — a keeper never leaves the goal area.
+    const wantGK = family === "GK";
     const pool = bench
       .filter(
         (p) =>
           !subbedIn.has(p.id) &&
           (family == null || positionFamily(p.position) === family) &&
-          positionFamily(p.position) !== "GK",
+          (wantGK ? positionFamily(p.position) === "GK" : positionFamily(p.position) !== "GK"),
       )
       .slice()
       .sort((a, b) => b.overall - a.overall);
@@ -953,8 +956,12 @@ class Engine {
       }
     }
 
-    // Injuries: roughly 1-in-11 per side per match, lasting 1-4 matches.
-    // Can happen at any minute during the match.
+    // Injuries: roughly 1-in-11 per side per match, lasting 1-4 matches. Can
+    // happen at any minute during the match. An injured player cannot carry
+    // on, so he is substituted whenever a replacement and an unused
+    // substitution remain; if the bench or the replacement allowance is
+    // exhausted he stays on and plays through the pain. Either way he misses
+    // the next 1-4 matches.
     if (this.rng.unit() < 0.09) {
       const w = this.rng.unit();
       const bannedFor = w < 0.3 ? 1 : w < 0.6 ? 2 : w < 0.85 ? 3 : 4;
@@ -962,35 +969,23 @@ class Engine {
       if (outp) {
         const isGK = outp.position === "GK";
         const minute = Math.min(1 + Math.floor(this.rng.unit() * 90), 90);
+        let inp: SquadPlayer | null = null;
         if (subsUsed < maxSubs && bench.length > 0) {
-          // Find a suitable replacement (same position if possible, especially for GK)
-          let inp: SquadPlayer | null = null;
-          if (isGK) {
-            inp = this.pickInFromBench(bench, "GK", subbedIn);
-          }
-          if (!inp) {
-            inp = this.pickInFromBench(bench, null, subbedIn);
-          }
-          if (inp) {
-            push(minute, "injury", "", outp, inp);
-            subsUsed += 1;
-            subbedOut.add(outp.id);
-            if (inp) subbedIn.add(inp.id);
-          } else {
-            // No substitution available - player injured but no sub available
-            push(minute, "injury", "", outp, null);
-            subbedOut.add(outp.id);
-            // If GK injured and no sub, a field player must take GK role
-            if (isGK) {
-              const fieldPlayer = xi.find(p => p.id !== outp.id && !subbedOut.has(p.id));
-              if (fieldPlayer) {
-                push(minute, "sub", "GK injured, field player takes GK", fieldPlayer, fieldPlayer);
-              }
-            }
-            subbedOut.add(outp.id);
-          }
-          this.suspensions.set(outp.id, [bannedFor, "injury"]);
+          // A keeper can only be replaced by a keeper from the bench.
+          if (isGK) inp = this.pickInFromBench(bench, "GK", subbedIn);
+          if (!inp) inp = this.pickInFromBench(bench, null, subbedIn);
         }
+        if (inp) {
+          push(minute, "injury", "", outp, inp);
+          subsUsed += 1;
+          subbedOut.add(outp.id);
+          subbedIn.add(inp.id);
+        } else {
+          // No replacement available (subs or bench exhausted): plays on early.
+          push(minute, "injury", "", outp, null);
+          subbedOut.add(outp.id);
+        }
+        this.suspensions.set(outp.id, [bannedFor, "injury"]);
       }
     }
 
