@@ -473,6 +473,7 @@ export default function Lab() {
                 ref={liveMatchRef}
                 match={match}
                 focusTeamId={match.home_team_id}
+                champion={null}
                 onReveal={() => {}}
                 onClose={() => setShowLiveMatch(false)}
               />

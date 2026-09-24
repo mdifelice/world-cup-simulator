@@ -6,6 +6,7 @@ import { axisPos, axisSpan, incLabel, labelOf, minuteText, seqForMinute, stoppag
 interface Props {
   match: RunMatch;
   focusTeamId: number | null;
+  champion: string | null;
   onReveal: (m: RunMatch) => void;
   onClose: () => void;
 }
@@ -22,6 +23,7 @@ const BASE_PAUSE_MS = 1000;
 export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   match: m,
   focusTeamId,
+  champion,
   onReveal,
   onClose,
 }, ref) => {
@@ -239,9 +241,10 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
     return list
       .filter((i) => (i.kind === "pen" ? true : incChrono(i) <= min))
       .sort((a, b) => {
-        // Newest incidents first; the shootout stays in kick order.
-        const aChrono = a.kind === "pen" ? -(130 + a.idx) : incChrono(a);
-        const bChrono = b.kind === "pen" ? -(130 + b.idx) : incChrono(b);
+        // Newest incidents first; the shootout already maps to 130+ (after the
+        // last possible goal), so higher kick index = later kick = on top.
+        const aChrono = incChrono(a);
+        const bChrono = incChrono(b);
         const byChrono = bChrono - aChrono;
         if (byChrono !== 0) return byChrono;
         const kindOrder = { goal: 0, red: 1, event: 2, pen: 3 };
@@ -273,6 +276,10 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   const HT_CHRONO = 45 + addedHT;
   const FT_CHRONO = 90 + addedHT + addedFT;
   const ET1_CHRONO = baseSH + 15 + addedET1;
+
+  // Extra-time ticks are hidden until the clock actually reaches full time, so
+  // watching a match that will go to extra time never spoils it in advance.
+  const showET = min >= FT_CHRONO;
 
   // Period line positions on the display axis (added time forms a narrow band
   // at each half's end).
@@ -488,6 +495,16 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
         )}
       </p>
 
+      {done && m.stage_key === "F" && champion && (
+        <div className="champ-card live-champ">
+          <span className="champ-cup">{flagFor(champion)}</span>
+          <div className="champ-text">
+            <strong>{t("hub.championTitle", { team: country(champion) })}</strong>
+            <span>{t("hub.championSub")}</span>
+          </div>
+        </div>
+      )}
+
       {momentum && series && series.length > 0 && (
         <div className="chart-card">
           <svg
@@ -508,7 +525,7 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
             />
             {tick(0, "0'")}
             {tick(htLine, t("match.ht"))}
-            {m.extra_time ? (
+            {showET && m.extra_time ? (
               <>
                 {tick(ftLine, "90'")}
                 {tick(et1Line, "105'")}

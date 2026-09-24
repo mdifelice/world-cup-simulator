@@ -175,13 +175,19 @@ export default function App() {
     save: boolean,
     target: { matchId: number; open: boolean } | null,
     lineups: Record<string, LineupConfig>,
+    explicitFocus?: number | null,
   ) => {
     const id = flow.tournament?.id;
     if (!id) return;
     if (runGuard.current === id) return;
     runGuard.current = id;
     const runSeed = seed ?? randomSeed();
-    const focus = flow.team?.id ?? flow.run?.focus_team_id ?? null;
+    // `flow` here is stale while a `setFlow` from the same handler is pending,
+    // so callers can pass the definitive focus (spectator runs pass null).
+    const focus =
+      explicitFocus !== undefined
+        ? explicitFocus
+        : flow.team?.id ?? flow.run?.focus_team_id ?? null;
     // Keep the previous run (and the scroll position) visible while the
     // deterministic re-sim runs; the result is all but identical, so clearing
     // it would flash the list empty and bounce the scroll back to the top.
@@ -354,7 +360,7 @@ export default function App() {
     setConfigs({});
     setLastLineup(null);
     setSeed(null);
-    postRun(true, null, {});
+    postRun(true, null, {}, null);
     setStep("overview");
   };
 
@@ -600,6 +606,7 @@ export default function App() {
         <LiveMatch
           match={liveMatch}
           focusTeamId={flow.run.focus_team_id}
+          champion={flow.run.champion}
           onReveal={liveReveal}
           onClose={closeLive}
         />

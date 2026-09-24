@@ -891,10 +891,8 @@ export default function Overview({
                       )}
                     </span>
                     <span className="scorers-name">
-                      <span className="scorers-surname">{s.name.split(/\s+/).pop() ?? s.name}</span>
-                      <span className="scorers-sub">
-                        {flagFor(s.team_name)} {country(s.team_name)}
-                      </span>
+                      <span className="scorers-surname">{s.name}</span>
+                      <span className="scorers-sub">{flagFor(s.team_name)}</span>
                     </span>
                     <span className="scorers-cell">{s.goals}</span>
                     <span className="scorers-cell">{s.assists}</span>
