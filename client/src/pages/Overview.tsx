@@ -962,7 +962,7 @@ export default function Overview({
                           <td className="num">{i + 1}</td>
                           <td className="l team-cell">
                             <span className="code-cell">
-                              {flagFor(r.name)} {codeOf(runCodes, r.id, r.name)}
+                              {flagFor(r.name)} {country(r.name)}
                             </span>
                           </td>
                           <td className="num">{r.p}</td>
