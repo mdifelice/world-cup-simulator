@@ -653,7 +653,13 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
                 : i.kind === "goal"
                   ? i.g.scorer
                   : i.r.player;
-            const playerNumber = undefined;
+            const playerNumber = isEvent
+              ? undefined
+              : isPen
+                ? undefined
+                : i.kind === "goal"
+                  ? i.g.shirt_number
+                  : i.r.shirt_number;
             const playerPhoto = isEvent
               ? event!.in_player_photo ?? event!.out_player_photo
               : isPen

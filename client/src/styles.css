@@ -1862,7 +1862,7 @@ body {
   opacity: 0.75;
 }
 /* ------- bracket / scorers popups ------- */
-.bracket-modal {
+.share-modal.bracket-modal {
   background: var(--panel);
   border: 2px solid var(--line);
   border-radius: 16px;
@@ -1901,10 +1901,10 @@ body {
 .bracket-scroll.bk-lg .bk-tbd {
   font-size: 12px;
 }
-.scorers-modal {
+.share-modal.scorers-modal {
   max-width: 1180px;
 }
-.standings-modal {
+.share-modal.standings-modal {
   max-width: 640px;
   max-height: 86vh;
 }

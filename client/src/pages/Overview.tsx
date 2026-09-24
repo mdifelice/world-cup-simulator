@@ -392,23 +392,24 @@ export default function Overview({
       .sort((a, b) => b.goals - a.goals || b.assists - a.assists || a.name.localeCompare(b.name))
       .map((e) => e);
   })();
-  // Prefer the engine's authoritative per-player stats: every player who took
-  // the field appears (even with no goals) and "matches" is actual games played.
-  const scorersAll: Entry[] = (() => {
-    if (run?.player_stats?.length) {
-      return run.player_stats.map((s) => ({
-        id: s.player_id,
-        name: s.name,
-        team_id: s.team_id,
-        team_name: s.team_name,
-        photo: s.photo,
-        goals: s.goals,
-        assists: s.assists,
-        matches: s.games,
-      }));
-    }
-    return goalScorersAll;
-  })();
+  // Prefer the engine's authoritative per-player stats once the whole cup is
+  // revealed: every player who took the field appears (even with no goals) and
+  // "matches" is actual games played. Until then, only count completed
+  // (revealed) matches so the table grows with the reveal, never ahead of it.
+  const fullyRevealed = total > 0 && revealedIds.size >= total;
+  const scorersAll: Entry[] =
+    fullyRevealed && run?.player_stats?.length
+      ? run.player_stats.map((s) => ({
+          id: s.player_id,
+          name: s.name,
+          team_id: s.team_id,
+          team_name: s.team_name,
+          photo: s.photo,
+          goals: s.goals,
+          assists: s.assists,
+          matches: s.games,
+        }))
+      : goalScorersAll;
   // Sidebar keeps the classic top-10 scorers table.
   const scorers = scorersAll.filter((s) => s.goals > 0).slice(0, 10);
 
@@ -446,7 +447,7 @@ export default function Overview({
     (a, b) => a.localeCompare(b),
   );
 
-  const allRevealed = total > 0 && revealedIds.size >= total;
+  const allRevealed = fullyRevealed;
   const champion = run?.champion ?? null;
 
   const isMine = (m: RunMatch) => focusId != null && (m.home_team_id === focusId || m.away_team_id === focusId);

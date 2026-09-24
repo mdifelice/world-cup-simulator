@@ -300,8 +300,11 @@ export default function Bracket({
                   ) : (
                       (() => {
                         const colIdx = cols.findIndex((col) => col.key === c.key);
-                        // First knockout round: teams are known from group stage qualifiers
+                        // First knockout round: teams are known from group stage
+                        // qualifiers; keep them hidden until that match is
+                        // revealed so the bracket fills with the games.
                         if (colIdx === 0) {
+                          if (!revealedIds.has(m.id)) return <div className="bk-tbd">{t("match.tbd")}</div>;
                           const hasHome = m.home_team_name && m.home_team_id;
                           const hasAway = m.away_team_name && m.away_team_id;
                           if (!hasHome && !hasAway) return <div className="bk-tbd">{t("match.tbd")}</div>;

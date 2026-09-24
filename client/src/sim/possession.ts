@@ -165,7 +165,17 @@ const pick = (unit: () => number, rows: PlayerRow[], skip?: number): PlayerRow |
   return last && last.id === skip ? (rows[0] ?? last) : last;
 };
 
-const D = (p: number): number => Math.max(0.12, Math.min(0.88, p));
+const D = (p: number): number => Math.max(0.15, Math.min(0.75, p));
+
+/**
+ * Quality deltas are damped so a one-sided team bends the flow instead of
+ * breaking it. The raw spread of a real squad (a 90-rated striker against a
+ * 55-rated keeper) would otherwise hand every duel to the stronger side and
+ * turn balanced matches into basketball scores; the sqrt curve keeps big gaps
+ * significant but saturating, so a mismatch reads like football (2x/3x the
+ * goals), not an arcade blowout.
+ */
+const damp = (d: number): number => Math.sign(d) * Math.sqrt(Math.abs(d));
 
 /** Fighter for the zone of a shape (build-up → midfield → attack → box). */
 const fighterFor = (unit: () => number, s: PlayShape, z: number): PlayerRow | null => {
@@ -222,7 +232,7 @@ export function simulateMinute(
             ? def.mfAv
             : def.dfAv * 0.6 + def.mfAv * 0.4) + def.space * 18 + (shortDef ? 7 : 0);
       const atkVal = fighter.overall + atk.risk * 5;
-      const pAdv = D(0.46 + (atkVal - markerVal) * 0.018);
+      const pAdv = D(0.48 + damp(atkVal - markerVal) * 0.016);
       if (unit() < pAdv) {
         const jump = unit() < 0.14 + atk.risk * 0.06 ? 2 : 1;
         z = Math.min(4, z + jump);
@@ -250,11 +260,11 @@ export function simulateMinute(
     const pGoal = Math.max(
       0.03,
       Math.min(
-        0.32,
-        0.079 +
-          (shooter.overall - gkOverall) * 0.008 +
-          atk.risk * 0.018 -
-          fromRange * 0.04 +
+        0.28,
+        0.085 +
+          damp(shooter.overall - gkOverall) * 0.015 +
+          atk.risk * 0.02 -
+          fromRange * 0.05 +
           (shortDef ? 0.07 : 0),
       ),
     );
