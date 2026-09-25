@@ -379,6 +379,49 @@ const KO_DATES_2026: Record<string, string[]> = {
 /** Real knockout dates for the 1970–2018 editions, by phase. The 1974/78
  *  second-round group is generated (no knockout to date). */
 const KO_DATES_LEGACY: Record<number, Record<string, string[]>> = {
+  1930: {
+    SF: ["1930-07-26", "1930-07-27"],
+    THIRD: ["1930-07-30"],
+    F: ["1930-07-30"],
+  },
+  1934: {
+    R16: ["1934-05-27"],
+    QF: ["1934-05-31"],
+    SF: ["1934-06-03"],
+    THIRD: ["1934-06-07"],
+    F: ["1934-06-10"],
+  },
+  1938: {
+    R16: ["1938-06-04", "1938-06-05"],
+    QF: ["1938-06-12"],
+    SF: ["1938-06-16"],
+    THIRD: ["1938-06-19"],
+    F: ["1938-06-19"],
+  },
+  1954: {
+    QF: ["1954-06-26", "1954-06-27"],
+    SF: ["1954-06-30"],
+    THIRD: ["1954-07-03"],
+    F: ["1954-07-04"],
+  },
+  1958: {
+    QF: ["1958-06-19", "1958-06-19"],
+    SF: ["1958-06-24"],
+    THIRD: ["1958-06-28"],
+    F: ["1958-06-29"],
+  },
+  1962: {
+    QF: ["1962-06-10"],
+    SF: ["1962-06-13"],
+    THIRD: ["1962-06-16"],
+    F: ["1962-06-17"],
+  },
+  1966: {
+    QF: ["1966-07-23"],
+    SF: ["1966-07-25", "1966-07-26"],
+    THIRD: ["1966-07-28"],
+    F: ["1966-07-30"],
+  },
   1970: {
     QF: ["1970-06-14", "1970-06-14"],
     SF: ["1970-06-17", "1970-06-17"],
@@ -1790,7 +1833,11 @@ class Engine {
       this.groupMetaBuilt = true;
     }
 
-    const real = realGroupSchedule(this.oracle);
+    // The oracle only carries the *first* group stage's real fixtures. Any
+    // later round-robin phase (1974/78/82 second round, 1950 "final round")
+    // must be generated from the qualifiers — reusing the first-stage schedule
+    // would replay the wrong teams and leave half the bracket idle.
+    const real = isFirstGroupPhase(phases, idx) ? realGroupSchedule(this.oracle) : null;
     const schedule: Array<Array<Array<[number, number]>>> = [];
     for (let gi = 0; gi < this.currentGroups.length; gi++) {
       const teams = this.currentGroups[gi];

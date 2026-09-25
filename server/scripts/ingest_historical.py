@@ -182,6 +182,35 @@ RATINGS = {
     "GDR": 78, "FRG": 90,
 }
 
+# Per-edition strength (1930–1966). FIFA rankings never meant much then, so
+# these are the eye-tests of the era: Hungary 1954 (the Mighty Magyars) and
+# Uruguay 1950 lead their tournaments, 1930s Austria keeps its "Wunderteam"
+# class, and the modern table's ARG/FRA/NED fantasy numbers never leak back.
+ERA_RATINGS: dict[int, dict[str, int]] = {
+    1930: {"URU": 90, "ARG": 88, "YUG": 82, "USA": 80, "BRA": 78, "CHI": 76,
+           "BEL": 74, "FRA": 72, "ROU": 70, "PER": 68, "PAR": 62, "MEX": 62, "BOL": 58},
+    1934: {"ITA": 88, "AUT": 86, "TCH": 86, "GER": 84, "HUN": 84, "ESP": 82,
+           "SWE": 80, "FRA": 78, "ARG": 78, "BRA": 76, "SUI": 76, "NED": 76,
+           "BEL": 74, "ROU": 68, "USA": 62, "EGY": 60},
+    1938: {"ITA": 88, "HUN": 86, "BRA": 84, "TCH": 82, "GER": 82, "FRA": 80,
+           "SWE": 78, "NED": 76, "SUI": 74, "BEL": 72, "POL": 70, "ROU": 68,
+           "NOR": 66, "CUB": 58, "IDN": 54},
+    1950: {"BRA": 88, "URU": 85, "ESP": 84, "ENG": 82, "SWE": 80, "YUG": 80,
+           "ITA": 78, "CHI": 74, "SUI": 74, "USA": 70, "PAR": 68, "MEX": 64, "BOL": 56},
+    1954: {"HUN": 90, "FRG": 86, "BRA": 84, "URU": 82, "AUT": 81, "YUG": 80,
+           "ITA": 78, "ENG": 77, "SUI": 76, "FRA": 76, "TCH": 75, "BEL": 74,
+           "TUR": 72, "SCO": 72, "MEX": 64, "KOR": 48},
+    1958: {"BRA": 90, "FRG": 85, "SWE": 84, "FRA": 84, "URS": 82, "ENG": 79,
+           "YUG": 79, "HUN": 78, "WAL": 76, "NIR": 76, "SCO": 76, "TCH": 76,
+           "ARG": 76, "AUT": 74, "PAR": 66, "MEX": 64},
+    1962: {"BRA": 90, "URS": 84, "TCH": 84, "CHI": 83, "YUG": 81, "FRG": 81,
+           "ESP": 80, "ENG": 80, "HUN": 80, "ITA": 79, "ARG": 78, "URU": 76,
+           "COL": 74, "BUL": 72, "SUI": 70, "MEX": 68},
+    1966: {"ENG": 88, "FRG": 88, "POR": 87, "BRA": 84, "URS": 82, "ITA": 82,
+           "ARG": 81, "ESP": 80, "HUN": 78, "YUG": 76, "URU": 76, "FRA": 74,
+           "CHI": 72, "PRK": 72, "BUL": 70, "SUI": 68, "MEX": 66},
+}
+
 # ---------------------------------------------------------------------------
 # Iconic players: elite attrs + a pinned, iconic primary role so the greats
 # play their real position and read 5 stars instead of a name-hash roll.
@@ -198,6 +227,8 @@ _STAR_ATTRS = {
     "FW": [95, 89, 86, 93, 82, 98, 45, 89, 96, 94, 70, 62, 82, 88, 90, 82, 90, 90],
     # DF commanders
     "DF": [86, 87, 90, 82, 89, 62, 96, 86, 93, 94, 78, 72, 82, 93, 92, 86, 92, 96],
+    # GK shot-stoppers / sweepers
+    "GK": [56, 62, 84, 58, 68, 58, 54, 80, 92, 88, 95, 95, 92, 88, 90, 72, 92, 90],
 }
 
 STAR_OVERRIDES = {
@@ -223,6 +254,49 @@ STAR_OVERRIDES = {
     "Gheorghe Hagi": (["CAM!", "LW:80", "CM:85"], "MF"),
     "Romário": (["ST!", "CF:90"], "FW"),
     "Hristo Stoichkov": (["LW!", "ST:88", "RW:82"], "FW"),
+    # Pre-1970 icons. "Pele" is one of the seed's own diacritic-free spellings;
+    # the "Bobby Moore"/"Beckenbauer" keys above already cover their 1966 cards.
+    # Both accented and folded spellings are kept — Wikipedia pages flip between
+    # the two between re-fetches.
+    "Pele": (["CF!", "ST:90", "RW:82"], "FW"),
+    "Garrincha": (["RW!", "RM:85", "CF:80"], "FW"),
+    "Vava": (["ST!", "CF:88", "LW:80"], "FW"),
+    "Vavá": (["ST!", "CF:88", "LW:80"], "FW"),
+    "Just Fontaine": (["ST!", "CF:88"], "FW"),
+    "Lev Yashin": (["GK!"], "GK"),
+    "Didi": (["CM!", "CAM:88", "CDM:85"], "MF"),
+    "Zito": (["CM!", "CDM:88"], "MF"),
+    "Amarildo": (["RW!", "ST:85"], "FW"),
+    "Uwe Seeler": (["ST!", "CF:90"], "FW"),
+    "Josef Masopust": (["CAM!", "CM:88"], "MF"),
+    "Bobby Charlton": (["CAM!", "CM:88"], "MF"),
+    "Ferenc Puskas": (["CAM!", "CF:88", "CM:85"], "MF"),
+    "Ferenc Puskás": (["CAM!", "CF:88", "CM:85"], "MF"),
+    "Sandor Kocsis": (["ST!", "CF:90"], "FW"),
+    "Sándor Kocsis": (["ST!", "CF:90"], "FW"),
+    "Nandor Hidegkuti": (["CAM!", "CM:88", "ST:82"], "MF"),
+    "Nándor Hidegkuti": (["CAM!", "CM:88", "ST:82"], "MF"),
+    "Zoltan Czibor": (["LW!", "ST:85"], "FW"),
+    "Zoltán Czibor": (["LW!", "ST:85"], "FW"),
+    "Fritz Walter": (["CAM!", "CM:88"], "MF"),
+    "Helmut Rahn": (["RW!", "ST:85", "CF:82"], "FW"),
+    "Eusebio": (["CF!", "ST:90"], "FW"),
+    "Eusébio": (["CF!", "ST:90"], "FW"),
+    "Leonidas": (["ST!", "CF:90"], "FW"),
+    "Giuseppe Meazza": (["CAM!", "CF:82"], "MF"),
+    "Silvio Piola": (["ST!"], "FW"),
+    "Matthias Sindelar": (["CAM!", "CF:85"], "MF"),
+    "Ademir": (["ST!", "CF:90", "CAM:80"], "FW"),
+    "Zizinho": (["CAM!", "CM:88"], "MF"),
+    "Juan Schiaffino": (["CAM!", "CF:85"], "MF"),
+    "Juan Alberto Schiaffino": (["CAM!", "CF:85"], "MF"),
+    # 1930: the first tournament's standout names.
+    "Guillermo Stábile": (["ST!", "CF:88"], "FW"),
+    "José Nasazzi": (["CB!"], "DF"),
+    "Héctor Scarone": (["CAM!", "CF:88"], "MF"),
+    "Pedro Cea": (["CAM!", "CM:85"], "MF"),
+    "Luis Monti": (["CM!", "CDM:85"], "MF"),
+    "José Leandro Andrade": (["CM!", "CDM:88"], "MF"),
 }
 
 _ATTR_CLAMP = lambda v: max(30, min(99, v))
@@ -552,8 +626,12 @@ def get_flag(code: str) -> str:
     return FLAG_CODES.get(code, "🏳️")
 
 
-def get_rating(name: str) -> int:
+def get_rating(name: str, year: int | None = None) -> int:
     code = get_code(name)
+    if year is not None:
+        era = ERA_RATINGS.get(year)
+        if era and code in era:
+            return era[code]
     return RATINGS.get(code, 60)
 
 
@@ -632,7 +710,7 @@ def build_seed(year: int) -> dict | None:
             "name": name,
             "code": code,
             "flag": get_flag(code),
-            "rating": get_rating(name),
+            "rating": get_rating(name, year),
             "group": "",  # filled below
         })
 
