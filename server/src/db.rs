@@ -490,37 +490,39 @@ pub(crate) fn family_of(pos: &str) -> i32 {
 /// stars read near their ratings, mid-table teams sit in the 60s-70s, minnows
 /// well below) and nudged per position family: forwards get pace/shooting/
 /// dribbling, defenders tackling/aerial, GKs the shot-stopping group,
-/// midfielders passing/vision. A deterministic per-player lift drawn from the
-/// name hash (−14..+14) breaks squads out of one flat band: a team fields a
-/// few genuine stars, a solid middle and real depth — and the roster stars
-/// actually separate teammates. The 85% slope keeps some air above the EA-rated
-/// players of the 2022/2026 editions, whose explicit attrs stay the ceiling.
+/// midfielders passing/vision. A small deterministic per-player lift drawn from
+/// the name hash (−6..+6) separates teammates without manufacturing false
+/// superstars — the real icons carry explicit attrs seeded by the historical
+/// ingester, so a bench player must never out-rate a Messi on a name roll.
 pub(crate) fn attrs_for(rating: i32, name: &str, family: i32) -> [i32; 18] {
     let r = rating.clamp(35, 99);
     let q = 40 + (r - 40) * 82 / 100;
-    let p = (hash_str(name) % 29) as i32 - 14;
+    let p = (hash_str(name) % 13) as i32 - 6;
     let clamp = |v: i32| v.clamp(30, 99);
     let j = |v: i32| clamp(v + q + p);
+    // Family bumps are intentionally gentle now that icons carry explicit attrs:
+    // a hash-rolled player should sit inside (or near) its team's band — peak
+    // ~89 on a title side — and never out-star a named great (90-96).
     match family {
-        // GK: keepers hang on their shot-stopping + composure/aerial
+        // GK: keepers live on shot-stopping + composure/aerial
         0 => [
-            j(0), j(2), j(5), j(-8), j(-4), j(-8), j(-6), j(-3), j(-2), j(3),
-            j(11), j(13), j(11), j(7), j(1), j(0), j(3), j(2),
+            j(0), j(1), j(2), j(-6), j(-3), j(-6), j(-5), j(-2), j(-1), j(1),
+            j(5), j(6), j(5), j(3), j(1), j(0), j(2), j(1),
         ],
         // DF: defence-first, physical
         1 => [
-            j(1), j(5), j(8), j(-2), j(0), j(-4), j(10), j(-1), j(3), j(3),
-            j(2), j(-8), j(-4), j(9), j(1), j(2), j(3), j(1),
+            j(1), j(4), j(6), j(-2), j(1), j(-3), j(7), j(-1), j(2), j(2),
+            j(1), j(-5), j(-3), j(6), j(1), j(1), j(2), j(1),
         ],
         // MF: engine room
         2 => [
-            j(2), j(5), j(3), j(5), j(8), j(1), j(2), j(7), j(3), j(3),
-            j(2), j(-8), j(-2), j(0), j(1), j(0), j(1), j(1),
+            j(1), j(3), j(2), j(3), j(5), j(1), j(1), j(4), j(2), j(2),
+            j(1), j(-4), j(-1), j(0), j(1), j(0), j(1), j(1),
         ],
         // FW: attackers lean into pace, finishing, dribbling
         _ => [
-            j(11), j(2), j(1), j(9), j(3), j(9), j(-3), j(3), j(9), j(3),
-            j(2), j(-8), j(-4), j(4), j(1), j(0), j(1), j(2),
+            j(6), j(1), j(1), j(5), j(2), j(5), j(-2), j(2), j(4), j(1),
+            j(1), j(-4), j(-2), j(2), j(1), j(0), j(1), j(1),
         ],
     }
 }

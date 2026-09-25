@@ -284,6 +284,7 @@ export function simulateMinute(
   home: PlayShape,
   away: PlayShape,
   minute: number,
+  goals: number = 1,
 ): MinuteResult {
   let homePts = 0;
   let awayPts = 0;
@@ -336,15 +337,17 @@ export function simulateMinute(
     shots += 1;
     const gkOverall = def.gk ? def.gk.overall : def.gkAv;
     const fromRange = def.deep > 0.65 ? 1 : 0;
+    const cap = goals <= 1 ? 0.30 : Math.min(0.45, 0.30 * (1 + 0.12 * (goals - 1)));
     const pGoal = Math.max(
       0.03,
       Math.min(
-        0.30,
-        0.106 +
+        cap,
+        (0.106 +
           damp(shooter.overall - gkOverall) * 0.016 +
           atk.risk * 0.02 -
           fromRange * 0.05 +
-          (shortDef ? 0.07 : 0),
+          (shortDef ? 0.07 : 0)) *
+          goals,
       ),
     );
     scoring(3);

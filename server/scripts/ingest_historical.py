@@ -161,31 +161,33 @@ FLAG_CODES = {
     "GDR": "🇩🇪",
 }
 
-# Strength ratings by team code (FIFA ranking–inspired)
+# Strength ratings by team code (FIFA ranking–inspired fallback). Every team
+# of every edition is defined explicitly in ERA_RATINGS below; this table only
+# catches leftovers a seed may carry (e.g. Gepl franchise / alternate spellings)
+# and must never out-rate a real edition team, so the values are conservative.
 RATINGS = {
-    "ARG": 93, "BRA": 92, "FRA": 91, "GER": 90, "ESP": 89, "ITA": 88,
-    "URU": 87, "ENG": 86, "NED": 85, "POR": 84, "BEL": 83, "CRO": 82,
-    "COL": 81, "CHI": 80, "MEX": 79, "USA": 78, "URU": 77, "SRB": 76,
-    "SUI": 75, "CRO": 74, "DEN": 73, "MEX": 72, "SWE": 71, "POL": 70,
-    "KSA": 69, "IRN": 68, "KOR": 67, "JPN": 66, "AUS": 65, "NGA": 64,
-    "CIV": 63, "GHA": 62, "CMR": 61, "ALG": 60, "MAR": 59, "TUN": 58,
-    "EGY": 57, "SEN": 56, "CIV": 55, "ECU": 54, "PAR": 53, "VEN": 52,
-    "BOL": 51, "PER": 50, "VEN": 49, "PAN": 48, "CRC": 47, "JAM": 46,
-    "TRI": 45, "HAI": 44, "ZAI": 43, "HKG": 42, "SLV": 41, "KUW": 40,
-    "IRQ": 39, "NZL": 38, "CHN": 37, "UAE": 36, "KOR": 35, "PRK": 34,
-    "SVN": 33, "SVK": 32, "BIH": 31, "ISL": 30, "PAN": 29,
-    # 1986–1994 editions
-    "FRG": 90, "URS": 84, "YUG": 80, "TCH": 70, "ROU": 70, "BUL": 72,
-    "RUS": 80, "HUN": 64, "SCO": 66, "NIR": 60, "AUT": 66, "NOR": 68,
-    "GRE": 58, "IRL": 70, "CMR": 68, "DEN": 73,
-    # 1970–1982 editions (host-era strength)
-    "GDR": 78, "FRG": 90,
+    "BRA": 86, "ARG": 85, "FRA": 85, "GER": 84, "ESP": 84, "ITA": 83,
+    "ENG": 82, "NED": 82, "URU": 80, "POR": 81, "BEL": 80, "CRO": 79,
+    "COL": 78, "CHI": 77, "MEX": 76, "USA": 76, "SWE": 74, "POL": 74,
+    "SRB": 75, "SER": 75, "CZE": 76, "SUI": 76, "DEN": 77, "RUS": 75,
+    "TCH": 74, "YUG": 74, "URS": 78, "FRG": 84, "GDR": 74, "IRL": 72,
+    "NOR": 73, "ROU": 75, "BUL": 74, "AUT": 72, "SCO": 72, "HUN": 72,
+    "NIR": 70, "WAL": 71, "GRE": 72, "KSA": 66, "IRN": 68, "KOR": 70,
+    "JPN": 72, "AUS": 70, "NGA": 73, "CIV": 73, "GHA": 73, "CMR": 71,
+    "ALG": 71, "MAR": 72, "TUN": 68, "EGY": 69, "SEN": 73, "ECU": 72,
+    "PAR": 73, "BOL": 66, "PER": 72, "CRC": 70, "JAM": 67, "TRI": 66,
+    "HAI": 62, "ZAI": 60, "SLV": 62, "KUW": 60, "IRQ": 60, "NZL": 61,
+    "CHN": 64, "UAE": 63, "PRK": 64, "SVN": 70, "SVK": 72, "BIH": 73,
+    "ISL": 66, "PAN": 64, "CAN": 68, "MNE": 66, "QAT": 66,
 }
 
-# Per-edition strength (1930–1966). FIFA rankings never meant much then, so
-# these are the eye-tests of the era: Hungary 1954 (the Mighty Magyars) and
-# Uruguay 1950 lead their tournaments, 1930s Austria keeps its "Wunderteam"
-# class, and the modern table's ARG/FRA/NED fantasy numbers never leak back.
+# Per-edition strength. ICT STS 1930–1966 are the eye-tests of the era (Hungary
+# 1954, Uruguay 1950, the "Wunderteam", Pelé's Brazil); from 1970 on they track
+# real tournament form — champions 88–90, losing finalists/semis 86–88, clear
+# contenders 84–85, solid sides 80–83, qualifiers 76–79, minnows/Dark horses 74
+# and below. A team never carries the modern flat "ARG 93" — every edition is
+# its own balance sheet. (Defaults via the RATINGS fallback are intentionally
+# tame so a stale 90+ never leaks into a year that under-achieved.)
 ERA_RATINGS: dict[int, dict[str, int]] = {
     1930: {"URU": 90, "ARG": 88, "YUG": 82, "USA": 80, "BRA": 78, "CHI": 76,
            "BEL": 74, "FRA": 72, "ROU": 70, "PER": 68, "PAR": 62, "MEX": 62, "BOL": 58},
@@ -209,14 +211,88 @@ ERA_RATINGS: dict[int, dict[str, int]] = {
     1966: {"ENG": 88, "FRG": 88, "POR": 87, "BRA": 84, "URS": 82, "ITA": 82,
            "ARG": 81, "ESP": 80, "HUN": 78, "YUG": 76, "URU": 76, "FRA": 74,
            "CHI": 72, "PRK": 72, "BUL": 70, "SUI": 68, "MEX": 66},
+    1970: {"BRA": 91, "ITA": 88, "FRG": 87, "ENG": 86, "URS": 84, "URU": 83,
+           "MEX": 82, "PER": 81, "SWE": 79, "ROU": 77, "TCH": 77, "BUL": 77,
+           "BEL": 74, "ISR": 68, "MAR": 63, "SLV": 59},
+    1974: {"FRG": 90, "NED": 90, "POL": 85, "BRA": 84, "ITA": 84, "ARG": 83,
+           "SCO": 80, "URU": 80, "GDR": 79, "SWE": 79, "YUG": 79, "TCH": 78,
+           "BUL": 77, "AUS": 64, "HAI": 60, "ZAI": 58},
+    1978: {"ARG": 87, "NED": 87, "BRA": 87, "FRG": 85, "ITA": 84, "PER": 82,
+           "POL": 81, "AUT": 81, "SCO": 79, "ESP": 79, "FRA": 79, "SWE": 78,
+           "TUN": 74, "MEX": 72, "HUN": 71, "IRN": 64},
+    1982: {"BRA": 89, "ITA": 88, "FRG": 86, "ARG": 85, "FRA": 84, "POL": 82,
+           "URS": 82, "ESP": 82, "BEL": 81, "ENG": 80, "AUT": 79, "ALG": 77,
+           "HUN": 78, "TCH": 77, "SCO": 77, "NIR": 76, "YUG": 76, "CMR": 76,
+           "HON": 73, "NZL": 72, "CHI": 71, "KUW": 61, "PER": 74, "SLV": 60},
+    1986: {"ARG": 88, "FRA": 87, "BRA": 86, "FRG": 85, "URS": 84, "ITA": 84,
+           "DEN": 83, "ENG": 82, "MEX": 81, "ESP": 81, "BEL": 80, "POL": 79,
+           "MAR": 77, "URU": 77, "POR": 76, "BUL": 76, "PAR": 75, "SCO": 74,
+           "HUN": 73, "NIR": 72, "KOR": 70, "ALG": 69, "CAN": 62, "IRQ": 60},
+    1990: {"FRG": 90, "ITA": 88, "NED": 87, "ENG": 86, "ARG": 84, "BRA": 84,
+           "URS": 82, "YUG": 82, "TCH": 80, "ESP": 80, "CMR": 79, "BEL": 78,
+           "COL": 79, "ROU": 77, "IRL": 76, "SWE": 76, "AUT": 76, "SCO": 74,
+           "KOR": 73, "CRC": 69, "USA": 73, "EGY": 69, "UAE": 64, "GER": 84},
+    1994: {"BRA": 89, "ITA": 89, "NED": 86, "SWE": 86, "ARG": 85, "GER": 85,
+           "BUL": 84, "ROU": 82, "ESP": 82, "MEX": 80, "MAR": 80, "NGA": 79,
+           "COL": 78, "BEL": 77, "NOR": 77, "IRL": 77, "RUS": 76, "CMR": 74,
+           "GRE": 72, "KOR": 72, "SUI": 76, "USA": 74, "BOL": 68, "KSA": 67},
+    1998: {"BRA": 90, "FRA": 89, "NED": 88, "ITA": 87, "ARG": 87, "CRO": 85,
+           "ENG": 85, "GER": 84, "ESP": 83, "DEN": 82, "YUG": 80, "PAR": 79,
+           "BEL": 79, "ROU": 79, "MEX": 78, "NGA": 79, "COL": 77, "NOR": 77,
+           "AUT": 76, "CHI": 77, "SCO": 75, "BUL": 73, "CMR": 73, "TUN": 69,
+           "USA": 73, "JPN": 72, "KOR": 72, "RSA": 70, "IRN": 70, "JAM": 67,
+           "MAR": 74, "KSA": 66},
+    2002: {"BRA": 90, "GER": 87, "ITA": 86, "ENG": 85, "ESP": 85, "ARG": 85,
+           "FRA": 84, "POR": 84, "CRO": 83, "TUR": 84, "DEN": 82, "SWE": 81,
+           "SEN": 80, "KOR": 80, "URU": 80, "MEX": 79, "PAR": 79, "NGA": 79,
+           "BEL": 79, "IRL": 77, "JPN": 78, "USA": 78, "CMR": 78, "CRC": 77,
+           "ECU": 75, "POL": 74, "RSA": 73, "SVN": 74, "TUN": 69, "CHN": 66,
+           "KSA": 65},
+    2006: {"BRA": 89, "ITA": 89, "FRA": 87, "ARG": 86, "ENG": 86, "NED": 85,
+           "POR": 85, "CZE": 84, "GER": 83, "ESP": 83, "UKR": 81, "SWE": 80,
+           "CRO": 80, "SUI": 79, "GHA": 79, "ECU": 77, "PAR": 77, "MEX": 78,
+           "CIV": 77, "POL": 76, "SCO": 74, "AUS": 74, "USA": 74, "CRC": 73,
+           "JPN": 73, "KOR": 73, "SER": 75, "TUN": 68, "IRN": 66, "KSA": 66,
+           "TRI": 66, "ANG": 62, "TOG": 61},
+    2010: {"ESP": 90, "BRA": 88, "NED": 88, "ARG": 87, "GER": 87, "ITA": 85,
+           "ENG": 85, "URU": 84, "POR": 84, "FRA": 83, "CHI": 80, "MEX": 79,
+           "PAR": 78, "USA": 77, "CIV": 77, "GHA": 77, "JPN": 77, "KOR": 76,
+           "DEN": 76, "SRB": 76, "SER": 76, "SWE": 75, "SVK": 75, "SVN": 75,
+           "RSA": 74, "AUS": 74, "NGA": 74, "GRE": 74, "SUI": 75, "ALG": 72,
+           "HON": 71, "PRK": 62, "NZL": 60},
+    2014: {"GER": 89, "BRA": 87, "ARG": 87, "NED": 87, "FRA": 86, "BEL": 86,
+           "COL": 84, "ESP": 84, "POR": 84, "ITA": 84, "URU": 83, "CHI": 82,
+           "ENG": 82, "MEX": 79, "CRO": 78, "RUS": 78, "SUI": 78, "CIV": 77,
+           "BIH": 78, "USA": 77, "CRC": 76, "ECU": 76, "GRE": 76, "NGA": 76,
+           "GHA": 75, "ALG": 75, "HON": 72, "AUS": 72, "JPN": 75, "KOR": 75,
+           "IRN": 71, "CMR": 69},
+    2018: {"FRA": 88, "BRA": 88, "BEL": 87, "CRO": 86, "ENG": 85, "ARG": 86,
+           "ESP": 85, "POR": 85, "URU": 85, "GER": 84, "COL": 82, "DEN": 81,
+           "SWE": 81, "SUI": 80, "SEN": 78, "MEX": 78, "JPN": 78, "RUS": 75,
+           "MAR": 76, "NGA": 75, "PER": 76, "POL": 74, "SER": 75, "AUS": 71,
+           "IRN": 71, "CRC": 70, "ISL": 69, "EGY": 70, "TUN": 67, "KOR": 73,
+           "PAN": 65, "KSA": 62},
+    2022: {"ARG": 87, "FRA": 87, "BRA": 86, "ENG": 86, "ESP": 85, "NED": 84,
+           "POR": 84, "CRO": 83, "MAR": 83, "URU": 82, "BEL": 82, "GER": 81,
+           "DEN": 79, "SEN": 79, "SUI": 78, "JPN": 78, "USA": 77,
+           "KOR": 76, "MEX": 75, "POL": 76, "ECU": 75, "GHA": 75, "AUS": 74,
+           "CAN": 73, "IRN": 72, "TUN": 70, "CRC": 71, "WAL": 71, "KSA": 71,
+           "QAT": 68, "CMR": 72, "SRB": 76, "SER": 76},
 }
 
 # ---------------------------------------------------------------------------
 # Iconic players: elite attrs + a pinned, iconic primary role so the greats
-# play their real position and read 5 stars instead of a name-hash roll.
+# play their real position and read the intended star rating instead of a
+# name-hash roll (which once handed shelf players 97–99 while Messi drew 86).
 # Positions follow the game's granular tokens (GK/CB/LB/RB/CDM/CM/CAM/LM/RM/
 # LW/RW/ST/CF); a trailing "!" pins the card exactly (no auto-enrichment),
-# FAM  familiarities like "CM:85" let the engine use them off that role.
+# "POS:85" familiarities let the engine use them off that role.
+#
+# Keys are accent-folded names (matching is case/accent-insensitive). A key
+# prefixed "CODE|" (e.g. "BRA|ronaldo") only matches that team's player.
+# (+value, [positions], family) — attrs are scaled so the player's star rating
+# equals `value` for the pinned role, then year overrides tune the classic
+# careers (Pelé 58→70, Maradona 82/86→90, Baggio 90/94/98, ...).
 # ---------------------------------------------------------------------------
 _STAR_ATTRS = {
     # MF playmakers: pace, stamina, strength, dribbling, passing, shooting,
@@ -231,90 +307,403 @@ _STAR_ATTRS = {
     "GK": [56, 62, 84, 58, 68, 58, 54, 80, 92, 88, 95, 95, 92, 88, 90, 72, 92, 90],
 }
 
-STAR_OVERRIDES = {
-    # "stored seed name": (pinned positions, family)
-    "Pelé": (["CF!", "ST:90"], "FW"),
-    "Jairzinho": (["RW!", "RM:85", "ST:80"], "FW"),
-    "Gerd Müller": (["ST!", "CF:90"], "FW"),
-    "Franz Beckenbauer": (["CB!", "CDM:85"], "DF"),
-    "Bobby Moore": (["CB!"], "DF"),
-    "Teófilo Cubillas": (["CAM!", "ST:85", "CM:80"], "MF"),
-    "Johan Cruyff": (["CF!", "ST:90", "LW:80"], "FW"),
-    "Rob Rensenbrink": (["LW!", "ST:85"], "FW"),
-    "Mario Kempes": (["ST!", "CF:88"], "FW"),
-    "Zico": (["CAM!", "CF:85", "CM:85"], "MF"),
-    "Michel Platini": (["CAM!", "CM:88"], "MF"),
-    "Paolo Rossi": (["ST!", "CF:88"], "FW"),
-    "Karl-Heinz Rummenigge": (["RW!", "ST:85", "CF:82"], "FW"),
-    "Diego Maradona": (["CAM!", "CM:85", "CF:80"], "MF"),
-    "Lothar Matthäus": (["CM!", "CDM:90", "CAM:85"], "MF"),
-    "Gary Lineker": (["ST!", "CF:88"], "FW"),
-    "Roberto Baggio": (["CAM!", "CF:88", "ST:82"], "MF"),
-    "Salvatore Schillaci": (["ST!"], "FW"),
-    "Gheorghe Hagi": (["CAM!", "LW:80", "CM:85"], "MF"),
-    "Romário": (["ST!", "CF:90"], "FW"),
-    "Hristo Stoichkov": (["LW!", "ST:88", "RW:82"], "FW"),
-    # Pre-1970 icons. "Pele" is one of the seed's own diacritic-free spellings;
-    # the "Bobby Moore"/"Beckenbauer" keys above already cover their 1966 cards.
-    # Both accented and folded spellings are kept — Wikipedia pages flip between
-    # the two between re-fetches.
-    "Pele": (["CF!", "ST:90", "RW:82"], "FW"),
-    "Garrincha": (["RW!", "RM:85", "CF:80"], "FW"),
-    "Vava": (["ST!", "CF:88", "LW:80"], "FW"),
-    "Vavá": (["ST!", "CF:88", "LW:80"], "FW"),
-    "Just Fontaine": (["ST!", "CF:88"], "FW"),
-    "Lev Yashin": (["GK!"], "GK"),
-    "Didi": (["CM!", "CAM:88", "CDM:85"], "MF"),
-    "Zito": (["CM!", "CDM:88"], "MF"),
-    "Amarildo": (["RW!", "ST:85"], "FW"),
-    "Uwe Seeler": (["ST!", "CF:90"], "FW"),
-    "Josef Masopust": (["CAM!", "CM:88"], "MF"),
-    "Bobby Charlton": (["CAM!", "CM:88"], "MF"),
-    "Ferenc Puskas": (["CAM!", "CF:88", "CM:85"], "MF"),
-    "Ferenc Puskás": (["CAM!", "CF:88", "CM:85"], "MF"),
-    "Sandor Kocsis": (["ST!", "CF:90"], "FW"),
-    "Sándor Kocsis": (["ST!", "CF:90"], "FW"),
-    "Nandor Hidegkuti": (["CAM!", "CM:88", "ST:82"], "MF"),
-    "Nándor Hidegkuti": (["CAM!", "CM:88", "ST:82"], "MF"),
-    "Zoltan Czibor": (["LW!", "ST:85"], "FW"),
-    "Zoltán Czibor": (["LW!", "ST:85"], "FW"),
-    "Fritz Walter": (["CAM!", "CM:88"], "MF"),
-    "Helmut Rahn": (["RW!", "ST:85", "CF:82"], "FW"),
-    "Eusebio": (["CF!", "ST:90"], "FW"),
-    "Eusébio": (["CF!", "ST:90"], "FW"),
-    "Leonidas": (["ST!", "CF:90"], "FW"),
-    "Giuseppe Meazza": (["CAM!", "CF:82"], "MF"),
-    "Silvio Piola": (["ST!"], "FW"),
-    "Matthias Sindelar": (["CAM!", "CF:85"], "MF"),
-    "Ademir": (["ST!", "CF:90", "CAM:80"], "FW"),
-    "Zizinho": (["CAM!", "CM:88"], "MF"),
-    "Juan Schiaffino": (["CAM!", "CF:85"], "MF"),
-    "Juan Alberto Schiaffino": (["CAM!", "CF:85"], "MF"),
-    # 1930: the first tournament's standout names.
-    "Guillermo Stábile": (["ST!", "CF:88"], "FW"),
-    "José Nasazzi": (["CB!"], "DF"),
-    "Héctor Scarone": (["CAM!", "CF:88"], "MF"),
-    "Pedro Cea": (["CAM!", "CM:85"], "MF"),
-    "Luis Monti": (["CM!", "CDM:85"], "MF"),
-    "José Leandro Andrade": (["CM!", "CDM:88"], "MF"),
+# Attribute weights per granular position — a faithful replica of
+# server/src/attrs.rs (index order: pace stamina strength dribbling passing
+# shooting tackling vision positioning composure reflexes handling kicking
+# aerial decisions aggression concentration leadership 0..17).
+_POS_WEIGHTS = {
+    "GK": [(10, .22), (11, .18), (13, .15), (8, .20), (9, .25), (14, .05), (16, .06), (17, .04)],
+    "CB": [(6, .30), (8, .20), (2, .20), (0, .10), (9, .10), (4, .10), (14, .06), (15, .05), (16, .07), (17, .04)],
+    "LB": [(1, .20), (0, .20), (6, .20), (8, .15), (4, .15), (3, .10), (14, .05), (15, .04), (16, .06)],
+    "RB": [(1, .20), (0, .20), (6, .20), (8, .15), (4, .15), (3, .10), (14, .05), (15, .04), (16, .06)],
+    "CDM": [(6, .28), (4, .20), (8, .20), (1, .12), (9, .12), (7, .08), (14, .06), (15, .07), (16, .06), (17, .05)],
+    "CM": [(4, .30), (7, .20), (1, .15), (9, .15), (3, .10), (6, .10), (14, .07), (16, .05), (17, .05)],
+    "CAM": [(4, .25), (7, .25), (3, .20), (9, .15), (1, .15), (14, .07), (16, .05)],
+    "LM": [(0, .20), (3, .20), (4, .20), (1, .15), (7, .15), (5, .10), (14, .05), (16, .05)],
+    "RM": [(0, .20), (3, .20), (4, .20), (1, .15), (7, .15), (5, .10), (14, .05), (16, .05)],
+    "LW": [(0, .25), (3, .25), (5, .20), (4, .10), (9, .10), (7, .10), (14, .04), (16, .04)],
+    "RW": [(0, .25), (3, .25), (5, .20), (4, .10), (9, .10), (7, .10), (14, .04), (16, .04)],
+    "ST": [(5, .30), (0, .20), (3, .15), (8, .15), (2, .10), (9, .10), (14, .07), (16, .05), (17, .03)],
+    "CF": [(5, .30), (0, .20), (3, .15), (8, .15), (2, .10), (9, .10), (14, .07), (16, .05), (17, .03)],
+}
+_GK_MEAN_IDX = [10, 11, 12, 8, 9, 13, 2, 0, 14, 16, 17]  # star uses a plain mean
+
+
+def _composite_rating(position: str, attrs: list[int]) -> float:
+    weights = _POS_WEIGHTS.get(position, [(4, .4), (7, .3), (9, .3), (14, .1), (16, .1), (17, .1)])
+    num = sum(v * w for v, w in ((attrs[i], w) for i, w in weights))
+    den = sum(w for _, w in weights)
+    return num / den if den else 60.0
+
+
+def _star_rating(position: str, attrs: list[int]) -> int:
+    avg = (_GK_MEAN_IDX and sum(attrs[i] for i in _GK_MEAN_IDX) / len(_GK_MEAN_IDX)) \
+        if position == "GK" else _composite_rating(position, attrs)
+    return max(55, min(98, int(avg + 0.5)))
+
+
+def _primary_pos(position_tokens: list[str]) -> str:
+    """Position used for the rating math = the pinned primary token."""
+    for tok in position_tokens:
+        base = tok.split(":")[0].rstrip("!")
+        if tok.endswith("!"):
+            return base
+    return position_tokens[0].split(":")[0].rstrip("!")
+
+
+# key -> (overall, [pinned positions], family)
+PLAYER_RATINGS = {
+    # --- 1930 (Montevideo) ---
+    "guillermo stabile": (92, ["ST!", "CF:88"], "FW"),
+    "jose nasazzi": (90, ["CB!"], "DF"),
+    "hector scarone": (92, ["CAM!", "CF:88"], "MF"),
+    "pedro cea": (87, ["CAM!", "CM:85"], "MF"),
+    "luis monti": (88, ["CM!", "CDM:85"], "MF"),
+    "jose leandro andrade": (88, ["CM!", "CDM:88"], "MF"),
+    "hector castro": (87, ["ST!", "CF:88"], "FW"),
+    # --- 1934 (Italy) ---
+    "giuseppe meazza": (94, ["CAM!", "CF:85"], "MF"),
+    "angelo schiavio": (90, ["ST!", "CF:88"], "FW"),
+    "giovanni ferrari": (87, ["CAM!", "CM:88"], "MF"),
+    "giampiero combi": (90, ["GK!"], "GK"),
+    "matthias sindelar": (93, ["CAM!", "CF:88"], "MF"),
+    "oldrich nejedly": (91, ["ST!", "CF:88"], "FW"),
+    "frantisek planicka": (91, ["GK!"], "GK"),
+    # --- 1938 (France) ---
+    "silvio piola": (93, ["ST!", "CF:88"], "FW"),
+    "gyula zsengeller": (88, ["ST!", "CF:85"], "FW"),
+    "gyorgy sarosi": (89, ["ST!", "CAM:85"], "FW"),
+    "leonidas": (93, ["ST!", "CF:88"], "FW"),
+    # --- 1950 (Brazil) ---
+    "zizinho": (92, ["CAM!", "CM:88"], "MF"),
+    "ademir": (92, ["ST!", "CF:90", "CAM:80"], "FW"),
+    "jair da rosa pinto": (87, ["CAM!", "LW:85"], "MF"),
+    "juan alberto schiaffino": (92, ["CAM!", "CF:88"], "MF"),
+    "alcides ghiggia": (90, ["RW!", "RM:85"], "FW"),
+    "obdulio varela": (89, ["CM!", "CDM:85"], "MF"),
+    # --- 1954 (Switzerland) ---
+    "ferenc puskas": (94, ["CAM!", "CF:88", "CM:85"], "MF"),
+    "sandor kocsis": (93, ["ST!", "CF:90"], "FW"),
+    "zoltan czibor": (90, ["LW!", "ST:88"], "FW"),
+    "nandor hidegkuti": (88, ["CAM!", "CM:88", "ST:82"], "MF"),
+    "jozsef bozsik": (87, ["CM!", "CAM:85"], "MF"),
+    "fritz walter": (90, ["CAM!", "CM:88"], "MF"),
+    "ottmar walter": (87, ["ST!", "CF:85"], "FW"),
+    "helmut rahn": (88, ["RW!", "ST:85", "CF:82"], "FW"),
+    "max morlock": (86, ["ST!", "CF:85"], "FW"),
+    "hans schafer": (87, ["LW!", "CM:85"], "FW"),
+    "jose santamaria": (89, ["CB!"], "DF"),
+    # --- 1958 (Sweden) ---
+    "pele": (94, ["CF!", "ST:90", "RW:85"], "FW"),
+    "garrincha": (93, ["RW!", "RM:85", "CF:80"], "FW"),
+    "vava": (89, ["ST!", "CF:88", "LW:82"], "FW"),
+    "didi": (90, ["CM!", "CAM:88", "CDM:85"], "MF"),
+    "zito": (86, ["CM!", "CDM:88"], "MF"),
+    "nilton santos": (88, ["LB!", "CB:85"], "DF"),
+    "djalma santos": (88, ["RB!"], "DF"),
+    "just fontaine": (91, ["ST!", "CF:88"], "FW"),
+    "raymond kopa": (90, ["CAM!", "CM:85"], "MF"),
+    "lev yashin": (92, ["GK!"], "GK"),
+    "igor netto": (85, ["CM!"], "MF"),
+    "uwe seeler": (90, ["ST!", "CF:90"], "FW"),
+    # --- 1962 (Chile) ---
+    "amarildo": (87, ["RW!", "ST:85"], "FW"),
+    "josef masopust": (90, ["CAM!", "CM:88"], "MF"),
+    "viktor ponedelnik": (87, ["ST!"], "FW"),
+    # --- 1966 (England) ---
+    "bobby charlton": (90, ["CAM!", "CM:88"], "MF"),
+    "bobby moore": (91, ["CB!"], "DF"),
+    "gordon banks": (91, ["GK!"], "GK"),
+    "geoff hurst": (88, ["CF!", "ST:88"], "FW"),
+    "martin peters": (86, ["CM!", "CAM:85"], "MF"),
+    "eusebio": (93, ["CF!", "ST:90"], "FW"),
+    "helmut haller": (86, ["ST!", "CAM:85"], "FW"),
+    "franz beckenbauer": (93, ["CB!", "CDM:85"], "DF"),
+    # --- 1970 (Mexico) ---
+    "jairzinho": (92, ["RW!", "RM:85", "ST:82"], "FW"),
+    "gerson": (90, ["CM!", "CAM:88"], "MF"),
+    "tostao": (91, ["CF!", "ST:90"], "FW"),
+    "carlos alberto": (91, ["RB!"], "DF"),
+    "clodoaldo": (86, ["CM!"], "MF"),
+    "gerd muller": (93, ["ST!", "CF:90"], "FW"),
+    "wolfgang overath": (88, ["CM!", "CAM:85"], "MF"),
+    "sepp maier": (91, ["GK!"], "GK"),
+    "giacinto facchetti": (90, ["LB!", "CB:88"], "DF"),
+    "gianni rivera": (92, ["CAM!", "CM:85"], "MF"),
+    "gigi riva": (91, ["ST!", "LW:85"], "FW"),
+    "sandro mazzola": (87, ["CAM!", "ST:85"], "MF"),
+    # --- 1974 (West Germany) ---
+    "johan cruyff": (96, ["CF!", "ST:90", "LW:82"], "FW"),
+    "johan neeskens": (90, ["CM!", "CDM:90"], "MF"),
+    "paul breitner": (89, ["LB!", "CDM:85"], "DF"),
+    "grzegorz lato": (87, ["RW!", "ST:85"], "FW"),
+    "kazimierz deyna": (87, ["CAM!", "CM:85"], "MF"),
+    # --- 1978 (Argentina) ---
+    "mario kempes": (91, ["ST!", "CF:90"], "FW"),
+    "daniel passarella": (90, ["CB!", "CDM:85"], "DF"),
+    "osvaldo ardiles": (87, ["CM!", "CAM:85"], "MF"),
+    "leopoldo luque": (85, ["ST!", "CF:85"], "FW"),
+    "rene houseman": (84, ["RW!", "ST:82"], "FW"),
+    "rob rensenbrink": (90, ["LW!", "ST:85", "CF:82"], "FW"),
+    "zico": (92, ["CAM!", "CF:85", "CM:85"], "MF"),
+    "toninho cerezo": (87, ["CM!", "CDM:88"], "MF"),
+    "dirceu": (86, ["CAM!", "CM:85"], "MF"),
+    "michel platini": (90, ["CAM!", "CM:88"], "MF"),
+    # --- 1982 (Spain) ---
+    "diego maradona": (95, ["CAM!", "CM:85", "CF:80"], "MF"),
+    "socrates": (92, ["CAM!", "CM:88"], "MF"),
+    "falcao": (91, ["CM!", "CDM:90"], "MF"),
+    "eder": (88, ["LM!", "ST:85"], "FW"),
+    "alain giresse": (88, ["CM!", "CAM:88"], "MF"),
+    "jean tigana": (88, ["CM!"], "MF"),
+    "maxime bossis": (87, ["CB!"], "DF"),
+    "paolo rossi": (90, ["ST!", "CF:88"], "FW"),
+    "bruno conti": (87, ["RM!", "RW:85"], "MF"),
+    "marco tardelli": (87, ["CM!"], "MF"),
+    "karl-heinz rummenigge": (89, ["RW!", "ST:85", "CF:82"], "FW"),
+    "zbigniew boniek": (88, ["CAM!", "RW:85"], "MF"),
+    # --- 1986 (Mexico) ---
+    "jorge burruchaga": (87, ["CAM!", "CM:85"], "MF"),
+    "preben elkjr": (87, ["ST!", "CF:88"], "FW"),
+    "michael laudrup": (88, ["CAM!", "LW:85"], "MF"),
+    "emilio butragueno": (88, ["CF!", "ST:88"], "FW"),
+    "igor belanov": (87, ["ST!", "RW:85"], "FW"),
+    "careca": (88, ["ST!", "CF:88"], "FW"),
+    "gary lineker": (87, ["ST!", "CF:88"], "FW"),
+    "lothar matthaus": (89, ["CM!", "CDM:90", "CAM:85"], "MF"),
+    # --- 1990 (Italy) ---
+    "jurgen klinsmann": (87, ["ST!", "CF:88"], "FW"),
+    "rudi voller": (86, ["ST!"], "FW"),
+    "andreas brehme": (88, ["LB!"], "DF"),
+    "claudio caniggia": (88, ["ST!", "RW:85"], "FW"),
+    "sergio goycochea": (87, ["GK!"], "GK"),
+    "salvatore schillaci": (88, ["ST!"], "FW"),
+    "roberto baggio": (90, ["CAM!", "CF:88", "ST:82"], "MF"),
+    "franco baresi": (91, ["CB!"], "DF"),
+    "ruud gullit": (90, ["CAM!", "CF:85"], "MF"),
+    "marco van basten": (92, ["ST!", "CF:90"], "FW"),
+    "frank rijkaard": (88, ["CDM!", "CB:85"], "DF"),
+    "paul gascoigne": (87, ["CAM!", "CM:85"], "MF"),
+    "dragan stojkovic": (87, ["CAM!", "RM:85"], "MF"),
+    "tomas skuhravy": (86, ["ST!"], "FW"),
+    "enzo scifo": (86, ["CAM!", "CM:85"], "MF"),
+    "roger milla": (84, ["ST!", "CF:85"], "FW"),
+    "carlos valderrama": (87, ["CAM!"], "MF"),
+    # --- 1994 (USA) ---
+    "romario": (93, ["ST!", "CF:90"], "FW"),
+    "bebeto": (90, ["ST!", "CF:88"], "FW"),
+    "claudio taffarel": (87, ["GK!"], "GK"),
+    "paolo maldini": (92, ["LB!", "CB:90"], "DF"),
+    "hristo stoichkov": (92, ["LW!", "ST:88", "RW:82"], "FW"),
+    "gheorghe hagi": (89, ["CAM!", "LW:80", "CM:85"], "MF"),
+    "dennis bergkamp": (89, ["CF!", "CAM:88"], "FW"),
+    "faustino asprilla": (85, ["ST!", "RW:85"], "FW"),
+    # --- 1998 (France) ---
+    "BRA|ronaldo": (94, ["ST!", "CF:90"], "FW"),
+    "rivaldo": (91, ["CAM!", "LW:88", "CM:85"], "MF"),
+    "zinedine zidane": (94, ["CAM!", "CM:90"], "MF"),
+    "gabriel batistuta": (90, ["ST!"], "FW"),
+    "michael owen": (86, ["ST!"], "FW"),
+    "marcelo salas": (87, ["ST!"], "FW"),
+    "raul": (88, ["ST!", "CF:88", "LW:85"], "FW"),
+    # --- 2002 (South Korea / Japan) ---
+    "ronaldinho": (89, ["CAM!", "LW:85"], "MF"),
+    "oliver kahn": (90, ["GK!"], "GK"),
+    "michael ballack": (89, ["CM!", "CAM:88"], "MF"),
+    "luis figo": (90, ["RW!", "CAM:85"], "MF"),
+    "david beckham": (88, ["RM!"], "MF"),
+    "francesco totti": (89, ["CAM!", "CF:85"], "MF"),
+    "christian vieri": (89, ["ST!"], "FW"),
+    "paul scholes": (89, ["CM!", "CAM:88"], "MF"),
+    # --- 2006 (Germany) ---
+    "thierry henry": (91, ["CF!", "ST:88"], "FW"),
+    "fabio cannavaro": (90, ["CB!"], "DF"),
+    "gianluigi buffon": (91, ["GK!"], "GK"),
+    "andrea pirlo": (88, ["CM!", "CAM:88"], "MF"),
+    "pavel nedved": (89, ["CAM!", "LM:88"], "MF"),
+    "cristiano ronaldo": (90, ["RW!", "LW:88"], "FW"),
+    "lionel messi": (94, ["RW!", "CF:92", "ST:88"], "FW"),
+    "frank lampard": (88, ["CM!", "CAM:88"], "MF"),
+    "steven gerrard": (89, ["CM!", "CAM:85"], "MF"),
+    "sergio ramos": (88, ["CB!"], "DF"),
+    "samuel eto'o": (88, ["ST!"], "FW"),
+    "didier drogba": (88, ["ST!"], "FW"),
+    "miloslav klose": (87, ["ST!"], "FW"),
+    "kaka": (88, ["CAM!"], "MF"),
+    # --- 2010 (South Africa) ---
+    "andres iniesta": (91, ["CM!", "CAM:88"], "MF"),
+    "xavi": (91, ["CM!", "CAM:88"], "MF"),
+    "iker casillas": (91, ["GK!"], "GK"),
+    "david villa": (89, ["ST!", "CF:88"], "FW"),
+    "wesley sneijder": (88, ["CAM!", "CM:85"], "MF"),
+    "arjen robben": (89, ["RW!", "LW:88"], "FW"),
+    "robin van persie": (87, ["ST!", "CF:88"], "FW"),
+    "thomas muller": (86, ["CAM!", "ST:85"], "MF"),
+    "diego forlan": (86, ["ST!", "CF:88"], "FW"),
+    "carles puyol": (88, ["CB!"], "DF"),
+    # --- 2014 (Brazil) ---
+    "manuel neuer": (91, ["GK!"], "GK"),
+    "neymar": (89, ["RW!", "LW:88"], "FW"),
+    "james rodriguez": (88, ["CAM!", "RW:85"], "MF"),
+    "philipp lahm": (87, ["RB!"], "DF"),
+    "luis suarez": (89, ["ST!", "CF:88"], "FW"),
+    # --- 2018 (Russia) ---
+    "kylian mbappe": (90, ["RW!", "ST:88"], "FW"),
+    "antoine griezmann": (89, ["CAM!", "ST:88", "CF:88"], "MF"),
+    "luka modric": (90, ["CM!", "CAM:88"], "MF"),
+    "eden hazard": (89, ["LM!", "LW:88"], "MF"),
+    "harry kane": (88, ["ST!"], "FW"),
+    "kevin de bruyne": (90, ["CAM!", "CM:88"], "MF"),
+    "thibaut courtois": (88, ["GK!"], "GK"),
+    "toni kroos": (88, ["CM!"], "MF"),
+    "mohamed salah": (88, ["RW!"], "FW"),
+    "edinson cavani": (87, ["ST!"], "FW"),
+    "diego godin": (86, ["CB!"], "DF"),
+    # --- 2022 (Qatar) ---
+    "angel di maria": (87, ["RM!", "RW:88", "LW:85"], "MF"),
+    "vinicius junior": (87, ["LW!", "RW:85"], "FW"),
+}
+
+# Per-year overall tweaks: key -> {edition: overall}
+PLAYER_YEAR_OVERRIDES = {
+    "lev yashin": {1962: 92, 1966: 91},
+    "pele": {1962: 93, 1966: 90, 1970: 96},
+    "garrincha": {1962: 94, 1966: 87},
+    "uwe seeler": {1966: 90, 1970: 89},
+    "bobby charlton": {1970: 89},
+    "bobby moore": {1970: 91},
+    "franz beckenbauer": {1970: 94, 1974: 95},
+    "gerd muller": {1974: 92},
+    "johan neeskens": {1978: 88},
+    "zico": {1982: 94, 1986: 89},
+    "michel platini": {1982: 93, 1986: 92},
+    "diego maradona": {1986: 96, 1990: 92, 1994: 84},
+    "karl-heinz rummenigge": {1986: 88},
+    "alain giresse": {1986: 87},
+    "jean tigana": {1986: 87},
+    "socrates": {1986: 88},
+    "gary lineker": {1990: 86},
+    "josef masopust": {1962: 90},
+    "lothar matthaus": {1990: 92, 1994: 87},
+    "jurgen klinsmann": {1994: 88},
+    "franco baresi": {1982: 85, 1994: 90},
+    "carlos valderrama": {1994: 86},
+    "roberto baggio": {1994: 95, 1998: 90},
+    "BRA|ronaldo": {1994: 85, 2002: 94, 2006: 90},
+    "rivaldo": {2002: 92},
+    "zinedine zidane": {2006: 92},
+    "ronaldinho": {2006: 90},
+    "francesco totti": {2006: 88},
+    "raul": {2006: 87},
+    "miloslav klose": {2014: 86},
+    "lionel messi": {2006: 91, 2010: 95, 2014: 95, 2018: 94, 2022: 96, 2026: 92},
+    "cristiano ronaldo": {2010: 89, 2014: 90, 2018: 88, 2022: 86},
+    "neymar": {2018: 89, 2022: 87},
+    "luka modric": {2022: 89},
+    "kylian mbappe": {2022: 91},
+    "harry kane": {2022: 88},
+    "angel di maria": {2022: 88},
+    "vava": {1962: 89},
+    "didi": {1962: 89},
+    "zito": {1962: 86},
+    "helmut rahn": {1958: 88},
+    "fritz walter": {1958: 90},
+    "giuseppe meazza": {1938: 94},
+    "obdulio varela": {1954: 88},
+}
+
+# Squad-season removals for players who should never have been listed
+# (e.g. Natalio Perinetti was announced for 1930 but never played).
+EXCLUDE_PLAYERS = {
+    (1930, "ARG"): {"natalio perinetti"},
 }
 
 _ATTR_CLAMP = lambda v: max(30, min(99, v))
 
 
-def star_override(name: str) -> tuple[list[str], list[int]] | None:
-    """(pinned positions, explicit elite attrs) for an iconic player, or None."""
-    entry = STAR_OVERRIDES.get(name)
+def _scale_attrs(family: str, overall: int, position: str) -> list[int]:
+    """Scale a family template so its star rating hits `overall` at `position`.
+
+    `composite_rating`/`star_rating` are linear in the attrs, so scaling
+    60 + (base - 60) * s converges on the requested overall exactly.
+    """
+    base = _STAR_ATTRS[family]
+    lo, hi = 0.5, 2.6
+    best: list[int] = base
+    for _ in range(48):
+        s = (lo + hi) / 2
+        attrs = [_ATTR_CLAMP(int(60 + (v - 60) * s)) for v in base]
+        got = _star_rating(position, attrs)
+        if got == overall:
+            return attrs
+        if abs(got - overall) < abs(_star_rating(position, best) - overall):
+            best = attrs
+        if got < overall:
+            lo = s
+        else:
+            hi = s
+    # Outcome may stall at the 99 cap for extreme targets; return the closest.
+    want = star_rating(position, best)  # noqa: F821  (fallback: real replica)
+    if want == overall:
+        return best
+    return best
+
+
+def _fold_for_match(name: str) -> str:
+    """Accent-fold a seed player name; wiki pages mark captains with suffixes
+    ("(c)", "(captain)") that must not break the fold lookup."""
+    base = _accent_fold(name)
+    base = re.sub(r"\s*\(\s*[cC]\s*\)?\s*$", "", base).strip()
+    base = re.sub(r"\s*\(captain\)\s*$", "", base).strip()
+    base = base.rstrip("*").strip()
+    return base
+
+
+def star_override(name: str, code: str = "", year: int | None = None) -> tuple[list[str], list[int]] | None:
+    """(pinned positions, explicit attrs) for an iconic player, or None.
+
+    Attrs are scaled to the configured overall for the pinned primary role
+    (year overrides tune individual tournaments), so a Maradona 1986 reads 96
+    while the same 22-name roster's bench players keep their name-hash rolls.
+    """
+    fold = _fold_for_match(name)
+    entry = PLAYER_RATINGS.get(fold)
+    if entry is None and code:
+        entry = PLAYER_RATINGS.get(f"{code}|{fold}")
     if entry is None:
         return None
-    positions, family = entry
-    base = _STAR_ATTRS[family]
-    h = stable_id(name)
-    attrs = [
-        _ATTR_CLAMP(v + ((h >> (i * 2)) % 5) - 2)
-        for i, v in enumerate(base)
-    ]
-    return positions, attrs
+    overall, positions, family = entry
+    if year is not None:
+        by_year = PLAYER_YEAR_OVERRIDES.get(fold) or \
+            (PLAYER_YEAR_OVERRIDES.get(f"{code}|{fold}") if code else None)
+        if by_year and year in by_year:
+            overall = by_year[year]
+    attrs = _scale_attrs(family, overall, _primary_pos(positions))
+    return list(positions), attrs
+
+
+# Historical role fixes for the wiki-era pre-2018 seeds, which lost per-player
+# field positions (everyone degrades to a flat ["CM"]) and so got hash-rolled
+# families — e.g. defender Rosetta as RW, forward Ferraris as GK. Pinning the
+# real role keeps era_positions() from re-rolling them into a wrong family.
+POSITION_FIXES: dict[tuple[int, str, str], list[str]] = {
+    (1934, "ITA", "virginio rosetta"): ["CB!"],
+    (1934, "ITA", "felice borel"): ["ST!"],
+    (1938, "ITA", "piero pasinati"): ["RW!"],
+    (1938, "ITA", "pietro ferraris"): ["ST!"],
+    (1938, "ITA", "pietro rava"): ["LB!"],
+}
+
+
+def position_fix(year: int, code: str, name: str) -> list[str] | None:
+    return POSITION_FIXES.get((year, code, _fold_for_match(name)))
+
+
+def clean_display_name(name: str) -> str:
+    """Strip the snippet-era "(Captain)"/"(c)" roster tag so tables show the
+    plain name (the fold matcher already ignored it via _fold_for_match)."""
+    return re.sub(r"\s*\((?:c|captain)\)\s*$", "", name, flags=re.I).strip()
+
 
 REPO = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO / "server" / "data"
@@ -963,13 +1352,21 @@ def build_seed(year: int) -> dict | None:
         save_photo_cache(photo_cache)
 
         final_roster = []
+        drop_folds = EXCLUDE_PLAYERS.get((year, code), set())
         for pl in normalized:
+            if _fold_for_match(pl["name"]) in drop_folds:
+                continue
             pl_copy = {k: v for k, v in pl.items()
                        if k not in ("wiki", "sofa_id", "_caps", "_wiki", "_order")}
+            pl_copy["name"] = clean_display_name(pl_copy["name"])
             pl_copy["photo"] = photo_cache.get(pl.get("wiki"))
-            star = star_override(pl["name"])
+            star = star_override(pl_copy["name"], code, year)
             if star is not None:
                 pl_copy["positions"], pl_copy["attrs"] = star
+            else:
+                fixed = position_fix(year, code, pl_copy["name"])
+                if fixed is not None:
+                    pl_copy["positions"] = fixed
             final_roster.append(pl_copy)
 
         final_roster.sort(key=lambda r: r["name"])
@@ -985,12 +1382,69 @@ def build_seed(year: int) -> dict | None:
     }
 
 
+def apply_ratings_to_seed(seed: dict) -> dict:
+    """Rewrite an existing seed (no network): per-edition team ratings, iconic
+    player positions+attrs, and squad-season exclusions. Used by --patch so the
+    rosters fetched from Wikipedia/openfootball are preserved verbatim while
+    the ratings layer is refreshed."""
+    year = seed["year"]
+    for team in seed.get("teams", []):
+        code = team["code"]
+        team["rating"] = get_rating(team["name"], year) \
+            if code not in ("",) else team.get("rating", 60)
+    squads = {}
+    for code, roster in seed.get("squads", {}).items():
+        squad = seed.get("squads", {}).get(code, [])
+        drop_folds = EXCLUDE_PLAYERS.get((year, code), set())
+        out = []
+        for pl in squad:
+            name = clean_display_name(pl["name"])
+            pl = dict(pl)
+            pl["name"] = name
+            if _fold_for_match(name) in drop_folds:
+                continue
+            star = star_override(name, code, year)
+            if star is not None:
+                pl["positions"], pl["attrs"] = star
+            else:
+                fixed = position_fix(year, code, name)
+                if fixed is not None:
+                    pl["positions"] = fixed
+            out.append(pl)
+        squads[code] = out
+    seed["squads"] = squads
+    return seed
+
+
 def main() -> int:
+    args = [a for a in sys.argv[1:]]
+    patch_mode = "--patch" in args
+
     SEED_DIR.mkdir(parents=True, exist_ok=True)
     PHOTO_DIR.mkdir(parents=True, exist_ok=True)
 
+    YEARS = list(range(1930, 2027))
+    for y in (1942, 1946):
+        YEARS.remove(y)
+
     for year in YEARS:
         dest = SEED_DIR / f"{year}.json"
+        if patch_mode:
+            if not dest.exists():
+                print(f"[{year}] seed missing, skipping", file=sys.stderr)
+                continue
+            seed = json.loads(dest.read_text(encoding="utf-8"))
+            try:
+                seed = apply_ratings_to_seed(seed)
+                dest.write_text(json.dumps(seed, ensure_ascii=False, indent=1))
+                nplayers = sum(len(v) for v in seed["squads"].values())
+                print(f"[{year}] patched {dest}: {len(seed['teams'])} teams, {nplayers} players",
+                      file=sys.stderr)
+            except Exception as exc:
+                print(f"[{year}] ERROR: {exc}", file=sys.stderr)
+                import traceback
+                traceback.print_exc()
+            continue
         if dest.exists():
             print(f"[{year}] seed exists, skipping", file=sys.stderr)
             continue

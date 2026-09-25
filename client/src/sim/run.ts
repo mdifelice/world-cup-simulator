@@ -136,6 +136,35 @@ export interface RunOptions {
 const BASE_GOALS = 0.88;
 const HOME_FACTOR = 1.08;
 
+// Era goal-volume factor, keyed by tournament year: the engine's baseline goal
+// rate is calibrated to modern football, so pre-1970 editions are scaled up
+// toward their real historical goals-per-match (and a few modern lows down).
+// 2026 has no settled historical figure, so it keeps the neutral factor of 1.
+const ERA_GOALS: Record<number, number> = {
+  1930: 1.74,
+  1934: 1.93,
+  1938: 2.37,
+  1950: 1.73,
+  1954: 2.66,
+  1958: 1.74,
+  1962: 1.36,
+  1966: 1.37,
+  1970: 1.37,
+  1974: 1.16,
+  1978: 1.34,
+  1982: 1.27,
+  1986: 1.12,
+  1990: 1.03,
+  1994: 1.29,
+  1998: 1.24,
+  2002: 1.25,
+  2006: 1.03,
+  2010: 0.99,
+  2014: 1.40,
+  2018: 1.28,
+  2022: 1.44,
+};
+
 // ---------------------------------------------------------------------------
 // Squad model
 // ---------------------------------------------------------------------------
@@ -1409,7 +1438,7 @@ class Engine {
         retune(aShape, aiStrategy(aw - hs, minute, awayRed != null), awayRed ? awayRed[0] : null);
       applyKeeper(hShape, homePlan, minute);
       applyKeeper(aShape, awayPlan, minute);
-      const r = simulateMinute(() => this.rng.unit(), hShape, aShape, minute);
+      const r = simulateMinute(() => this.rng.unit(), hShape, aShape, minute, ERA_GOALS[this.year] ?? 1);
       if (r.goal) {
         const team = r.goal.teamId;
         const [xi, opp, red] = team === home ? [homeXi, awayXi, homeRed] : [awayXi, homeXi, awayRed];
