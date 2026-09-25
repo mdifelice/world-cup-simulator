@@ -63,6 +63,8 @@ export interface PlayShape {
   press: number;
   /** Deep block bias: higher means the team defends deeper / shoots from range. */
   deep: number;
+  /** Set once the starting keeper has been replaced (injury/sending-off). */
+  keeperReplaced?: boolean;
 }
 
 const familyOf = (pos: string): "GK" | "DF" | "MF" | "FW" => {
@@ -87,7 +89,7 @@ const avg = (xs: PlayerRow[]): number =>
   xs.length ? xs.reduce((s, p) => s + p.overall, 0) / xs.length : 60;
 
 /** Rating bonus per point of team rating above the 75 anchor. */
-const RATING_BIAS = 0.45;
+export const RATING_BIAS = 0.45;
 
 /** Build the play shape of a team from its XI and tactical choices. */
 export function shapeOf(inp: ShapeInputs): PlayShape {
@@ -128,6 +130,46 @@ export function shapeOf(inp: ShapeInputs): PlayShape {
     gkAv: gk ? gk.overall : 60,
     ...coeffs,
   };
+}
+
+/** Swap the starting keeper mid-match (injury or sending-off).
+ *
+ *  - `next` is a signed-on sub keeper: he goes in as the team's new
+ *    goalkeeper and the outfield line is untouched.
+ *  - `emergency` is an outfield player forced into the goal: he leaves his zone
+ *    (the team now defends with one fewer outfield man) and fronts a ×0.88
+ *    shot-stopping rating, so a keeper-less side visibly leaks goals.
+ *  - With no keeper at all left on the pitch, the goal is left to a very low
+ *    default rating. Either way the swap is one-way: it happens once. */
+export function replaceKeeper(
+  shape: PlayShape,
+  next: PlayerRow | null,
+  emergency: PlayerRow | null,
+): void {
+  if (shape.keeperReplaced) return;
+  if (next) {
+    shape.gk = { ...next, position: "GK" };
+    shape.gkAv = next.overall;
+  } else if (emergency) {
+    shape.df = shape.df.filter((p) => p.id !== emergency.id);
+    shape.mf = shape.mf.filter((p) => p.id !== emergency.id);
+    shape.fw = shape.fw.filter((p) => p.id !== emergency.id);
+    const g: PlayerRow = {
+      ...emergency,
+      position: "GK",
+      overall: clampN(Math.round(emergency.overall * 0.88), 30, 99),
+    };
+    shape.gk = g;
+    shape.dfAv = avg(shape.df);
+    shape.mfAv = avg(shape.mf);
+    shape.fwAv = avg(shape.fw);
+    shape.gkAv = g.overall;
+  } else {
+    shape.gk = null;
+    shape.gkAv = 45;
+  }
+  shape.outfield = [...shape.df, ...shape.mf, ...shape.fw];
+  shape.keeperReplaced = true;
 }
 
 /** How an AI coach reacts to the scoreboard and the clock (focus team exempt). */
@@ -269,7 +311,7 @@ export function simulateMinute(
             ? def.mfAv
             : def.dfAv * 0.6 + def.mfAv * 0.4) + def.space * 18 + (shortDef ? 7 : 0);
       const atkVal = fighter.overall + atk.risk * 5;
-      const pAdv = D(0.48 + damp(atkVal - markerVal) * 0.016);
+      const pAdv = D(0.50 + damp(atkVal - markerVal) * 0.019);
       if (unit() < pAdv) {
         const jump = unit() < 0.14 + atk.risk * 0.06 ? 2 : 1;
         z = Math.min(4, z + jump);
@@ -297,9 +339,9 @@ export function simulateMinute(
     const pGoal = Math.max(
       0.03,
       Math.min(
-        0.28,
-        0.085 +
-          damp(shooter.overall - gkOverall) * 0.015 +
+        0.30,
+        0.106 +
+          damp(shooter.overall - gkOverall) * 0.016 +
           atk.risk * 0.02 -
           fromRange * 0.05 +
           (shortDef ? 0.07 : 0),

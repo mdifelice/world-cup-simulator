@@ -463,14 +463,15 @@ pub(crate) fn family_of(pos: &str) -> i32 {
 }
 
 /// Spreads a team rating across the 18 attributes for players without explicit
-/// EA ratings, so fallback players read as solid-but-unspectacular (roughly the
-/// 60s-70s band) instead of outshining EA-rated stars. The rating is squashed
-/// into a modest quality band and then nudged per position family: forwards get
-/// pace/shooting/dribbling, defenders tackling/aerial, GKs the shot-stopping
-/// group, midfielders passing/vision.
+/// EA ratings. The rating is mapped onto a real quality band (a 90+ team's
+/// stars read near their ratings, mid-table teams sit in the 60s-70s, minnows
+/// well below) and nudged per position family: forwards get pace/shooting/
+/// dribbling, defenders tackling/aerial, GKs the shot-stopping group,
+/// midfielders passing/vision. The 85% slope keeps some air above the EA-rated
+/// players of the 2022/2026 editions, whose explicit attrs stay the ceiling.
 pub(crate) fn attrs_for(rating: i32, name_len: usize, family: i32) -> [i32; 18] {
     let r = rating.clamp(35, 99);
-    let q = 40 + (r - 40) * 45 / 100;
+    let q = 40 + (r - 40) * 82 / 100;
     let nl = name_len as i32;
     let clamp = |v: i32| v.clamp(30, 99);
     let j = |v: i32| clamp(v + q + nl % 5 - 2);

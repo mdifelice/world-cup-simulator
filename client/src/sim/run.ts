@@ -12,11 +12,14 @@
 
 import { Rng, match_seed } from "./seed";
 import {
+  RATING_BIAS,
   aiStrategy,
+  clampN,
   momentumOf,
   type MinuteResult,
   type PlayShape,
   type PlayerRow,
+  replaceKeeper,
   retune,
   shapeOf,
   simulateMinute,
@@ -146,6 +149,26 @@ interface SquadPlayer {
   shirt_number: number | null;
   overall: number;
   aggression: number;
+}
+
+/** Engine-authoritative knock/injury: decided in playMatch so the score
+ *  simulation (keeper replacement reaction) and the event feed agree. */
+interface EngineInjury {
+  minute: number;
+  bannedFor: number;
+  player: SquadPlayer;
+}
+
+/** How a team copes with a keeper leaving the pitch (red card or injury). */
+interface KeeperPlan {
+  /** First minute the keeper is unavailable (red/injury minute). */
+  outAt: number;
+  /** A bench keeper is signed on as a sub (replaces the starter). */
+  bench: boolean;
+  /** The bench keeper, when `bench` is true. */
+  benchPlayer: SquadPlayer | null;
+  /** Outfield player forced to take the gloves (no bench keeper left). */
+  emergencyId: number | null;
 }
 
 /** Best (lowest) slot penalty across a player's positions — mirrors
@@ -353,8 +376,29 @@ const KO_DATES_2026: Record<string, string[]> = {
   F: ["2026-07-19"],
 };
 
-/** Real knockout dates for the 1998–2018 editions, by phase. */
+/** Real knockout dates for the 1986–2018 editions, by phase. */
 const KO_DATES_LEGACY: Record<number, Record<string, string[]>> = {
+  1986: {
+    R16: ["1986-06-15", "1986-06-16", "1986-06-17", "1986-06-18"],
+    QF: ["1986-06-21", "1986-06-22"],
+    SF: ["1986-06-24", "1986-06-25"],
+    THIRD: ["1986-06-28"],
+    F: ["1986-06-29"],
+  },
+  1990: {
+    R16: ["1990-06-23", "1990-06-24", "1990-06-25", "1990-06-26"],
+    QF: ["1990-06-30", "1990-07-01"],
+    SF: ["1990-07-03", "1990-07-04"],
+    THIRD: ["1990-07-07"],
+    F: ["1990-07-08"],
+  },
+  1994: {
+    R16: ["1994-07-02", "1994-07-03", "1994-07-04", "1994-07-05"],
+    QF: ["1994-07-09", "1994-07-10"],
+    SF: ["1994-07-13"],
+    THIRD: ["1994-07-16"],
+    F: ["1994-07-17"],
+  },
   1998: {
     R16: ["1998-06-27", "1998-06-28", "1998-06-29"],
     QF: ["1998-07-03", "1998-07-04"],
@@ -723,18 +767,23 @@ class Engine {
   }
 
   drawRed(xi: SquadPlayer[]): [number, SquadPlayer] | null {
-    const pool = xi.filter((p) => p.position !== "GK");
-    if (!pool.length) return null;
+    if (!xi.length) return null;
     const avg = xi.reduce((s, p) => s + p.aggression, 0) / xi.length;
     const prob = clamp(0.045 * (avg / 60), 0.005, 0.18);
     if (this.rng.unit() >= prob) return null;
-    const total = pool.reduce((s, p) => s + p.aggression * p.aggression, 0);
+    // Keepers can be sent off too; their (usually low) aggression plus a
+    // 0.6 weight keeps GK reds the rare event they are.
+    const pool = xi.map((p) => ({
+      p,
+      w: p.aggression * p.aggression * (p.position === "GK" ? 0.6 : 1),
+    }));
+    const total = pool.reduce((s, e) => s + e.w, 0);
     let roll = this.rng.unit() * total;
-    let chosen = pool[pool.length - 1];
-    for (const p of pool) {
-      roll -= p.aggression * p.aggression;
+    let chosen = pool[pool.length - 1].p;
+    for (const e of pool) {
+      roll -= e.w;
       if (roll <= 0) {
-        chosen = p;
+        chosen = e.p;
         break;
       }
     }
@@ -747,6 +796,60 @@ class Engine {
     if (!pool.length) pool = oppXi.filter((p) => p.position !== "GK");
     if (!pool.length) return null;
     return pool[Math.min(Math.floor(this.rng.unit() * pool.length), pool.length - 1)];
+  }
+
+  /** Apply the same form/morale/team-rating adjustment shapeOf uses, so a
+   *  bench keeper signed on mid-match is graded on the same scale as the XI. */
+  adjustedRow(p: SquadPlayer, teamId: number): PlayerRow {
+    const ctx = this.teamContext(teamId);
+    return {
+      id: p.id,
+      name: p.name,
+      position: "GK",
+      overall: clampN(
+        p.overall +
+          (ctx.form / 100 - 0.5) * 4 +
+          (ctx.morale / 100 - 0.5) * 4 +
+          (ctx.rating - 75) * RATING_BIAS,
+        30,
+        99,
+      ),
+      aggression: p.aggression,
+    };
+  }
+
+  /** Decide, without touching the RNG stream, how a team copes when its
+   *  keeper is sent off or injured from `outAt`. A bench keeper is brought on
+   *  when one exists; otherwise the weakest outfield player takes the gloves. */
+  keeperPlan(
+    team: number,
+    xi: SquadPlayer[],
+    red: [number, SquadPlayer] | null,
+    injury: EngineInjury | null,
+    bannedAtKickoff: Set<number>,
+  ): KeeperPlan | null {
+    const outs: Array<{ at: number }> = [];
+    if (red && red[1].position === "GK") outs.push({ at: red[0] });
+    if (injury && injury.player.position === "GK") outs.push({ at: injury.minute });
+    if (!outs.length) return null;
+    outs.sort((a, b) => a.at - b.at);
+    const outAt = outs[0].at;
+    const xiIds = new Set(xi.map((p) => p.id));
+    const benchGK = this.squad(team)
+      .filter((p) => p.position === "GK" && !xiIds.has(p.id) && !bannedAtKickoff.has(p.id))
+      .sort((a, b) => b.overall - a.overall)[0] ?? null;
+    if (benchGK) return { outAt, bench: true, benchPlayer: benchGK, emergencyId: null };
+    let emergency: SquadPlayer | null = null;
+    for (const p of xi) {
+      if (p.position === "GK") continue;
+      if (!emergency || p.overall < emergency.overall) emergency = p;
+    }
+    return {
+      outAt,
+      bench: false,
+      benchPlayer: null,
+      emergencyId: emergency ? emergency.id : null,
+    };
   }
 
   scorerWeight(p: SquadPlayer): number {
@@ -990,6 +1093,8 @@ class Engine {
     xi: SquadPlayer[],
     goals: Goal[],
     redCards: [number, SquadPlayer] | null,
+    injury: EngineInjury | null,
+    gkPlan: KeeperPlan | null,
     maxSubs: number,
     bannedAtKickoff: Set<number>,
   ): void {
@@ -1029,59 +1134,61 @@ class Engine {
       const [minute] = redCards;
       push(minute, "red", "", redCards[1], null);
       subbedOut.add(redCards[1].id);
-      // If red card is GK, handle GK substitution
-      if (redCards[1].position === "GK") {
-        // Find a GK on the bench
-        const gkBench = bench.find(p => p.position === "GK");
-        if (gkBench) {
-          push(redCards[0], "sub", "GK sent off", redCards[1], gkBench);
+      // Keeper sent off: the engine already chose between a bench keeper
+      // and an outfield stop-gap; mirror that in the feed.
+      if (redCards[1].position === "GK" && gkPlan) {
+        if (gkPlan.bench && gkPlan.benchPlayer) {
+          push(minute, "sub", "GK sent off", redCards[1], gkPlan.benchPlayer);
+          subsUsed += 1;
+          subbedOut.add(redCards[1].id);
+          subbedIn.add(gkPlan.benchPlayer.id);
         } else {
-          // No GK on bench, field player takes GK
-          const fieldPlayer = xi.find(p => p.id !== redCards[1].id);
-          if (fieldPlayer) {
-            push(redCards[0], "sub", "GK sent off, field player takes GK", fieldPlayer, fieldPlayer);
+          const stopGap = xi.find((p) => p.id === gkPlan.emergencyId) ?? null;
+          if (stopGap) {
+            push(minute, "sub", "GK sent off, field player takes GK", redCards[1], stopGap);
+          } else {
+            push(minute, "injury", "No keeper left on the pitch", redCards[1], null);
           }
         }
       }
     }
 
-    // Injuries: roughly 1-in-11 per side per match, lasting 1-4 matches. Can
-    // happen at any minute during the match. An injured player cannot carry
-    // on, so he is substituted whenever a replacement and an unused
-    // substitution remain; if the bench or the replacement allowance is
-    // exhausted he stays on and plays through the pain. Either way he misses
-    // the next 1-4 matches.
-    if (this.rng.unit() < 0.09) {
-      const w = this.rng.unit();
-      const bannedFor = w < 0.3 ? 1 : w < 0.6 ? 2 : w < 0.85 ? 3 : 4;
-      const outp = this.pickField(xi);
-      if (outp) {
-        const isGK = outp.position === "GK";
-        const minute = Math.min(1 + Math.floor(this.rng.unit() * 90), 90);
-        let inp: SquadPlayer | null = null;
-        if (subsUsed < maxSubs && bench.length > 0) {
-          // A keeper can only be replaced by a keeper from the bench.
-          if (isGK) inp = this.pickInFromBench(bench, "GK", subbedIn);
-          if (!inp) inp = this.pickInFromBench(bench, null, subbedIn);
+    // Injuries are decided by the engine (playMatch) so the simulated score
+    // reacts to them; here we only narrate them. An injured keeper is replaced
+    // by the bench keeper the engine already brought on; other players are
+    // substituted whenever a replacement and an unused substitution remain,
+    // otherwise they play through the pain. Either way the next 1-4 matches
+    // are missed.
+    if (injury) {
+      const { minute, player: outp, bannedFor } = injury;
+      let inp: SquadPlayer | null = null;
+      let detail = "";
+      if (outp.position === "GK") {
+        // The engine's keeper plan has the replacement ready.
+        if (gkPlan?.bench && gkPlan.benchPlayer) {
+          inp = gkPlan.benchPlayer;
+        } else if (gkPlan?.emergencyId != null) {
+          detail = "GK injured, field player takes GK";
+          inp = xi.find((p) => p.id === gkPlan.emergencyId) ?? null;
         }
-        if (inp) {
-          push(minute, "injury", "", outp, inp);
-          subsUsed += 1;
-          subbedOut.add(outp.id);
-          subbedIn.add(inp.id);
-        } else {
-          // No replacement available (subs or bench exhausted): plays on early.
-          push(minute, "injury", "", outp, null);
-          subbedOut.add(outp.id);
-        }
-        this.suspensions.set(outp.id, [bannedFor, "injury"]);
+      } else if (subsUsed < maxSubs && bench.length > 0) {
+        inp = this.pickInFromBench(bench, null, subbedIn);
       }
+      if (inp) {
+        push(minute, "injury", detail, outp, inp);
+        subsUsed += 1;
+        subbedOut.add(outp.id);
+        subbedIn.add(inp.id);
+      } else if (outp.position !== "GK") {
+        // No replacement available (subs or bench exhausted): plays on early.
+        push(minute, "injury", "", outp, null);
+        subbedOut.add(outp.id);
+      } else {
+        push(minute, "injury", "No keeper left on the pitch", outp, null);
+        subbedOut.add(outp.id);
+      }
+      this.suspensions.set(outp.id, [bannedFor, "injury"]);
     }
-
-    // Red card for this team (if applicable)
-    // This is called from playMatch where red card is already determined
-    // We'll handle red card events here for the user's team
-    // Red card is passed as parameter (minute and player)
 
     // Half-time reaction: chase or protect the lead.
     const d46 = gfAt(46) - gaAt(46);
@@ -1142,6 +1249,22 @@ class Engine {
     const homeRed = this.drawRed(homeXi);
     const awayRed = this.drawRed(awayXi);
 
+    // Injuries (engine-authoritative): ~1-in-11 per side, 1-4 matches out, any
+    // minute. Decided here — before the minute loop — so a keeper knocked out
+    // mid-match actually bends the simulated score, and so the event feed
+    // below agrees with what happened on the pitch.
+    const drawInjury = (xi: SquadPlayer[]): EngineInjury | null => {
+      if (this.rng.unit() >= 0.09) return null;
+      const w = this.rng.unit();
+      const bannedFor = w < 0.3 ? 1 : w < 0.6 ? 2 : w < 0.85 ? 3 : 4;
+      const player = this.pickField(xi);
+      if (!player) return null;
+      const minute = Math.min(1 + Math.floor(this.rng.unit() * 90), 90);
+      return { minute, bannedFor, player };
+    };
+    const homeInj = drawInjury(homeXi);
+    const awayInj = drawInjury(awayXi);
+
     const toRow = (p: SquadPlayer): PlayerRow => ({
       id: p.id,
       name: p.name,
@@ -1173,6 +1296,33 @@ class Engine {
     const hShape = makeShape(home, homeXi, cfgStrategy(home), homeRed);
     const aShape = makeShape(away, awayXi, cfgStrategy(away), awayRed);
 
+    // Players suspended at kickoff (from earlier matches), used to keep them
+    // off the bench for keeper replacement and the event feed.
+    const bannedAtKickoff = new Set<number>();
+    for (const team of [home, away]) {
+      for (const p of this.squad(team)) {
+        if (this.suspended(p.id)) bannedAtKickoff.add(p.id);
+      }
+    }
+
+    // Keeper replacement plans: if either side loses its GK (red/injury), a
+    // bench keeper or (failing that) a weary outfielder takes the gloves from
+    // the incident minute — a side playing with no keeper leaks goals.
+    const homePlan = this.keeperPlan(home, homeXi, homeRed, homeInj, bannedAtKickoff);
+    const awayPlan = this.keeperPlan(away, awayXi, awayRed, awayInj, bannedAtKickoff);
+
+    const applyKeeper = (shape: PlayShape, plan: KeeperPlan | null, minute: number): void => {
+      if (!plan || minute < plan.outAt || shape.keeperReplaced) return;
+      if (plan.bench && plan.benchPlayer) {
+        replaceKeeper(shape, this.adjustedRow(plan.benchPlayer, shape.id), null);
+      } else if (plan.emergencyId != null) {
+        const emergency = shape.outfield.find((p) => p.id === plan.emergencyId) ?? null;
+        replaceKeeper(shape, null, emergency);
+      } else {
+        replaceKeeper(shape, null, null);
+      }
+    };
+
     const goals: Goal[] = [];
     let hs = 0;
     let aw = 0;
@@ -1194,6 +1344,8 @@ class Engine {
         retune(hShape, aiStrategy(hs - aw, minute, homeRed != null), homeRed ? homeRed[0] : null);
       if (focus !== away)
         retune(aShape, aiStrategy(aw - hs, minute, awayRed != null), awayRed ? awayRed[0] : null);
+      applyKeeper(hShape, homePlan, minute);
+      applyKeeper(aShape, awayPlan, minute);
       const r = simulateMinute(() => this.rng.unit(), hShape, aShape, minute);
       if (r.goal) {
         const team = r.goal.teamId;
@@ -1211,20 +1363,12 @@ class Engine {
       rec(m, simMinute(m, false, false));
     }
 
-    // Players suspended at kickoff, needed up-front for event generation.
-    const bannedAtKickoff = new Set<number>();
-    for (const team of [home, away]) {
-      for (const p of this.squad(team)) {
-        if (this.suspended(p.id)) bannedAtKickoff.add(p.id);
-      }
-    }
-
     // Live feed (subs, injuries, reds, strategy, tactics) for this match.
     const events: LiveEvent[] = [];
     {
       const maxSubs = maxSubsFor(this.year);
-      this.genMatchEvents(events, home, homeXi, goals, homeRed, maxSubs, bannedAtKickoff);
-      this.genMatchEvents(events, away, awayXi, goals, awayRed, maxSubs, bannedAtKickoff);
+      this.genMatchEvents(events, home, homeXi, goals, homeRed, homeInj, homePlan, maxSubs, bannedAtKickoff);
+      this.genMatchEvents(events, away, awayXi, goals, awayRed, awayInj, awayPlan, maxSubs, bannedAtKickoff);
       events.sort((a, b) => a.minute - b.minute);
     }
 

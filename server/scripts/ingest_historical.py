@@ -71,7 +71,8 @@ TEAM_CODES = {
     "Soviet Union": "URS", "West Germany": "FRG", "Yugoslavia": "YUG",
     # 1994
     "Greece": "GRE", "Nigeria": "NGA", "Saudi Arabia": "KSA", "Ireland": "IRL",
-    "USSR": "URS", "United States": "USA",
+    "USSR": "URS", "United States": "USA", "Cameroon": "CMR", "Russia": "RUS",
+    "United Arab Emirates": "UAE",
     # 1998
     "Croatia": "CRO", "Jamaica": "JAM", "Japan": "JPN", "South Africa": "RSA",
     "FR Yugoslavia": "YUG",
@@ -155,6 +156,7 @@ FLAG_CODES = {
     "BIH": "🇧🇦", "ISL": "🇮🇸", "PAN": "🇵🇦", "DR Congo": "🇨🇩",
     "Russia": "🇷🇺", "Czech Republic": "🇨🇿", "DR Congo": "🇨🇩",
     "South Korea": "🇰🇷", "Ivory Coast": "🇨🇮", "Trinidad & Tobago": "🇹🇹",
+    "CAN": "🇨🇦", "DEN": "🇩🇰", "IRQ": "🇮🇶", "CMR": "🇨🇲", "RUS": "🇷🇺", "UAE": "🇦🇪",
 }
 
 # Strength ratings by team code (FIFA ranking–inspired)
@@ -170,6 +172,10 @@ RATINGS = {
     "TRI": 45, "HAI": 44, "ZAI": 43, "HKG": 42, "SLV": 41, "KUW": 40,
     "IRQ": 39, "NZL": 38, "CHN": 37, "UAE": 36, "KOR": 35, "PRK": 34,
     "SVN": 33, "SVK": 32, "BIH": 31, "ISL": 30, "PAN": 29,
+    # 1986–1994 editions
+    "FRG": 90, "URS": 84, "YUG": 80, "TCH": 70, "ROU": 70, "BUL": 72,
+    "RUS": 80, "HUN": 64, "SCO": 66, "NIR": 60, "AUT": 66, "NOR": 68,
+    "GRE": 58, "IRL": 70, "CMR": 68, "DEN": 73,
 }
 
 REPO = Path(__file__).resolve().parents[2]
@@ -794,7 +800,10 @@ def build_seed(year: int) -> dict | None:
         # Normalize every squad to the edition's uniform official size: keep the
         # Wikipedia squad (the real pre-tournament squad) and pad any short team
         # with the openfootball players who actually appeared, most-used first.
-        target = 22 if year == 1998 else 23
+        # Wikipedia pages list the official pre-tournament squad (22 for
+        # 1982–1994, 23 from 1998 on); pad any short team with the openfootball
+        # players who actually appeared, most-used first.
+        target = 22 if year <= 1994 else 23
         official = sorted(
             (pl for pl in merged.values() if pl.get("_wiki")),
             key=lambda r: r["_order"],
