@@ -490,14 +490,17 @@ pub(crate) fn family_of(pos: &str) -> i32 {
 /// stars read near their ratings, mid-table teams sit in the 60s-70s, minnows
 /// well below) and nudged per position family: forwards get pace/shooting/
 /// dribbling, defenders tackling/aerial, GKs the shot-stopping group,
-/// midfielders passing/vision. The 85% slope keeps some air above the EA-rated
+/// midfielders passing/vision. A deterministic per-player lift drawn from the
+/// name hash (−14..+14) breaks squads out of one flat band: a team fields a
+/// few genuine stars, a solid middle and real depth — and the roster stars
+/// actually separate teammates. The 85% slope keeps some air above the EA-rated
 /// players of the 2022/2026 editions, whose explicit attrs stay the ceiling.
-pub(crate) fn attrs_for(rating: i32, name_len: usize, family: i32) -> [i32; 18] {
+pub(crate) fn attrs_for(rating: i32, name: &str, family: i32) -> [i32; 18] {
     let r = rating.clamp(35, 99);
     let q = 40 + (r - 40) * 82 / 100;
-    let nl = name_len as i32;
+    let p = (hash_str(name) % 29) as i32 - 14;
     let clamp = |v: i32| v.clamp(30, 99);
-    let j = |v: i32| clamp(v + q + nl % 5 - 2);
+    let j = |v: i32| clamp(v + q + p);
     match family {
         // GK: keepers hang on their shot-stopping + composure/aerial
         0 => [
@@ -694,7 +697,7 @@ fn seed_edition(conn: &Connection, year: i32) -> rusqlite::Result<()> {
                     out.copy_from_slice(v);
                     out
                 }
-                _ => attrs_for(base + delta, p.name.len(), family_of(&pos)),
+                _ => attrs_for(base + delta, &p.name, family_of(&pos)),
             };
             conn.execute(
                 "INSERT INTO players (name, pace, stamina, strength, dribbling, passing, shooting,
@@ -830,110 +833,131 @@ fn fam_of_token(t: &str) -> u8 {
 }
 
 fn era_positions(year: i32, code: &str, players: &[SeedPlayer]) -> Vec<Vec<String>> {
-    let distinct: HashSet<&str> = players
+    // Pinned cards — any seed position token carrying a trailing "!" — are
+    // declared exactly as written: iconic players keep their real role instead
+    // of a name-hash formation roll. The rest of the squad resolves below.
+    let pinned: Vec<bool> = players
         .iter()
-        .filter_map(|p| p.positions.first().map(|s| s.as_str()))
+        .map(|p| p.positions.iter().any(|s| s.ends_with('!')))
+        .collect();
+    let declared: Vec<Vec<String>> = players
+        .iter()
+        .map(|p| {
+            p.positions
+                .iter()
+                .map(|s| s.trim_end_matches('!').to_string())
+                .collect()
+        })
+        .collect();
+
+    let loose: Vec<usize> = pinned
+        .iter()
+        .enumerate()
+        .filter_map(|(i, &is_pinned)| if is_pinned { None } else { Some(i) })
+        .collect();
+
+    let mut resolved = declared.clone();
+    if loose.is_empty() {
+        return resolved;
+    }
+
+    let distinct: HashSet<&str> = loose
+        .iter()
+        .filter_map(|&i| players[i].positions.first().map(|s| s.as_str()))
         .collect();
     if distinct.len() > 1 {
         // Real positional data (2018+, 2022/2026 demo rosters): keep the
         // declared primary, graft the multi-position secondaries on top.
-        return players
-            .iter()
-            .map(|p| {
-                let raw: Vec<&str> = p.positions.iter().map(|s| s.as_str()).collect();
-                // A trailing "!" pins the card exactly: strip the marker and
-                // skip enrichment, so a pinned "LB!" card stays LB alone
-                // (a CB groomed as a pure full-back shouldn't inherit a
-                // box-to-box set of extras).
-                let pinned = raw.iter().any(|s| s.ends_with('!'));
-                let tokens: Vec<String> = raw
-                    .iter()
-                    .map(|s| s.trim_end_matches('!').to_string())
-                    .collect();
-                if pinned {
-                    return tokens;
-                }
-                let mut v = enrich_positions(
-                    tokens.first().map(|s| s.as_str()).unwrap_or("CM"),
-                    hash_str(&format!("{code}|{}", p.name)),
-                );
-                for extra in tokens.iter().skip(1) {
-                    match v.iter().position(|e| pos_of_token(e) == pos_of_token(extra)) {
-                        Some(i) if fam_of_token(extra) > fam_of_token(&v[i]) => v[i] = extra.clone(),
-                        None => v.push(extra.clone()),
-                        _ => {}
+        for &i in &loose {
+            let mut v = enrich_positions(
+                resolved[i].first().map(|s| s.as_str()).unwrap_or("CM"),
+                hash_str(&format!("{code}|{}", players[i].name)),
+            );
+            for extra in declared[i].iter().skip(1) {
+                match v.iter().position(|e| pos_of_token(e) == pos_of_token(extra)) {
+                    Some(idx) if fam_of_token(extra) > fam_of_token(&v[idx]) => {
+                        v[idx] = extra.clone();
                     }
+                    None => v.push(extra.clone()),
+                    _ => {}
                 }
-                v
-            })
-            .collect();
+            }
+            resolved[i] = v;
+        }
+        return resolved;
     }
 
-    let n = players.len();
-    if n == 0 {
-        return Vec::new();
-    }
-    let n_gk = if n >= 14 { 2 } else { 1 };
-    let (w_df, w_mf, w_fw) = if year <= 1954 {
-        (2, 3, 5)
-    } else if year <= 1966 {
-        (4, 2, 4)
-    } else if year <= 1974 {
-        (4, 3, 3)
-    } else if year <= 1998 {
-        (4, 4, 2)
-    } else {
-        (4, 3, 3)
-    };
-    let wsum = w_df + w_mf + w_fw;
-    let out = n - n_gk;
-    let df = out * w_df / wsum;
-    let mf = out * w_mf / wsum;
-    let fw = out - df - mf;
-
-    let mut fam: Vec<&str> = Vec::with_capacity(n);
-    for _ in 0..n_gk {
-        fam.push("GK");
-    }
-    for _ in 0..df {
-        fam.push("DF");
-    }
-    for _ in 0..mf {
-        fam.push("MF");
-    }
-    for _ in 0..fw {
-        fam.push("FW");
-    }
-
-    // Shuffle the family bag by name hash so GKs and role spread don't simply
-    // follow the roster's JSON order.
-    let mut order: Vec<usize> = (0..n).collect();
-    order.sort_by_key(|&i| hash_str(&format!("{code}|{}", players[i].name)));
-
-    const DF_ROLES: [&str; 4] = ["CB", "CB", "RB", "LB"];
-    const MF_ROLES: [&str; 4] = ["CM", "CM", "CDM", "CAM"];
-    const FW_ROLES: [&str; 5] = ["ST", "ST", "CF", "LW", "RW"];
-
-    let mut out_v: Vec<Vec<String>> = vec![Vec::new(); n];
-    for k in 0..n {
-        let i = order[k];
-        let h = hash_str(&format!("{code}|{}", players[i].name)) as usize;
-        let role = match fam[k] {
-            "GK" => "GK".to_string(),
-            "DF" => DF_ROLES[h % DF_ROLES.len()].to_string(),
-            "MF" => MF_ROLES[h % MF_ROLES.len()].to_string(),
-            _ => FW_ROLES[h % FW_ROLES.len()].to_string(),
+    // Flat "CM" squads (most pre-2018 seeds): each loose player gets a role
+    // that fits his era's formation shape, picked deterministically from a
+    // hash of his name — GKs, defenders, midfielders and forwards are spread
+    // across the squad instead of being blank "CM" boxes.
+    let n = loose.len();
+    if n != 0 {
+        let n_gk = if n >= 14 { 2 } else { 1 };
+        let (w_df, w_mf, w_fw) = if year <= 1954 {
+            (2, 3, 5)
+        } else if year <= 1966 {
+            (4, 2, 4)
+        } else if year <= 1974 {
+            (4, 3, 3)
+        } else if year <= 1998 {
+            (4, 4, 2)
+        } else {
+            (4, 3, 3)
         };
-        out_v[i] = vec![role];
+        let wsum = w_df + w_mf + w_fw;
+        let out = n - n_gk;
+        let df = out * w_df / wsum;
+        let mf = out * w_mf / wsum;
+        let fw = out - df - mf;
+
+        let mut fam: Vec<&str> = Vec::with_capacity(n);
+        for _ in 0..n_gk {
+            fam.push("GK");
+        }
+        for _ in 0..df {
+            fam.push("DF");
+        }
+        for _ in 0..mf {
+            fam.push("MF");
+        }
+        for _ in 0..fw {
+            fam.push("FW");
+        }
+
+        // Shuffle the family bag by name hash so GKs and role spread don't
+        // simply follow the roster's JSON order.
+        let mut order: Vec<usize> = (0..n).collect();
+        order.sort_by_key(|&k| hash_str(&format!("{code}|{}", players[loose[k]].name)));
+
+        const DF_ROLES: [&str; 4] = ["CB", "CB", "RB", "LB"];
+        const MF_ROLES: [&str; 4] = ["CM", "CM", "CDM", "CAM"];
+        const FW_ROLES: [&str; 5] = ["ST", "ST", "CF", "LW", "RW"];
+
+        let mut out_v: Vec<Vec<String>> = vec![Vec::new(); n];
+        for k in 0..n {
+            let i = order[k];
+            let h = hash_str(&format!("{code}|{}", players[loose[i]].name)) as usize;
+            let role = match fam[k] {
+                "GK" => "GK".to_string(),
+                "DF" => DF_ROLES[h % DF_ROLES.len()].to_string(),
+                "MF" => MF_ROLES[h % MF_ROLES.len()].to_string(),
+                _ => FW_ROLES[h % FW_ROLES.len()].to_string(),
+            };
+            out_v[i] = vec![role];
+        }
+        // Every era-resolved role gets its multi-position card too.
+        for (i, role) in out_v.iter_mut().enumerate() {
+            *role = enrich_positions(
+                role.first().map(|s| s.as_str()).unwrap_or("CM"),
+                hash_str(&format!("{code}|{}", players[loose[i]].name)),
+            );
+        }
+        for (k, v) in out_v.into_iter().enumerate() {
+            resolved[loose[k]] = v;
+        }
     }
-    // Every era-resolved role gets its multi-position card too.
-    for (i, role) in out_v.iter_mut().enumerate() {
-        *role = enrich_positions(
-            role.first().map(|s| s.as_str()).unwrap_or("CM"),
-            hash_str(&format!("{code}|{}", players[i].name)),
-        );
-    }
-    out_v
+    resolved
 }
 
 /// Demo fallback for the two editions that shipped before the real seeds.

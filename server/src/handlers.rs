@@ -1251,7 +1251,7 @@ fn expand_attrs(p: &CreatePlayer) -> [i32; 18] {
     if let Some(rating) = p.rating {
         // scraper back-compat: spread a scalar rating using the same
         // position-aware, band-squashed template as the seed fallback
-        crate::db::attrs_for(rating, p.name.len(), crate::db::family_of(&p.position))
+        crate::db::attrs_for(rating, &p.name, crate::db::family_of(&p.position))
     } else {
         [
             p.pace.clamp(1, 99),

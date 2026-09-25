@@ -156,12 +156,11 @@ pub fn composite_rating(position: &str, attrs: &[Option<i32>]) -> f64 {
     }
 }
 
-/// Market-style star rating (0–100). Rolled back to a plain average — no
-/// attacking ponderations: outfielders use the position-weighted composite
-/// `overall` (their own position's mix, not an attack bias), keepers a plain
-/// mean of their shot-stopping fields. The average is then stretched toward
-/// 100 so the very best read close to their ceiling:
-///     overall 85 → ≈97, 80 → 90, 75 → 82, 70 → 75 — clamped to the 60–98 band.
+/// Market-style star rating (0–100). Identical in scale to `overall` — for
+/// outfielders the position-weighted composite, for keepers a plain mean of
+/// their shot-stopping fields. A five-star player genuinely means ~90+ quality;
+/// the previous 1.5× stretch sent every 80+ player to 90+, so entire rosters
+/// of strong teams showed five stars.
 pub fn star_rating(position: &str, attrs: &[Option<i32>]) -> f64 {
     let avg = if position == "GK" {
         // Plain mean of the keeper-relevant fields (reflexes, handling,
@@ -174,5 +173,5 @@ pub fn star_rating(position: &str, attrs: &[Option<i32>]) -> f64 {
     } else {
         composite_rating(position, attrs)
     };
-    ((60.0 + (avg - 60.0) * 1.5) + 0.5).floor().clamp(60.0, 98.0)
+    (avg + 0.5).floor().clamp(55.0, 98.0)
 }

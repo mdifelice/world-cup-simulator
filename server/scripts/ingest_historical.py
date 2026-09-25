@@ -182,6 +182,66 @@ RATINGS = {
     "GDR": 78, "FRG": 90,
 }
 
+# ---------------------------------------------------------------------------
+# Iconic players: elite attrs + a pinned, iconic primary role so the greats
+# play their real position and read 5 stars instead of a name-hash roll.
+# Positions follow the game's granular tokens (GK/CB/LB/RB/CDM/CM/CAM/LM/RM/
+# LW/RW/ST/CF); a trailing "!" pins the card exactly (no auto-enrichment),
+# FAM  familiarities like "CM:85" let the engine use them off that role.
+# ---------------------------------------------------------------------------
+_STAR_ATTRS = {
+    # MF playmakers: pace, stamina, strength, dribbling, passing, shooting,
+    # tackling, vision, positioning, composure, reflexes, handling, kicking,
+    # aerial, decisions, aggression, concentration, leadership
+    "MF": [90, 90, 82, 94, 96, 90, 80, 97, 93, 94, 78, 74, 86, 74, 92, 80, 90, 94],
+    # FW finishers/free-roamers
+    "FW": [95, 89, 86, 93, 82, 98, 45, 89, 96, 94, 70, 62, 82, 88, 90, 82, 90, 90],
+    # DF commanders
+    "DF": [86, 87, 90, 82, 89, 62, 96, 86, 93, 94, 78, 72, 82, 93, 92, 86, 92, 96],
+}
+
+STAR_OVERRIDES = {
+    # "stored seed name": (pinned positions, family)
+    "Pelé": (["CF!", "ST:90"], "FW"),
+    "Jairzinho": (["RW!", "RM:85", "ST:80"], "FW"),
+    "Gerd Müller": (["ST!", "CF:90"], "FW"),
+    "Franz Beckenbauer": (["CB!", "CDM:85"], "DF"),
+    "Bobby Moore": (["CB!"], "DF"),
+    "Teófilo Cubillas": (["CAM!", "ST:85", "CM:80"], "MF"),
+    "Johan Cruyff": (["CF!", "ST:90", "LW:80"], "FW"),
+    "Rob Rensenbrink": (["LW!", "ST:85"], "FW"),
+    "Mario Kempes": (["ST!", "CF:88"], "FW"),
+    "Zico": (["CAM!", "CF:85", "CM:85"], "MF"),
+    "Michel Platini": (["CAM!", "CM:88"], "MF"),
+    "Paolo Rossi": (["ST!", "CF:88"], "FW"),
+    "Karl-Heinz Rummenigge": (["RW!", "ST:85", "CF:82"], "FW"),
+    "Diego Maradona": (["CAM!", "CM:85", "CF:80"], "MF"),
+    "Lothar Matthäus": (["CM!", "CDM:90", "CAM:85"], "MF"),
+    "Gary Lineker": (["ST!", "CF:88"], "FW"),
+    "Roberto Baggio": (["CAM!", "CF:88", "ST:82"], "MF"),
+    "Salvatore Schillaci": (["ST!"], "FW"),
+    "Gheorghe Hagi": (["CAM!", "LW:80", "CM:85"], "MF"),
+    "Romário": (["ST!", "CF:90"], "FW"),
+    "Hristo Stoichkov": (["LW!", "ST:88", "RW:82"], "FW"),
+}
+
+_ATTR_CLAMP = lambda v: max(30, min(99, v))
+
+
+def star_override(name: str) -> tuple[list[str], list[int]] | None:
+    """(pinned positions, explicit elite attrs) for an iconic player, or None."""
+    entry = STAR_OVERRIDES.get(name)
+    if entry is None:
+        return None
+    positions, family = entry
+    base = _STAR_ATTRS[family]
+    h = stable_id(name)
+    attrs = [
+        _ATTR_CLAMP(v + ((h >> (i * 2)) % 5) - 2)
+        for i, v in enumerate(base)
+    ]
+    return positions, attrs
+
 REPO = Path(__file__).resolve().parents[2]
 DATA_DIR = REPO / "server" / "data"
 SEED_DIR = DATA_DIR / "seed"
@@ -829,6 +889,9 @@ def build_seed(year: int) -> dict | None:
             pl_copy = {k: v for k, v in pl.items()
                        if k not in ("wiki", "sofa_id", "_caps", "_wiki", "_order")}
             pl_copy["photo"] = photo_cache.get(pl.get("wiki"))
+            star = star_override(pl["name"])
+            if star is not None:
+                pl_copy["positions"], pl_copy["attrs"] = star
             final_roster.append(pl_copy)
 
         final_roster.sort(key=lambda r: r["name"])
