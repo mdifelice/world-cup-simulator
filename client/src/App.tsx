@@ -604,6 +604,7 @@ export default function App() {
 
       {liveMatch && flow.run && (
         <LiveMatch
+          key={liveMatch.id}
           match={liveMatch}
           focusTeamId={flow.run.focus_team_id}
           champion={flow.run.champion}

@@ -470,6 +470,7 @@ export default function Lab() {
           {showLiveMatch && match ? (
             <div className="lab-live-match">
               <LiveMatch
+                key={match.id}
                 ref={liveMatchRef}
                 match={match}
                 focusTeamId={match.home_team_id}

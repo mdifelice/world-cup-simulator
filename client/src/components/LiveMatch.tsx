@@ -420,18 +420,24 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
 
   // The goals are listed newest first, the newest on top.
 
-  const resultLabel = m.extra_time || m.penalties ? (
+  // The final penalty tally may only surface once every kick has been shown:
+  // between full time and the shootout's first kick the label must not spoil
+  // the eventual result.
+  const shootoutRevealed =
+    done && m.penalties != null && pensGo && penShown >= m.penalties.kicks.length;
+  const pensTally = m.penalties && shootoutRevealed ? (
+    <span className="pens">
+      {" · "}
+      {t("match.pensScore", {
+        home: m.penalties.home_score,
+        away: m.penalties.away_score,
+      })}
+    </span>
+  ) : null;
+  const resultLabel = m.extra_time || pensTally != null ? (
     <>
       {m.extra_time ? t("match.aet") : ""}
-      {m.penalties ? (
-        <span className="pens">
-          {" · "}
-          {t("match.pensScore", {
-            home: m.penalties.home_score,
-            away: m.penalties.away_score,
-          })}
-        </span>
-      ) : null}
+      {pensTally}
     </>
   ) : null;
 
