@@ -87,16 +87,34 @@ fn formats_for(year: i32) -> Vec<PhaseSpec> {
             .find(|(yy, _)| *yy == y)
             .map(|(_, p)| p.to_vec())
             .unwrap_or_default(),
-        // 1954–1978: 16 teams → 4 groups → QF → SF → Third → Final.
-        y if (1954..=1978).contains(&y) => vec![
+        // 1954–1970: 16 teams → 4 groups → QF → SF → Third → Final.
+        y if (1954..=1970).contains(&y) => vec![
             PhaseSpec::group("Group stage", 4),
             PhaseSpec::knockout("QF", "Quarter-finals", 8),
             PhaseSpec::knockout("SF", "Semi-finals", 4),
             PhaseSpec::knockout("THIRD", "Third place", 2),
             PhaseSpec::knockout("F", "Final", 2),
         ],
-        // 1982–1994: 24 teams → 6 groups → R16 (2 per group + 4 best thirds).
-        y if (1982..=1994).contains(&y) => vec![
+        // 1974 & 1978: 16 teams → 4 groups → a second group phase (2 groups
+        // of 4); the winners contest the final, the runners-up the third-place
+        // match. There is no semi-final round.
+        y if y == 1974 || y == 1978 => vec![
+            PhaseSpec::group("Group stage", 4),
+            PhaseSpec::group_round("GROUP2", "Second round", 2, 0),
+            PhaseSpec::knockout("THIRD", "Third place", 2),
+            PhaseSpec::knockout("F", "Final", 2),
+        ],
+        // 1982: 24 teams → 6 groups → a second group phase (4 groups of 3,
+        // the 6 winners + 4 best runners-up) → SF → Third → Final.
+        y if y == 1982 => vec![
+            PhaseSpec::group("Group stage", 6),
+            PhaseSpec::group_round("GROUP2", "Second round", 4, 12),
+            PhaseSpec::knockout("SF", "Semi-finals", 4),
+            PhaseSpec::knockout("THIRD", "Third place", 2),
+            PhaseSpec::knockout("F", "Final", 2),
+        ],
+        // 1986–1994: 24 teams → 6 groups → R16 (2 per group + 4 best thirds).
+        y if (1986..=1994).contains(&y) => vec![
             PhaseSpec::group("Group stage", 6),
             PhaseSpec::knockout("R16", "Round of 16", 16),
             PhaseSpec::knockout("QF", "Quarter-finals", 8),
@@ -159,6 +177,11 @@ impl PhaseSpec {
     }
     const fn league(name: &'static str) -> Self {
         Self::new("FINAL", name, "GROUP", 0, Some(1), None)
+    }
+    /// A round-robin phase with an explicit entrants cap (used for the second
+    /// group phase: 8 → 2×4 in 1974/78, 12 → 4×3 in 1982).
+    const fn group_round(key: &'static str, name: &'static str, groups: i32, entry: i32) -> Self {
+        Self::new(key, name, "GROUP", 0, Some(groups), if entry > 0 { Some(entry) } else { None })
     }
     const fn knockout(key: &'static str, name: &'static str, entry: i32) -> Self {
         Self::new(key, name, "KNOCKOUT", 0, None, Some(entry))

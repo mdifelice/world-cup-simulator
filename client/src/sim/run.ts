@@ -376,8 +376,28 @@ const KO_DATES_2026: Record<string, string[]> = {
   F: ["2026-07-19"],
 };
 
-/** Real knockout dates for the 1986–2018 editions, by phase. */
+/** Real knockout dates for the 1970–2018 editions, by phase. The 1974/78
+ *  second-round group is generated (no knockout to date). */
 const KO_DATES_LEGACY: Record<number, Record<string, string[]>> = {
+  1970: {
+    QF: ["1970-06-14", "1970-06-14"],
+    SF: ["1970-06-17", "1970-06-17"],
+    THIRD: ["1970-06-20"],
+    F: ["1970-06-21"],
+  },
+  1974: {
+    THIRD: ["1974-07-06"],
+    F: ["1974-07-07"],
+  },
+  1978: {
+    THIRD: ["1978-06-24"],
+    F: ["1978-06-25"],
+  },
+  1982: {
+    SF: ["1982-07-08", "1982-07-08"],
+    THIRD: ["1982-07-10"],
+    F: ["1982-07-11"],
+  },
   1986: {
     R16: ["1986-06-15", "1986-06-16", "1986-06-17", "1986-06-18"],
     QF: ["1986-06-21", "1986-06-22"],
@@ -1820,6 +1840,12 @@ class Engine {
     const [q, m] = advance(tables, entry);
     this.quals = q;
     this.groupCount = m;
+    // A later group phase (1974/78 second round) feeds a final: the winners
+    // carry on in `quals` and the group runners-up contest the third-place
+    // match when no semi-final has decided it.
+    if (!isFirstGroupPhase(phases, idx) && m > 1) {
+      this.prevLosers = tables.map((t) => t[1]?.team_id ?? -1).filter((id) => id >= 0);
+    }
   }
 
   playKnockoutPhase(key: string, name: string): void {

@@ -59,7 +59,8 @@ TEAM_CODES = {
     # 1970
     "El Salvador": "SLV", "Morocco": "MAR", "Israel": "ISR",
     # 1974
-    "Zaire": "ZAI", "Haiti": "HAI", "Australia": "AUS",
+    "Zaire": "ZAI", "Haiti": "HAI", "Australia": "AUS", "East Germany": "GDR",
+    "Germany DR": "GDR", "DR Congo": "ZAI",
     # 1978
     "Iran": "IRN", "Tunisia": "TUN", "Peru": "PER",
     # 1982
@@ -157,6 +158,7 @@ FLAG_CODES = {
     "Russia": "🇷🇺", "Czech Republic": "🇨🇿", "DR Congo": "🇨🇩",
     "South Korea": "🇰🇷", "Ivory Coast": "🇨🇮", "Trinidad & Tobago": "🇹🇹",
     "CAN": "🇨🇦", "DEN": "🇩🇰", "IRQ": "🇮🇶", "CMR": "🇨🇲", "RUS": "🇷🇺", "UAE": "🇦🇪",
+    "GDR": "🇩🇪",
 }
 
 # Strength ratings by team code (FIFA ranking–inspired)
@@ -176,6 +178,8 @@ RATINGS = {
     "FRG": 90, "URS": 84, "YUG": 80, "TCH": 70, "ROU": 70, "BUL": 72,
     "RUS": 80, "HUN": 64, "SCO": 66, "NIR": 60, "AUT": 66, "NOR": 68,
     "GRE": 58, "IRL": 70, "CMR": 68, "DEN": 73,
+    # 1970–1982 editions (host-era strength)
+    "GDR": 78, "FRG": 90,
 }
 
 REPO = Path(__file__).resolve().parents[2]

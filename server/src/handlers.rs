@@ -115,7 +115,7 @@ fn load_phases(conn: &rusqlite::Connection, id: i64) -> rusqlite::Result<Vec<Pha
 
 /// Editions that can be launched as new tournaments. Every other edition is
 /// still browsable (history/table/results) but won't be offered as playable.
-const PLAYABLE_YEARS: &[i32] = &[1986, 1990, 1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022, 2026];
+const PLAYABLE_YEARS: &[i32] = &[1970, 1974, 1978, 1982, 1986, 1990, 1994, 1998, 2002, 2006, 2010, 2014, 2018, 2022, 2026];
 
 pub async fn list_tournaments(State(db): State<Db>) -> ApiResult<Json<Vec<Tournament>>> {
     let conn = db.lock().unwrap();
