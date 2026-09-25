@@ -21,6 +21,7 @@ import os
 import re
 import sys
 import time
+import unicodedata
 import urllib.request
 import urllib.parse
 from pathlib import Path
@@ -74,7 +75,7 @@ TEAM_CODES = {
     # 1998
     "Croatia": "CRO", "Jamaica": "JAM", "Japan": "JPN", "South Africa": "RSA",
     # 2002
-    "China PR": "CHN", "Ecuador": "ECU", "Senegal": "SEN", "Slovenia": "SVN",
+    "China PR": "CHN", "China": "CHN", "Ecuador": "ECU", "Senegal": "SEN", "Slovenia": "SVN",
     # 2006
     "Angola": "ANG", "Côte d'Ivoire": "CIV", "Ghana": "GHA", "Trinidad and Tobago": "TRI",
     "Togo": "TOG", "Ukraine": "UKR",
@@ -84,6 +85,10 @@ TEAM_CODES = {
     "Bosnia and Herzegovina": "BIH",
     # 2018
     "Iceland": "ISL", "Panama": "PAN",
+    # other spellings found on the "YYYY FIFA World Cup squads" pages
+    "IR Iran": "IRN", "Ivory Coast": "CIV", "Czech Republic": "CZE",
+    "South Korea": "KOR", "South Africa": "RSA", "North Korea": "PRK",
+    "Crna Gora": "MNE", "Trinidad & Tobago": "TRI", "Saudi Arabia": "KSA",
 }
 
 # These override the name as it appears in openfootball
@@ -346,16 +351,25 @@ def strip_links(raw: str) -> str:
 
 
 def parse_squads_wikipedia(year: int) -> dict[str, list[dict]]:
-    """Scrape 'YYYY FIFA World Cup squads' page for player rosters."""
+    """Scrape 'YYYY FIFA World Cup squads' page for player rosters.
+
+    The wikitext is cached under .cache/{year}_FIFA_World_Cup_squads.wiki so a
+    failed later stage never forces a re-fetch.
+    """
     page = f"{year} FIFA World Cup squads"
-    print(f"  fetching {page} ...", file=sys.stderr)
-    time.sleep(_POLITE)
-    qs = urllib.parse.urlencode({
-        "action": "parse", "page": page, "prop": "wikitext",
-        "format": "json", "formatversion": "2"
-    })
-    data = json.loads(fetch(f"{WIKI_API}?{qs}"))
-    wt = data["parse"]["wikitext"]
+    cpath = cache_path(f"{year}_squads.wiki")
+    if cpath.exists():
+        wt = cpath.read_text(encoding="utf-8")
+    else:
+        print(f"  fetching {page} ...", file=sys.stderr)
+        time.sleep(_POLITE)
+        qs = urllib.parse.urlencode({
+            "action": "parse", "page": page, "prop": "wikitext",
+            "format": "json", "formatversion": "2",
+        })
+        data = json.loads(fetch(f"{WIKI_API}?{qs}"))
+        wt = data["parse"]["wikitext"]
+        cpath.write_text(wt, encoding="utf-8")
 
     squads = {}
     # Find group sections
@@ -375,7 +389,8 @@ def parse_squads_wikipedia(year: int) -> dict[str, list[dict]]:
             en = st + (nxt2.start() if nxt2 else len(section[st:]))
             loads = []
             for pm in re.finditer(
-                r"\{\{nat fs g? player\|([^}]*?)\}\}", section[st:en], re.S,
+                r"\{\{(?:nat fs g?player|National football squad player)\|([^}]*?)\}\}",
+                section[st:en], re.S,
             ):
                 fields = dict(
                     (k.strip(), v.strip())
@@ -387,6 +402,7 @@ def parse_squads_wikipedia(year: int) -> dict[str, list[dict]]:
                 link = re.search(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]", raw_name)
                 wiki = link.group(1).split("#")[0].replace("_", " ").strip() if link else ""
                 name = strip_links(raw_name)
+                name = re.sub(r"\s*\(\(?[cC]\)?\)?\s*$", "", name)  # captain mark
                 if not name:
                     continue
                 if not wiki:
@@ -410,6 +426,28 @@ def parse_squads_wikipedia(year: int) -> dict[str, list[dict]]:
 
 def normalize_name(name: str) -> str:
     return NAME_OVERRIDES.get(name, name)
+
+def _accent_fold(name: str) -> str:
+    return unicodedata.normalize("NFKD", name) \
+        .encode("ascii", "ignore").decode("ascii").lower().strip()
+
+def _dedupe_by_fold(merged: dict[int, dict]) -> dict[int, dict]:
+    """Drop duplicate-fold players, keeping the entry with a shirt number /
+    wiki backfill over a bare openfootball fallback stub."""
+    by_fold: dict[str, int] = {}
+    for pid, pl in merged.items():
+        fold = _accent_fold(pl["name"])
+        if fold not in by_fold:
+            by_fold[fold] = pid
+            continue
+        cur = merged[by_fold[fold]]
+        keep = cur
+        if (not cur.get("shirt") and pl.get("shirt")) or \
+           (cur.get("shirt") == pl.get("shirt") and not cur.get("wiki") and pl.get("wiki")):
+            keep = pl
+        if keep is not pl:
+            by_fold[fold] = pid
+    return {pid: merged[pid] for pid in by_fold.values()}
 
 
 def get_code(name: str) -> str:
@@ -657,12 +695,25 @@ def build_seed(year: int) -> dict | None:
     # Photo cache
     photo_cache = load_photo_cache()
 
+    # Match wiki section headers to edition teams by code so display-name
+    # differences ("United States" vs "USA", "IR Iran" vs "Iran", ...) never
+    # drop a whole roster.
+    teams_by_fold = {_accent_fold(t["name"]): t["code"] for t in teams}
+    wiki_by_code: dict[str, list[dict]] = {}
+    for wtname, roster in wiki_squads.items():
+        code = teams_by_fold.get(_accent_fold(wtname)) or get_code(wtname)
+        if code:
+            wiki_by_code.setdefault(code, []).extend(roster)
+        else:
+            print(f"  (no code for wiki team '{wtname}', {len(roster)} players dropped)",
+                  file=sys.stderr)
+
     # Build final squads
     squads = {}
     for t in teams:
         code = t["code"]
         of_squad = squads_by_team.get(code, {})
-        wiki_roster = wiki_squads.get(t["name"], [])
+        wiki_roster = wiki_by_code.get(code, [])
 
         # Merge: prefer Wikipedia for position/shirt, OF for existence
         merged: dict[int, dict] = {}
@@ -674,18 +725,17 @@ def build_seed(year: int) -> dict | None:
                 "sofa_id": pid,
             }
 
-        # Try to match wiki players to OF players by name
+        # Match wiki players to OF players ignoring accents/case so near-dup
+        # spellings ("Cristian Pavon" / "Cristian Pavón") collide.
+        of_by_fold = {_accent_fold(pl["name"]): pid for pid, pl in merged.items()}
         for wp in wiki_roster:
-            wname = wp["name"].lower()
-            match_pid = None
-            for pid, pl in merged.items():
-                if pl["name"].lower() == wname:
-                    match_pid = pid
-                    break
+            wfold = _accent_fold(wp["name"])
+            match_pid = of_by_fold.get(wfold)
             if match_pid is not None:
                 merged[match_pid]["positions"] = wp["positions"]
                 merged[match_pid]["shirt"] = wp["shirt"]
                 merged[match_pid]["wiki"] = wp["wiki"]
+                merged[match_pid]["name"] = wp["name"]
             else:
                 # New player only in Wikipedia
                 npid = stable_id(wp["name"] + code)
@@ -695,6 +745,9 @@ def build_seed(year: int) -> dict | None:
                     "shirt": wp["shirt"],
                     "wiki": wp["wiki"],
                 }
+
+        # Drop duplicate-fold leftovers (prefer the entry carrying a shirt/A wiki).
+        merged = _dedupe_by_fold(merged)
 
         # Resolve photos
         all_titles = sorted({pl.get("wiki") for pl in merged.values() if pl.get("wiki")})

@@ -353,10 +353,58 @@ const KO_DATES_2026: Record<string, string[]> = {
   F: ["2026-07-19"],
 };
 
+/** Real knockout dates for the 1998–2018 editions, by phase. */
+const KO_DATES_LEGACY: Record<number, Record<string, string[]>> = {
+  1998: {
+    R16: ["1998-06-27", "1998-06-28", "1998-06-29"],
+    QF: ["1998-07-03", "1998-07-04"],
+    SF: ["1998-07-07", "1998-07-08"],
+    THIRD: ["1998-07-11"],
+    F: ["1998-07-12"],
+  },
+  2002: {
+    R16: ["2002-06-15", "2002-06-16", "2002-06-17", "2002-06-18"],
+    QF: ["2002-06-21", "2002-06-22"],
+    SF: ["2002-06-25", "2002-06-26"],
+    THIRD: ["2002-06-29"],
+    F: ["2002-06-30"],
+  },
+  2006: {
+    R16: ["2006-06-24", "2006-06-25", "2006-06-26", "2006-06-27"],
+    QF: ["2006-06-30", "2006-07-01"],
+    SF: ["2006-07-04", "2006-07-05"],
+    THIRD: ["2006-07-08"],
+    F: ["2006-07-09"],
+  },
+  2010: {
+    R16: ["2010-06-26", "2010-06-27", "2010-06-28", "2010-06-29"],
+    QF: ["2010-07-02", "2010-07-03"],
+    SF: ["2010-07-06", "2010-07-07"],
+    THIRD: ["2010-07-10"],
+    F: ["2010-07-11"],
+  },
+  2014: {
+    R16: ["2014-06-28", "2014-06-29", "2014-06-30", "2014-07-01"],
+    QF: ["2014-07-04", "2014-07-05"],
+    SF: ["2014-07-08", "2014-07-09"],
+    THIRD: ["2014-07-12"],
+    F: ["2014-07-13"],
+  },
+  2018: {
+    R16: ["2018-06-30", "2018-07-01", "2018-07-02", "2018-07-03"],
+    QF: ["2018-07-06", "2018-07-07"],
+    SF: ["2018-07-10", "2018-07-11"],
+    THIRD: ["2018-07-14"],
+    F: ["2018-07-15"],
+  },
+};
+
 /** Deterministic date for knockout match i (0-based) of n in a phase, or null
- *  when the edition has no real knockout calendar (2022 and 2026 do). */
+ *  when the edition has no real knockout calendar. */
 function koDate(year: number, key: string, i: number, n: number): string | null {
-  const days = year === 2022 ? KO_DATES_2022[key] : year === 2026 ? KO_DATES_2026[key] : undefined;
+  const days = KO_DATES_LEGACY[year]?.[key] ??
+    (year === 2022 ? KO_DATES_2022[key] : undefined) ??
+    (year === 2026 ? KO_DATES_2026[key] : undefined);
   if (!days || days.length === 0 || n <= 0) return null;
   return days[Math.min(Math.floor((i * days.length) / n), days.length - 1)];
 }
