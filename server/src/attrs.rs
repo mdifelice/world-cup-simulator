@@ -140,8 +140,34 @@ fn position_weights(position: &str) -> &'static [(usize, f64)] {
     }
 }
 
+/// Keeper-relevant fields used for a keeper's official overall — the plain
+/// mean, identical to the `star_rating` GK branch. A keeper's `overall` must
+/// mean the same as the icon pins the ingester scales against; the old
+/// weighted composite measured ~4.5 higher on the same attrs, so world-class
+/// keepers (real 91) read 95.7 and out-starred every outfield great.
+fn gk_plain_mean(attrs: &[Option<i32>]) -> f64 {
+    gk_plain_mean_raw(attrs) - GK_DAMP
+}
+
+fn gk_plain_mean_raw(attrs: &[Option<i32>]) -> f64 {
+    let idx = [REFLEXES, HANDLING, KICKING, POSITIONING, COMPOSURE, AERIAL,
+        STRENGTH, PACE, DECISIONS, CONCENTRATION, LEADERSHIP];
+    let n = idx.len() as f64;
+    idx.iter().map(|&i| attrs.get(i).copied().flatten().unwrap_or(60) as f64).sum::<f64>() / n
+}
+
+/// Keeper ratings are damped below outfielders: even a world-class keeper
+/// (pinned ~91 shot-stopping) should read ~88 — elite, but never the best
+/// player in a tournament. Without this, top-50 lists fill with GKs (14.6%
+/// of slots vs ~4.5% of a squad's players). Mirrored in the client sim and
+/// the ingester's scale solver.
+pub const GK_DAMP: f64 = 3.0;
+
 /// Position-weighted composite (0–100). Missing attributes default to 60.
 pub fn composite_rating(position: &str, attrs: &[Option<i32>]) -> f64 {
+    if position == "GK" {
+        return gk_plain_mean(attrs);
+    }
     let mut num = 0.0;
     let mut den = 0.0;
     for (idx, w) in position_weights(position) {
@@ -163,13 +189,7 @@ pub fn composite_rating(position: &str, attrs: &[Option<i32>]) -> f64 {
 /// of strong teams showed five stars.
 pub fn star_rating(position: &str, attrs: &[Option<i32>]) -> f64 {
     let avg = if position == "GK" {
-        // Plain mean of the keeper-relevant fields (reflexes, handling,
-        // kicking, positioning, composure, aerial, strength, pace, decisions,
-        // concentration, leadership), equal weight, no sums-warping attrs.
-        let idx = [REFLEXES, HANDLING, KICKING, POSITIONING, COMPOSURE, AERIAL,
-            STRENGTH, PACE, DECISIONS, CONCENTRATION, LEADERSHIP];
-        let n = idx.len() as f64;
-        idx.iter().map(|&i| attrs.get(i).copied().flatten().unwrap_or(60) as f64).sum::<f64>() / n
+        gk_plain_mean(attrs)
     } else {
         composite_rating(position, attrs)
     };

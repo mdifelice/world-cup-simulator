@@ -18,7 +18,16 @@ const WEIGHTS: Record<string, [string, number][]> = {
   CF: [["shooting", 0.3], ["pace", 0.2], ["dribbling", 0.15], ["positioning", 0.15], ["strength", 0.1], ["composure", 0.1], ["decisions", 0.07], ["concentration", 0.05], ["leadership", 0.03]],
 };
 
+export const GK_DAMP = 3;
+
 export function compositeRating(position: string, attrs: Record<string, number>): number {
+  if (position === "GK") {
+    // Keeper overall is the damped plain shot-stopping mean (mirror of server:
+    // composite_rating uses gk_plain_mean, not the weighted GK list, so
+    // world-class keepers land ~88 instead of a ~+4.5-inflated 95.7).
+    const f = ["reflexes", "handling", "kicking", "positioning", "composure", "aerial", "strength", "pace", "decisions", "concentration", "leadership"];
+    return f.reduce((s, k) => s + (attrs[k] ?? 60), 0) / f.length - GK_DAMP;
+  }
   const w = WEIGHTS[position] ?? [["passing", 0.4], ["vision", 0.3], ["composure", 0.3], ["decisions", 0.1], ["concentration", 0.1], ["leadership", 0.1]];
   let num = 0;
   let den = 0;

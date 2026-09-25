@@ -327,9 +327,15 @@ _POS_WEIGHTS = {
     "CF": [(5, .30), (0, .20), (3, .15), (8, .15), (2, .10), (9, .10), (14, .07), (16, .05), (17, .03)],
 }
 _GK_MEAN_IDX = [10, 11, 12, 8, 9, 13, 2, 0, 14, 16, 17]  # star uses a plain mean
+# Keepers read a bit below outfielders (mirrors attrs.rs GK_DAMP) so GKs don't
+# out-star the world's best attackers; the icon solver compensates, so a pin
+# of 88 stays a visible 88.
+GK_DAMP = 3.0
 
 
 def _composite_rating(position: str, attrs: list[int]) -> float:
+    if position == "GK":
+        return sum(attrs[i] for i in _GK_MEAN_IDX) / len(_GK_MEAN_IDX) - GK_DAMP
     weights = _POS_WEIGHTS.get(position, [(4, .4), (7, .3), (9, .3), (14, .1), (16, .1), (17, .1)])
     num = sum(v * w for v, w in ((attrs[i], w) for i, w in weights))
     den = sum(w for _, w in weights)
@@ -337,7 +343,7 @@ def _composite_rating(position: str, attrs: list[int]) -> float:
 
 
 def _star_rating(position: str, attrs: list[int]) -> int:
-    avg = (_GK_MEAN_IDX and sum(attrs[i] for i in _GK_MEAN_IDX) / len(_GK_MEAN_IDX)) \
+    avg = (sum(attrs[i] for i in _GK_MEAN_IDX) / len(_GK_MEAN_IDX) - GK_DAMP) \
         if position == "GK" else _composite_rating(position, attrs)
     return max(55, min(98, int(avg + 0.5)))
 
@@ -365,10 +371,10 @@ PLAYER_RATINGS = {
     "giuseppe meazza": (94, ["CAM!", "CF:85"], "MF"),
     "angelo schiavio": (90, ["ST!", "CF:88"], "FW"),
     "giovanni ferrari": (87, ["CAM!", "CM:88"], "MF"),
-    "giampiero combi": (90, ["GK!"], "GK"),
+    "giampiero combi": (87, ["GK!"], "GK"),
     "matthias sindelar": (93, ["CAM!", "CF:88"], "MF"),
     "oldrich nejedly": (91, ["ST!", "CF:88"], "FW"),
-    "frantisek planicka": (91, ["GK!"], "GK"),
+    "frantisek planicka": (88, ["GK!"], "GK"),
     # --- 1938 (France) ---
     "silvio piola": (93, ["ST!", "CF:88"], "FW"),
     "gyula zsengeller": (88, ["ST!", "CF:85"], "FW"),
@@ -403,7 +409,7 @@ PLAYER_RATINGS = {
     "djalma santos": (88, ["RB!"], "DF"),
     "just fontaine": (91, ["ST!", "CF:88"], "FW"),
     "raymond kopa": (90, ["CAM!", "CM:85"], "MF"),
-    "lev yashin": (92, ["GK!"], "GK"),
+    "lev yashin": (89, ["GK!"], "GK"),
     "igor netto": (85, ["CM!"], "MF"),
     "uwe seeler": (90, ["ST!", "CF:90"], "FW"),
     # --- 1962 (Chile) ---
@@ -413,7 +419,7 @@ PLAYER_RATINGS = {
     # --- 1966 (England) ---
     "bobby charlton": (90, ["CAM!", "CM:88"], "MF"),
     "bobby moore": (91, ["CB!"], "DF"),
-    "gordon banks": (91, ["GK!"], "GK"),
+    "gordon banks": (88, ["GK!"], "GK"),
     "geoff hurst": (88, ["CF!", "ST:88"], "FW"),
     "martin peters": (86, ["CM!", "CAM:85"], "MF"),
     "eusebio": (93, ["CF!", "ST:90"], "FW"),
@@ -427,7 +433,7 @@ PLAYER_RATINGS = {
     "clodoaldo": (86, ["CM!"], "MF"),
     "gerd muller": (93, ["ST!", "CF:90"], "FW"),
     "wolfgang overath": (88, ["CM!", "CAM:85"], "MF"),
-    "sepp maier": (91, ["GK!"], "GK"),
+    "sepp maier": (88, ["GK!"], "GK"),
     "giacinto facchetti": (90, ["LB!", "CB:88"], "DF"),
     "gianni rivera": (92, ["CAM!", "CM:85"], "MF"),
     "gigi riva": (91, ["ST!", "LW:85"], "FW"),
@@ -476,7 +482,7 @@ PLAYER_RATINGS = {
     "rudi voller": (86, ["ST!"], "FW"),
     "andreas brehme": (88, ["LB!"], "DF"),
     "claudio caniggia": (88, ["ST!", "RW:85"], "FW"),
-    "sergio goycochea": (87, ["GK!"], "GK"),
+    "sergio goycochea": (84, ["GK!"], "GK"),
     "salvatore schillaci": (88, ["ST!"], "FW"),
     "roberto baggio": (90, ["CAM!", "CF:88", "ST:82"], "MF"),
     "franco baresi": (91, ["CB!"], "DF"),
@@ -492,7 +498,7 @@ PLAYER_RATINGS = {
     # --- 1994 (USA) ---
     "romario": (93, ["ST!", "CF:90"], "FW"),
     "bebeto": (90, ["ST!", "CF:88"], "FW"),
-    "claudio taffarel": (87, ["GK!"], "GK"),
+    "claudio taffarel": (84, ["GK!"], "GK"),
     "paolo maldini": (92, ["LB!", "CB:90"], "DF"),
     "hristo stoichkov": (92, ["LW!", "ST:88", "RW:82"], "FW"),
     "gheorghe hagi": (89, ["CAM!", "LW:80", "CM:85"], "MF"),
@@ -508,7 +514,7 @@ PLAYER_RATINGS = {
     "raul": (88, ["ST!", "CF:88", "LW:85"], "FW"),
     # --- 2002 (South Korea / Japan) ---
     "ronaldinho": (89, ["CAM!", "LW:85"], "MF"),
-    "oliver kahn": (90, ["GK!"], "GK"),
+    "oliver kahn": (87, ["GK!"], "GK"),
     "michael ballack": (89, ["CM!", "CAM:88"], "MF"),
     "luis figo": (90, ["RW!", "CAM:85"], "MF"),
     "david beckham": (88, ["RM!"], "MF"),
@@ -518,7 +524,7 @@ PLAYER_RATINGS = {
     # --- 2006 (Germany) ---
     "thierry henry": (91, ["CF!", "ST:88"], "FW"),
     "fabio cannavaro": (90, ["CB!"], "DF"),
-    "gianluigi buffon": (91, ["GK!"], "GK"),
+    "gianluigi buffon": (88, ["GK!"], "GK"),
     "andrea pirlo": (88, ["CM!", "CAM:88"], "MF"),
     "pavel nedved": (89, ["CAM!", "LM:88"], "MF"),
     "cristiano ronaldo": (90, ["RW!", "LW:88"], "FW"),
@@ -533,7 +539,7 @@ PLAYER_RATINGS = {
     # --- 2010 (South Africa) ---
     "andres iniesta": (91, ["CM!", "CAM:88"], "MF"),
     "xavi": (91, ["CM!", "CAM:88"], "MF"),
-    "iker casillas": (91, ["GK!"], "GK"),
+    "iker casillas": (88, ["GK!"], "GK"),
     "david villa": (89, ["ST!", "CF:88"], "FW"),
     "wesley sneijder": (88, ["CAM!", "CM:85"], "MF"),
     "arjen robben": (89, ["RW!", "LW:88"], "FW"),
@@ -542,7 +548,7 @@ PLAYER_RATINGS = {
     "diego forlan": (86, ["ST!", "CF:88"], "FW"),
     "carles puyol": (88, ["CB!"], "DF"),
     # --- 2014 (Brazil) ---
-    "manuel neuer": (91, ["GK!"], "GK"),
+    "manuel neuer": (88, ["GK!"], "GK"),
     "neymar": (89, ["RW!", "LW:88"], "FW"),
     "james rodriguez": (88, ["CAM!", "RW:85"], "MF"),
     "philipp lahm": (87, ["RB!"], "DF"),
@@ -554,7 +560,7 @@ PLAYER_RATINGS = {
     "eden hazard": (89, ["LM!", "LW:88"], "MF"),
     "harry kane": (88, ["ST!"], "FW"),
     "kevin de bruyne": (90, ["CAM!", "CM:88"], "MF"),
-    "thibaut courtois": (88, ["GK!"], "GK"),
+    "thibaut courtois": (85, ["GK!"], "GK"),
     "toni kroos": (88, ["CM!"], "MF"),
     "mohamed salah": (88, ["RW!"], "FW"),
     "edinson cavani": (87, ["ST!"], "FW"),
