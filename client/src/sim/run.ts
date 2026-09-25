@@ -1995,6 +1995,30 @@ const clamp = (v: number, min: number, max: number): number =>
 export function generateRun(oracle: Oracle, opts: RunOptions): RunPayload {
   const eng = new Engine(oracle, opts);
   eng.run();
+  // Play the matches in play order, refined by real kickoffs within a round:
+  // the engine simulates round by round and the `day` counter grows with every
+  // played round, so it is the authoritative chronological key. Within a round
+  // the real `date` (where known) still refines the cadence; undated legacy
+  // fixtures fall back to id. A date-first sort would be wrong here: generated
+  // second-round groups (1974/78/82 GROUP2) carry no date, so the dated THIRD
+  // and F matches would leap ahead of them.
+  const idx = eng.matches.map((_, i) => i).sort((a, b) => {
+    const ma = eng.matches[a];
+    const mb = eng.matches[b];
+    const byDay = ma.day - mb.day;
+    if (byDay !== 0) return byDay;
+    if (ma.date && mb.date) {
+      const d = ma.date.localeCompare(mb.date);
+      if (d !== 0) return d;
+    } else if (ma.date && !mb.date) {
+      return -1;
+    } else if (!ma.date && mb.date) {
+      return 1;
+    }
+    return ma.id - mb.id;
+  });
+  const matches = idx.map((i) => eng.matches[i]);
+  const order = idx.map((i) => eng.order[i]);
   const run: RunPayload = {
     run_id: null,
     tournament_id: oracle.tournament.id,
@@ -2004,8 +2028,8 @@ export function generateRun(oracle: Oracle, opts: RunOptions): RunPayload {
     shirt_numbers: oracle.tournament.shirt_numbers,
     focus_team_id: opts.focus_team_id,
     seed: Number(eng.runSeed),
-    order: eng.order,
-    matches: eng.matches,
+    order,
+    matches,
     groups: eng.groups,
     awards: eng.finalizeAwards(),
     champion: eng.champion,

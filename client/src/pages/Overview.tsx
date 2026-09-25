@@ -525,7 +525,14 @@ export default function Overview({
               <div className="match-scroll" ref={matchScrollRef}>
                 {run.matches.length === 0 && <p className="hint">{t("cup.noMatches")}</p>}
                 {run.matches
-                  .filter((m) => currentDay == null || m.day <= currentDay)
+                  .filter(
+                    (m) =>
+                      currentDay == null ||
+                      m.day <= currentDay ||
+                      m.stage_key === "GROUP",
+                  )
+                  .slice()
+                  .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? "") || a.id - b.id)
                   .map((m) => {
                   const done = revealedIds.has(m.id);
                   const isNext = m.id === nextMatch?.id;

@@ -23,7 +23,6 @@ const BASE_PAUSE_MS = 1000;
 export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
   match: m,
   focusTeamId,
-  champion,
   onReveal,
   onClose,
 }, ref) => {
@@ -115,14 +114,6 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
 
   const done = min >= totalLength;
 
-  // Commit the result to the hub as soon as the match ends, but keep the dialog
-  // open so the user can watch the final score and close it manually.
-  useEffect(() => {
-    if (!done) return;
-    onReveal(m);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [done]);
-
   // Shootout: once the match ends (added time included), pause 1s, then reveal
   // each penalty kick one by one in the incidents row.
   const kicks = m.penalties?.kicks ?? [];
@@ -150,6 +141,16 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
     const t = setTimeout(() => setPenShown((c) => c + 1), PEN_MS);
     return () => clearTimeout(t);
   }, [pensGo, penShown, kicks.length]);
+
+  // Commit the result to the hub as soon as the match ends, including the full
+  // shootout reveal — the bracket only updates once every penalty is shown.
+  // The dialog stays open so the user can watch the final score and close it.
+  useEffect(() => {
+    if (!done) return;
+    if (kicks.length > 0 && penShown < kicks.length) return;
+    onReveal(m);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done, kicks.length, penShown]);
 
   // Hidden shortcut: Ctrl+Shift+F jumps the live match straight to full time
   // and, when the match ended in a shootout, reveals every kick at once.
@@ -505,16 +506,6 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
           <span className="match-clock">{labelOf(clock, min)}</span>
         )}
       </p>
-
-      {done && m.stage_key === "F" && champion && (
-        <div className="champ-card live-champ">
-          <span className="champ-cup">{flagFor(champion)}</span>
-          <div className="champ-text">
-            <strong>{t("hub.championTitle", { team: country(champion) })}</strong>
-            <span>{t("hub.championSub")}</span>
-          </div>
-        </div>
-      )}
 
       {momentum && series && series.length > 0 && (
         <div className="chart-card">

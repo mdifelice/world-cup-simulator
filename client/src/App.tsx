@@ -85,12 +85,17 @@ export default function App() {
   /** Last committed XI, reused (prefilled) for following matches. */
   const [lastLineup, setLastLineup] = useState<LineupConfig | null>(null);
   const [ffRunning, setFfRunning] = useState(false);
+  const ffRunningRef = useRef(false);
   const ffTimer = useRef<number | null>(null);
+  const speedRef = useRef(1);
   const [shareOpen, setShareOpen] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [notifications, setNotifications] = useState<Array<{ id: number; message: string; type: "info" | "success" | "warning" }>>([]);
   const notifyId = useRef(0);
   const { t, locale, setLocale, speed, setSpeed } = useI18n();
+
+  useEffect(() => { speedRef.current = speed; }, [speed]);
+  useEffect(() => { ffRunningRef.current = ffRunning; }, [ffRunning]);
 
   // Silent #token= capture from the OAuth redirect (login stays hidden).
   useEffect(() => {
@@ -204,7 +209,10 @@ export default function App() {
         runGuard.current = null;
         setFlow((f) => {
           const revealed = new Set(f.revealed);
-          if (target) revealed.add(target.matchId);
+          // When the dialog is about to open for the target match, leave it
+          // unrevealed so the banner/hub only update once the match finishes
+          // playing out; only pre-reveal when jumping without the dialog.
+          if (target && !target.open) revealed.add(target.matchId);
           return { ...f, run, revealed, runError: null };
         });
         if (target?.open) {
@@ -252,7 +260,7 @@ export default function App() {
 
   const stopFF = () => {
     if (ffTimer.current != null) {
-      window.clearInterval(ffTimer.current);
+      window.clearTimeout(ffTimer.current);
       ffTimer.current = null;
     }
     setFfRunning(false);
@@ -260,7 +268,7 @@ export default function App() {
 
   useEffect(() => {
     return () => {
-      if (ffTimer.current != null) window.clearInterval(ffTimer.current);
+      if (ffTimer.current != null) window.clearTimeout(ffTimer.current);
     };
   }, []);
 
@@ -278,7 +286,7 @@ export default function App() {
     const first = firstUnrevealed(run, flow.revealed);
     if (first == null || isFocusMatch(run, first.id)) return;
     setFfRunning(true);
-    ffTimer.current = window.setInterval(() => {
+    const tick = () => {
       const r = runRef.current;
       const rev = revealedRef.current;
       const m = r ? firstUnrevealed(r, rev) : null;
@@ -292,7 +300,11 @@ export default function App() {
         next.add(m.id);
         return { ...f, revealed: next };
       });
-    }, FF_BASE_MS / speed);
+      if (ffRunningRef.current) {
+        ffTimer.current = window.setTimeout(tick, FF_BASE_MS / speedRef.current);
+      }
+    };
+    ffTimer.current = window.setTimeout(tick, FF_BASE_MS / speedRef.current);
   };
 
   /** The Forward button can act only while the next pending match is not ours. */

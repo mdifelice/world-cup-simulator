@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef } from "react";
 import { flagFor, useI18n } from "../i18n";
 import type { RunMatch } from "../types";
+import {
+  geomFor,
+  groupStageDone as groupStageDonePure,
+  layoutBracket,
+  type BracketLayout,
+  type Col,
+} from "../sim/bracketLayout";
 
 interface Props {
   matches: RunMatch[];
@@ -15,32 +22,6 @@ interface Props {
   className?: string;
   /** Show full (localised) country names instead of abbreviated codes. */
   fullName?: boolean;
-}
-
-// Knockout stage keys, in the order they are played. `THIRD` is laid out as a
-// side column after the final.
-const KO_ORDER = ["R32", "R16", "QF", "SF", "F", "THIRD"] as const;
-
-const BOX_W = 124;
-const BOX_H = 48;
-const GAP_X = 38;
-const GAP_Y = 14;
-const PAD = 12;
-const LABEL_H = 20;
-
-interface Col {
-  key: string;
-  name: string;
-  matches: RunMatch[];
-  x: number;
-  centers: number[];
-  labelTop?: number;
-}
-
-interface Line {
-  key: string;
-  points: string;
-  dashed: boolean;
 }
 
 export default function Bracket({
@@ -58,113 +39,20 @@ export default function Bracket({
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastRevealedRef = useRef<number | null>(null);
   const R = scale;
-  const boxW = BOX_W * R;
-  const boxH = BOX_H * R;
-  const gapX = GAP_X * R;
-  const gapY = GAP_Y * R;
-  const pad = PAD * R;
-  const labelH = LABEL_H * R;
+  const geom = geomFor(R);
 
-  const { cols, width, height, lines } = useMemo(() => {
-    const rank = new Map(order.map((id, i) => [id, i]));
-    const byStage = new Map<string, RunMatch[]>();
-    for (const k of KO_ORDER) byStage.set(k, []);
-    for (const m of matches) {
-      const list = byStage.get(m.stage_key);
-      if (list) list.push(m);
-    }
-    for (const list of byStage.values()) {
-      list.sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
-    }
-    const keys = KO_ORDER.filter((k) => (byStage.get(k)?.length ?? 0) > 0);
-    const mainKeys = keys.filter((k) => k !== "THIRD");
+  // Knockout pairings are decided by the group phases that feed them, so the
+  // first bracket column can be filled in as soon as those groups are done —
+  // not only once each specific match is revealed.
+  const groupStageDone = useMemo(
+    () => groupStageDonePure(matches, revealedIds),
+    [matches, revealedIds],
+  );
 
-    const slot = boxH + gapY;
-    const top = labelH + pad;
-    const cols: Col[] = [];
-    let py = top;
-    let px = pad;
-    for (let r = 0; r < mainKeys.length; r++) {
-      const key = mainKeys[r];
-      const list = byStage.get(key) ?? [];
-      const centers: number[] = [];
-      if (r === 0) {
-        for (let i = 0; i < list.length; i++) centers.push(top + i * slot + boxH / 2);
-      } else {
-        const prev = cols[r - 1].centers;
-        for (let j = 0; j < list.length; j++) {
-          const a = prev[2 * j];
-          const b = prev[2 * j + 1];
-          centers.push(b == null ? a ?? top : (a + b) / 2);
-        }
-      }
-      const first = list[0];
-      cols.push({
-        key,
-        name: first?.stage_name ?? key,
-        matches: list,
-        x: px,
-        centers,
-      });
-      px += boxW + gapX;
-      py = Math.max(py, ...centers.map((c) => c + boxH / 2));
-    }
-
-    const lines: Line[] = [];
-    for (let r = 1; r < cols.length; r++) {
-      const cur = cols[r];
-      const prev = cols[r - 1];
-      for (let j = 0; j < cur.matches.length; j++) {
-        const childY = cur.centers[j];
-        const midX = cur.x - gapX / 2;
-        for (const fi of [2 * j, 2 * j + 1]) {
-          const fy = prev.centers[fi];
-          if (fy == null) continue;
-          const fx = prev.x + boxW;
-          lines.push({
-            key: `${prev.key}-${fi}-${cur.key}-${j}`,
-            points: `${fx},${fy} ${midX},${fy} ${midX},${childY} ${cur.x},${childY}`,
-            dashed: false,
-          });
-        }
-      }
-    }
-
-    // Third-place match: drawn directly below the final, in the final's column,
-    // and fed by the two semi-final losers.
-    let third: Col | null = null;
-    const thirdMatches = byStage.get("THIRD") ?? [];
-    const finalCol = cols.find((c) => c.key === "F");
-    if (thirdMatches.length > 0) {
-      const x = finalCol?.x ?? px;
-      const fy = finalCol?.centers[0];
-      const cy = (fy ?? top) + boxH + gapY * 3;
-      third = {
-        key: "THIRD",
-        name: thirdMatches[0]?.stage_name ?? "THIRD",
-        matches: thirdMatches,
-        x,
-        centers: [cy],
-        labelTop: cy - boxH / 2 - 16 * R,
-      };
-      if (finalCol) {
-        const midX = x - gapX / 2;
-        lines.push({
-          key: "THIRD-UP",
-          // The third-place match joins the bracket spine with a single
-          // horizontal connector at its own height (no vertical rising leg).
-          points: `${x},${cy} ${midX},${cy}`,
-          dashed: true,
-        });
-      }
-      py = Math.max(py, cy + boxH / 2);
-    }
-
-    const allCols = third ? [...cols, third] : cols;
-    const width = px + boxW + pad;
-    const height = py + pad;
-    return { cols: allCols, width, height, lines };
-  }, [matches, order, boxW, boxH, gapX, gapY, pad, labelH, R]);
+  const { cols, width, height, lines }: BracketLayout = useMemo(
+    () => layoutBracket(matches, order, geom),
+    [matches, order, geom],
+  );
 
   // Follow the newest revealed knockout match: scroll the bracket horizontally to
   // its column and vertically to its box inside the sidebar. Runs on every reveal
@@ -192,7 +80,7 @@ export default function Bracket({
     // a new round) by scrolling on the next frame.
     requestAnimationFrame(() => {
       el.scrollTo({
-        left: Math.max(0, colX + boxW + pad - el.clientWidth),
+        left: Math.max(0, colX + geom.boxW + geom.pad - el.clientWidth),
         behavior: "smooth",
       });
       const parent = el.closest(".group-scroll") as HTMLElement | null;
@@ -253,7 +141,7 @@ export default function Bracket({
             </span>
             {c.matches.map((m, i) => {
               const played = revealedIds.has(m.id);
-              const y = c.centers[i] - boxH / 2;
+              const y = c.centers[i] - geom.boxH / 2;
               const win = played
                 ? m.penalties
                   ? m.penalties.winner_id
@@ -275,7 +163,7 @@ export default function Bracket({
                       ? " focus"
                       : "")
                   }
-                  style={{ left: c.x, top: y, width: boxW, height: boxH }}
+                  style={{ left: c.x, top: y, width: geom.boxW, height: geom.boxH }}
                   onClick={played && onOpen ? () => onOpen(m) : undefined}
                   role={played && onOpen ? "button" : undefined}
                 >
@@ -301,13 +189,15 @@ export default function Bracket({
                       (() => {
                         const colIdx = cols.findIndex((col) => col.key === c.key);
                         // First knockout round: teams are known from group stage
-                        // qualifiers; keep them hidden until that match is
-                        // revealed so the bracket fills with the games.
+                        // qualifiers as soon as the groups are done, so fill the
+                        // bracket with the games then; keep them hidden only
+                        // while a group phase is still in progress.
                         if (colIdx === 0) {
-                          if (!revealedIds.has(m.id)) return <div className="bk-tbd">{t("match.tbd")}</div>;
                           const hasHome = m.home_team_name && m.home_team_id;
                           const hasAway = m.away_team_name && m.away_team_id;
-                          if (!hasHome && !hasAway) return <div className="bk-tbd">{t("match.tbd")}</div>;
+                          if (!groupStageDone || (!hasHome && !hasAway)) {
+                            return <div className="bk-tbd">{t("match.tbd")}</div>;
+                          }
                           return (
                             <div className="bk-qual">
                               <div className="bk-line">
