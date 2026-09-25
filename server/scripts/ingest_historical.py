@@ -74,6 +74,7 @@ TEAM_CODES = {
     "USSR": "URS", "United States": "USA",
     # 1998
     "Croatia": "CRO", "Jamaica": "JAM", "Japan": "JPN", "South Africa": "RSA",
+    "FR Yugoslavia": "YUG",
     # 2002
     "China PR": "CHN", "China": "CHN", "Ecuador": "ECU", "Senegal": "SEN", "Slovenia": "SVN",
     # 2006
@@ -403,6 +404,7 @@ def parse_squads_wikipedia(year: int) -> dict[str, list[dict]]:
                 wiki = link.group(1).split("#")[0].replace("_", " ").strip() if link else ""
                 name = strip_links(raw_name)
                 name = re.sub(r"\s*\(\(?[cC]\)?\)?\s*$", "", name)  # captain mark
+                name = name.rstrip("*").rstrip()  # footnote markers
                 if not name:
                     continue
                 if not wiki:
@@ -430,6 +432,24 @@ def normalize_name(name: str) -> str:
 def _accent_fold(name: str) -> str:
     return unicodedata.normalize("NFKD", name) \
         .encode("ascii", "ignore").decode("ascii").lower().strip()
+
+def _is_subseq(a: str, b: str) -> bool:
+    it = iter(b)
+    return all(c in it for c in a)
+
+def _same_player_short_name(a: str, b: str) -> bool:
+    """True when a and b are the same player's name under a short-form/nickname
+    variant (same surname, and one fold is a strict in-order subsequence of the
+    other, e.g. 'leo franco' vs 'leonardo franco')."""
+    if a == b:
+        return False
+    if a.split()[-1] != b.split()[-1]:
+        return False
+    if len(a) < len(b) and _is_subseq(a, b):
+        return True
+    if len(b) < len(a) and _is_subseq(b, a):
+        return True
+    return False
 
 def _dedupe_by_fold(merged: dict[int, dict]) -> dict[int, dict]:
     """Drop duplicate-fold players, keeping the entry with a shirt number /
@@ -723,19 +743,38 @@ def build_seed(year: int) -> dict | None:
                 "positions": pl["positions"],
                 "shirt": None,
                 "sofa_id": pid,
+                "_caps": pl.get("caps", 0),
+                "_wiki": False,
+                "_order": 1 << 30,
             }
 
         # Match wiki players to OF players ignoring accents/case so near-dup
-        # spellings ("Cristian Pavon" / "Cristian Pavón") collide.
+        # spellings ("Cristian Pavon" / "Cristian Pavón") collide. When the full
+        # name isn't an exact fold match, fall back to a same-surname strict
+        # subsequence test: openfootball lists many subs by surname/nickname
+        # ("Juan Riquelme" vs "Juan Román Riquelme", "Leo Franco" vs
+        # "Leonardo Franco").
         of_by_fold = {_accent_fold(pl["name"]): pid for pid, pl in merged.items()}
-        for wp in wiki_roster:
+        matched_pids: set[int] = set()
+        for order, wp in enumerate(wiki_roster):
             wfold = _accent_fold(wp["name"])
             match_pid = of_by_fold.get(wfold)
+            if match_pid is None:
+                for opid, pl in merged.items():
+                    if opid in matched_pids:
+                        continue
+                    ofold = _accent_fold(pl["name"])
+                    if _same_player_short_name(ofold, wfold):
+                        match_pid = opid
+                        break
             if match_pid is not None:
+                matched_pids.add(match_pid)
                 merged[match_pid]["positions"] = wp["positions"]
                 merged[match_pid]["shirt"] = wp["shirt"]
                 merged[match_pid]["wiki"] = wp["wiki"]
                 merged[match_pid]["name"] = wp["name"]
+                merged[match_pid]["_wiki"] = True
+                merged[match_pid]["_order"] = order
             else:
                 # New player only in Wikipedia
                 npid = stable_id(wp["name"] + code)
@@ -744,19 +783,38 @@ def build_seed(year: int) -> dict | None:
                     "positions": wp["positions"],
                     "shirt": wp["shirt"],
                     "wiki": wp["wiki"],
+                    "_caps": 0,
+                    "_wiki": True,
+                    "_order": order,
                 }
 
         # Drop duplicate-fold leftovers (prefer the entry carrying a shirt/A wiki).
         merged = _dedupe_by_fold(merged)
 
+        # Normalize every squad to the edition's uniform official size: keep the
+        # Wikipedia squad (the real pre-tournament squad) and pad any short team
+        # with the openfootball players who actually appeared, most-used first.
+        target = 22 if year == 1998 else 23
+        official = sorted(
+            (pl for pl in merged.values() if pl.get("_wiki")),
+            key=lambda r: r["_order"],
+        )[:target]
+        extras = sorted(
+            (pl for pl in merged.values() if not pl.get("_wiki")),
+            key=lambda r: r["_caps"],
+            reverse=True,
+        )
+        normalized = official + extras[: max(0, target - len(official))]
+
         # Resolve photos
-        all_titles = sorted({pl.get("wiki") for pl in merged.values() if pl.get("wiki")})
+        all_titles = sorted({pl.get("wiki") for pl in normalized if pl.get("wiki")})
         fetch_photos(photo_cache, all_titles)
         save_photo_cache(photo_cache)
 
         final_roster = []
-        for pl in merged.values():
-            pl_copy = {k: v for k, v in pl.items() if k != "wiki" and k != "sofa_id"}
+        for pl in normalized:
+            pl_copy = {k: v for k, v in pl.items()
+                       if k not in ("wiki", "sofa_id", "_caps", "_wiki", "_order")}
             pl_copy["photo"] = photo_cache.get(pl.get("wiki"))
             final_roster.append(pl_copy)
 
