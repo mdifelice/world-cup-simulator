@@ -15,7 +15,7 @@ Run order:
 
     python3 server/scripts/scrape_wc2026.py            # regenerates squads + photos
     python3 server/scripts/ingest_fc_ratings.py ...    # <-- PREFERRED primary attrs (EA FC)
-    <place CSV at server/data/wc2026/player_stats.csv>
+    <place CSV at data/wc2026/player_stats.csv>
     python3 server/scripts/ingest_wc2026_stats.py      # optional: tournament line if you
                                                        # would rather overlay match stats
 
@@ -40,7 +40,7 @@ import unicodedata
 
 DEFAULT_CSV = "data/wc2026/player_stats.csv"
 DEFAULT_SEED = "data/seed/2026.json"
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data")
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "data")
 
 # Canonical Rust attribute order (server/src/db.rs INSERT + server/src/sim.rs PACE..LEADERSHIP).
 ATTR_ORDER = [

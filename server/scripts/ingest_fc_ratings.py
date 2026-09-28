@@ -61,7 +61,7 @@ import re
 import sys
 import unicodedata
 
-DEFAULT_SEED = "server/data/seed/2026.json"
+DEFAULT_SEED = "data/seed/2026.json"
 
 ATTR_ORDER = [
     "pace", "stamina", "strength", "dribbling", "passing", "shooting", "tackling", "vision",

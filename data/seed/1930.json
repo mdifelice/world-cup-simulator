@@ -1,0 +1,2426 @@
+{
+ "year": 1930,
+ "name": "1930 FIFA World Cup",
+ "host": "Uruguay",
+ "teams": [
+  {
+   "name": "Argentina",
+   "code": "ARG",
+   "flag": "🇦🇷",
+   "rating": 88,
+   "group": "A"
+  },
+  {
+   "name": "Belgium",
+   "code": "BEL",
+   "flag": "🇧🇪",
+   "rating": 74,
+   "group": "D"
+  },
+  {
+   "name": "Bolivia",
+   "code": "BOL",
+   "flag": "🇧🇴",
+   "rating": 58,
+   "group": "B"
+  },
+  {
+   "name": "Brazil",
+   "code": "BRA",
+   "flag": "🇧🇷",
+   "rating": 78,
+   "group": "B"
+  },
+  {
+   "name": "Chile",
+   "code": "CHI",
+   "flag": "🇨🇱",
+   "rating": 76,
+   "group": "A"
+  },
+  {
+   "name": "France",
+   "code": "FRA",
+   "flag": "🇫🇷",
+   "rating": 72,
+   "group": "A"
+  },
+  {
+   "name": "Mexico",
+   "code": "MEX",
+   "flag": "🇲🇽",
+   "rating": 62,
+   "group": "A"
+  },
+  {
+   "name": "Paraguay",
+   "code": "PAR",
+   "flag": "🇵🇾",
+   "rating": 62,
+   "group": "D"
+  },
+  {
+   "name": "Peru",
+   "code": "PER",
+   "flag": "🇵🇪",
+   "rating": 68,
+   "group": "C"
+  },
+  {
+   "name": "Romania",
+   "code": "ROU",
+   "flag": "🇷🇴",
+   "rating": 70,
+   "group": "C"
+  },
+  {
+   "name": "United States",
+   "code": "USA",
+   "flag": "🇺🇸",
+   "rating": 80,
+   "group": "D"
+  },
+  {
+   "name": "Uruguay",
+   "code": "URU",
+   "flag": "🇺🇾",
+   "rating": 90,
+   "group": "C"
+  },
+  {
+   "name": "Yugoslavia",
+   "code": "YUG",
+   "flag": "🇷🇸",
+   "rating": 82,
+   "group": "B"
+  }
+ ],
+ "squads": {
+  "ARG": [
+   {
+    "name": "Adolfo Zumelzú",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Zumelzu_1929.jpg/330px-Zumelzu_1929.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Alberto Chividini",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Rivarola_y_Chividini_%28Selecci%C3%B3n_argentina%29_-_El_Gr%C3%A1fico_541.jpg/330px-Rivarola_y_Chividini_%28Selecci%C3%B3n_argentina%29_-_El_Gr%C3%A1fico_541.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Alejandro Scopelli",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d6/Alejandro_scopelli_retrato_1931.jpg/330px-Alejandro_scopelli_retrato_1931.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Arico Suárez",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/9/90/Arico_Su%C3%A1rez.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Attilio Demaría",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Carlos Peucelle",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Peucelle_1929.jpg/330px-Peucelle_1929.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Carlos Spadaro",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Carlos_spadaro_retrato.jpg/330px-Carlos_spadaro_retrato.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Edmundo Piaggio",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Fernando Paternoster",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Fernando_paternoster.jpg/330px-Fernando_paternoster.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Francisco Varallo",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Varallo_boca_portrait.jpg/330px-Varallo_boca_portrait.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Guillermo Stábile",
+    "positions": [
+     "ST!",
+     "CF:88"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Guillermo_stabile_hincado.jpg/330px-Guillermo_stabile_hincado.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     93,
+     87,
+     84,
+     91,
+     81,
+     96,
+     45,
+     87,
+     94,
+     92,
+     69,
+     61,
+     81,
+     86,
+     88,
+     81,
+     88,
+     88
+    ]
+   },
+   {
+    "name": "José Della Torre",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Jose_Della_Torre_1936.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Juan Botasso",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/5/58/Juan_Botasso.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Juan Evaristo",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Juan_Evaristo_-_El_Gr%C3%A1fico_573.jpg/330px-Juan_Evaristo_-_El_Gr%C3%A1fico_573.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Luis Monti",
+    "positions": [
+     "CM!",
+     "CDM:85"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Luis_Monti_1934.jpg/330px-Luis_Monti_1934.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     85,
+     85,
+     78,
+     89,
+     90,
+     85,
+     77,
+     91,
+     88,
+     89,
+     75,
+     72,
+     82,
+     72,
+     87,
+     77,
+     85,
+     89
+    ]
+   },
+   {
+    "name": "Manuel Ferreira",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/0/02/Manuel-ferreira.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Mario Evaristo",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/en/c/c2/MarioEvaristo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Ramón Muttis",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/9/94/Ramon_muttis.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Roberto Cherro",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Roberto_cherro_elgrafico_1933.jpg/330px-Roberto_cherro_elgrafico_1933.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Rodolfo Orlandini",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/en/e/e0/Rodolfo_Orlandini.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Ángel Bossio",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/AngelBossio-2.jpg/330px-AngelBossio-2.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ],
+  "BEL": [
+   {
+    "name": "Alexis Chantraine",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "André Saeys",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Arnold Badjou",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/Bakhuys_in_de_aanval_-_Dutch_soccer_player_Bep_Bakhuys_on_the_offensive_%284681460963%29.jpg/330px-Bakhuys_in_de_aanval_-_Dutch_soccer_player_Bep_Bakhuys_on_the_offensive_%284681460963%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "August Hellemans",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/August_Hellemans.jpg/330px-August_Hellemans.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Bernard Voorhoof",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Le_Belge_Bernard_Voorhoof_%28sombre%29_sautant_plus_haut_que_tout_le_monde%2C_lors_du_8e_de_finale_de_Coupe_du_monde_1938%2C_perdu_face_%C3%A0_la_France_%C3%A0_Colombes.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Ferdinand Adams",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Gérard Delbeke",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Henri De Deken",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jacques Moeschal",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jan Diddens",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jean De Bie",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/0/0a/JeanDeBie.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Jean De Clercq",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jean De Clerq",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Louis Versyp",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Nicolas Hoydonckx",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Nicolas_Hoydonckx.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Nikolaas Hoydonckx",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Pierre Braine",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Théodore Nouwens",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   }
+  ],
+  "BOL": [
+   {
+    "name": "Casiano Chavarría",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Casiano_Chavarr%C3%ADa.png/330px-Casiano_Chavarr%C3%ADa.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Constantino Noya",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Diógenes Lara",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Di%C3%B3genes_Lara%2C_Estadio%2C_1946-02-02_%28142%29.jpg/330px-Di%C3%B3genes_Lara%2C_Estadio%2C_1946-02-02_%28142%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Eduardo Reyes Ortiz",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Gumercindo Gómez",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jesús Bermúdez",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Jes%C3%BAs_Berm%C3%BAdez.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Jorge Argote",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jorge Balderrama",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jorge Valderrama",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "José Bustamante",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Juan Argote",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Luis Reyes",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Mario Alborta",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Miguel Brito",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Miguel Murillo",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Rafael Méndez",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Renato Sáinz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Renato_sainz_loza.jpg/330px-Renato_sainz_loza.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "René Fernández",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Segundo Durandal",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Segundo_Durandal.png/330px-Segundo_Durandal.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ],
+  "BRA": [
+   {
+    "name": "Araken",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/1/15/Araken_Patusca_%281933%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Benedicto",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Brilhante",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/Brasil_-_Mundial_-_1930.jpg/330px-Brasil_-_Mundial_-_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Carvalho Leite",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/3/39/Carvalho_Leite.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Fausto",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/CR_Vasco_da_Gama_1929.jpg/330px-CR_Vasco_da_Gama_1929.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Fernando",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Fortes",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Hermógenes",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/Brasil_-_Mundial_-_1930.jpg/330px-Brasil_-_Mundial_-_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Itália",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Ivan Mariz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Joel",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Joel%2C_Los_Sports%2C_1930-08-01_%28386%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Manoelzinho",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Moderato",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Moderato_Wisintainer_-_1931.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Nilo",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Nilo_Murtinho_Braga_1929.jpg/330px-Nilo_Murtinho_Braga_1929.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Oscarino",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Pamplona",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Poly",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Preguinho",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Ef_preguinho.jpg/330px-Ef_preguinho.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Russinho",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Russinho_%28DdN%2C_19350524-6%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Teóphilo",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/Jaksic_Mihajlovic_Theophilo.jpg/330px-Jaksic_Mihajlovic_Theophilo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Velloso",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Zé Luiz",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   }
+  ],
+  "CHI": [
+   {
+    "name": "Arturo Coddou",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Arturo_Coddou%2C_Los_Sports%2C_1930-06-20_%28378%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Arturo Torres",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/5/52/Arturo_Torres%2C_Los_Sports%2C_1928-06-01_%28273%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Carlos Schneberger",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Carlos Schneeberger",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Carlos_Schneeberger%2C_Los_Sports%2C_1927-01-07_%28200%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Carlos Vidal",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Carlos_Vidal%2C_Estadio%2C_1944-04-21_%2868%29_01.jpg/330px-Carlos_Vidal%2C_Estadio%2C_1944-04-21_%2868%29_01.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Casimiro Torres",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Casimiro_Torres%2C_Estadio%2C_1950-02-11_%28352%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "César Espinoza",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/C%C3%A9sar_Espinoza%2C_Los_Sports%2C_1929-11-01_%28347%29.jpg/330px-C%C3%A9sar_Espinoza%2C_Los_Sports%2C_1929-11-01_%28347%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Eberardo Villalobos",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Eberardo_Villalobos%2C_Los_Sports%2C_1930-06-20_%28378%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Ernesto Chaparro",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Ernesto_Chaparro_%281928%29.png/330px-Ernesto_Chaparro_%281928%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Guillermo Arellano",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/5/5b/Guillermo_Arellano%2C_Los_Sports%2C_1930-06-20_%28378%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Guillermo Riveros",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Guillermo_Riveros%2C_Estadio%2C_1943-06-18_%2846%29.jpg/330px-Guillermo_Riveros%2C_Estadio%2C_1943-06-18_%2846%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Guillermo Saavedra",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Guillermo_Saavedra%2C_Los_Sports%2C_1927-07-29_%28229%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Guillermo Subiabre",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Guillermo_Subiabre%2C_Los_Sports%2C_1928-06-01_%28273%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Horacio Muñoz",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Horacio_Mu%C3%B1oz%2C_Los_Sports%2C_1925-05-29_%28116%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Humberto Elgueta",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Humberto_Elgueta%2C_Los_Sports%2C_1925-06-05_%28117%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Juan Aguilera",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/2/27/Juan-aguilera-chile-1930.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Roberto Cortés",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Viejito_Cort%C3%A9s_-_1934.jpg/330px-Viejito_Cort%C3%A9s_-_1934.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Tomás Ojeda",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/3/37/Tom%C3%A1s_Ojeda%2C_Los_Sports%2C_1930-06-20_%28378%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Ulises Poirier",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Ulises_Poirier%2C_Estadio%2C_1948-05-22_%28262%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Víctor Morales",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/9/9d/V%C3%ADctor_Morales%2C_Los_Sports%2C_1928-06-01_%28273%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   }
+  ],
+  "FRA": [
+   {
+    "name": "Alex Thépot",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Alex_Th%C3%A9pot_en_f%C3%A9vrier_1941.jpg/330px-Alex_Th%C3%A9pot_en_f%C3%A9vrier_1941.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Alexandre Villaplane",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/1/19/AlexVillaplane_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "André Maschinot",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/6/63/Andr%C3%A9_Maschinot.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "André Tassin",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Andr%C3%A9_Tassin_1930.jpg/330px-Andr%C3%A9_Tassin_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Augustin Chantrel",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Augustin_Chantrel_1925.jpg/330px-Augustin_Chantrel_1925.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Célestin Delmer",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Chile_v_Francia%2C_Los_Sports%2C_1930-08-01_%28386%29_02.jpg/330px-Chile_v_Francia%2C_Los_Sports%2C_1930-08-01_%28386%29_02.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Edmond Delfour",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/3/37/Edmond_Delfour_en_mai_1936.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Ernest Libérati",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Ernest_Lib%C3%A9rati_1930_Colombes.jpg/330px-Ernest_Lib%C3%A9rati_1930_Colombes.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jean Laurent",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Jean_Laurent_1935.jpg/330px-Jean_Laurent_1935.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Lucien Laurent",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Lucien_Laurent.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Marcel Capelle",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Marcel Langiller",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Lucien_Laurent%2C_Marcel_Langiller%2C_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Marcel Pinel",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Numa Andoire",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Numa_Andoire_1931.jpg/330px-Numa_Andoire_1931.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Émile Veinante",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/%C3%89mile_Veinante_en_octobre_1937.jpg/330px-%C3%89mile_Veinante_en_octobre_1937.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Étienne Mattler",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/%C3%89tienne_Mattler_en_octobre_1937.jpg/330px-%C3%89tienne_Mattler_en_octobre_1937.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ],
+  "MEX": [
+   {
+    "name": "Alfredo Sánchez",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Dionisio Mejía",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Efraín Amézcua",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Felipe Olivares",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Felipe Rosas",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Francisco Garza",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Francisco Garza Gutierrez",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Hilario López",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Isidoro Sota",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jesús Castro",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "José Ruíz",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Juan Carreño",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Luis Pérez",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Manuel Rosas",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Rafael Garza",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Raimundo Rodriguez",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Raymundo Rodríguez",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Roberto Gayón",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Óscar Bonfiglio",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": null
+   }
+  ],
+  "PAR": [
+   {
+    "name": "Amadeo Ortega",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Aurelio González",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Gonz%C3%A1lez_%28selecci%C3%B3n_paraguaya%29_-_El_Gr%C3%A1fico_540.jpg/330px-Gonz%C3%A1lez_%28selecci%C3%B3n_paraguaya%29_-_El_Gr%C3%A1fico_540.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Bernabé Rivera",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Delfín Benítez Cáceres",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Benitez_caceres_Boca.jpg/330px-Benitez_caceres_Boca.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Diego Florentín",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Diógenes Domínguez",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Eusebio Díaz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Eusebio_D%C3%ADaz%2C_Los_Sports%2C_1924-11-07_%2887%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Eustacio Chamorro",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Francisco Aguirre",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Gerardo Romero",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jacinto Villalba",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "José Miracca",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Lino Nessi",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Luis Vargas Peña",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Modesto Denis",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Modesto_Denis%2C_Los_Sports%2C_1924-11-07_%2887%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Pedro Benítez",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Quiterio Olmedo",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Romildo Etcheverry",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Saguier Carreras",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Salvador Flores",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Santiago Benítez",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Tranquilino Garcete",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   }
+  ],
+  "PER": [
+   {
+    "name": "Alberto Denegri",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Alberto Soria",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Alejandro Villanueva",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Alejandro_Manguera_Villanueva.png/330px-Alejandro_Manguera_Villanueva.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Antonio Maquilón",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Arturo Fernández",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Carlos Cillóniz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Demetrio Neyra",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Domingo García",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Eduardo Astengo",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jorge Pardon",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jorge Sarmiento",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/JorgeKooChoiSarmiento1928.png/330px-JorgeKooChoiSarmiento1928.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "José María Lavalle",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Peru_football_team_1927.jpg/330px-Peru_football_team_1927.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Juan Valdivieso",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/JuanValdiviesoPadilla-08.12.1935.png/330px-JuanValdiviesoPadilla-08.12.1935.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Julio Lores",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Rumania_v_Per%C3%BA%2C_Los_Sports%2C_1930-07-25_%28385%29_02.jpg/330px-Rumania_v_Per%C3%BA%2C_Los_Sports%2C_1930-07-25_%28385%29_02.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Julio Quintana",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Julio_Quintana_Calmet.png/330px-Julio_Quintana_Calmet.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Lizardo Rodríguez Nue",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Luis de Souza",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Mario de las Casas",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Pablo Pacheco",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Plácido Galindo",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   }
+  ],
+  "ROU": [
+   {
+    "name": "Adalbert Deșu",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Adalbert Steiner",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Adalbert_Steiner_1966_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Alfred Eisenbeisser",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Alfred_Fieraru_1966.jpg/330px-Alfred_Fieraru_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Constantin Stanciu",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Constantin_Stanciu_1966_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Corneliu Robe",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Corneliu_Robe_1966.jpg/330px-Corneliu_Robe_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Emerich Vogl",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/Emerich_Vogl.jpg/330px-Emerich_Vogl.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ilie Subășeanu",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Ilie_Sub%C4%83%C8%99eanu_1966.jpg/330px-Ilie_Sub%C4%83%C8%99eanu_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ion Lăpușneanu",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Jean_L%C4%83pu%C8%99neanu_1966.jpg/330px-Jean_L%C4%83pu%C8%99neanu_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Iosif Czako",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Ladislau Raffinsky",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "László Raffinsky",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/4/40/Raffinsky_Laszlo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Nicolae Kovács",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Nicolae_Kov%C3%A1cs%2C_interna%C8%9Bional_timi%C8%99orean%2C_world_cups_1930%2C_1934%2C_1938.jpg/330px-Nicolae_Kov%C3%A1cs%2C_interna%C8%9Bional_timi%C8%99orean%2C_world_cups_1930%2C_1934%2C_1938.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Rudolf Buerger",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Rudolf Bürger",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/6/65/Rudolf_B%C3%BCrger.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Rudolf Wetzer",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Rudy_Wetzer_1966.jpg/330px-Rudy_Wetzer_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Samuel Zauber",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Ștefan Barbu",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/0/03/%C8%98tefan_Barbu_1966_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   }
+  ],
+  "USA": [
+   {
+    "name": "Alexander Wood",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/Alexander_Wood_US_Soccer_Team_1930.png/330px-Alexander_Wood_US_Soccer_Team_1930.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Andrew Auld",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Andy Auld",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Arnie Oliver",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Bart McGhee",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Bert Patenaude",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Bert_Patenaude.jpg/330px-Bert_Patenaude.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Billy Gonsalves",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Billy_gonsalves_in_1930.jpg/330px-Billy_gonsalves_in_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Frank Vaughn",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "George Moorhouse",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/George_Moorhouse_USA.jpg/330px-George_Moorhouse_USA.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "James Gentle",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Jim Brown",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/9/9c/USA_team_line_up_13_July.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Jimmy Douglas",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/4/46/Jimmy_douglas_us_goalkeeper.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Jimmy Gallagher",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Jimmy_Gallagher_US_Soccer_Team_1930.png/330px-Jimmy_Gallagher_US_Soccer_Team_1930.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Mike Bookie",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Philip Slone",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Ralph Tracy",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Raphael Tracey",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Tom Florie",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   }
+  ],
+  "URU": [
+   {
+    "name": "Carlos Riolfo",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Conduelo Píriz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Domingo Tejera",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Emilio Recoba",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Enrique Ballestrero",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Uruguay_en_el_Mundial_1930%2C_Los_Sports%2C_1930-08-08_%28387%29.jpg/330px-Uruguay_en_el_Mundial_1930%2C_Los_Sports%2C_1930-08-08_%28387%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ernesto Mascheroni",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Héctor Castro",
+    "positions": [
+     "ST!",
+     "CF:88"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/H%C3%A9ctor_Castro_%281928%29.jpg/330px-H%C3%A9ctor_Castro_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     87,
+     83,
+     80,
+     86,
+     77,
+     90,
+     48,
+     83,
+     88,
+     87,
+     67,
+     61,
+     77,
+     82,
+     83,
+     77,
+     83,
+     83
+    ]
+   },
+   {
+    "name": "Héctor Scarone",
+    "positions": [
+     "CAM!",
+     "CF:88"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Hector_scarone_nacional.jpg/330px-Hector_scarone_nacional.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     88,
+     88,
+     81,
+     92,
+     94,
+     88,
+     79,
+     95,
+     91,
+     92,
+     77,
+     73,
+     84,
+     73,
+     90,
+     79,
+     88,
+     92
+    ]
+   },
+   {
+    "name": "José Leandro Andrade",
+    "positions": [
+     "CM!",
+     "CDM:88"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Andrade_urug.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "attrs": [
+     85,
+     85,
+     78,
+     89,
+     90,
+     85,
+     77,
+     91,
+     88,
+     89,
+     75,
+     72,
+     82,
+     72,
+     87,
+     77,
+     85,
+     89
+    ]
+   },
+   {
+    "name": "José Nasazzi",
+    "positions": [
+     "CB!"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/1/16/Jose_nasazzi_urug.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "attrs": [
+     84,
+     85,
+     88,
+     81,
+     87,
+     61,
+     94,
+     84,
+     91,
+     92,
+     77,
+     71,
+     81,
+     91,
+     90,
+     84,
+     90,
+     94
+    ]
+   },
+   {
+    "name": "Juan Carlos Calvo",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Lorenzo Fernández",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Lorenzo_Fern%C3%A1ndez_%281928%29.jpg/330px-Lorenzo_Fern%C3%A1ndez_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Miguel Capuccini",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Pablo Dorado",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/3/31/Pablo_Dorado_%28cropped%29.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Pedro Cea",
+    "positions": [
+     "CAM!",
+     "CM:85"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Pedro_Cea_%281928%29.jpg/330px-Pedro_Cea_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     83,
+     83,
+     77,
+     87,
+     88,
+     83,
+     75,
+     89,
+     86,
+     87,
+     74,
+     71,
+     80,
+     71,
+     85,
+     75,
+     83,
+     87
+    ]
+   },
+   {
+    "name": "Pedro Petrone",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Pedro_Petrone_%281928%29.jpg/330px-Pedro_Petrone_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Peregrino Anselmo",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/0/01/Juan_Anselmo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Santos Iriarte",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/3/37/Santos_Iriarte_%28cropped%29.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Santos Urdinarán",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Santos_Urdinar%C3%A1n_%281928%29.jpg/330px-Santos_Urdinar%C3%A1n_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Zoilo Saldombide",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Álvaro Gestido",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/%C3%81lvaro_Gestido_%281928%29.jpg/330px-%C3%81lvaro_Gestido_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ángel Melogno",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   }
+  ],
+  "YUG": [
+   {
+    "name": "Aleksandar Tirnanić",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/6/69/Aleksandar_Tirnani%C4%87.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Blagoje Marjanović",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Božidar Marković",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Branislav Hrnjiček",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Branislav Sekulić",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Yugoslavia_nationalteam_1930.jpg/330px-Yugoslavia_nationalteam_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Dragan Mihajlovic",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Dragomir Tošić",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Dragoslav Mihajlović",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Jaksic_Mihajlovic_Theophilo_%28Dragoslav%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Dragutin Najdanović",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Ivan Bek",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/Ivan_Bek_%281928%29.jpg/330px-Ivan_Bek_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ivica Bek",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Ljubiša Stefanović",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Yugoslavia_nationalteam_1930.jpg/330px-Yugoslavia_nationalteam_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Milan Stojanović",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Milorad Arsenijević",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Milorad_Arsenijevi%C4%87_%281928%29.jpg/330px-Milorad_Arsenijevi%C4%87_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Milovan Jakšić",
+    "positions": [
+     "GK"
+    ],
+    "shirt": null,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/3/39/Jaksic_Mihajlovic_Theophilo_%28Milovan%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Milutin Ivković",
+    "positions": [
+     "CB"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Milutin_Ivkovi%C4%87_%281928%29.jpg/330px-Milutin_Ivkovi%C4%87_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Momcilo Djokic",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Momčilo Đokić",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Teofilo Spasojević",
+    "positions": [
+     "CM"
+    ],
+    "shirt": null,
+    "photo": null
+   },
+   {
+    "name": "Đorđe Vujadinović",
+    "positions": [
+     "ST"
+    ],
+    "shirt": null,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Yugoslavia_nationalteam_1930.jpg/330px-Yugoslavia_nationalteam_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ]
+ },
+ "fixtures": [
+  {
+   "group": "A",
+   "match": 1,
+   "home": "FRA",
+   "away": "MEX",
+   "matchday": 1,
+   "kickoff": "1930-07-13"
+  },
+  {
+   "group": "A",
+   "match": 2,
+   "home": "ARG",
+   "away": "FRA",
+   "matchday": 1,
+   "kickoff": "1930-07-15"
+  },
+  {
+   "group": "A",
+   "match": 3,
+   "home": "CHI",
+   "away": "MEX",
+   "matchday": 2,
+   "kickoff": "1930-07-16"
+  },
+  {
+   "group": "A",
+   "match": 4,
+   "home": "CHI",
+   "away": "FRA",
+   "matchday": 2,
+   "kickoff": "1930-07-19"
+  },
+  {
+   "group": "A",
+   "match": 5,
+   "home": "ARG",
+   "away": "MEX",
+   "matchday": 3,
+   "kickoff": "1930-07-19"
+  },
+  {
+   "group": "A",
+   "match": 6,
+   "home": "ARG",
+   "away": "CHI",
+   "matchday": 3,
+   "kickoff": "1930-07-22"
+  },
+  {
+   "group": "B",
+   "match": 7,
+   "home": "YUG",
+   "away": "BRA",
+   "matchday": 1,
+   "kickoff": "1930-07-14"
+  },
+  {
+   "group": "B",
+   "match": 8,
+   "home": "YUG",
+   "away": "BOL",
+   "matchday": 2,
+   "kickoff": "1930-07-17"
+  },
+  {
+   "group": "B",
+   "match": 9,
+   "home": "BRA",
+   "away": "BOL",
+   "matchday": 3,
+   "kickoff": "1930-07-20"
+  },
+  {
+   "group": "C",
+   "match": 10,
+   "home": "ROU",
+   "away": "PER",
+   "matchday": 1,
+   "kickoff": "1930-07-14"
+  },
+  {
+   "group": "C",
+   "match": 11,
+   "home": "URU",
+   "away": "PER",
+   "matchday": 2,
+   "kickoff": "1930-07-18"
+  },
+  {
+   "group": "C",
+   "match": 12,
+   "home": "URU",
+   "away": "ROU",
+   "matchday": 3,
+   "kickoff": "1930-07-21"
+  },
+  {
+   "group": "D",
+   "match": 13,
+   "home": "USA",
+   "away": "BEL",
+   "matchday": 1,
+   "kickoff": "1930-07-13"
+  },
+  {
+   "group": "D",
+   "match": 14,
+   "home": "USA",
+   "away": "PAR",
+   "matchday": 2,
+   "kickoff": "1930-07-17"
+  },
+  {
+   "group": "D",
+   "match": 15,
+   "home": "PAR",
+   "away": "BEL",
+   "matchday": 3,
+   "kickoff": "1930-07-20"
+  }
+ ]
+}

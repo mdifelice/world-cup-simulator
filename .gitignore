@@ -7,15 +7,20 @@ dist/
 build/
 
 # Database & data artifacts
-data/
-server/data/*.sqlite
-server/data/*.sqlite-shm
-server/data/*.sqlite-wal
-server/data/*.db
-server/data/*.sqlite3
-server/wcs.sqlite
-server/wcs.sqlite-shm
-server/wcs.sqlite-wal
+# Runtime SQLite databases live anywhere under these names and never get committed.
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.sqlite3
+
+# data/ holds the real seed data (tracked exceptions below). Everything else in
+# the folder — raw CSV sources, downloaded photos, and any SQLite file — is
+# regenerable tooling/runtime state and stays local.
+data/*
+!data/seed/
+!data/seed/*.json
+
 pwtest-shots/
 *.tmp
 

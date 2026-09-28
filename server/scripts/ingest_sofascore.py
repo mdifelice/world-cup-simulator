@@ -1,7 +1,7 @@
 """Build per-edition World Cup seed files from SoFaScore.
 
-Produces ``server/data/seed/{year}.json`` (teams, squads, group fixtures) plus
-downscaled player headshots in ``server/data/photos/{playerId}.jpg``. See
+Produces ``data/seed/{year}.json`` (teams, squads, group fixtures) plus
+downscaled player headshots in ``data/photos/{playerId}.jpg``. See
 ``csv_to_seed``/``build_seed`` for the pure assembly logic and
 ``scripts/sofascore_api.py`` for the Cloudflare-friendly fetcher.
 
@@ -32,7 +32,7 @@ import wcs_derive as dv  # noqa: E402
 from sofascore_api import OfflineClient, SofaClient  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
-DATA_DIR = REPO / "server" / "data"
+DATA_DIR = REPO / "data"
 SEED_DIR = DATA_DIR / "seed"
 PHOTO_DIR = DATA_DIR / "photos"
 CACHE_DIR = Path(__file__).resolve().parent / ".cache" / "sofascore"

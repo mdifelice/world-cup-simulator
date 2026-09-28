@@ -1,0 +1,3644 @@
+{
+ "year": 1966,
+ "name": "1966 FIFA World Cup",
+ "host": "England",
+ "teams": [
+  {
+   "name": "Argentina",
+   "code": "ARG",
+   "flag": "🇦🇷",
+   "rating": 81,
+   "group": "B"
+  },
+  {
+   "name": "Brazil",
+   "code": "BRA",
+   "flag": "🇧🇷",
+   "rating": 84,
+   "group": "C"
+  },
+  {
+   "name": "Bulgaria",
+   "code": "BUL",
+   "flag": "🇧🇬",
+   "rating": 70,
+   "group": "C"
+  },
+  {
+   "name": "Chile",
+   "code": "CHI",
+   "flag": "🇨🇱",
+   "rating": 72,
+   "group": "D"
+  },
+  {
+   "name": "England",
+   "code": "ENG",
+   "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+   "rating": 88,
+   "group": "A"
+  },
+  {
+   "name": "France",
+   "code": "FRA",
+   "flag": "🇫🇷",
+   "rating": 74,
+   "group": "A"
+  },
+  {
+   "name": "Hungary",
+   "code": "HUN",
+   "flag": "🇭🇺",
+   "rating": 78,
+   "group": "C"
+  },
+  {
+   "name": "Italy",
+   "code": "ITA",
+   "flag": "🇮🇹",
+   "rating": 82,
+   "group": "D"
+  },
+  {
+   "name": "Mexico",
+   "code": "MEX",
+   "flag": "🇲🇽",
+   "rating": 66,
+   "group": "A"
+  },
+  {
+   "name": "North Korea",
+   "code": "PRK",
+   "flag": "🇰🇵",
+   "rating": 72,
+   "group": "D"
+  },
+  {
+   "name": "Portugal",
+   "code": "POR",
+   "flag": "🇵🇹",
+   "rating": 87,
+   "group": "C"
+  },
+  {
+   "name": "Spain",
+   "code": "ESP",
+   "flag": "🇪🇸",
+   "rating": 80,
+   "group": "B"
+  },
+  {
+   "name": "Switzerland",
+   "code": "SUI",
+   "flag": "🇨🇭",
+   "rating": 68,
+   "group": "B"
+  },
+  {
+   "name": "USSR",
+   "code": "URS",
+   "flag": "🇷🇺",
+   "rating": 82,
+   "group": "D"
+  },
+  {
+   "name": "Uruguay",
+   "code": "URU",
+   "flag": "🇺🇾",
+   "rating": 76,
+   "group": "A"
+  },
+  {
+   "name": "West Germany",
+   "code": "FRG",
+   "flag": "🇩🇪",
+   "rating": 88,
+   "group": "B"
+  }
+ ],
+ "squads": {
+  "ARG": [
+   {
+    "name": "Alberto González",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 16,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Alberto_Gonz%C3%A1lez_%28Atlanta%29_-_El_Gr%C3%A1fico_2180.jpg/330px-Alberto_Gonz%C3%A1lez_%28Atlanta%29_-_El_Gr%C3%A1fico_2180.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Alfredo Rojas",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 18,
+    "photo": null
+   },
+   {
+    "name": "Antonio Rattín",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 10,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Rattin_waving_crowd.jpg/330px-Rattin_waving_crowd.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Antonio Roma",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Antonio_roma.jpg/330px-Antonio_roma.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Aníbal Tarabini",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 22,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/An%C3%ADbal_Tarabini.jpg/330px-An%C3%ADbal_Tarabini.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Carmelo Simeone",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 9,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Carmelo_Simeone.jpg/330px-Carmelo_Simeone.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ermindo Onega",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 20,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/Ermindo_Onega_1961.jpeg/330px-Ermindo_Onega_1961.jpeg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Hugo Gatti",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 3,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Hugo_gatti_en_1987.jpg/330px-Hugo_gatti_en_1987.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jorge Solari",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 15,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/4/46/Jorge_Raul_Solari.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "José Omar Pastoriza",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 11,
+    "photo": null
+   },
+   {
+    "name": "José Varacka",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Jose_varacka_1969.jpg/330px-Jose_varacka_1969.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Juan Carlos Sarnari",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 17,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Juan_Carlos_Sarnari.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Luis Artime",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 19,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/9/98/Luis_artime_argentina.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Mario Chaldú",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 14,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/9/9b/Mario_Chaldu.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Nelson López",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 13,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/4/44/Nelson_Juan_L%C3%B3pez.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Oscar Calics",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 6,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/5/57/Oscar_Calics.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Oscar Más",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 21,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Oscar_Mas_1969.jpg/330px-Oscar_Mas_1969.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Rafael Albrecht",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Rafael_Albrecht.jpg/330px-Rafael_Albrecht.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Roberto Ferreiro",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 8,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Roberto_Ferreiro_%281972%29.jpg/330px-Roberto_Ferreiro_%281972%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Roberto Perfumo",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 4,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Perfumo_1969.jpeg/330px-Perfumo_1969.jpeg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Rolando Irusta",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 2,
+    "photo": null
+   },
+   {
+    "name": "Silvio Marzolini",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 7,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Silvioposter.jpg/330px-Silvioposter.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ],
+  "BRA": [
+   {
+    "name": "Alcindo",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 18,
+    "photo": null
+   },
+   {
+    "name": "Altair",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 6,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Altair_Gomes_de_Figueiredo_%28cropped%29.jpg/330px-Altair_Gomes_de_Figueiredo_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Brito",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/H%C3%A9rcules_de_Brito_Ruas.jpg/330px-H%C3%A9rcules_de_Brito_Ruas.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Denílson",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 13,
+    "photo": null
+   },
+   {
+    "name": "Djalma Santos",
+    "positions": [
+     "RB!"
+    ],
+    "shirt": 2,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Djalma_Santos.jpg/330px-Djalma_Santos.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     84,
+     85,
+     88,
+     81,
+     87,
+     61,
+     94,
+     84,
+     91,
+     92,
+     77,
+     71,
+     81,
+     91,
+     90,
+     84,
+     90,
+     94
+    ]
+   },
+   {
+    "name": "Edu",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 22,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Edu_1970.jpg/330px-Edu_1970.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Fidélis",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": null
+   },
+   {
+    "name": "Garrincha",
+    "positions": [
+     "RW!",
+     "RM:85",
+     "CF:80"
+    ],
+    "shirt": 16,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Manoel_Francisco_dos_Santos-Garrincha.jpg/330px-Manoel_Francisco_dos_Santos-Garrincha.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     88,
+     84,
+     81,
+     87,
+     78,
+     91,
+     47,
+     84,
+     89,
+     88,
+     68,
+     61,
+     78,
+     83,
+     84,
+     78,
+     84,
+     84
+    ]
+   },
+   {
+    "name": "Gilmar",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Gilmar_%28cropped%29.jpg/330px-Gilmar_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Gérson",
+    "positions": [
+     "CM!",
+     "CAM:88"
+    ],
+    "shirt": 11,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/G%C3%A9rson_1970.jpg/330px-G%C3%A9rson_1970.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     87,
+     87,
+     80,
+     91,
+     93,
+     87,
+     78,
+     94,
+     90,
+     91,
+     76,
+     72,
+     84,
+     72,
+     89,
+     78,
+     87,
+     91
+    ]
+   },
+   {
+    "name": "Hilderaldo Bellini",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 4,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/Bellini%2C_jogador_de_futebol%2C_1961.tif/lossy-page1-330px-Bellini%2C_jogador_de_futebol%2C_1961.tif.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jairzinho",
+    "positions": [
+     "RW!",
+     "RM:85",
+     "ST:82"
+    ],
+    "shirt": 17,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Jairzinho_1970s.jpg/330px-Jairzinho_1970s.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     94,
+     88,
+     85,
+     92,
+     81,
+     97,
+     45,
+     88,
+     95,
+     93,
+     69,
+     61,
+     81,
+     87,
+     89,
+     81,
+     89,
+     89
+    ]
+   },
+   {
+    "name": "Lima",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 14,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Ant%C3%B4nio_Lima_dos_Santos_%281963%29.png/330px-Ant%C3%B4nio_Lima_dos_Santos_%281963%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Manga",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f5/Manga_%281971%29.png/330px-Manga_%281971%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Orlando",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 7,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Orlando%2C_jogador_de_futebol%2C_1961.tif/lossy-page1-330px-Orlando%2C_jogador_de_futebol%2C_1961.tif.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Paraná",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 21,
+    "photo": null
+   },
+   {
+    "name": "Paulo Henrique",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 8,
+    "photo": null
+   },
+   {
+    "name": "Pelé",
+    "positions": [
+     "CF!",
+     "ST:90",
+     "RW:85"
+    ],
+    "shirt": 10,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Pele_con_brasil_%28cropped%29.jpg/330px-Pele_con_brasil_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     91,
+     85,
+     83,
+     89,
+     79,
+     93,
+     46,
+     85,
+     92,
+     90,
+     68,
+     61,
+     79,
+     85,
+     86,
+     79,
+     86,
+     86
+    ]
+   },
+   {
+    "name": "Rildo",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 9,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Rildo.JPG/330px-Rildo.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Silva Batuta",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 19,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b6/Walter_Machado_da_Silva.JPG/330px-Walter_Machado_da_Silva.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Tostão",
+    "positions": [
+     "CF!",
+     "ST:90"
+    ],
+    "shirt": 20,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Tost%C3%A3o_1970.jpg/330px-Tost%C3%A3o_1970.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     92,
+     86,
+     84,
+     90,
+     80,
+     95,
+     46,
+     86,
+     93,
+     91,
+     69,
+     61,
+     80,
+     85,
+     87,
+     80,
+     87,
+     87
+    ]
+   },
+   {
+    "name": "Zito",
+    "positions": [
+     "CM!",
+     "CDM:88"
+    ],
+    "shirt": 15,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Zito_brazil_1962_team.jpg/330px-Zito_brazil_1962_team.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     83,
+     83,
+     77,
+     87,
+     88,
+     83,
+     75,
+     89,
+     86,
+     87,
+     74,
+     71,
+     80,
+     71,
+     85,
+     75,
+     83,
+     87
+    ]
+   }
+  ],
+  "BUL": [
+   {
+    "name": "Aleksandar Kostov",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 16,
+    "photo": null
+   },
+   {
+    "name": "Aleksandar Shalamanov",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/Aleksandar_Shalamanov_M%C3%A9xico_70.jpg/330px-Aleksandar_Shalamanov_M%C3%A9xico_70.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Boris Gaganelov",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 4,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Boris_Gaganelov_M%C3%A9xico_70.jpg/330px-Boris_Gaganelov_M%C3%A9xico_70.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Dimitar Largov",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 15,
+    "photo": null
+   },
+   {
+    "name": "Dimitar Penev",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9a/Dimitar_Penev_c1974.jpg/330px-Dimitar_Penev_c1974.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Dimitar Yakimov",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 13,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Dimitar_Yakimov_M%C3%A9xico_70.png/330px-Dimitar_Yakimov_M%C3%A9xico_70.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Dinko Dermendzhiev",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 7,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/19/Dinko_Dermendzhiev.jpg/330px-Dinko_Dermendzhiev.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Dobromir Zhechev",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 6,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ca/Dobromir_Zhechev_M%C3%A9xico_70.jpg/330px-Dobromir_Zhechev_M%C3%A9xico_70.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Evgeni Yanchovski",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 18,
+    "photo": null
+   },
+   {
+    "name": "Georgi Asparuhov",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 9,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Georgi_Asparuhov_1969.jpg/330px-Georgi_Asparuhov_1969.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Georgi Naydenov",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": null
+   },
+   {
+    "name": "Ivan Davidov",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 20,
+    "photo": null
+   },
+   {
+    "name": "Ivan Deyanov",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 22,
+    "photo": null
+   },
+   {
+    "name": "Ivan Kolev",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 11,
+    "photo": null
+   },
+   {
+    "name": "Ivan Vutsov",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/Ivan_Vutsov_%281977%29.jpg/330px-Ivan_Vutsov_%281977%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Nikola Kotkov",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 14,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/83/Nikola_Kotkov%2C_Bestanddeelnr_922-8917_%28cropped%29.jpg/330px-Nikola_Kotkov%2C_Bestanddeelnr_922-8917_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Petar Zhekov",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 10,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fc/Petar_Zhekov_M%C3%A9xico_70.png/330px-Petar_Zhekov_M%C3%A9xico_70.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Simeon Simeonov",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 21,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Simeon_Simeonov_1969.jpg/330px-Simeon_Simeonov_1969.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Stefan Abadzhiev",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 17,
+    "photo": null
+   },
+   {
+    "name": "Stoyan Kitov",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 8,
+    "photo": null
+   },
+   {
+    "name": "Vasil Metodiev",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/Vasil_metodiev.jpg/330px-Vasil_metodiev.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Vidin Apostolov",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 19,
+    "photo": null
+   }
+  ],
+  "CHI": [
+   {
+    "name": "Adán Godoy",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 9,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/46/Ad%C3%A1n_Godoy.JPG/330px-Ad%C3%A1n_Godoy.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Alberto Fouilloux",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 8,
+    "photo": null
+   },
+   {
+    "name": "Alberto Valentini",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 20,
+    "photo": null
+   },
+   {
+    "name": "Armando Tobar",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 18,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Armando_Tobar%2C_Estadio%2C_1957-07-05_%28738%29.jpg/330px-Armando_Tobar%2C_Estadio%2C_1957-07-05_%28738%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Carlos Campos",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 3,
+    "photo": null
+   },
+   {
+    "name": "Elías Figueroa",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 7,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Don_El%C3%ADas_Figueroa.jpg/330px-Don_El%C3%ADas_Figueroa.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Francisco Valdés",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 19,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Francisco_Vald%C3%A9s%2C_Estadio%2C_1961-08-31_%28953%29.jpg/330px-Francisco_Vald%C3%A9s%2C_Estadio%2C_1961-08-31_%28953%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Guillermo Yávar",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 22,
+    "photo": null
+   },
+   {
+    "name": "Honorino Landa",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 11,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/Honorino_Landa%2C_Estadio%2C_1960-10-20_%28908%29.jpg/330px-Honorino_Landa%2C_Estadio%2C_1960-10-20_%28908%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Hugo Berly",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": null
+   },
+   {
+    "name": "Hugo Villanueva",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 21,
+    "photo": null
+   },
+   {
+    "name": "Humberto Cruz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 4,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Humberto_Cruz%2C_Estadio%2C_1962-01-11_%28972%29.jpg/330px-Humberto_Cruz%2C_Estadio%2C_1962-01-11_%28972%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Humberto Donoso",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/58/Humberto_Donoso%2C_Estadio%2C_1961-07-27_%28948%29.jpg/330px-Humberto_Donoso%2C_Estadio%2C_1961-07-27_%28948%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ignacio Prieto",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 14,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Ignacio_Prieto_%281975%2C_Lille%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Jaime Ramírez",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 15,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6b/Jramirez1962.jpg/330px-Jramirez1962.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Juan Olivares",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 13,
+    "photo": null
+   },
+   {
+    "name": "Leonel Sánchez",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 17,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Leonel_S%C3%A1nchez_%282%29_%28cropped%29.jpg/330px-Leonel_S%C3%A1nchez_%282%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Luis Eyzaguirre",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 6,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Luis_Eyzaguirre%2C_Estadio%2C_1960-08-04_%28897%29.jpg/330px-Luis_Eyzaguirre%2C_Estadio%2C_1960-08-04_%28897%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Orlando Ramírez",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 16,
+    "photo": null
+   },
+   {
+    "name": "Pedro Araya",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 1,
+    "photo": null
+   },
+   {
+    "name": "Roberto Hodge",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 10,
+    "photo": null
+   },
+   {
+    "name": "Rubén Marcos",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Rub%C3%A9n_Marcos_1966.jpg/330px-Rub%C3%A9n_Marcos_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ],
+  "ENG": [
+   {
+    "name": "Alan Ball",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 7,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Alan_Ball_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Bobby Charlton",
+    "positions": [
+     "CAM!",
+     "CM:88"
+    ],
+    "shirt": 9,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/LondonHouseAmsterdam1966_Bobby_Charlton.jpg/330px-LondonHouseAmsterdam1966_Bobby_Charlton.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     86,
+     86,
+     79,
+     90,
+     92,
+     86,
+     77,
+     93,
+     89,
+     90,
+     76,
+     72,
+     83,
+     72,
+     88,
+     77,
+     86,
+     90
+    ]
+   },
+   {
+    "name": "Bobby Moore",
+    "positions": [
+     "CB!"
+    ],
+    "shirt": 6,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Bobby_moore_elgrafico_1970.jpg/330px-Bobby_moore_elgrafico_1970.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     85,
+     86,
+     89,
+     81,
+     88,
+     61,
+     95,
+     85,
+     92,
+     93,
+     77,
+     71,
+     81,
+     92,
+     91,
+     85,
+     91,
+     95
+    ]
+   },
+   {
+    "name": "Geoff Hurst",
+    "positions": [
+     "CF!",
+     "ST:88"
+    ],
+    "shirt": 10,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Geoff_Hurst_%282%29.jpg/330px-Geoff_Hurst_%282%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     88,
+     84,
+     81,
+     87,
+     78,
+     91,
+     47,
+     84,
+     89,
+     88,
+     68,
+     61,
+     78,
+     83,
+     84,
+     78,
+     84,
+     84
+    ]
+   },
+   {
+    "name": "George Cohen",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/0/0f/George_Cohen.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "George Eastham",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 22,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/37/George_Eastham1.jpg/330px-George_Eastham1.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Gerry Byrne",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 15,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Gerry_Byrne.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Gordon Banks",
+    "positions": [
+     "GK!"
+    ],
+    "shirt": 1,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Gordon_Banks_2007.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "attrs": [
+     55,
+     62,
+     87,
+     57,
+     69,
+     57,
+     53,
+     83,
+     97,
+     92,
+     99,
+     99,
+     97,
+     92,
+     94,
+     73,
+     97,
+     94
+    ]
+   },
+   {
+    "name": "Ian Callaghan",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 20,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/LFC_Legends_-_FA_Cup_Final_1974_%2825633138964%29.jpg/330px-LFC_Legends_-_FA_Cup_Final_1974_%2825633138964%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jack Charlton",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Jack_Charlton.jpg/330px-Jack_Charlton.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jimmy Armfield",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 14,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Jimmy_Armfield%2C_2012_%28cropped%29.jpg/330px-Jimmy_Armfield%2C_2012_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jimmy Greaves",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 8,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a5/Jimmy_Greaves_%28cropped%29.jpg/330px-Jimmy_Greaves_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "John Connelly",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 11,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/England_national_football_team%2C_28_October_1959_%28Connelly%29.jpg/330px-England_national_football_team%2C_28_October_1959_%28Connelly%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Martin Peters",
+    "positions": [
+     "CM!",
+     "CAM:85"
+    ],
+    "shirt": 16,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/Martin_Peters_%281970%29.jpg/330px-Martin_Peters_%281970%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     83,
+     83,
+     77,
+     87,
+     88,
+     83,
+     75,
+     89,
+     86,
+     87,
+     74,
+     71,
+     80,
+     71,
+     85,
+     75,
+     83,
+     87
+    ]
+   },
+   {
+    "name": "Nobby Stiles",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 4,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/05/Nobby_Stiles_%281966%29.jpg/330px-Nobby_Stiles_%281966%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Norman Hunter",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 18,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/Norman_Hunter.jpg/330px-Norman_Hunter.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Peter Bonetti",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 13,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/Peter_Bonetti.jpg/330px-Peter_Bonetti.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ray Wilson",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": null
+   },
+   {
+    "name": "Roger Hunt",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 21,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/08/Roger_Hunt.jpg/330px-Roger_Hunt.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ron Flowers",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 17,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/Nederland_tegen_Engeland_1-1%2C_Daan_Schrijvers_en_Engelse_aanvoerder%2C_Bestanddeelnr_917-2255.jpg/330px-Nederland_tegen_Engeland_1-1%2C_Daan_Schrijvers_en_Engelse_aanvoerder%2C_Bestanddeelnr_917-2255.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ron Springett",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 12,
+    "photo": null
+   },
+   {
+    "name": "Terry Paine",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 19,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/England_1963.jpg/330px-England_1963.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ],
+  "FRA": [
+   {
+    "name": "André Chorda",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 7,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Andr%C3%A9_Chorda_1972_Ras_al-Khaimah_stamp.jpg/330px-Andr%C3%A9_Chorda_1972_Ras_al-Khaimah_stamp.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Bernard Bosquier",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Bernard_Bosquier.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Didier Couécou",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 9,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Didier_Couecou_Panini_%28cropped%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Edmond Baraffe",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 3,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/a/ac/15.11.64_Equipe_du_TFC_%281964%29_-_53Fi624_%28Edmond_Baraffe%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Gabriel De Michele",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 11,
+    "photo": null
+   },
+   {
+    "name": "Georges Carnus",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 21,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Georges_Carnus.jpg/330px-Georges_Carnus.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Gérard Hausser",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 14,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d6/G%C3%A9rard_Hausser_%281970%2C_FC_Metz%29.png/330px-G%C3%A9rard_Hausser_%281970%2C_FC_Metz%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Héctor De Bourgoing",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 10,
+    "photo": null
+   },
+   {
+    "name": "Jacques Simon",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 20,
+    "photo": null
+   },
+   {
+    "name": "Jean Djorkaeff",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Jean_Djorkaeff.JPG/330px-Jean_Djorkaeff.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jean-Claude Piumi",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 18,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/6/63/Jean_claude-piumi.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Johnny Schuth",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 22,
+    "photo": null
+   },
+   {
+    "name": "Joseph Bonnel",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 4,
+    "photo": null
+   },
+   {
+    "name": "Laurent Robuschi",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 19,
+    "photo": null
+   },
+   {
+    "name": "Lucien Muller",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 17,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8a/Ao%C3%BBt_59._Foot._Reportage_sur_le_TFC_%281959%29_-_53Fi6450_%28Lucien_Muller%29.jpg/330px-Ao%C3%BBt_59._Foot._Reportage_sur_le_TFC_%281959%29_-_53Fi6450_%28Lucien_Muller%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Marcel Artelesa",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": null
+   },
+   {
+    "name": "Marcel Aubour",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/Marcel_Aubour_en_1970.jpg/330px-Marcel_Aubour_en_1970.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Nestor Combin",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 8,
+    "photo": null
+   },
+   {
+    "name": "Philippe Gondet",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 13,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/Philippe_Gondet_en_1970.jpg/330px-Philippe_Gondet_en_1970.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Robert Budzynski",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 6,
+    "photo": null
+   },
+   {
+    "name": "Robert Herbin",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 16,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/47/Robert_Herbin_%281979%29.jpg/330px-Robert_Herbin_%281979%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Yves Herbet",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 15,
+    "photo": null
+   }
+  ],
+  "HUN": [
+   {
+    "name": "Antal Nagy",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 20,
+    "photo": null
+   },
+   {
+    "name": "Antal Szentmihályi",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Antal_Szentmih%C3%A1lyi_1962.jpg/330px-Antal_Szentmih%C3%A1lyi_1962.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Benő Káposzta",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": null
+   },
+   {
+    "name": "Dezső Molnár",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 15,
+    "photo": null
+   },
+   {
+    "name": "Ferenc Bene",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 7,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Gyula_Guly%C3%A1s_sports_reporter_with_Fl%C3%B3ri%C3%A1n_Albert%2C_Ferenc_Bene_and_J%C3%A1nos_Farkas_footballers_%28cropped%29.jpg/330px-Gyula_Guly%C3%A1s_sports_reporter_with_Fl%C3%B3ri%C3%A1n_Albert%2C_Ferenc_Bene_and_J%C3%A1nos_Farkas_footballers_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ferenc Sipos",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 6,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Sipos_Ferenc_labdar%C3%BAg%C3%B3.jpg/330px-Sipos_Ferenc_labdar%C3%BAg%C3%B3.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Flórián Albert",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 9,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Fl%C3%B3ri%C3%A1n_Albert_cropped.jpg/330px-Fl%C3%B3ri%C3%A1n_Albert_cropped.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Gusztáv Szepesi",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 17,
+    "photo": null
+   },
+   {
+    "name": "Gyula Rákosi",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 11,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/R%C3%A1kosi_Gyula_2011.jpg/330px-R%C3%A1kosi_Gyula_2011.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Imre Mathesz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 13,
+    "photo": null
+   },
+   {
+    "name": "István Géczi",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 22,
+    "photo": null
+   },
+   {
+    "name": "István Nagy",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 14,
+    "photo": null
+   },
+   {
+    "name": "János Farkas",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 10,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Farkas_J%C3%A1nos_fortepan_50358.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "József Gelei",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 21,
+    "photo": null
+   },
+   {
+    "name": "Kálmán Ihász",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 18,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/e/e4/Ih%C3%A1sz_K%C3%A1lm%C3%A1n_fortepan_50358.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Kálmán Mészöly",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/K%C3%A1lm%C3%A1n_M%C3%A9sz%C3%B6ly_cropped.jpg/330px-K%C3%A1lm%C3%A1n_M%C3%A9sz%C3%B6ly_cropped.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Kálmán Sóvári",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 4,
+    "photo": null
+   },
+   {
+    "name": "Lajos Puskás",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 19,
+    "photo": null
+   },
+   {
+    "name": "Lajos Tichy",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 16,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Tichy_Lajos_Fortepan_261534.jpg/330px-Tichy_Lajos_Fortepan_261534.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Máté Fenyvesi",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Fenyvesi_M%C3%A1t%C3%A9_2011.jpg/330px-Fenyvesi_M%C3%A1t%C3%A9_2011.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Sándor Mátrai",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/M%C3%A1trai_S%C3%A1ndor_fortepan_101243.jpg/330px-M%C3%A1trai_S%C3%A1ndor_fortepan_101243.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Zoltán Varga",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 8,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/Zoltan_Varga_%281973%29.jpg/330px-Zoltan_Varga_%281973%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ],
+  "ITA": [
+   {
+    "name": "Antonio Juliano",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 10,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/28/Antonio_Juliano_1974.jpg/330px-Antonio_Juliano_1974.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Aristide Guarneri",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 8,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5c/1965-66_Inter_Milan_-_Aristide_Guarneri.jpg/330px-1965-66_Inter_Milan_-_Aristide_Guarneri.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Enrico Albertosi",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/1973%E2%80%9374_Cagliari_Calcio_-_Enrico_Albertosi.jpg/330px-1973%E2%80%9374_Cagliari_Calcio_-_Enrico_Albertosi.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ezio Pascutti",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 16,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/82/Ezio_Pascutti_-_Bologna_FC_1964-65.jpg/330px-Ezio_Pascutti_-_Bologna_FC_1964-65.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Francesco Janich",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 9,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/73/Francesco_Janich_-_Bologna_FC_%28cropped%29.jpg/330px-Francesco_Janich_-_Bologna_FC_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Francesco Rizzo",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 20,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/1970%E2%80%9371_Bologna_FC_-_Francesco_Rizzo.jpg/330px-1970%E2%80%9371_Bologna_FC_-_Francesco_Rizzo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Giacinto Facchetti",
+    "positions": [
+     "LB!",
+     "CB:88"
+    ],
+    "shirt": 6,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/1966%E2%80%9367_Inter_Milan_-_Giacinto_Facchetti.jpg/330px-1966%E2%80%9367_Inter_Milan_-_Giacinto_Facchetti.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     87,
+     88,
+     91,
+     82,
+     90,
+     62,
+     97,
+     87,
+     94,
+     95,
+     78,
+     72,
+     82,
+     94,
+     93,
+     87,
+     93,
+     97
+    ]
+   },
+   {
+    "name": "Giacomo Bulgarelli",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 4,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fe/Bologna_FC_-_Giacomo_Bulgarelli.jpg/330px-Bologna_FC_-_Giacomo_Bulgarelli.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Gianfranco Leoncini",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/1965%E2%80%9366_Juventus_FC_-_Gianfranco_Leoncini.jpg/330px-1965%E2%80%9366_Juventus_FC_-_Gianfranco_Leoncini.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Gianni Rivera",
+    "positions": [
+     "CAM!",
+     "CM:85"
+    ],
+    "shirt": 19,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Rivera.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "attrs": [
+     88,
+     88,
+     81,
+     92,
+     94,
+     88,
+     79,
+     95,
+     91,
+     92,
+     77,
+     73,
+     84,
+     73,
+     90,
+     79,
+     88,
+     92
+    ]
+   },
+   {
+    "name": "Giovanni Lodetti",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 13,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/AC_Milan_-_1960s_-_Giovanni_Lodetti.jpg/330px-AC_Milan_-_1960s_-_Giovanni_Lodetti.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Luigi Meroni",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 15,
+    "photo": null
+   },
+   {
+    "name": "Marino Perani",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 17,
+    "photo": null
+   },
+   {
+    "name": "Paolo Barison",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 3,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Paolo_Barison.jpg/330px-Paolo_Barison.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Pierluigi Pizzaballa",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 18,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/1970%E2%80%9371_AC_Hellas_Verona_-_Pier_Luigi_Pizzaballa.jpg/330px-1970%E2%80%9371_AC_Hellas_Verona_-_Pier_Luigi_Pizzaballa.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Roberto Anzolin",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 2,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Roberto_Anzolin%2C_Juventus_1961-62.jpg/330px-Roberto_Anzolin%2C_Juventus_1961-62.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Roberto Rosato",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 21,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Roberto_Rosato.jpg/330px-Roberto_Rosato.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Romano Fogli",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 7,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Romano_Fogli_%28cropped%29.png/330px-Romano_Fogli_%28cropped%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Sandro Mazzola",
+    "positions": [
+     "CAM!",
+     "ST:85"
+    ],
+    "shirt": 14,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Inter_Milan_1971-1972_Sandro_Mazzola.jpg/330px-Inter_Milan_1971-1972_Sandro_Mazzola.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     83,
+     83,
+     77,
+     87,
+     88,
+     83,
+     75,
+     89,
+     86,
+     87,
+     74,
+     71,
+     80,
+     71,
+     85,
+     75,
+     83,
+     87
+    ]
+   },
+   {
+    "name": "Sandro Salvadore",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 22,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/1969_Juventus_FC_-_Sandro_Salvadore.jpg/330px-1969_Juventus_FC_-_Sandro_Salvadore.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Spartaco Landini",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 11,
+    "photo": null
+   },
+   {
+    "name": "Tarcisio Burgnich",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Inter_Milan_1966-1967_Tarcisio_Burgnich.jpg/330px-Inter_Milan_1966-1967_Tarcisio_Burgnich.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ],
+  "MEX": [
+   {
+    "name": "Aarón Padilla",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 8,
+    "photo": null
+   },
+   {
+    "name": "Antonio Carbajal",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": null
+   },
+   {
+    "name": "Arturo Chaires",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": null
+   },
+   {
+    "name": "Elías Muñoz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 18,
+    "photo": null
+   },
+   {
+    "name": "Enrique Borja",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 20,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Enrique_Borja.jpg/330px-Enrique_Borja.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ernesto Cisneros",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 9,
+    "photo": null
+   },
+   {
+    "name": "Felipe Ruvalcaba",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 7,
+    "photo": null
+   },
+   {
+    "name": "Francisco Jara",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 11,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Francisco_Jara_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Gabriel Núñez",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 14,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Gabriel_N%C3%BA%C3%B1ez_M%C3%A9xico_70.png/330px-Gabriel_N%C3%BA%C3%B1ez_M%C3%A9xico_70.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Guillermo Hernández",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 15,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Guillermo_%22Campe%C3%B3n%22_Hern%C3%A1ndez.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Gustavo Peña",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/Gustavo_Pe%C3%B1a.jpg/330px-Gustavo_Pe%C3%B1a.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ignacio Calderón",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Ignacio_Calder%C3%B3n_%28cropped%29.png/330px-Ignacio_Calder%C3%B3n_%28cropped%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ignacio Jáuregui",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": null
+   },
+   {
+    "name": "Isidoro Díaz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 6,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/Isidoro_D%C3%ADaz.jpg/330px-Isidoro_D%C3%ADaz.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Javier Fragoso",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 10,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Javier_Fragoso.jpg/330px-Javier_Fragoso.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Javier Vargas",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 22,
+    "photo": null
+   },
+   {
+    "name": "Jesús del Muro",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 4,
+    "photo": null
+   },
+   {
+    "name": "José Luis González",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 13,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/b/b6/Jos%C3%A9_Luis_Gonz%C3%A1lez_D%C3%A1vila.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Luis Regueiro",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 16,
+    "photo": null
+   },
+   {
+    "name": "Magdaleno Mercado",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 17,
+    "photo": null
+   },
+   {
+    "name": "Ramiro Navarro",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 21,
+    "photo": null
+   },
+   {
+    "name": "Salvador Reyes",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 19,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/8/86/Salvador_reyes_chivas.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   }
+  ],
+  "PRK": [
+   {
+    "name": "An Se-bok",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 21,
+    "photo": null
+   },
+   {
+    "name": "Ha Jung-won",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 14,
+    "photo": null
+   },
+   {
+    "name": "Han Bong-zin",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 11,
+    "photo": null
+   },
+   {
+    "name": "Im Seung-hwi",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 6,
+    "photo": null
+   },
+   {
+    "name": "Kang Bong-chil",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 4,
+    "photo": null
+   },
+   {
+    "name": "Kang Ryong-woon",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 10,
+    "photo": null
+   },
+   {
+    "name": "Ke Seung-woon",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 18,
+    "photo": null
+   },
+   {
+    "name": "Kim Bong-hwan",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 17,
+    "photo": null
+   },
+   {
+    "name": "Kim Seung-Il",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 12,
+    "photo": null
+   },
+   {
+    "name": "Kim Yung-kil",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 19,
+    "photo": null
+   },
+   {
+    "name": "Lee Keun-hak",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 9,
+    "photo": null
+   },
+   {
+    "name": "Li Chan-myung",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": null
+   },
+   {
+    "name": "Li Chi-an",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 22,
+    "photo": null
+   },
+   {
+    "name": "Li Dong-woon",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 16,
+    "photo": null
+   },
+   {
+    "name": "Lim Zoong-sun",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": null
+   },
+   {
+    "name": "Oh Yoon-kyung",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 13,
+    "photo": null
+   },
+   {
+    "name": "Pak Doo-ik",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 7,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Pak_Doo_Ik.jpg/330px-Pak_Doo_Ik.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Pak Li-sup",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": null
+   },
+   {
+    "name": "Pak Seung-zin",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 8,
+    "photo": null
+   },
+   {
+    "name": "Ryoo Chang-kil",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 20,
+    "photo": null
+   },
+   {
+    "name": "Shin Yung-kyoo",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/b/b3/%EC%8B%A0%EC%98%81%EA%B7%9C_%EC%A3%BC%EC%9E%A5.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Yang Seung-kook",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 15,
+    "photo": null
+   }
+  ],
+  "POR": [
+   {
+    "name": "Alberto Festa",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 22,
+    "photo": null
+   },
+   {
+    "name": "Alexandre Baptista",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 20,
+    "photo": null
+   },
+   {
+    "name": "Américo",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": null
+   },
+   {
+    "name": "António Simões",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 11,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b8/Training_en_persconferentie_PSV_en_Benfica_in_Eindhoven_nr_7_Simoes_%28Benfica%29%2C_Bestanddeelnr_927-7898.jpg/330px-Training_en_persconferentie_PSV_en_Benfica_in_Eindhoven_nr_7_Simoes_%28Benfica%29%2C_Bestanddeelnr_927-7898.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Custódio Pinto",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 19,
+    "photo": null
+   },
+   {
+    "name": "Ernesto Figueiredo",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 7,
+    "photo": null
+   },
+   {
+    "name": "Eusébio",
+    "positions": [
+     "CF!",
+     "ST:90"
+    ],
+    "shirt": 13,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Eusebio_en_1973.jpg/330px-Eusebio_en_1973.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     94,
+     88,
+     85,
+     92,
+     81,
+     97,
+     45,
+     88,
+     95,
+     93,
+     69,
+     61,
+     81,
+     87,
+     89,
+     81,
+     89,
+     89
+    ]
+   },
+   {
+    "name": "Fernando Cruz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 14,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Fernando_Cruz_1965_%28cropped%29.png/330px-Fernando_Cruz_1965_%28cropped%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Fernando Peres",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 6,
+    "photo": null
+   },
+   {
+    "name": "Germano",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/83/Germano_de_Figueiredo_%28cropped%29.png/330px-Germano_de_Figueiredo_%28cropped%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Hilário",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 9,
+    "photo": null
+   },
+   {
+    "name": "Jaime Graça",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 16,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Jaime_Gra%C3%A7a_%28cropped%29.png/330px-Jaime_Gra%C3%A7a_%28cropped%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Joaquim Carvalho",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 2,
+    "photo": null
+   },
+   {
+    "name": "José Augusto",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Jos%C3%A9_Augusto_1965_%28cropped%29.png/330px-Jos%C3%A9_Augusto_1965_%28cropped%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "José Carlos",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 21,
+    "photo": null
+   },
+   {
+    "name": "José Pereira",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 3,
+    "photo": null
+   },
+   {
+    "name": "José Torres",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 18,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Jos%C3%A9_Augusto_Torres_%281963%29.jpg/330px-Jos%C3%A9_Augusto_Torres_%281963%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "João Lourenço",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 8,
+    "photo": null
+   },
+   {
+    "name": "João Morais",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 17,
+    "photo": null
+   },
+   {
+    "name": "Manuel Duarte",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 15,
+    "photo": null
+   },
+   {
+    "name": "Mário Coluna",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 10,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Mario_Coluna_%281969%29.jpg/330px-Mario_Coluna_%281969%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Vicente",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 4,
+    "photo": null
+   }
+  ],
+  "ESP": [
+   {
+    "name": "Adelardo",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 21,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/%28Adelardo_Rodr%C3%ADguez%29_El_distrito_Centro_y_la_Fundaci%C3%B3n_Atl%C3%A9tico_de_Madrid_renuevan_su_compromiso_para_impulsar_el_f%C3%BAtbol_social_en_Lavapi%C3%A9s_05_%28cropped%29.jpg/330px-thumbnail.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Amancio",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 8,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Training_Real_Madrid_in_Amsterdam%2C_Amancio%2C_Bestanddeelnr_926-3299.jpg/330px-Training_Real_Madrid_in_Amsterdam%2C_Amancio%2C_Bestanddeelnr_926-3299.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Antonio Betancort",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Antonio_Betancort_%281965%29.jpg/330px-Antonio_Betancort_%281965%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Carlos Lapetra",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 22,
+    "photo": null
+   },
+   {
+    "name": "Eladio Silvestre",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": null
+   },
+   {
+    "name": "Feliciano Rivilla",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 14,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Feliciano_Rivilla_1962.jpg/330px-Feliciano_Rivilla_1962.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ferran Olivella",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 16,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/3/34/Ferran_Olivella_%281960%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Gallego",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 17,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ea/Gallego_%281973%29.jpg/330px-Gallego_%281973%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Ignacio Zoco",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Ignacio_Zoco_%281971%29.jpg/330px-Ignacio_Zoco_%281971%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jesús Glaría",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 6,
+    "photo": null
+   },
+   {
+    "name": "Joaquín Peiró",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 20,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Joaqu%C3%ADn_Peir%C3%B3_1962.jpg/330px-Joaqu%C3%ADn_Peir%C3%B3_1962.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Josep Maria Fusté",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 19,
+    "photo": null
+   },
+   {
+    "name": "José Ufarte",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 7,
+    "photo": null
+   },
+   {
+    "name": "José Ángel Iribar",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/DERBI_DE_LEYENDAS_Korner_Festibala_2019_%2846268716714%29_%28cropped%29.jpg/330px-DERBI_DE_LEYENDAS_Korner_Festibala_2019_%2846268716714%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Luis Suárez",
+    "positions": [
+     "ST!",
+     "CF:88"
+    ],
+    "shirt": 10,
+    "photo": null,
+    "attrs": [
+     90,
+     84,
+     82,
+     88,
+     78,
+     92,
+     47,
+     84,
+     90,
+     89,
+     68,
+     61,
+     78,
+     84,
+     85,
+     78,
+     85,
+     85
+    ]
+   },
+   {
+    "name": "Luis del Sol",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 4,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/1969_Juventus_FC_-_Luis_del_Sol_Cascajares.jpg/330px-1969_Juventus_FC_-_Luis_del_Sol_Cascajares.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Manuel Sanchís",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/Manuel_Sanch%C3%ADs_Mart%C3%ADnez_1966.jpg/330px-Manuel_Sanch%C3%ADs_Mart%C3%ADnez_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Marcelino",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 9,
+    "photo": null
+   },
+   {
+    "name": "Miguel Reina",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 13,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/8/81/Miguel_Reina.PNG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Paco Gento",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 11,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/V.l.n.r._Amancio%2C_Miguel_Mu%C3%B1oz_%28trainer%29%2C_Gento%2C_Bestanddeelnr_924-4486_%28Gento_cropped%29.jpg/330px-V.l.n.r._Amancio%2C_Miguel_Mu%C3%B1oz_%28trainer%29%2C_Gento%2C_Bestanddeelnr_924-4486_%28Gento_cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Pirri",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 18,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Jos%C3%A9_Mart%C3%ADnez_Pirri.jpg/330px-Jos%C3%A9_Mart%C3%ADnez_Pirri.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Severino Reija",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 15,
+    "photo": null
+   }
+  ],
+  "SUI": [
+   {
+    "name": "André Grobéty",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 9,
+    "photo": null
+   },
+   {
+    "name": "Ely Tacchella",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 20,
+    "photo": null
+   },
+   {
+    "name": "Fritz Künzli",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 13,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/Fritz_Kunzli.jpg/330px-Fritz_Kunzli.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Georges Vuilleumier",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 21,
+    "photo": null
+   },
+   {
+    "name": "Hansruedi Führer",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 7,
+    "photo": null
+   },
+   {
+    "name": "Heinz Bäni",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 4,
+    "photo": null
+   },
+   {
+    "name": "Heinz Schneiter",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 18,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/Heinz_Schneiter.jpg/330px-Heinz_Schneiter.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jean-Claude Schindelholz",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 17,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Jean-Claude_Schindelholz_1966.jpg/330px-Jean-Claude_Schindelholz_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Karl Elsener",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": null
+   },
+   {
+    "name": "Karl Odermatt",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 15,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Karl_Odermatt_%281970%29.jpg/330px-Karl_Odermatt_%281970%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Kurt Armbruster",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Kurt_Armbruster.JPG/330px-Kurt_Armbruster.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Köbi Kuhn",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 11,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Jakob_Kuhn.jpg/330px-Jakob_Kuhn.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Léo Eichmann",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 12,
+    "photo": null
+   },
+   {
+    "name": "Mario Prosperi",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 22,
+    "photo": null
+   },
+   {
+    "name": "René Brodmann",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Ren%C3%A9_Brodmann.jpg/330px-Ren%C3%A9_Brodmann.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "René-Pierre Quentin",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 16,
+    "photo": null
+   },
+   {
+    "name": "Richard Dürr",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 6,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/Richard_Durr_1972_Ras_al-Khaimah_stamp.jpg/330px-Richard_Durr_1972_Ras_al-Khaimah_stamp.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Robert Hosp",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 10,
+    "photo": null
+   },
+   {
+    "name": "Vittore Gottardi",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 8,
+    "photo": null
+   },
+   {
+    "name": "Werner Leimgruber",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 14,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Werner_Leimgruber.jpg/330px-Werner_Leimgruber.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Willy Allemann",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": null
+   },
+   {
+    "name": "Xavier Stierli",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 19,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/Xavier_Stierli.jpg/330px-Xavier_Stierli.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ],
+  "URS": [
+   {
+    "name": "Albert Shesternyov",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 6,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/9/97/Albert_Shesternyov_Panini_1970.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Alexey Korneyev",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 13,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/%D0%9C%D0%BE%D0%B3%D0%B8%D0%BB%D0%B0_%D1%84%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D0%B8%D1%81%D1%82%D0%B0_%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B5%D1%8F_%D0%9A%D0%BE%D1%80%D0%BD%D0%B5%D0%B5%D0%B2%D0%B0.JPG/330px-%D0%9C%D0%BE%D0%B3%D0%B8%D0%BB%D0%B0_%D1%84%D1%83%D1%82%D0%B1%D0%BE%D0%BB%D0%B8%D1%81%D1%82%D0%B0_%D0%90%D0%BB%D0%B5%D0%BA%D1%81%D0%B5%D1%8F_%D0%9A%D0%BE%D1%80%D0%BD%D0%B5%D0%B5%D0%B2%D0%B0.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Anatoliy Banishevskiy",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 18,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/Anatoliy_Banishevskiy_%281967%29.png/330px-Anatoliy_Banishevskiy_%281967%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Anzor Kavazashvili",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 21,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Anzor_Kavazashvili.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Eduard Malofeyev",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 19,
+    "photo": null
+   },
+   {
+    "name": "Eduard Markarov",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 20,
+    "photo": null
+   },
+   {
+    "name": "Galimzyan Khusainov",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 15,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/KhusainovG1997.jpg/330px-KhusainovG1997.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Georgi Sichinava",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 14,
+    "photo": null
+   },
+   {
+    "name": "Igor Chislenko",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 11,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Igor_Chislenko.jpg/330px-Igor_Chislenko.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Leonid Ostrovskiy",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": null
+   },
+   {
+    "name": "Lev Yashin",
+    "positions": [
+     "GK!"
+    ],
+    "shirt": 1,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f5/LevYashin.JPG/330px-LevYashin.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     54,
+     62,
+     94,
+     57,
+     71,
+     57,
+     51,
+     88,
+     99,
+     99,
+     99,
+     99,
+     99,
+     99,
+     99,
+     77,
+     99,
+     99
+    ]
+   },
+   {
+    "name": "Murtaz Khurtsilava",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 7,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Murtaz_Khurtsilava_1973.jpg/330px-Murtaz_Khurtsilava_1973.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Slava Metreveli",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 16,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Slava_Metreveli_2.jpg/330px-Slava_Metreveli_2.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Valentin Afonin",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Valentin_Afonin.jpg/330px-Valentin_Afonin.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Valeriy Porkujan",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 17,
+    "photo": null
+   },
+   {
+    "name": "Valery Voronin",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/Valery_Voronin_1966.jpg/330px-Valery_Voronin_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Vasiliy Danilov",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 10,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fa/Vasiliy_Danilov_2017.jpg/330px-Vasiliy_Danilov_2017.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Viktor Bannikov",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 22,
+    "photo": null
+   },
+   {
+    "name": "Viktor Getmanov",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 9,
+    "photo": null
+   },
+   {
+    "name": "Viktor Serebryanikov",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 2,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Viktor_Serebryanikov.jpg/330px-Viktor_Serebryanikov.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Vladimir Ponomaryov",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 4,
+    "photo": null
+   },
+   {
+    "name": "Yozhef Sabo",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 8,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Yozhef_Sabo_%28cropped%29.jpg/330px-Yozhef_Sabo_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ],
+  "URU": [
+   {
+    "name": "Domingo Pérez",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 11,
+    "photo": null
+   },
+   {
+    "name": "Eliseo Álvarez",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 16,
+    "photo": null
+   },
+   {
+    "name": "Emilio Álvarez",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 14,
+    "photo": null
+   },
+   {
+    "name": "Horacio Troche",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": null
+   },
+   {
+    "name": "Héctor Salvá",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 17,
+    "photo": null
+   },
+   {
+    "name": "Héctor Silva",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 19,
+    "photo": null
+   },
+   {
+    "name": "Jorge Manicera",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": null
+   },
+   {
+    "name": "José Sasía",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 9,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/f/f4/PepeSas%C3%ADa.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "José Urruzmendi",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 8,
+    "photo": null
+   },
+   {
+    "name": "Julio César Cortés",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 7,
+    "photo": "https://upload.wikimedia.org/wikipedia/commons/3/35/Julio_C%C3%A9sar_Cort%C3%A9s_c1970.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled"
+   },
+   {
+    "name": "Ladislao Mazurkiewicz",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/df/WK_74_training_Uruguay_in_Duitsburg%2C_keeper_Mazurkievic_laat_zijn_handen_zien%2C_Bestanddeelnr_927-2464.jpg/330px-WK_74_training_Uruguay_in_Duitsburg%2C_keeper_Mazurkievic_laat_zijn_handen_zien%2C_Bestanddeelnr_927-2464.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Luis Ramos",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 20,
+    "photo": null
+   },
+   {
+    "name": "Luis Ubiña",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 15,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Luis_Ubi%C3%B1a_1970.jpg/330px-Luis_Ubi%C3%B1a_1970.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Milton Viera",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 18,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Milton_Viera_Boca_Juniors.jpg/330px-Milton_Viera_Boca_Juniors.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Nelson Díaz",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 13,
+    "photo": null
+   },
+   {
+    "name": "Néstor Gonçalves",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/N%C3%A9stor_Goncalves.jpg/330px-N%C3%A9stor_Goncalves.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Omar Caetano",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 6,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Omar_Caetano.png/330px-Omar_Caetano.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Pablo Forlán",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 4,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Wereldkampioenschap_voetbal_1974_Nederland_tegen_Uruguay_2-0_spelmomenten%2C_Bestanddeelnr_927-2595.jpg/330px-Wereldkampioenschap_voetbal_1974_Nederland_tegen_Uruguay_2-0_spelmomenten%2C_Bestanddeelnr_927-2595.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Pedro Rocha",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 10,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Pedro_Rocha_c1966b.jpg/330px-Pedro_Rocha_c1966b.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Roberto Sosa",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/da/Roberto_Eliseo_Sosa.jpg/330px-Roberto_Eliseo_Sosa.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Víctor Espárrago",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 21,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/V%C3%ADctor_Esp%C3%A1rrago_%281972%29.png/330px-V%C3%ADctor_Esp%C3%A1rrago_%281972%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Walter Taibo",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 22,
+    "photo": null
+   }
+  ],
+  "FRG": [
+   {
+    "name": "Albert Brülls",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 7,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/27/Albert_Brulls.jpg/330px-Albert_Brulls.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Bernd Patzke",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 15,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Bernd_Patzke_%28cropped%29.png/330px-Bernd_Patzke_%28cropped%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Franz Beckenbauer",
+    "positions": [
+     "CB!",
+     "CDM:85"
+    ],
+    "shirt": 4,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Franz_Beckenbauer_%281975%29.jpg/330px-Franz_Beckenbauer_%281975%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     87,
+     88,
+     91,
+     83,
+     90,
+     62,
+     98,
+     87,
+     94,
+     95,
+     79,
+     72,
+     83,
+     94,
+     93,
+     87,
+     93,
+     98
+    ]
+   },
+   {
+    "name": "Friedel Lutz",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 14,
+    "photo": null
+   },
+   {
+    "name": "Günter Bernard",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 21,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/Nederland_tegen_West-Duitsland_2-4%2C_eerste_Nederlandse_doelpunt%2C_v.l.n.r._keeper%2C_Bestanddeelnr_918-9494.jpg/330px-Nederland_tegen_West-Duitsland_2-4%2C_eerste_Nederlandse_doelpunt%2C_v.l.n.r._keeper%2C_Bestanddeelnr_918-9494.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Hans Tilkowski",
+    "positions": [
+     "GK"
+    ],
+    "shirt": 1,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/Hans_Tilkowski.jpg/330px-Hans_Tilkowski.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Heinz Hornig",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 13,
+    "photo": null
+   },
+   {
+    "name": "Helmut Haller",
+    "positions": [
+     "ST!",
+     "CAM:85"
+    ],
+    "shirt": 8,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/81/Helmut_Haller_-_1960s_-_Juventus_FC.jpg/330px-Helmut_Haller_-_1960s_-_Juventus_FC.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     87,
+     82,
+     80,
+     85,
+     77,
+     89,
+     48,
+     82,
+     88,
+     86,
+     67,
+     61,
+     77,
+     81,
+     83,
+     77,
+     83,
+     83
+    ]
+   },
+   {
+    "name": "Horst-Dieter Höttges",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 2,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Horst-Dieter_H%C3%B6ttges_M%C3%A9xico_70.jpg/330px-Horst-Dieter_H%C3%B6ttges_M%C3%A9xico_70.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Jürgen Grabowski",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 20,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/2018-09-17_Eintracht_Frankfurt_Golf_Open_J%C3%BCrgen_Grabowski-8891_%28cropped%29.jpg/330px-2018-09-17_Eintracht_Frankfurt_Golf_Open_J%C3%BCrgen_Grabowski-8891_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Karl-Heinz Schnellinger",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 3,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Karl-Heinz_Schnellinger.jpg/330px-Karl-Heinz_Schnellinger.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Klaus-Dieter Sieloff",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 18,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Klaus-Dieter_Sieloff.png/330px-Klaus-Dieter_Sieloff.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Lothar Emmerich",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 11,
+    "photo": null
+   },
+   {
+    "name": "Max Lorenz",
+    "positions": [
+     "CM"
+    ],
+    "shirt": 16,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/10._Tag_der_Legenden_17.JPG/330px-10._Tag_der_Legenden_17.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Sepp Maier",
+    "positions": [
+     "GK!"
+    ],
+    "shirt": 22,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/6137Sepp_Maier_Torwart-Legende.JPG/330px-6137Sepp_Maier_Torwart-Legende.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     55,
+     62,
+     87,
+     57,
+     69,
+     57,
+     53,
+     83,
+     97,
+     92,
+     99,
+     99,
+     97,
+     92,
+     94,
+     73,
+     97,
+     94
+    ]
+   },
+   {
+    "name": "Sigfried Held",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 10,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/16/Siggi_Held.jpg/330px-Siggi_Held.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Uwe Seeler",
+    "positions": [
+     "ST!",
+     "CF:90"
+    ],
+    "shirt": 9,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Uwe_Seeler_1966_%28cropped%29.jpg/330px-Uwe_Seeler_1966_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     91,
+     85,
+     83,
+     89,
+     79,
+     93,
+     46,
+     85,
+     92,
+     90,
+     68,
+     61,
+     79,
+     85,
+     86,
+     79,
+     86,
+     86
+    ]
+   },
+   {
+    "name": "Werner Krämer",
+    "positions": [
+     "ST"
+    ],
+    "shirt": 19,
+    "photo": null
+   },
+   {
+    "name": "Willi Schulz",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 5,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/Willi_Schulz_%281968%29.jpg/330px-Willi_Schulz_%281968%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   },
+   {
+    "name": "Wolfgang Overath",
+    "positions": [
+     "CM!",
+     "CAM:85"
+    ],
+    "shirt": 12,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Wolfgang_Overath_1974.jpg/330px-Wolfgang_Overath_1974.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "attrs": [
+     85,
+     85,
+     78,
+     89,
+     90,
+     85,
+     77,
+     91,
+     88,
+     89,
+     75,
+     72,
+     82,
+     72,
+     87,
+     77,
+     85,
+     89
+    ]
+   },
+   {
+    "name": "Wolfgang Paul",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 17,
+    "photo": null
+   },
+   {
+    "name": "Wolfgang Weber",
+    "positions": [
+     "CB"
+    ],
+    "shirt": 6,
+    "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7b/Wolfgang_Weber_%281968%29.jpg/330px-Wolfgang_Weber_%281968%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail"
+   }
+  ]
+ },
+ "fixtures": [
+  {
+   "group": "A",
+   "match": 1,
+   "home": "ENG",
+   "away": "URU",
+   "matchday": 1,
+   "kickoff": "1966-07-11"
+  },
+  {
+   "group": "A",
+   "match": 2,
+   "home": "FRA",
+   "away": "MEX",
+   "matchday": 1,
+   "kickoff": "1966-07-13"
+  },
+  {
+   "group": "A",
+   "match": 3,
+   "home": "URU",
+   "away": "FRA",
+   "matchday": 2,
+   "kickoff": "1966-07-15"
+  },
+  {
+   "group": "A",
+   "match": 4,
+   "home": "ENG",
+   "away": "MEX",
+   "matchday": 2,
+   "kickoff": "1966-07-16"
+  },
+  {
+   "group": "A",
+   "match": 5,
+   "home": "MEX",
+   "away": "URU",
+   "matchday": 3,
+   "kickoff": "1966-07-19"
+  },
+  {
+   "group": "A",
+   "match": 6,
+   "home": "ENG",
+   "away": "FRA",
+   "matchday": 3,
+   "kickoff": "1966-07-20"
+  },
+  {
+   "group": "B",
+   "match": 7,
+   "home": "FRG",
+   "away": "SUI",
+   "matchday": 1,
+   "kickoff": "1966-07-12"
+  },
+  {
+   "group": "B",
+   "match": 8,
+   "home": "ARG",
+   "away": "ESP",
+   "matchday": 1,
+   "kickoff": "1966-07-13"
+  },
+  {
+   "group": "B",
+   "match": 9,
+   "home": "ESP",
+   "away": "SUI",
+   "matchday": 2,
+   "kickoff": "1966-07-15"
+  },
+  {
+   "group": "B",
+   "match": 10,
+   "home": "ARG",
+   "away": "FRG",
+   "matchday": 2,
+   "kickoff": "1966-07-16"
+  },
+  {
+   "group": "B",
+   "match": 11,
+   "home": "ARG",
+   "away": "SUI",
+   "matchday": 3,
+   "kickoff": "1966-07-19"
+  },
+  {
+   "group": "B",
+   "match": 12,
+   "home": "FRG",
+   "away": "ESP",
+   "matchday": 3,
+   "kickoff": "1966-07-20"
+  },
+  {
+   "group": "C",
+   "match": 13,
+   "home": "BRA",
+   "away": "BUL",
+   "matchday": 1,
+   "kickoff": "1966-07-12"
+  },
+  {
+   "group": "C",
+   "match": 14,
+   "home": "POR",
+   "away": "HUN",
+   "matchday": 1,
+   "kickoff": "1966-07-13"
+  },
+  {
+   "group": "C",
+   "match": 15,
+   "home": "HUN",
+   "away": "BRA",
+   "matchday": 2,
+   "kickoff": "1966-07-15"
+  },
+  {
+   "group": "C",
+   "match": 16,
+   "home": "POR",
+   "away": "BUL",
+   "matchday": 2,
+   "kickoff": "1966-07-16"
+  },
+  {
+   "group": "C",
+   "match": 17,
+   "home": "POR",
+   "away": "BRA",
+   "matchday": 3,
+   "kickoff": "1966-07-19"
+  },
+  {
+   "group": "C",
+   "match": 18,
+   "home": "HUN",
+   "away": "BUL",
+   "matchday": 3,
+   "kickoff": "1966-07-20"
+  },
+  {
+   "group": "D",
+   "match": 19,
+   "home": "URS",
+   "away": "PRK",
+   "matchday": 1,
+   "kickoff": "1966-07-12"
+  },
+  {
+   "group": "D",
+   "match": 20,
+   "home": "ITA",
+   "away": "CHI",
+   "matchday": 1,
+   "kickoff": "1966-07-13"
+  },
+  {
+   "group": "D",
+   "match": 21,
+   "home": "CHI",
+   "away": "PRK",
+   "matchday": 2,
+   "kickoff": "1966-07-15"
+  },
+  {
+   "group": "D",
+   "match": 22,
+   "home": "URS",
+   "away": "ITA",
+   "matchday": 2,
+   "kickoff": "1966-07-16"
+  },
+  {
+   "group": "D",
+   "match": 23,
+   "home": "PRK",
+   "away": "ITA",
+   "matchday": 3,
+   "kickoff": "1966-07-19"
+  },
+  {
+   "group": "D",
+   "match": 24,
+   "home": "URS",
+   "away": "CHI",
+   "matchday": 3,
+   "kickoff": "1966-07-20"
+  }
+ ]
+}

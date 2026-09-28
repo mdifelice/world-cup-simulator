@@ -4,13 +4,13 @@
 For each edition 1930-2018:
   1. Download openfootball worldcup-full.json → teams, matches, lineups, goals, bookings
   2. Scrape Wikipedia for squad pages → player photos from Wikimedia Commons
-  3. Merge → server/data/seed/{year}.json consumed by Rust server
+  3. Merge → data/seed/{year}.json consumed by Rust server
 
 Run:
     python3 server/scripts/ingest_historical.py
 
 Outputs:
-    server/data/seed/1930.json, ..., server/data/seed/2018.json
+    data/seed/1930.json, ..., data/seed/2018.json
 """
 
 from __future__ import annotations
@@ -712,7 +712,7 @@ def clean_display_name(name: str) -> str:
 
 
 REPO = Path(__file__).resolve().parents[2]
-DATA_DIR = REPO / "server" / "data"
+DATA_DIR = REPO / "data"
 SEED_DIR = DATA_DIR / "seed"
 PHOTO_DIR = DATA_DIR / "photos"
 CACHE_DIR = Path(__file__).resolve().parent / ".cache"

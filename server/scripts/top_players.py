@@ -8,7 +8,7 @@ move the needle for outfielders. Keepers are compared against a separate
 GK-focused weight profile so they are still judged on the right things.
 
 Usage:
-    python3 server/scripts/top_players.py [--db server/data/wcs.sqlite] [--top 50]
+    python3 server/scripts/top_players.py [--db data/wcs.sqlite] [--top 50]
 """
 
 from __future__ import annotations

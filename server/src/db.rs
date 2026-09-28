@@ -411,7 +411,7 @@ fn migrate(conn: &Connection) -> rusqlite::Result<()> {
 }
 
 pub fn open() -> rusqlite::Result<Connection> {
-    let dir = std::env::var("WCS_DATA_DIR").unwrap_or_else(|_| "data".to_string());
+    let dir = data_dir();
     std::fs::create_dir_all(&dir).ok();
     let path = Path::new(&dir).join("wcs.sqlite");
     let conn = Connection::open(&path)?;
@@ -546,9 +546,40 @@ fn upsert_team(
     }
 }
 
-/// Data directory for seed files (and, if present, local player photos).
+/// Data directory for seed files, the SQLite database and (if present) local
+/// player photos. Resolution order:
+///   1. `WCS_DATA_DIR` env var when set (used by the Docker image, where the
+///      data volume is mounted at `/app/data`);
+///   2. a `data/seed` folder found by walking up from the current directory
+///      (repo layout — works from `server/` while developing);
+///   3. bare `data` (legacy colocated layout) as a final fallback.
 pub fn data_dir() -> String {
-    std::env::var("WCS_DATA_DIR").unwrap_or_else(|_| "data".to_string())
+    if let Ok(dir) = std::env::var("WCS_DATA_DIR") {
+        return dir;
+    }
+    if let Some(dir) = find_up("data") {
+        return dir;
+    }
+    "data".to_string()
+}
+
+/// Walk up from the current directory until `name/seed` holds at least one
+/// `*.json` seed, returning the absolute `name` path — lets the server find the
+/// shared `data/` folder no matter which subdirectory it is launched from.
+fn find_up(name: &str) -> Option<String> {
+    let mut dir = std::env::current_dir().ok()?;
+    loop {
+        let seed = dir.join(name).join("seed");
+        let has_seeds = std::fs::read_dir(&seed)
+            .map(|rd| rd.flatten().any(|e| e.path().extension().is_some_and(|x| x == "json")))
+            .unwrap_or(false);
+        if has_seeds {
+            return Some(dir.join(name).to_string_lossy().into_owned());
+        }
+        if !dir.pop() {
+            return None;
+        }
+    }
 }
 
 /// Save a base64 data-URL image (`data:image/png;base64,….`) into the photos

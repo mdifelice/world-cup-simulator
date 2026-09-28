@@ -14,7 +14,7 @@ players neither source covers get a single spaced-out intitle search each.
 All thumbnails are then fetched in one batched pageimages request (≤50 titles,
 no per-title throttling) and written back into the seed.
 
-    python3 server/scripts/backfill_player_photos.py server/data/seed/2022.json
+    python3 server/scripts/backfill_player_photos.py data/seed/2022.json
 """
 
 from __future__ import annotations
