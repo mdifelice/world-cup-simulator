@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { canonSlot, useI18n } from "../i18n";
 import type { LineupConfig, MatchBan, Player, Strategy } from "../types";
 import {
@@ -210,6 +210,63 @@ export default function LineupEditor({
     setAssignments((cur) => cur.map((pid, i) => (i === slotIndex ? null : pid)));
   };
 
+  /** Double-click on a bench player: drop them into the best free slot. With
+   *  more than one free spot the slot matching their position wins (highest
+   *  effective rating drives that choice); with none, nothing happens. */
+  const placeBestFree = (p: Player) => {
+    if (disabled || blocked.has(p.id) || idsIn.has(p.id)) return;
+    let bestIdx = -1;
+    let bestScore = -Infinity;
+    for (let j = 0; j < slots.length; j++) {
+      if (assignments[j] != null) continue;
+      const score = effFor(p, slots[j]);
+      if (score > bestScore) {
+        bestScore = score;
+        bestIdx = j;
+      }
+    }
+    if (bestIdx >= 0) assignTo(bestIdx, p);
+  };
+
+  const [dragOver, setDragOver] = useState<number | null>(null);
+
+  const startDrag = (e: DragEvent<HTMLButtonElement>, p: Player) => {
+    e.dataTransfer.setData("text/plain", String(p.id));
+    e.dataTransfer.effectAllowed = "move";
+    setArmedId(null);
+  };
+  const allowDrop = (e: DragEvent<HTMLButtonElement>, slotIndex: number) => {
+    if (disabled) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOver(slotIndex);
+  };
+  const dropOn = (e: DragEvent<HTMLButtonElement>, slotIndex: number) => {
+    e.preventDefault();
+    setDragOver(null);
+    if (disabled) return;
+    const id = Number(e.dataTransfer.getData("text/plain"));
+    const player = squad.find((p) => p.id === id);
+    if (!player) return;
+    const from = assignments.indexOf(id);
+    if (from === -1) {
+      // Bench player: replace the slot's current occupant (it returns to bench),
+      // matching what armed-click placement does.
+      assignTo(slotIndex, player);
+    } else {
+      // Pitch player dropped on another spot: swap the two occupants.
+      setAssignments((cur) => {
+        const next = [...cur];
+        next[from] = cur[slotIndex];
+        next[slotIndex] = id;
+        return next;
+      });
+      setArmedId(null);
+    }
+  };
+  const leaveDrop = (slotIndex: number) =>
+    setDragOver((cur) => (cur === slotIndex ? null : cur));
+
   const effFor = (p: Player, slot: string) =>
     bestEffectiveIn(playerPositions(p), p.rating ?? p.overall, slot);
   // Canonical-ised position labels, deduped: a full-back holding both a CB and
@@ -280,8 +337,8 @@ export default function LineupEditor({
     setArmedId(null);
   };
 
-  // Players grouped by position family (GK → DF → MF → FW), best first within
-  // each row, so the picker reads like the team-selection screen.
+  // Players grouped by position family (GK → DF → MF → FW), by shirt number
+  // within each row so the picker reads like the printed team sheet.
   const grouped = useMemo(() => {
     const by = new Map<string, Player[]>();
     for (const f of FAMILIES) by.set(f, []);
@@ -290,7 +347,7 @@ export default function LineupEditor({
       for (const f of fams) by.get(f)?.push(p);
     }
     for (const list of by.values()) {
-      list.sort((a, b) => (b.rating ?? b.overall) - (a.rating ?? a.overall));
+      list.sort((a, b) => (a.shirt_number ?? Infinity) - (b.shirt_number ?? Infinity));
     }
     return by;
   }, [squad]);
@@ -382,16 +439,22 @@ export default function LineupEditor({
               <button
                 key={slot + ":" + x + ":" + i}
                 data-slot={slot}
+                draggable={chosen ? !disabled : false}
                 className={
                   "slot-marker" +
                   (chosen ? " filled" : "") +
                   (natural ? " pulsing" : "") +
-                  (armedPlayer ? " arm-target" : "")
+                  (armedPlayer ? " arm-target" : "") +
+                  (dragOver === i ? " drop-target" : "")
                 }
                 style={{ left: `${x}%`, top: `${y}%` }}
                 disabled={disabled}
                 onClick={() => armedPlayer && assignTo(i, armedPlayer)}
                 onDoubleClick={() => chosen && clearSlot(i)}
+                onDragStart={chosen ? (e) => startDrag(e, chosen) : undefined}
+                onDragOver={(e) => allowDrop(e, i)}
+                onDragLeave={() => leaveDrop(i)}
+                onDrop={(e) => dropOn(e, i)}
                 title={
                   chosen
                     ? `${chosen.name} — ${t("lineup.ready")} · ${t("lineup.dblClear")}`
@@ -479,6 +542,7 @@ export default function LineupEditor({
               return (
                 <button
                   key={p.id}
+                  draggable={!(disabled || sus)}
                   className={
                     "pc-pick" +
                     (isArmed ? " armed" : "") +
@@ -486,6 +550,8 @@ export default function LineupEditor({
                     (sus ? " suspended" : "")
                   }
                   onClick={() => setArmedId((cur) => (cur === p.id ? null : p.id))}
+                  onDoubleClick={() => placeBestFree(p)}
+                  onDragStart={(e) => startDrag(e, p)}
                   disabled={disabled || sus}
                   title={
                     sus && banDetails.has(p.id)
@@ -517,7 +583,12 @@ export default function LineupEditor({
                     )}
                   </span>
                   <span className="pp-text">
-                    <span className="pp-name">{playerSurname(p.name)}</span>
+                    <span className="pp-name">
+                      {shirtNumbers && p.shirt_number != null
+                        ? `${p.shirt_number}. `
+                        : ""}
+                      {playerSurname(p.name)}
+                    </span>
                     <span className="pp-pos">{positionsLabel(p)}</span>
                   </span>
                   {sus ? (

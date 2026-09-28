@@ -1466,6 +1466,14 @@ body {
 .pc-pick.suspended:hover {
   border-color: var(--line);
 }
+.pc-pick[draggable="true"],
+.slot-marker[draggable="true"] {
+  cursor: grab;
+}
+.slot-marker.drop-target .marker-face {
+  outline: 2px dashed var(--gold);
+  outline-offset: 2px;
+}
 .pitch.locked {
   opacity: 0.85;
 }
