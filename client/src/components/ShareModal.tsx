@@ -21,7 +21,7 @@ const flagName = (country: (s: string) => string, n: string) =>
   [flagFor(n), country(n)].filter(Boolean).join(" ");
 
 export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Props) {
-  const { t, country } = useI18n();
+  const { t, country, host: localizeHost } = useI18n();
   const [sharing, setSharing] = useState(false);
   const captureRef = useRef<HTMLDivElement>(null);
 
@@ -128,7 +128,7 @@ export default function ShareModal({ run, focusTeam, onClose, onPlayAgain }: Pro
         .sort((a, b) => b.assists - a.assists || b.goals - a.goals)
         .slice(0, 3);
       const title = t("share.title", { year: run.year });
-      const host = t("share.host", { host: country(run.host ?? "") });
+      const host = t("share.host", { host: localizeHost(run.host ?? "") });
 
       return { podium, yourPos, best, scorers, assists, title, host };
     }, [run, focusTeam, t, country]);

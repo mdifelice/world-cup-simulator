@@ -150,3 +150,73 @@ describe("bracket column completion gate", () => {
     });
   }
 });
+
+describe("second-round group scheduling is a fair round-robin", () => {
+  for (const year of EDITIONS) {
+    test(`${year}: generated group phases reach every pairing once`, () => {
+      const r = run(year);
+      const phases = formatsFor(year).filter((p) => p.phase_type === "GROUP");
+      // Only the *first* group phase mirrors real fixtures (1954's seeded
+      // groups were deliberately partial — 4 games per 4-team pool — so a full
+      // round-robin is only guaranteed for the engine-generated later phases:
+      // 1974/78/82 second round and the 1950 league decider).
+      phases.slice(1).forEach((p) => {
+        const matches = r.matches.filter((m) => m.stage_key === p.key);
+        // Bucket the phase's matches by the table they belong to (a phase can
+        // have several groups, and 1950's decider is a single-table league).
+        const tables = new Map<string, RunMatch[]>();
+        for (const m of matches) {
+          const label = `${p.key}:${m.stage_name ?? p.name}`;
+          const bucket = tables.get(label) ?? [];
+          bucket.push(m);
+          tables.set(label, bucket);
+        }
+        for (const [label, ms] of tables) {
+          const seen = new Map<number, number>();
+          const pairs = new Set<string>();
+          for (const m of ms) {
+            seen.set(m.home_team_id, (seen.get(m.home_team_id) ?? 0) + 1);
+            seen.set(m.away_team_id, (seen.get(m.away_team_id) ?? 0) + 1);
+            pairs.add(
+              `${Math.min(m.home_team_id, m.away_team_id)}|${Math.max(m.home_team_id, m.away_team_id)}`,
+            );
+          }
+          const n = seen.size;
+          assert.ok(n >= 2, `${year}: ${label} has ${n} teams`);
+          assert.equal(ms.length, (n * (n - 1)) / 2, `${year}: ${label} match count`);
+          assert.equal(pairs.size, ms.length, `${year}: ${label} duplicated a pairing`);
+          for (const games of seen.values()) {
+            assert.equal(games, n - 1, `${year}: ${label} unbalanced fixture list`);
+          }
+        }
+      });
+    });
+  }
+});
+
+describe("second-round group matches are dated after the first round", () => {
+  for (const year of EDITIONS) {
+    test(`${year}: generated group fixtures sort after the real group fixtures`, () => {
+      const r = run(year);
+      const phases = formatsFor(year).filter((p) => p.phase_type === "GROUP");
+      let firstMax: string | null = null;
+      phases.forEach((p, pi) => {
+        const ms = r.matches.filter((m) => m.stage_key === p.key);
+        if (pi === 0) {
+          for (const m of ms) {
+            if (m.date == null) continue;
+            if (firstMax == null || m.date > firstMax) firstMax = m.date;
+          }
+          return;
+        }
+        for (const m of ms) {
+          assert.ok(m.date != null, `${year}: undated ${p.key} match ${m.stage_name}`);
+          assert.ok(
+            firstMax != null && m.date > firstMax,
+            `${year}: ${p.key} ${m.date} not after first round (${firstMax})`,
+          );
+        }
+      });
+    });
+  }
+});

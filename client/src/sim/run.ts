@@ -224,28 +224,27 @@ function maxSubsFor(year: number): number {
   return 2;
 }
 
-/** fixture.rs round_robin — circle method, (home, away, round). */
+/** fixture.rs round_robin — circle method, (home, away, round).
+ *  An odd team count gets a virtual "bye" slot so every pairing appears exactly
+ *  once. The seat-0 rotation wrongly paired again for odd lists (a 3-team group
+ *  replayed team A against B twice, leaving one team with a single outing);
+ *  the m = n+1 slate below skips byes and keeps all C(n, 2) pairs unique. */
 function roundRobin(teams: number[]): Array<[number, number, number]> {
   const n = teams.length;
   const out: Array<[number, number, number]> = [];
   if (n < 2) return out;
-  const list: number[] = [];
-  for (let i = 1; i < n; i++) list.push(i);
-  const rounds = n % 2 === 0 ? n - 1 : n;
-  let idx = 0;
-  while (idx < rounds) {
-    const pairs: Array<[number, number]> = [[0, list[0]]];
-    let k = 1;
-    while (k + 1 < list.length) {
-      pairs.push([list[k], list[k + 1]]);
-      k += 2;
+  const m = n % 2 === 0 ? n : n + 1; // virtual slate (odd n: one bye per round)
+  const rot: number[] = [];
+  for (let i = 1; i < m; i++) rot.push(i); // seats that rotate around fixed seat 0
+  for (let round = 0; round < m - 1; round++) {
+    for (let i = 0; i < m / 2; i++) {
+      const a = i === 0 ? 0 : rot[i - 1];
+      const b = i === 0 ? rot[m - 2] : rot[m - 2 - i];
+      if (a >= n || b >= n) continue; // the bye
+      const [h, away] = round % 2 === 0 ? [a, b] : [b, a];
+      out.push([teams[h], teams[away], round + 1]);
     }
-    for (const [i, j] of pairs) {
-      const [h, a] = idx % 2 === 0 ? [i, j] : [j, i];
-      out.push([teams[h], teams[a], idx + 1]);
-    }
-    list.unshift(list.pop() as number);
-    idx += 1;
+    rot.unshift(rot.pop() as number);
   }
   return out;
 }
@@ -545,6 +544,15 @@ function koDate(year: number, key: string, i: number, n: number): string | null 
   return days[Math.min(Math.floor((i * days.length) / n), days.length - 1)];
 }
 
+/** "2022-12-03T19:00" + 2 → "2022-12-05" (UTC; the date prefix sorts like the
+ *  real kickoffs the UI's shortDate already consumes). */
+function addDays(iso: string, n: number): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return iso;
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + n));
+  return d.toISOString().slice(0, 10);
+}
+
 /** fixture.rs real_group_schedule — per-group per-round matchdays. */
 function realGroupSchedule(oracle: Oracle): Array<Array<Array<[number, number]>>> | null {
   const groups = oracle.groups;
@@ -608,6 +616,11 @@ class Engine {
   champion: string | null = null;
   nextId = 1;
   day = 0;
+  /** Latest real calendar date seen so far (kickoff / knockout calendar), used
+   *  to back-date generated second-round group matches (1974/78/82 GROUP2,
+   *  1950 final round) right after the first-round fixtures. */
+  realDateMax: string | null = null;
+  realDateMaxDay = 0;
   quals: number[];
   prevWinners: number[] = [];
   prevLosers: number[] = [];
@@ -1593,7 +1606,17 @@ class Engine {
     // Knockout matches get their date only from the phase calendar; the group
     // kickoffs map must never leak a coincidental same-pair group date into a
     // knockout tie (2022 R16 can re-pair teams that also met in the group).
-    const date = koDateOverride ?? (!knockout ? (this.kickoffs.get(pair) ?? null) : null);
+    let date = koDateOverride ?? (!knockout ? (this.kickoffs.get(pair) ?? null) : null);
+    if (date && (this.realDateMax == null || date.slice(0, 10) > this.realDateMax)) {
+      this.realDateMax = date.slice(0, 10);
+      this.realDateMaxDay = this.day;
+    }
+    // Generated group fixtures carry no kickoff: derive a deterministic date
+    // one calendar day further on than the last real group match, so second
+    // round still lands after the first round in the chronological feed.
+    if (date == null && !knockout && this.realDateMax != null) {
+      date = addDays(this.realDateMax, this.day - this.realDateMaxDay);
+    }
 
     const rm: RunMatch = {
       id: matchId,

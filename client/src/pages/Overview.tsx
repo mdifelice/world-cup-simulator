@@ -99,7 +99,7 @@ export default function Overview({
 }: Props) {
   const focusId = run?.focus_team_id ?? null;
   const total = run?.matches.length ?? 0;
-  const { t, stage, country } = useI18n();
+  const { t, stage, country, host } = useI18n();
   const [bracketOpen, setBracketOpen] = useState(false);
   const [scorersOpen, setScorersOpen] = useState(false);
   const [standingsOpen, setStandingsOpen] = useState(false);
@@ -192,12 +192,32 @@ export default function Overview({
         if (!comps.has(root)) comps.set(root, []);
         comps.get(root)!.push({ id, name: nameOf.get(id) ?? "" });
       }
+      // Name each component after the phase's own stage label when every team
+      // in it shares one (e.g. "Second round A" for 1974/78/82 second-round
+      // groups); fall back to a generic "Group X" letter otherwise.
+      const labelOf = new Map<number, string>();
+      for (const m of all) {
+        labelOf.set(m.home_team_id, m.stage_name);
+        labelOf.set(m.away_team_id, m.stage_name);
+      }
       const letters = "ABCDEFGHIJKL";
       const list = [...comps.values()];
-      members = list.map((teams, i) => ({
-        name: list.length === 1 ? stageName : `Group ${letters[i] ?? i + 1}`,
-        teams,
-      }));
+      members = list.map((teams, i) => {
+        const labels = [
+          ...new Set(
+            teams
+              .map((t) => labelOf.get(t.id))
+              .filter((s): s is string => s != null && s !== ""),
+          ),
+        ];
+        const name =
+          labels.length === 1
+            ? labels[0]
+            : list.length === 1
+              ? stageName
+              : `Group ${letters[i] ?? i + 1}`;
+        return { name, teams };
+      });
     }
 
     const map = new Map<string, Row[]>();
@@ -288,7 +308,7 @@ export default function Overview({
     const firstKey = order[0]?.stage_key;
     for (const [key, p] of map.entries()) {
       const revealed = p.matches.filter((m) => revealedMatchIds.has(m.id));
-      const groupType = key === "GROUP" || key === "FINAL";
+      const groupType = key === "GROUP" || key === "GROUP2" || key === "FINAL";
       // Show the opening group stage from kickoff (all-zero tables); every
       // later phase only once its first match has been played.
       if (revealed.length === 0 && !(key === firstKey && groupType)) continue;
@@ -470,7 +490,7 @@ export default function Overview({
         <div>
           <h1>
             {run
-              ? t("cup.title", { year: run.year, host: run.host ?? "" })
+              ? t("cup.title", { year: run.year, host: host(run.host ?? "") })
               : t("step.tournament")}
           </h1>
           <p className="hint">

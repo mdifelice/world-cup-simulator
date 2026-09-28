@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function Finals({ run, teamId, onReplay, onHistory, onHome }: Props) {
-  const { t } = useI18n();
+  const { t, host } = useI18n();
 
   const medal = (a: RunPayload["awards"]["golden"], title: string, cls: string) =>
     a ? (
@@ -30,7 +30,7 @@ export default function Finals({ run, teamId, onReplay, onHistory, onHome }: Pro
     <section>
       <div className="page-head">
         <div>
-          <h1>{t("final.title", { year: run.year, host: run.host ?? "" })}</h1>
+          <h1>{t("final.title", { year: run.year, host: host(run.host ?? "") })}</h1>
           <p className="hint">{t("final.hint")}</p>
         </div>
       </div>

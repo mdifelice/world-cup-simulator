@@ -19,7 +19,7 @@ const hostParts = (host: string) =>
 export default function ChooseTournament({ selected, onPick, onHistory }: Props) {
   const [cups, setCups] = useState<Tournament[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { t, country } = useI18n();
+  const { t, country, host } = useI18n();
 
   useEffect(() => {
     api.tournaments().then(setCups).catch((e) => setError(e.message));
@@ -74,7 +74,7 @@ export default function ChooseTournament({ selected, onPick, onHistory }: Props)
                   </span>
                 ) : null}
                 <span className="cup-host-name">
-                  {hostParts(c.host).map(country).join(" · ")}
+                  {host(c.host)}
                 </span>
               </span>
             </span>

@@ -17,6 +17,10 @@ export interface I18n {
   stage: (name: string, vars?: Vars) => string;
   /** Localise a country/team name (e.g. "Brazil" → "Brasil" in es). */
   country: (name: string) => string;
+  /** Localise a tournament host string, splitting multi-host lists on the
+   *  "·" separator (e.g. "United States · Mexico · Canada" → "Estados Unidos
+   *  · México · Canadá" in es). */
+  host: (host: string) => string;
   /** Localise a position abbreviation, normalising it to the canonical set
    *  (GK, RDF, DF, LDF, DMF, RMF, LMF, AMF, RFW, FW, LFW) first. */
   pos: (code: string) => string;
@@ -186,6 +190,8 @@ const en: Record<string, string> = {
   "stage.r32": "Round of 32",
   "stage.r8": "Round of 8",
   "stage.third": "Third place",
+  "stage.second": "Second round",
+  "stage.finalRound": "Final round",
 
   "match.day": "Matchday {day}",
   "match.aet": "after extra time",
@@ -661,6 +667,8 @@ const es: Record<string, string> = {
   "stage.r32": "Dieciseisavos",
   "stage.r8": "Cuartos",
   "stage.third": "Tercer puesto",
+  "stage.second": "Segunda ronda",
+  "stage.finalRound": "Ronda final",
 
   "match.day": "Jornada {day}",
   "match.aet": "tras la prórroga",
@@ -985,6 +993,14 @@ const STAGE_PATTERNS: [RegExp, string][] = [
   [/^(?:third place|tercer puesto|bronze final)$/i, "stage.third"],
 ];
 
+// Round-robin phases beyond the opening group stage (1974/78/82 "Second round"
+// with its A–D sub-groups, and 1950's "Final round" league) are grouped tables
+// too; map their bare name to a dictionary key when one is known.
+const STAGE_NAME_KEYS: Record<string, string> = {
+  "second round": "stage.second",
+  "final round": "stage.finalRound",
+};
+
 const I18nCtx = createContext<I18n | null>(null);
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
@@ -1020,10 +1036,19 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       return s;
     };
     const stage = (name: string, vars?: Vars): string => {
-      const group = /^(?:Group stage|Fase de grupos|Group|Grupo)\s+([A-Z])$/i.exec(name.trim());
+      const n = name.trim();
+      const group = /^(?:Group stage|Fase de grupos|Group|Grupo)\s+([A-Z])$/i.exec(n);
       if (group) return `${t("stage.group")} ${group[1]}`;
+      // Named round-robin phases keep an optional trailing group letter
+      // ("Second round A" → "Segunda ronda A").
+      const lettered = /^(.{2,}?)\s+([A-Z])$/.exec(n);
+      const key = STAGE_NAME_KEYS[(lettered ? lettered[1] : n).toLowerCase()];
+      if (key) {
+        const label = t(key);
+        return lettered ? `${label} ${lettered[2]}` : label;
+      }
       for (const [re, key] of STAGE_PATTERNS) {
-        if (re.test(name.trim())) return t(key, vars);
+        if (re.test(n)) return t(key, vars);
       }
       return name;
     };
@@ -1035,6 +1060,13 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       t,
       stage,
       country: (name: string): string => countryNames[locale]?.[name] ?? name,
+      host: (value: string): string =>
+        value
+          .split(/[·/]+/)
+          .map((h) => h.trim())
+          .filter(Boolean)
+          .map((h) => countryNames[locale]?.[h] ?? h)
+          .join(" · "),
       pos: (code: string): string => t("abbr." + normalizePos(code)),
     };
   }, [locale, speed]);
