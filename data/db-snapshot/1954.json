@@ -1,0 +1,10498 @@
+{
+  "teams": [
+    {
+      "name": "Austria",
+      "code": "AUT",
+      "flag": "🇦🇹",
+      "rating": 81,
+      "group": "C"
+    },
+    {
+      "name": "Belgium",
+      "code": "BEL",
+      "flag": "🇧🇪",
+      "rating": 74,
+      "group": "D"
+    },
+    {
+      "name": "Brazil",
+      "code": "BRA",
+      "flag": "🇧🇷",
+      "rating": 84,
+      "group": "A"
+    },
+    {
+      "name": "Czechoslovakia",
+      "code": "TCH",
+      "flag": "🇨🇿",
+      "rating": 75,
+      "group": "C"
+    },
+    {
+      "name": "England",
+      "code": "ENG",
+      "flag": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      "rating": 77,
+      "group": "D"
+    },
+    {
+      "name": "France",
+      "code": "FRA",
+      "flag": "🇫🇷",
+      "rating": 76,
+      "group": "A"
+    },
+    {
+      "name": "Hungary",
+      "code": "HUN",
+      "flag": "🇭🇺",
+      "rating": 90,
+      "group": "B"
+    },
+    {
+      "name": "Italy",
+      "code": "ITA",
+      "flag": "🇮🇹",
+      "rating": 78,
+      "group": "D"
+    },
+    {
+      "name": "Mexico",
+      "code": "MEX",
+      "flag": "🇲🇽",
+      "rating": 64,
+      "group": "A"
+    },
+    {
+      "name": "Scotland",
+      "code": "SCO",
+      "flag": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+      "rating": 72,
+      "group": "C"
+    },
+    {
+      "name": "South Korea",
+      "code": "KOR",
+      "flag": "🇰🇷",
+      "rating": 48,
+      "group": "B"
+    },
+    {
+      "name": "Switzerland",
+      "code": "SUI",
+      "flag": "🇨🇭",
+      "rating": 76,
+      "group": "D"
+    },
+    {
+      "name": "Turkey",
+      "code": "TUR",
+      "flag": "🇹🇷",
+      "rating": 72,
+      "group": "B"
+    },
+    {
+      "name": "Uruguay",
+      "code": "URU",
+      "flag": "🇺🇾",
+      "rating": 82,
+      "group": "C"
+    },
+    {
+      "name": "West Germany",
+      "code": "FRG",
+      "flag": "🇩🇪",
+      "rating": 86,
+      "group": "B"
+    },
+    {
+      "name": "Yugoslavia",
+      "code": "YUG",
+      "flag": "🇷🇸",
+      "rating": 80,
+      "group": "A"
+    }
+  ],
+  "squads": {
+    "AUT": [
+      {
+        "name": "Alfred Körner",
+        "positions": [
+          "ST!",
+          "LW:79",
+          "CAM:74",
+          "CF:88"
+        ],
+        "shirt": 11,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Alfred_K%C3%B6rner_%28cropped%29.jpg/330px-Alfred_K%C3%B6rner_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Alfred Teinitzer",
+        "positions": [
+          "CM!",
+          "LM:71",
+          "CDM:83"
+        ],
+        "shirt": 17,
+        "attrs": [
+          69,
+          71,
+          70,
+          71,
+          73,
+          69,
+          69,
+          72,
+          70,
+          70,
+          69,
+          64,
+          67,
+          68,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Erich Probst",
+        "positions": [
+          "CM!",
+          "CAM:83",
+          "LM:75",
+          "CDM:85"
+        ],
+        "shirt": 10,
+        "attrs": [
+          70,
+          72,
+          71,
+          72,
+          74,
+          70,
+          70,
+          73,
+          71,
+          71,
+          70,
+          65,
+          68,
+          69,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Ernst Happel",
+        "positions": [
+          "CB!",
+          "CDM:67"
+        ],
+        "shirt": 3,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Ernst-Happel-01_%28cropped%29.jpg/330px-Ernst-Happel-01_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          68,
+          71,
+          73,
+          65,
+          68,
+          64,
+          74,
+          66,
+          69,
+          69,
+          68,
+          62,
+          64,
+          73,
+          68,
+          68,
+          69,
+          68
+        ]
+      },
+      {
+        "name": "Ernst Ocwirk",
+        "positions": [
+          "CM!",
+          "RM:73"
+        ],
+        "shirt": 5,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Ernst_Ocwirk_1953.jpg/330px-Ernst_Ocwirk_1953.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          79,
+          81,
+          80,
+          81,
+          83,
+          79,
+          79,
+          82,
+          80,
+          80,
+          79,
+          74,
+          77,
+          78,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "Ernst Stojaspal",
+        "positions": [
+          "ST!",
+          "CF:92",
+          "RW:77"
+        ],
+        "shirt": 21,
+        "attrs": [
+          85,
+          80,
+          80,
+          84,
+          81,
+          84,
+          77,
+          81,
+          83,
+          80,
+          80,
+          75,
+          77,
+          81,
+          80,
+          79,
+          80,
+          80
+        ]
+      },
+      {
+        "name": "Franz Pelikan",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 15,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Franz_Pelikan_1953.jpg/330px-Franz_Pelikan_1953.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          79,
+          80,
+          72,
+          75,
+          72,
+          73,
+          76,
+          77,
+          79,
+          83,
+          84,
+          83,
+          81,
+          79,
+          78,
+          80,
+          79
+        ]
+      },
+      {
+        "name": "Gerhard Hanappi",
+        "positions": [
+          "CB!",
+          "LB:79",
+          "CDM:65"
+        ],
+        "shirt": 2,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Gerhard_Hanappi_1953.jpg/330px-Gerhard_Hanappi_1953.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          81,
+          83,
+          75,
+          78,
+          74,
+          84,
+          76,
+          79,
+          79,
+          78,
+          72,
+          74,
+          83,
+          78,
+          78,
+          79,
+          78
+        ]
+      },
+      {
+        "name": "Johann Riegler",
+        "positions": [
+          "CM!",
+          "LM:75",
+          "CDM:87",
+          "CAM:82"
+        ],
+        "shirt": 18,
+        "attrs": [
+          72,
+          74,
+          73,
+          74,
+          76,
+          72,
+          72,
+          75,
+          73,
+          73,
+          72,
+          67,
+          70,
+          71,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Karl Giesser",
+        "positions": [
+          "CM!",
+          "CAM:81",
+          "LM:73",
+          "CDM:85"
+        ],
+        "shirt": 14,
+        "attrs": [
+          71,
+          73,
+          72,
+          73,
+          75,
+          71,
+          71,
+          74,
+          72,
+          72,
+          71,
+          66,
+          69,
+          70,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Karl Koller",
+        "positions": [
+          "CM!",
+          "CAM:81",
+          "RM:74",
+          "LM:77"
+        ],
+        "shirt": 6,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c0/Karl_Koller_%281964%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Karl Stotz",
+        "positions": [
+          "CM!",
+          "CDM:87"
+        ],
+        "shirt": 12,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Karl_Stotz_%281953%29.jpg/330px-Karl_Stotz_%281953%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          80,
+          79,
+          80,
+          82,
+          78,
+          78,
+          81,
+          79,
+          79,
+          78,
+          73,
+          76,
+          77,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Kurt Schmied",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/56/Kurt_Schmied_1961.jpg/330px-Kurt_Schmied_1961.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          75,
+          76,
+          77,
+          69,
+          72,
+          69,
+          70,
+          73,
+          74,
+          76,
+          80,
+          81,
+          80,
+          78,
+          76,
+          75,
+          77,
+          76
+        ]
+      },
+      {
+        "name": "Leopold Barschandt",
+        "positions": [
+          "CB!",
+          "RB:77",
+          "LB:80",
+          "CDM:65"
+        ],
+        "shirt": 4,
+        "attrs": [
+          74,
+          77,
+          79,
+          71,
+          74,
+          70,
+          80,
+          72,
+          75,
+          75,
+          74,
+          68,
+          70,
+          79,
+          74,
+          74,
+          75,
+          74
+        ]
+      },
+      {
+        "name": "Paul Halla",
+        "positions": [
+          "CB!",
+          "LB:79"
+        ],
+        "shirt": 20,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/%C3%96sterrike_1958.jpg/330px-%C3%96sterrike_1958.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          68,
+          71,
+          73,
+          65,
+          68,
+          64,
+          74,
+          66,
+          69,
+          69,
+          68,
+          62,
+          64,
+          73,
+          68,
+          68,
+          69,
+          68
+        ]
+      },
+      {
+        "name": "Robert Dienst",
+        "positions": [
+          "ST!",
+          "CAM:70",
+          "CF:87"
+        ],
+        "shirt": 19,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Portr%C3%A4t_Robert_Dienst_sen.%2C_1948_Rapid1.jpg/330px-Portr%C3%A4t_Robert_Dienst_sen.%2C_1948_Rapid1.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          82,
+          77,
+          77,
+          81,
+          78,
+          81,
+          74,
+          78,
+          80,
+          77,
+          77,
+          72,
+          74,
+          78,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Robert Körner",
+        "positions": [
+          "ST!",
+          "RW:74"
+        ],
+        "shirt": 7,
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Theodor Wagner",
+        "positions": [
+          "ST!",
+          "CF:91",
+          "RW:77"
+        ],
+        "shirt": 9,
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Walter Haummer",
+        "positions": [
+          "ST!",
+          "CF:91",
+          "RW:77"
+        ],
+        "shirt": 22,
+        "attrs": [
+          82,
+          77,
+          77,
+          81,
+          78,
+          81,
+          74,
+          78,
+          80,
+          77,
+          77,
+          72,
+          74,
+          78,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Walter Kollmann",
+        "positions": [
+          "CM!",
+          "RM:71",
+          "LM:74"
+        ],
+        "shirt": 13,
+        "attrs": [
+          80,
+          82,
+          81,
+          82,
+          84,
+          80,
+          80,
+          83,
+          81,
+          81,
+          80,
+          75,
+          78,
+          79,
+          80,
+          79,
+          80,
+          80
+        ]
+      },
+      {
+        "name": "Walter Schleger",
+        "positions": [
+          "ST!",
+          "LW:78"
+        ],
+        "shirt": 8,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/Walter_Schleger_%28cropped%29.jpg/330px-Walter_Schleger_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          86,
+          81,
+          81,
+          85,
+          82,
+          85,
+          78,
+          82,
+          84,
+          81,
+          81,
+          76,
+          78,
+          82,
+          81,
+          80,
+          81,
+          81
+        ]
+      },
+      {
+        "name": "Walter Zeman",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 16,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/Walter_Zeman_%281953%29.jpg/330px-Walter_Zeman_%281953%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          74,
+          75,
+          76,
+          68,
+          71,
+          68,
+          69,
+          72,
+          73,
+          75,
+          79,
+          80,
+          79,
+          77,
+          75,
+          74,
+          76,
+          75
+        ]
+      }
+    ],
+    "BEL": [
+      {
+        "name": "Alfons Van Brandt",
+        "positions": [
+          "CB!",
+          "CDM:61",
+          "LB:79"
+        ],
+        "shirt": 3,
+        "attrs": [
+          73,
+          76,
+          78,
+          70,
+          73,
+          69,
+          79,
+          71,
+          74,
+          74,
+          73,
+          67,
+          69,
+          78,
+          73,
+          73,
+          74,
+          73
+        ]
+      },
+      {
+        "name": "Charles Geerts",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 12,
+        "attrs": [
+          70,
+          71,
+          72,
+          64,
+          67,
+          64,
+          65,
+          68,
+          69,
+          71,
+          75,
+          76,
+          75,
+          73,
+          71,
+          70,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Constant Huysmans",
+        "positions": [
+          "CB!",
+          "LB:80"
+        ],
+        "shirt": 4,
+        "attrs": [
+          62,
+          65,
+          67,
+          59,
+          62,
+          58,
+          68,
+          60,
+          63,
+          63,
+          62,
+          56,
+          58,
+          67,
+          62,
+          62,
+          63,
+          62
+        ]
+      },
+      {
+        "name": "Denis Houf",
+        "positions": [
+          "ST!",
+          "RW:73",
+          "CAM:75",
+          "CF:90"
+        ],
+        "shirt": 8,
+        "attrs": [
+          70,
+          65,
+          65,
+          69,
+          66,
+          69,
+          62,
+          66,
+          68,
+          65,
+          65,
+          60,
+          62,
+          66,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Henri Coppens",
+        "positions": [
+          "ST!",
+          "RW:74",
+          "LW:73"
+        ],
+        "shirt": 9,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/Rik_Coppens.jpg/330px-Rik_Coppens.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          72,
+          67,
+          67,
+          71,
+          68,
+          71,
+          64,
+          68,
+          70,
+          67,
+          67,
+          62,
+          64,
+          68,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Henri Dirickx",
+        "positions": [
+          "CB!",
+          "CDM:63",
+          "RB:80"
+        ],
+        "shirt": 13,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Collectie_Fotocollectiie_Afdrukken_ANEFO_Rousel%2C_fotonummer_157-1131%2C_Bestanddeelnr_157-1131.jpg/330px-Collectie_Fotocollectiie_Afdrukken_ANEFO_Rousel%2C_fotonummer_157-1131%2C_Bestanddeelnr_157-1131.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          68,
+          71,
+          73,
+          65,
+          68,
+          64,
+          74,
+          66,
+          69,
+          69,
+          68,
+          62,
+          64,
+          73,
+          68,
+          68,
+          69,
+          68
+        ]
+      },
+      {
+        "name": "Hippolyte Van Den Bosch",
+        "positions": [
+          "ST!",
+          "LW:79",
+          "CF:89",
+          "RW:78"
+        ],
+        "shirt": 15,
+        "attrs": [
+          72,
+          67,
+          67,
+          71,
+          68,
+          71,
+          64,
+          68,
+          70,
+          67,
+          67,
+          62,
+          64,
+          68,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Jean Van Steen",
+        "positions": [
+          "CM!",
+          "RM:73",
+          "CDM:87",
+          "CAM:83"
+        ],
+        "shirt": 21,
+        "attrs": [
+          74,
+          76,
+          75,
+          76,
+          78,
+          74,
+          74,
+          77,
+          75,
+          75,
+          74,
+          69,
+          72,
+          73,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Jef Van Der Linden",
+        "positions": [
+          "CB!",
+          "RB:80"
+        ],
+        "shirt": 18,
+        "attrs": [
+          65,
+          68,
+          70,
+          62,
+          65,
+          61,
+          71,
+          63,
+          66,
+          66,
+          65,
+          59,
+          61,
+          70,
+          65,
+          65,
+          66,
+          65
+        ]
+      },
+      {
+        "name": "Jo Backaert",
+        "positions": [
+          "CM!",
+          "LM:71"
+        ],
+        "shirt": 19,
+        "attrs": [
+          74,
+          76,
+          75,
+          76,
+          78,
+          74,
+          74,
+          77,
+          75,
+          75,
+          74,
+          69,
+          72,
+          73,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Joseph Mermans",
+        "positions": [
+          "ST!",
+          "RW:79",
+          "LW:76"
+        ],
+        "shirt": 11,
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Jozef Vliers",
+        "positions": [
+          "CM!",
+          "CDM:86",
+          "CAM:81"
+        ],
+        "shirt": 7,
+        "attrs": [
+          62,
+          64,
+          63,
+          64,
+          66,
+          62,
+          62,
+          65,
+          63,
+          63,
+          62,
+          57,
+          60,
+          61,
+          62,
+          61,
+          62,
+          62
+        ]
+      },
+      {
+        "name": "Louis Carré",
+        "positions": [
+          "CM!",
+          "LM:76",
+          "CDM:89",
+          "CAM:84"
+        ],
+        "shirt": 5,
+        "attrs": [
+          63,
+          65,
+          64,
+          65,
+          67,
+          63,
+          63,
+          66,
+          64,
+          64,
+          63,
+          58,
+          61,
+          62,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "Luc Van Hoyweghen",
+        "positions": [
+          "ST!",
+          "CAM:74",
+          "CF:88",
+          "LW:75"
+        ],
+        "shirt": 22,
+        "attrs": [
+          69,
+          64,
+          64,
+          68,
+          65,
+          68,
+          61,
+          65,
+          67,
+          64,
+          64,
+          59,
+          61,
+          65,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Léopold Anoul",
+        "positions": [
+          "ST!",
+          "CAM:69",
+          "CF:90"
+        ],
+        "shirt": 10,
+        "attrs": [
+          80,
+          75,
+          75,
+          79,
+          76,
+          79,
+          72,
+          76,
+          78,
+          75,
+          75,
+          70,
+          72,
+          76,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "Léopold Gernaey",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/e/e0/NBN_C9_gernaey.MM.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          69,
+          70,
+          71,
+          63,
+          66,
+          63,
+          64,
+          67,
+          68,
+          70,
+          74,
+          75,
+          74,
+          72,
+          70,
+          69,
+          71,
+          70
+        ]
+      },
+      {
+        "name": "Marcel Dries",
+        "positions": [
+          "CB!",
+          "LB:80",
+          "CDM:67"
+        ],
+        "shirt": 2,
+        "attrs": [
+          66,
+          69,
+          71,
+          63,
+          66,
+          62,
+          72,
+          64,
+          67,
+          67,
+          66,
+          60,
+          62,
+          71,
+          66,
+          66,
+          67,
+          66
+        ]
+      },
+      {
+        "name": "Pieter Van Den Bosch",
+        "positions": [
+          "ST!",
+          "RW:78"
+        ],
+        "shirt": 16,
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Raymond Ausloos",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 17,
+        "attrs": [
+          67,
+          68,
+          69,
+          61,
+          64,
+          61,
+          62,
+          65,
+          66,
+          68,
+          72,
+          73,
+          72,
+          70,
+          68,
+          67,
+          69,
+          68
+        ]
+      },
+      {
+        "name": "Robert Maertens",
+        "positions": [
+          "CM!",
+          "CDM:84",
+          "RM:76",
+          "LM:77"
+        ],
+        "shirt": 20,
+        "attrs": [
+          69,
+          71,
+          70,
+          71,
+          73,
+          69,
+          69,
+          72,
+          70,
+          70,
+          69,
+          64,
+          67,
+          68,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Robert Van Kerkhoven",
+        "positions": [
+          "CM!",
+          "CDM:84",
+          "RM:75",
+          "LM:77"
+        ],
+        "shirt": 14,
+        "attrs": [
+          72,
+          74,
+          73,
+          74,
+          76,
+          72,
+          72,
+          75,
+          73,
+          73,
+          72,
+          67,
+          70,
+          71,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Victor Mees",
+        "positions": [
+          "CM!",
+          "RM:77"
+        ],
+        "shirt": 6,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/73/Victor_Mees.jpg/330px-Victor_Mees.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          64,
+          66,
+          65,
+          66,
+          68,
+          64,
+          64,
+          67,
+          65,
+          65,
+          64,
+          59,
+          62,
+          63,
+          64,
+          63,
+          64,
+          64
+        ]
+      }
+    ],
+    "BRA": [
+      {
+        "name": "Alfredo",
+        "positions": [
+          "CB!",
+          "LB:76",
+          "CDM:66",
+          "RB:78"
+        ],
+        "shirt": 13,
+        "attrs": [
+          76,
+          79,
+          81,
+          73,
+          76,
+          72,
+          82,
+          74,
+          77,
+          77,
+          76,
+          70,
+          72,
+          81,
+          76,
+          76,
+          77,
+          76
+        ]
+      },
+      {
+        "name": "Baltazar",
+        "positions": [
+          "ST!",
+          "LW:79"
+        ],
+        "shirt": 9,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Baltazar%2C_jogador_de_futebol%2C_sem_data.tif/lossy-page1-330px-Baltazar%2C_jogador_de_futebol%2C_sem_data.tif.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          79,
+          74,
+          74,
+          78,
+          75,
+          78,
+          71,
+          75,
+          77,
+          74,
+          74,
+          69,
+          71,
+          75,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Bauer",
+        "positions": [
+          "CM!",
+          "CAM:87"
+        ],
+        "shirt": 6,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Jos%C3%A9_Carlos_Bauer%2C_Estadio%2C_1950-08-05_%28377%29.jpg/330px-Jos%C3%A9_Carlos_Bauer%2C_Estadio%2C_1950-08-05_%28377%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Brandãozinho",
+        "positions": [
+          "CB!",
+          "RB:79"
+        ],
+        "shirt": 4,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Brand%C3%A3ozinho_%28sem_data%29.tiff/lossy-page1-330px-Brand%C3%A3ozinho_%28sem_data%29.tiff.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          79,
+          81,
+          73,
+          76,
+          72,
+          82,
+          74,
+          77,
+          77,
+          76,
+          70,
+          72,
+          81,
+          76,
+          76,
+          77,
+          76
+        ]
+      },
+      {
+        "name": "Cabeção",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 22,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Cabe%C3%A7%C3%A3o_%28sem_data%29.tiff/lossy-page1-330px-Cabe%C3%A7%C3%A3o_%28sem_data%29.tiff.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          84,
+          85,
+          86,
+          78,
+          81,
+          78,
+          79,
+          82,
+          83,
+          85,
+          89,
+          90,
+          89,
+          87,
+          85,
+          84,
+          86,
+          85
+        ]
+      },
+      {
+        "name": "Castilho",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "attrs": [
+          84,
+          85,
+          86,
+          78,
+          81,
+          78,
+          79,
+          82,
+          83,
+          85,
+          89,
+          90,
+          89,
+          87,
+          85,
+          84,
+          86,
+          85
+        ]
+      },
+      {
+        "name": "Dequinha",
+        "positions": [
+          "CM!",
+          "LM:71",
+          "CDM:83"
+        ],
+        "shirt": 16,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Dequinha%2C_sem_data.tif/lossy-page1-330px-Dequinha%2C_sem_data.tif.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Didi",
+        "positions": [
+          "CM!",
+          "CAM:88",
+          "CDM:85"
+        ],
+        "shirt": 8,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/Waldir_Pereira_1958.jpg/330px-Waldir_Pereira_1958.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          87,
+          87,
+          80,
+          91,
+          93,
+          87,
+          78,
+          94,
+          90,
+          91,
+          76,
+          72,
+          84,
+          72,
+          89,
+          78,
+          87,
+          91
+        ]
+      },
+      {
+        "name": "Djalma Santos",
+        "positions": [
+          "RB!"
+        ],
+        "shirt": 2,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/36/Djalma_Santos.jpg/330px-Djalma_Santos.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          84,
+          85,
+          88,
+          81,
+          87,
+          61,
+          94,
+          84,
+          91,
+          92,
+          77,
+          71,
+          81,
+          91,
+          90,
+          84,
+          90,
+          94
+        ]
+      },
+      {
+        "name": "Ely",
+        "positions": [
+          "CM!",
+          "CDM:86"
+        ],
+        "shirt": 14,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f0/Ely_do_Amparo%2C_Estadio%2C_1948-03-06_%28251%29.jpg/330px-Ely_do_Amparo%2C_Estadio%2C_1948-03-06_%28251%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          81,
+          83,
+          82,
+          83,
+          85,
+          81,
+          81,
+          84,
+          82,
+          82,
+          81,
+          76,
+          79,
+          80,
+          81,
+          80,
+          81,
+          81
+        ]
+      },
+      {
+        "name": "Humberto",
+        "positions": [
+          "ST!",
+          "CF:91"
+        ],
+        "shirt": 18,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Humberto_Tozzi_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          79,
+          74,
+          74,
+          78,
+          75,
+          78,
+          71,
+          75,
+          77,
+          74,
+          74,
+          69,
+          71,
+          75,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Julinho",
+        "positions": [
+          "ST!",
+          "CAM:71",
+          "CF:87",
+          "RW:76"
+        ],
+        "shirt": 7,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/J%C3%BAlio_Botelho_%28cropped%29.jpg/330px-J%C3%BAlio_Botelho_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          80,
+          75,
+          75,
+          79,
+          76,
+          79,
+          72,
+          76,
+          78,
+          75,
+          75,
+          70,
+          72,
+          76,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "Maurinho",
+        "positions": [
+          "ST!",
+          "RW:74",
+          "LW:73",
+          "CAM:69"
+        ],
+        "shirt": 17,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6c/Mauro_Raphael_Maurinho_%28Boca%29_-_El_Gr%C3%A1fico_2185.jpg/330px-Mauro_Raphael_Maurinho_%28Boca%29_-_El_Gr%C3%A1fico_2185.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Mauro Ramos",
+        "positions": [
+          "CB!",
+          "CDM:67",
+          "RB:76",
+          "LB:80"
+        ],
+        "shirt": 15,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Mauro_Ramos_en_1962.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Nílton Santos",
+        "positions": [
+          "LB!",
+          "CB:85"
+        ],
+        "shirt": 3,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/Nilton_Santos_1_%281956%29.tif/lossy-page1-330px-Nilton_Santos_1_%281956%29.tif.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          84,
+          85,
+          88,
+          81,
+          87,
+          61,
+          94,
+          84,
+          91,
+          92,
+          77,
+          71,
+          81,
+          91,
+          90,
+          84,
+          90,
+          94
+        ]
+      },
+      {
+        "name": "Paulinho",
+        "positions": [
+          "CB!",
+          "LB:78"
+        ],
+        "shirt": 12,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fb/Time_do_Internacional%2C_1953_%28Paulinho%29.jpg/330px-Time_do_Internacional%2C_1953_%28Paulinho%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Pinga",
+        "positions": [
+          "ST!",
+          "LW:79",
+          "CAM:72",
+          "CF:87"
+        ],
+        "shirt": 10,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/12/Pinga_em_Brasil_X_M%C3%A9xico.tif/lossy-page1-330px-Pinga_em_Brasil_X_M%C3%A9xico.tif.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          79,
+          74,
+          74,
+          78,
+          75,
+          78,
+          71,
+          75,
+          77,
+          74,
+          74,
+          69,
+          71,
+          75,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Pinheiro",
+        "positions": [
+          "CM!",
+          "LM:76",
+          "CDM:87",
+          "CAM:82"
+        ],
+        "shirt": 5,
+        "attrs": [
+          81,
+          83,
+          82,
+          83,
+          85,
+          81,
+          81,
+          84,
+          82,
+          82,
+          81,
+          76,
+          79,
+          80,
+          81,
+          80,
+          81,
+          81
+        ]
+      },
+      {
+        "name": "Rodrigues",
+        "positions": [
+          "ST!",
+          "LW:73",
+          "CAM:69",
+          "CF:90"
+        ],
+        "shirt": 11,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Francisco_Rodr%C3%ADgues_%28Rosario_Central%29_-_El_Gr%C3%A1fico_2186.jpg/330px-Francisco_Rodr%C3%ADgues_%28Rosario_Central%29_-_El_Gr%C3%A1fico_2186.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          81,
+          76,
+          76,
+          80,
+          77,
+          80,
+          73,
+          77,
+          79,
+          76,
+          76,
+          71,
+          73,
+          77,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Rubens",
+        "positions": [
+          "ST!",
+          "CF:88",
+          "RW:78",
+          "LW:74"
+        ],
+        "shirt": 20,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Rubens_%281952%29.tif/lossy-page1-330px-Rubens_%281952%29.tif.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Veludo",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 21,
+        "attrs": [
+          80,
+          81,
+          82,
+          74,
+          77,
+          74,
+          75,
+          78,
+          79,
+          81,
+          85,
+          86,
+          85,
+          83,
+          81,
+          80,
+          82,
+          81
+        ]
+      },
+      {
+        "name": "Índio",
+        "positions": [
+          "ST!",
+          "RW:76",
+          "LW:75",
+          "CF:88"
+        ],
+        "shirt": 19,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/Correio_da_Manh%C3%A3_AN_417.jpg/330px-Correio_da_Manh%C3%A3_AN_417.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      }
+    ],
+    "TCH": [
+      {
+        "name": "Anton Krásnohorský",
+        "positions": [
+          "CB!",
+          "RB:76"
+        ],
+        "shirt": 12,
+        "attrs": [
+          67,
+          70,
+          72,
+          64,
+          67,
+          63,
+          73,
+          65,
+          68,
+          68,
+          67,
+          61,
+          63,
+          72,
+          67,
+          67,
+          68,
+          67
+        ]
+      },
+      {
+        "name": "Anton Malatinský",
+        "positions": [
+          "ST!",
+          "LW:74"
+        ],
+        "shirt": 9,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/Trnava_Plastika_Malatinsky.jpg/330px-Trnava_Plastika_Malatinsky.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          69,
+          64,
+          64,
+          68,
+          65,
+          68,
+          61,
+          65,
+          67,
+          64,
+          64,
+          59,
+          61,
+          65,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Emil Pažický",
+        "positions": [
+          "ST!",
+          "RW:78"
+        ],
+        "shirt": 10,
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "František Šafránek",
+        "positions": [
+          "CB!",
+          "LB:77",
+          "CDM:65"
+        ],
+        "shirt": 2,
+        "attrs": [
+          70,
+          73,
+          75,
+          67,
+          70,
+          66,
+          76,
+          68,
+          71,
+          71,
+          70,
+          64,
+          66,
+          75,
+          70,
+          70,
+          71,
+          70
+        ]
+      },
+      {
+        "name": "Imrich Stacho",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 21,
+        "attrs": [
+          65,
+          66,
+          67,
+          59,
+          62,
+          59,
+          60,
+          63,
+          64,
+          66,
+          70,
+          71,
+          70,
+          68,
+          66,
+          65,
+          67,
+          66
+        ]
+      },
+      {
+        "name": "Jan Hertl",
+        "positions": [
+          "CM!",
+          "LM:71",
+          "CDM:83",
+          "CAM:82"
+        ],
+        "shirt": 14,
+        "attrs": [
+          63,
+          65,
+          64,
+          65,
+          67,
+          63,
+          63,
+          66,
+          64,
+          64,
+          63,
+          58,
+          61,
+          62,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "Jaroslav Košnar",
+        "positions": [
+          "ST!",
+          "CAM:69",
+          "CF:87"
+        ],
+        "shirt": 19,
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Jiří Hledík",
+        "positions": [
+          "CM!",
+          "CDM:87"
+        ],
+        "shirt": 13,
+        "attrs": [
+          75,
+          77,
+          76,
+          77,
+          79,
+          75,
+          75,
+          78,
+          76,
+          76,
+          75,
+          70,
+          73,
+          74,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "Jiří Pešek",
+        "positions": [
+          "ST!",
+          "CF:92",
+          "RW:76"
+        ],
+        "shirt": 11,
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Jiří Trnka",
+        "positions": [
+          "CB!",
+          "LB:81",
+          "RB:75"
+        ],
+        "shirt": 5,
+        "attrs": [
+          65,
+          68,
+          70,
+          62,
+          65,
+          61,
+          71,
+          63,
+          66,
+          66,
+          65,
+          59,
+          61,
+          70,
+          65,
+          65,
+          66,
+          65
+        ]
+      },
+      {
+        "name": "Josef Majer",
+        "positions": [
+          "ST!",
+          "CF:90",
+          "RW:75"
+        ],
+        "shirt": 18,
+        "attrs": [
+          72,
+          67,
+          67,
+          71,
+          68,
+          71,
+          64,
+          68,
+          70,
+          67,
+          67,
+          62,
+          64,
+          68,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Kazimír Gajdoš",
+        "positions": [
+          "ST!",
+          "RW:76",
+          "LW:73",
+          "CAM:69"
+        ],
+        "shirt": 20,
+        "attrs": [
+          72,
+          67,
+          67,
+          71,
+          68,
+          71,
+          64,
+          68,
+          70,
+          67,
+          67,
+          62,
+          64,
+          68,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Ladislav Hlaváček",
+        "positions": [
+          "ST!",
+          "CAM:71",
+          "CF:89"
+        ],
+        "shirt": 7,
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Ladislav Kačáni",
+        "positions": [
+          "ST!",
+          "CF:89",
+          "RW:75"
+        ],
+        "shirt": 15,
+        "attrs": [
+          79,
+          74,
+          74,
+          78,
+          75,
+          78,
+          71,
+          75,
+          77,
+          74,
+          74,
+          69,
+          71,
+          75,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Ladislav Novák",
+        "positions": [
+          "CB!",
+          "RB:75"
+        ],
+        "shirt": 4,
+        "attrs": [
+          68,
+          71,
+          73,
+          65,
+          68,
+          64,
+          74,
+          66,
+          69,
+          69,
+          68,
+          62,
+          64,
+          73,
+          68,
+          68,
+          69,
+          68
+        ]
+      },
+      {
+        "name": "Michal Benedikovič",
+        "positions": [
+          "CM!",
+          "CAM:87"
+        ],
+        "shirt": 6,
+        "attrs": [
+          65,
+          67,
+          66,
+          67,
+          69,
+          65,
+          65,
+          68,
+          66,
+          66,
+          65,
+          60,
+          63,
+          64,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Otto Hemele",
+        "positions": [
+          "ST!",
+          "LW:79"
+        ],
+        "shirt": 8,
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Svatopluk Pluskal",
+        "positions": [
+          "CM!",
+          "RM:76"
+        ],
+        "shirt": 3,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/62/Svatopluk_Pluskal_1962.jpg/330px-Svatopluk_Pluskal_1962.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          68,
+          70,
+          69,
+          70,
+          72,
+          68,
+          68,
+          71,
+          69,
+          69,
+          68,
+          63,
+          66,
+          67,
+          68,
+          67,
+          68,
+          68
+        ]
+      },
+      {
+        "name": "Tadeáš Kraus",
+        "positions": [
+          "ST!",
+          "RW:75",
+          "LW:78"
+        ],
+        "shirt": 17,
+        "attrs": [
+          81,
+          76,
+          76,
+          80,
+          77,
+          80,
+          73,
+          77,
+          79,
+          76,
+          76,
+          71,
+          73,
+          77,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Theodor Reimann",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "attrs": [
+          72,
+          73,
+          74,
+          66,
+          69,
+          66,
+          67,
+          70,
+          71,
+          73,
+          77,
+          78,
+          77,
+          75,
+          73,
+          72,
+          74,
+          73
+        ]
+      },
+      {
+        "name": "Viliam Schrojf",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 22,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6a/Viliam_Schrojf_1962.jpg/330px-Viliam_Schrojf_1962.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          72,
+          73,
+          74,
+          66,
+          69,
+          66,
+          67,
+          70,
+          71,
+          73,
+          77,
+          78,
+          77,
+          75,
+          73,
+          72,
+          74,
+          73
+        ]
+      },
+      {
+        "name": "Zdeněk Procházka",
+        "positions": [
+          "CM!",
+          "CAM:82",
+          "RM:76"
+        ],
+        "shirt": 16,
+        "attrs": [
+          66,
+          68,
+          67,
+          68,
+          70,
+          66,
+          66,
+          69,
+          67,
+          67,
+          66,
+          61,
+          64,
+          65,
+          66,
+          65,
+          66,
+          66
+        ]
+      }
+    ],
+    "ENG": [
+      {
+        "name": "Albert Quixall",
+        "positions": [
+          "CM!",
+          "CAM:83"
+        ],
+        "shirt": 16,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Manchester_United_FC_1960.jpg/330px-Manchester_United_FC_1960.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          66,
+          68,
+          67,
+          68,
+          70,
+          66,
+          66,
+          69,
+          67,
+          67,
+          66,
+          61,
+          64,
+          65,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Allenby Chilton",
+        "positions": [
+          "CM!",
+          "CDM:88",
+          "CAM:85"
+        ],
+        "shirt": 18,
+        "attrs": [
+          77,
+          79,
+          78,
+          79,
+          81,
+          77,
+          77,
+          80,
+          78,
+          78,
+          77,
+          72,
+          75,
+          76,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Bedford Jezzard",
+        "positions": [
+          "ST!",
+          "CAM:69",
+          "CF:90"
+        ],
+        "shirt": 20,
+        "attrs": [
+          79,
+          74,
+          74,
+          78,
+          75,
+          78,
+          71,
+          75,
+          77,
+          74,
+          74,
+          69,
+          71,
+          75,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Bill McGarry",
+        "positions": [
+          "CM!",
+          "CAM:83",
+          "RM:75",
+          "LM:72"
+        ],
+        "shirt": 14,
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Billy Wright",
+        "positions": [
+          "CM!",
+          "LM:75"
+        ],
+        "shirt": 4,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Billy_Wright_%281961%29.jpg/330px-Billy_Wright_%281961%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          75,
+          77,
+          76,
+          77,
+          79,
+          75,
+          75,
+          78,
+          76,
+          76,
+          75,
+          70,
+          73,
+          74,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "Dennis Wilshaw",
+        "positions": [
+          "ST!",
+          "RW:73"
+        ],
+        "shirt": 15,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Wolverhampton_Wanderers_F.C._1955.jpg/330px-Wolverhampton_Wanderers_F.C._1955.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Gil Merrick",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "attrs": [
+          69,
+          70,
+          71,
+          63,
+          66,
+          63,
+          64,
+          67,
+          68,
+          70,
+          74,
+          75,
+          74,
+          72,
+          70,
+          69,
+          71,
+          70
+        ]
+      },
+      {
+        "name": "Harry Hooper",
+        "positions": [
+          "ST!",
+          "CF:91",
+          "RW:75"
+        ],
+        "shirt": 22,
+        "attrs": [
+          82,
+          77,
+          77,
+          81,
+          78,
+          81,
+          74,
+          78,
+          80,
+          77,
+          77,
+          72,
+          74,
+          78,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Ivor Broadis",
+        "positions": [
+          "ST!",
+          "CAM:75"
+        ],
+        "shirt": 8,
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Jimmy Dickinson",
+        "positions": [
+          "CM!",
+          "RM:74",
+          "LM:75"
+        ],
+        "shirt": 6,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Jimmy_Dickinson_Statue.jpg/330px-Jimmy_Dickinson_Statue.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          68,
+          70,
+          69,
+          70,
+          72,
+          68,
+          68,
+          71,
+          69,
+          69,
+          68,
+          63,
+          66,
+          67,
+          68,
+          67,
+          68,
+          68
+        ]
+      },
+      {
+        "name": "Jimmy Mullen",
+        "positions": [
+          "ST!",
+          "RW:74",
+          "LW:78",
+          "CAM:73"
+        ],
+        "shirt": 17,
+        "attrs": [
+          79,
+          74,
+          74,
+          78,
+          75,
+          78,
+          71,
+          75,
+          77,
+          74,
+          74,
+          69,
+          71,
+          75,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Johnny Haynes",
+        "positions": [
+          "ST!",
+          "RW:77",
+          "CAM:73",
+          "CF:89"
+        ],
+        "shirt": 21,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/Johnny_Haynes_crop.jpg/330px-Johnny_Haynes_crop.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          81,
+          76,
+          76,
+          80,
+          77,
+          80,
+          73,
+          77,
+          79,
+          76,
+          76,
+          71,
+          73,
+          77,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Ken Armstrong",
+        "positions": [
+          "CM!",
+          "CDM:85"
+        ],
+        "shirt": 19,
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Ken Green",
+        "positions": [
+          "CB!",
+          "RB:79",
+          "LB:76",
+          "CDM:64"
+        ],
+        "shirt": 13,
+        "attrs": [
+          68,
+          71,
+          73,
+          65,
+          68,
+          64,
+          74,
+          66,
+          69,
+          69,
+          68,
+          62,
+          64,
+          73,
+          68,
+          68,
+          69,
+          68
+        ]
+      },
+      {
+        "name": "Nat Lofthouse",
+        "positions": [
+          "ST!",
+          "CAM:72",
+          "RW:78"
+        ],
+        "shirt": 9,
+        "attrs": [
+          81,
+          76,
+          76,
+          80,
+          77,
+          80,
+          73,
+          77,
+          79,
+          76,
+          76,
+          71,
+          73,
+          77,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Roger Byrne",
+        "positions": [
+          "CB!",
+          "LB:77",
+          "RB:81"
+        ],
+        "shirt": 3,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Roger_Byrne.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          66,
+          69,
+          71,
+          63,
+          66,
+          62,
+          72,
+          64,
+          67,
+          67,
+          66,
+          60,
+          62,
+          71,
+          66,
+          66,
+          67,
+          66
+        ]
+      },
+      {
+        "name": "Ron Staniforth",
+        "positions": [
+          "CB!",
+          "CDM:67"
+        ],
+        "shirt": 2,
+        "attrs": [
+          73,
+          76,
+          78,
+          70,
+          73,
+          69,
+          79,
+          71,
+          74,
+          74,
+          73,
+          67,
+          69,
+          78,
+          73,
+          73,
+          74,
+          73
+        ]
+      },
+      {
+        "name": "Stanley Matthews",
+        "positions": [
+          "ST!",
+          "CAM:71",
+          "CF:89"
+        ],
+        "shirt": 7,
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Syd Owen",
+        "positions": [
+          "CM!",
+          "RM:76"
+        ],
+        "shirt": 5,
+        "attrs": [
+          70,
+          72,
+          71,
+          72,
+          74,
+          70,
+          70,
+          73,
+          71,
+          71,
+          70,
+          65,
+          68,
+          69,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Ted Burgin",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 12,
+        "attrs": [
+          69,
+          70,
+          71,
+          63,
+          66,
+          63,
+          64,
+          67,
+          68,
+          70,
+          74,
+          75,
+          74,
+          72,
+          70,
+          69,
+          71,
+          70
+        ]
+      },
+      {
+        "name": "Tom Finney",
+        "positions": [
+          "ST!",
+          "RW:78",
+          "CAM:70",
+          "CF:87"
+        ],
+        "shirt": 11,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/33/Tom_finney_with_england_c1950.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          82,
+          77,
+          77,
+          81,
+          78,
+          81,
+          74,
+          78,
+          80,
+          77,
+          77,
+          72,
+          74,
+          78,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Tommy Taylor",
+        "positions": [
+          "ST!",
+          "RW:75"
+        ],
+        "shirt": 10,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/Tommy_Taylor_1957_%28cropped%29.jpg/330px-Tommy_Taylor_1957_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      }
+    ],
+    "FRA": [
+      {
+        "name": "Abdelaziz Ben Tifour",
+        "positions": [
+          "CM!",
+          "RM:77",
+          "LM:77",
+          "CDM:84"
+        ],
+        "shirt": 15,
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Abderrahmane Mahjoub",
+        "positions": [
+          "CM!",
+          "RM:73"
+        ],
+        "shirt": 13,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/5/5b/OGC_Nice_v_Olympique_de_Marseille%2C_23_May_1954_%28Abderrahmane_Mahjoub%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          75,
+          77,
+          76,
+          77,
+          79,
+          75,
+          75,
+          78,
+          76,
+          76,
+          75,
+          70,
+          73,
+          74,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "André Strappe",
+        "positions": [
+          "ST!",
+          "RW:77",
+          "LW:77"
+        ],
+        "shirt": 21,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/9/98/Andr%C3%A9_Strappe_%281955%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Antoine Cuissard",
+        "positions": [
+          "CM!",
+          "CAM:84",
+          "RM:75"
+        ],
+        "shirt": 9,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Antoine_Cuissard_%281949%29.png/330px-Antoine_Cuissard_%281949%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          69,
+          71,
+          70,
+          71,
+          73,
+          69,
+          69,
+          72,
+          70,
+          70,
+          69,
+          64,
+          67,
+          68,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Armand Penverne",
+        "positions": [
+          "CM!",
+          "LM:71",
+          "CDM:83"
+        ],
+        "shirt": 14,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Armand_Penverne%2C_%27Francia_Football_1978_-1979%27%2C_n%C2%B0570.jpg/330px-Armand_Penverne%2C_%27Francia_Football_1978_-1979%27%2C_n%C2%B0570.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          66,
+          68,
+          67,
+          68,
+          70,
+          66,
+          66,
+          69,
+          67,
+          67,
+          66,
+          61,
+          64,
+          65,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Claude Abbes",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 3,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/6.5.69._Foot._Anciens_de_Su%C3%A8de_%281969%29_-_53Fi6509.jpg/330px-6.5.69._Foot._Anciens_de_Su%C3%A8de_%281969%29_-_53Fi6509.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          77,
+          78,
+          79,
+          71,
+          74,
+          71,
+          72,
+          75,
+          76,
+          78,
+          82,
+          83,
+          82,
+          80,
+          78,
+          77,
+          79,
+          78
+        ]
+      },
+      {
+        "name": "César Ruminski",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 2,
+        "attrs": [
+          74,
+          75,
+          76,
+          68,
+          71,
+          68,
+          69,
+          72,
+          73,
+          75,
+          79,
+          80,
+          79,
+          77,
+          75,
+          74,
+          76,
+          75
+        ]
+      },
+      {
+        "name": "Ernest Schultz",
+        "positions": [
+          "ST!",
+          "CF:87",
+          "RW:73",
+          "LW:74"
+        ],
+        "shirt": 20,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/09/15.16.17.18-10-62_Reportage_sur_le_TFC_%281962%29_-_53Fi602.jpg/330px-15.16.17.18-10-62_Reportage_sur_le_TFC_%281962%29_-_53Fi602.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "François Remetter",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/d/df/Fran%C3%A7ois_Remetter_dans_les_ann%C3%A9es_1950.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          65,
+          66,
+          67,
+          59,
+          62,
+          59,
+          60,
+          63,
+          64,
+          66,
+          70,
+          71,
+          70,
+          68,
+          66,
+          65,
+          67,
+          66
+        ]
+      },
+      {
+        "name": "Guillaume Bieganski",
+        "positions": [
+          "CM!",
+          "CDM:89"
+        ],
+        "shirt": 8,
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Jacques Grimonpon",
+        "positions": [
+          "CB!",
+          "LB:78",
+          "RB:75"
+        ],
+        "shirt": 5,
+        "attrs": [
+          72,
+          75,
+          77,
+          69,
+          72,
+          68,
+          78,
+          70,
+          73,
+          73,
+          72,
+          66,
+          68,
+          77,
+          72,
+          72,
+          73,
+          72
+        ]
+      },
+      {
+        "name": "Jean Vincent",
+        "positions": [
+          "ST!",
+          "CAM:69",
+          "CF:87",
+          "RW:78"
+        ],
+        "shirt": 22,
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Jean-Jacques Marcel",
+        "positions": [
+          "CM!",
+          "CAM:81",
+          "RM:76"
+        ],
+        "shirt": 12,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Jean-Jacques_Marcel_vers_1954.jpg/330px-Jean-Jacques_Marcel_vers_1954.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Lazare Gianessi",
+        "positions": [
+          "CB!",
+          "RB:79",
+          "LB:76",
+          "CDM:66"
+        ],
+        "shirt": 4,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Equipe_France_Olympique_1948.jpg/330px-Equipe_France_Olympique_1948.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Léon Glovacki",
+        "positions": [
+          "ST!",
+          "CF:91",
+          "RW:79"
+        ],
+        "shirt": 17,
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Michel Leblond",
+        "positions": [
+          "CM!",
+          "RM:76",
+          "CDM:88",
+          "CAM:84"
+        ],
+        "shirt": 19,
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Raymond Kaelbel",
+        "positions": [
+          "CB!",
+          "LB:79"
+        ],
+        "shirt": 6,
+        "attrs": [
+          63,
+          66,
+          68,
+          60,
+          63,
+          59,
+          69,
+          61,
+          64,
+          64,
+          63,
+          57,
+          59,
+          68,
+          63,
+          63,
+          64,
+          63
+        ]
+      },
+      {
+        "name": "Raymond Kopa",
+        "positions": [
+          "CAM!",
+          "CM:85"
+        ],
+        "shirt": 18,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Raymond_Kopa_1963b.jpg/330px-Raymond_Kopa_1963b.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          86,
+          86,
+          79,
+          90,
+          92,
+          86,
+          77,
+          93,
+          89,
+          90,
+          76,
+          72,
+          83,
+          72,
+          88,
+          77,
+          86,
+          90
+        ]
+      },
+      {
+        "name": "René Dereuddre",
+        "positions": [
+          "CM!",
+          "CAM:85",
+          "RM:73"
+        ],
+        "shirt": 16,
+        "attrs": [
+          74,
+          76,
+          75,
+          76,
+          78,
+          74,
+          74,
+          77,
+          75,
+          75,
+          74,
+          69,
+          72,
+          73,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Robert Jonquet",
+        "positions": [
+          "CB!",
+          "LB:75"
+        ],
+        "shirt": 10,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Robert_Jonquet_%281949%29.png/330px-Robert_Jonquet_%281949%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          72,
+          75,
+          77,
+          69,
+          72,
+          68,
+          78,
+          70,
+          73,
+          73,
+          72,
+          66,
+          68,
+          77,
+          72,
+          72,
+          73,
+          72
+        ]
+      },
+      {
+        "name": "Roger Marche",
+        "positions": [
+          "CB!",
+          "RB:77"
+        ],
+        "shirt": 7,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Roger_Marche_%281949%29.png/330px-Roger_Marche_%281949%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          62,
+          65,
+          67,
+          59,
+          62,
+          58,
+          68,
+          60,
+          63,
+          63,
+          62,
+          56,
+          58,
+          67,
+          62,
+          62,
+          63,
+          62
+        ]
+      },
+      {
+        "name": "Xercès Louis",
+        "positions": [
+          "CM!",
+          "CAM:87",
+          "RM:77"
+        ],
+        "shirt": 11,
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      }
+    ],
+    "HUN": [
+      {
+        "name": "Béla Kárpáti",
+        "positions": [
+          "CB!",
+          "CDM:61"
+        ],
+        "shirt": 12,
+        "attrs": [
+          78,
+          81,
+          83,
+          75,
+          78,
+          74,
+          84,
+          76,
+          79,
+          79,
+          78,
+          72,
+          74,
+          83,
+          78,
+          78,
+          79,
+          78
+        ]
+      },
+      {
+        "name": "Ferenc Machos",
+        "positions": [
+          "ST!",
+          "LW:79"
+        ],
+        "shirt": 17,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Machos_Ferenc.jpg/330px-Machos_Ferenc.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          82,
+          77,
+          77,
+          81,
+          78,
+          81,
+          74,
+          78,
+          80,
+          77,
+          77,
+          72,
+          74,
+          78,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Ferenc Puskás",
+        "positions": [
+          "CAM!",
+          "CF:88",
+          "CM:85"
+        ],
+        "shirt": 10,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/9/93/Ferenc_Puskas_en_1965.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          90,
+          90,
+          82,
+          94,
+          96,
+          90,
+          80,
+          97,
+          93,
+          94,
+          78,
+          74,
+          86,
+          74,
+          92,
+          80,
+          90,
+          94
+        ]
+      },
+      {
+        "name": "Ferenc Szojka",
+        "positions": [
+          "CM!",
+          "RM:74",
+          "LM:71",
+          "CAM:85"
+        ],
+        "shirt": 15,
+        "attrs": [
+          83,
+          85,
+          84,
+          85,
+          87,
+          83,
+          83,
+          86,
+          84,
+          84,
+          83,
+          78,
+          81,
+          82,
+          83,
+          82,
+          83,
+          83
+        ]
+      },
+      {
+        "name": "Gyula Grosics",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Grosics_Gyula_Fortepan_261531.jpg/330px-Grosics_Gyula_Fortepan_261531.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          79,
+          80,
+          72,
+          75,
+          72,
+          73,
+          76,
+          77,
+          79,
+          83,
+          84,
+          83,
+          81,
+          79,
+          78,
+          80,
+          79
+        ]
+      },
+      {
+        "name": "Gyula Lóránt",
+        "positions": [
+          "CB!",
+          "LB:78"
+        ],
+        "shirt": 3,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/8/8b/L%C3%B3r%C3%A1nt_Gyula_fortepan_13743.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          84,
+          87,
+          89,
+          81,
+          84,
+          80,
+          90,
+          82,
+          85,
+          85,
+          84,
+          78,
+          80,
+          89,
+          84,
+          84,
+          85,
+          84
+        ]
+      },
+      {
+        "name": "Géza Gulyás",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 22,
+        "attrs": [
+          84,
+          85,
+          86,
+          78,
+          81,
+          78,
+          79,
+          82,
+          83,
+          85,
+          89,
+          90,
+          89,
+          87,
+          85,
+          84,
+          86,
+          85
+        ]
+      },
+      {
+        "name": "Imre Kovács",
+        "positions": [
+          "CM!",
+          "CAM:85",
+          "RM:73",
+          "LM:71"
+        ],
+        "shirt": 14,
+        "attrs": [
+          87,
+          89,
+          88,
+          89,
+          91,
+          87,
+          87,
+          90,
+          88,
+          88,
+          87,
+          82,
+          85,
+          86,
+          87,
+          86,
+          87,
+          87
+        ]
+      },
+      {
+        "name": "Jenő Buzánszky",
+        "positions": [
+          "CB!",
+          "LB:75",
+          "CDM:62",
+          "RB:75"
+        ],
+        "shirt": 2,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Jeno_Buzanszky_in_his_85th_birthday_in_May_of_2010..jpg/330px-Jeno_Buzanszky_in_his_85th_birthday_in_May_of_2010..jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          79,
+          81,
+          73,
+          76,
+          72,
+          82,
+          74,
+          77,
+          77,
+          76,
+          70,
+          72,
+          81,
+          76,
+          76,
+          77,
+          76
+        ]
+      },
+      {
+        "name": "József Bozsik",
+        "positions": [
+          "CM!",
+          "CAM:85"
+        ],
+        "shirt": 5,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Bozsik_J%C3%B3zsef_Fortepan_261523.jpg/330px-Bozsik_J%C3%B3zsef_Fortepan_261523.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          84,
+          84,
+          78,
+          88,
+          89,
+          84,
+          76,
+          90,
+          87,
+          88,
+          74,
+          71,
+          81,
+          71,
+          86,
+          76,
+          84,
+          88
+        ]
+      },
+      {
+        "name": "József Tóth",
+        "positions": [
+          "ST!",
+          "RW:77",
+          "LW:79",
+          "CAM:75"
+        ],
+        "shirt": 7,
+        "attrs": [
+          84,
+          79,
+          79,
+          83,
+          80,
+          83,
+          76,
+          80,
+          82,
+          79,
+          79,
+          74,
+          76,
+          80,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "József Zakariás",
+        "positions": [
+          "CM!",
+          "RM:75"
+        ],
+        "shirt": 6,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Zakari%C3%A1s_J%C3%B3zsef_fortepan_13743.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          83,
+          85,
+          84,
+          85,
+          87,
+          83,
+          83,
+          86,
+          84,
+          84,
+          83,
+          78,
+          81,
+          82,
+          83,
+          82,
+          83,
+          83
+        ]
+      },
+      {
+        "name": "Lajos Csordás",
+        "positions": [
+          "ST!",
+          "LW:74",
+          "CF:91"
+        ],
+        "shirt": 18,
+        "attrs": [
+          89,
+          84,
+          84,
+          88,
+          85,
+          88,
+          81,
+          85,
+          87,
+          84,
+          84,
+          79,
+          81,
+          85,
+          84,
+          83,
+          84,
+          84
+        ]
+      },
+      {
+        "name": "László Budai",
+        "positions": [
+          "CM!",
+          "LM:75",
+          "CDM:89"
+        ],
+        "shirt": 16,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Budai_II_L%C3%A1szl%C3%B3_Fortepan_261537.jpg/330px-Budai_II_L%C3%A1szl%C3%B3_Fortepan_261537.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          81,
+          83,
+          82,
+          83,
+          85,
+          81,
+          81,
+          84,
+          82,
+          82,
+          81,
+          76,
+          79,
+          80,
+          81,
+          80,
+          81,
+          81
+        ]
+      },
+      {
+        "name": "Mihály Lantos",
+        "positions": [
+          "CB!",
+          "RB:75"
+        ],
+        "shirt": 4,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Mih%C3%A1ly_Lantos.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          85,
+          88,
+          90,
+          82,
+          85,
+          81,
+          91,
+          83,
+          86,
+          86,
+          85,
+          79,
+          81,
+          90,
+          85,
+          85,
+          86,
+          85
+        ]
+      },
+      {
+        "name": "Mihály Tóth",
+        "positions": [
+          "ST!",
+          "LW:78"
+        ],
+        "shirt": 20,
+        "attrs": [
+          81,
+          76,
+          76,
+          80,
+          77,
+          80,
+          73,
+          77,
+          79,
+          76,
+          76,
+          71,
+          73,
+          77,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Nándor Hidegkuti",
+        "positions": [
+          "CAM!",
+          "CM:88",
+          "ST:82"
+        ],
+        "shirt": 9,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/Nandor_Hidegkuti.jpg/330px-Nandor_Hidegkuti.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          84,
+          84,
+          78,
+          88,
+          89,
+          84,
+          76,
+          90,
+          87,
+          88,
+          74,
+          71,
+          81,
+          71,
+          86,
+          76,
+          84,
+          88
+        ]
+      },
+      {
+        "name": "Pál Várhidi",
+        "positions": [
+          "CB!",
+          "RB:80"
+        ],
+        "shirt": 13,
+        "attrs": [
+          84,
+          87,
+          89,
+          81,
+          84,
+          80,
+          90,
+          82,
+          85,
+          85,
+          84,
+          78,
+          80,
+          89,
+          84,
+          84,
+          85,
+          84
+        ]
+      },
+      {
+        "name": "Péter Palotás",
+        "positions": [
+          "ST!",
+          "LW:79",
+          "CF:88"
+        ],
+        "shirt": 19,
+        "attrs": [
+          93,
+          88,
+          88,
+          92,
+          89,
+          92,
+          85,
+          89,
+          91,
+          88,
+          88,
+          83,
+          85,
+          89,
+          88,
+          87,
+          88,
+          88
+        ]
+      },
+      {
+        "name": "Sándor Gellér",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 21,
+        "attrs": [
+          78,
+          79,
+          80,
+          72,
+          75,
+          72,
+          73,
+          76,
+          77,
+          79,
+          83,
+          84,
+          83,
+          81,
+          79,
+          78,
+          80,
+          79
+        ]
+      },
+      {
+        "name": "Sándor Kocsis",
+        "positions": [
+          "ST!",
+          "CF:90"
+        ],
+        "shirt": 8,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Kocsis_S%C3%A1ndor_Fortepan_261526.jpg/330px-Kocsis_S%C3%A1ndor_Fortepan_261526.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          94,
+          88,
+          85,
+          92,
+          81,
+          97,
+          45,
+          88,
+          95,
+          93,
+          69,
+          61,
+          81,
+          87,
+          89,
+          81,
+          89,
+          89
+        ]
+      },
+      {
+        "name": "Zoltán Czibor",
+        "positions": [
+          "LW!",
+          "ST:88"
+        ],
+        "shirt": 11,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Czibor_Zolt%C3%A1n_Fortepan_261528.jpg/330px-Czibor_Zolt%C3%A1n_Fortepan_261528.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          92,
+          86,
+          84,
+          90,
+          80,
+          95,
+          46,
+          86,
+          93,
+          91,
+          69,
+          61,
+          80,
+          85,
+          87,
+          80,
+          87,
+          87
+        ]
+      }
+    ],
+    "ITA": [
+      {
+        "name": "Amleto Frignani",
+        "positions": [
+          "ST!",
+          "CF:90",
+          "LW:79",
+          "CAM:75"
+        ],
+        "shirt": 21,
+        "attrs": [
+          82,
+          77,
+          77,
+          81,
+          78,
+          81,
+          74,
+          78,
+          80,
+          77,
+          77,
+          72,
+          74,
+          78,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Ardico Magnini",
+        "positions": [
+          "CB!",
+          "LB:79",
+          "CDM:62"
+        ],
+        "shirt": 13,
+        "attrs": [
+          64,
+          67,
+          69,
+          61,
+          64,
+          60,
+          70,
+          62,
+          65,
+          65,
+          64,
+          58,
+          60,
+          69,
+          64,
+          64,
+          65,
+          64
+        ]
+      },
+      {
+        "name": "Armando Segato",
+        "positions": [
+          "ST!",
+          "LW:77",
+          "CF:92",
+          "RW:79"
+        ],
+        "shirt": 17,
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Benito Lorenzi",
+        "positions": [
+          "ST!",
+          "CAM:74",
+          "CF:93",
+          "LW:76"
+        ],
+        "shirt": 11,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Benito_Lorenzi_%281953%29.jpg/330px-Benito_Lorenzi_%281953%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Carlo Galli",
+        "positions": [
+          "ST!",
+          "RW:77",
+          "LW:75"
+        ],
+        "shirt": 9,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Carlo_Galli_1953.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Egisto Pandolfini",
+        "positions": [
+          "ST!",
+          "LW:76",
+          "CAM:75",
+          "RW:73"
+        ],
+        "shirt": 8,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/AS_Roma_-_Egisto_Pandolfini.jpg/330px-AS_Roma_-_Egisto_Pandolfini.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Ermes Muccinelli",
+        "positions": [
+          "ST!",
+          "RW:78",
+          "LW:79"
+        ],
+        "shirt": 7,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/28/Juventus_Football_Club_1951-1952_-_Ermes_Muccinelli.jpg/330px-Juventus_Football_Club_1951-1952_-_Ermes_Muccinelli.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Fulvio Nesti",
+        "positions": [
+          "CM!",
+          "RM:72"
+        ],
+        "shirt": 6,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Fulvio_Nesti.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Giacomo Mari",
+        "positions": [
+          "CM!",
+          "CAM:84",
+          "RM:73"
+        ],
+        "shirt": 15,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7e/1951%E2%80%9352_Juventus_Football_Club_-_Giacomo_Mari.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          68,
+          70,
+          69,
+          70,
+          72,
+          68,
+          68,
+          71,
+          69,
+          69,
+          68,
+          63,
+          66,
+          67,
+          68,
+          67,
+          68,
+          68
+        ]
+      },
+      {
+        "name": "Giampiero Boniperti",
+        "positions": [
+          "ST!",
+          "LW:74",
+          "CF:87",
+          "RW:73"
+        ],
+        "shirt": 19,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c7/Giampiero_Boniperti_-_Juventus_Football_Club.jpg/330px-Giampiero_Boniperti_-_Juventus_Football_Club.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Gino Cappello",
+        "positions": [
+          "ST!",
+          "CAM:72",
+          "CF:91"
+        ],
+        "shirt": 10,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Gino_Cappello_-_1951_-_Bologna_FC.jpg/330px-Gino_Cappello_-_1951_-_Bologna_FC.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          82,
+          77,
+          77,
+          81,
+          78,
+          81,
+          74,
+          78,
+          80,
+          77,
+          77,
+          72,
+          74,
+          78,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Gino Pivatelli",
+        "positions": [
+          "ST!",
+          "RW:79"
+        ],
+        "shirt": 18,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6e/Gino_Pivatelli_-_1958_-_Bologna_FC.jpg/330px-Gino_Pivatelli_-_1958_-_Bologna_FC.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Giorgio Ghezzi",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "photo": "https://upload.wikimedia.org/wikipedia/en/c/cd/Giorgio_Ghezzi.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          73,
+          74,
+          75,
+          67,
+          70,
+          67,
+          68,
+          71,
+          72,
+          74,
+          78,
+          79,
+          78,
+          76,
+          74,
+          73,
+          75,
+          74
+        ]
+      },
+      {
+        "name": "Giovanni Giacomazzi",
+        "positions": [
+          "CB!",
+          "CDM:66",
+          "LB:81"
+        ],
+        "shirt": 3,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/9/99/Giovanni_Giacomazzi.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          67,
+          70,
+          72,
+          64,
+          67,
+          63,
+          73,
+          65,
+          68,
+          68,
+          67,
+          61,
+          63,
+          72,
+          67,
+          67,
+          68,
+          67
+        ]
+      },
+      {
+        "name": "Giovanni Viola",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 12,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Italy_v_Brazil_%28Milan%2C_1956%29_-_Giovanni_Viola_%28cropped%29.jpg/330px-Italy_v_Brazil_%28Milan%2C_1956%29_-_Giovanni_Viola_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          72,
+          73,
+          65,
+          68,
+          65,
+          66,
+          69,
+          70,
+          72,
+          76,
+          77,
+          76,
+          74,
+          72,
+          71,
+          73,
+          72
+        ]
+      },
+      {
+        "name": "Guido Gratton",
+        "positions": [
+          "CM!",
+          "LM:74",
+          "CDM:89"
+        ],
+        "shirt": 20,
+        "attrs": [
+          71,
+          73,
+          72,
+          73,
+          75,
+          71,
+          71,
+          74,
+          72,
+          72,
+          71,
+          66,
+          69,
+          70,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Guido Vincenzi",
+        "positions": [
+          "CB!",
+          "LB:76",
+          "RB:76"
+        ],
+        "shirt": 2,
+        "attrs": [
+          69,
+          72,
+          74,
+          66,
+          69,
+          65,
+          75,
+          67,
+          70,
+          70,
+          69,
+          63,
+          65,
+          74,
+          69,
+          69,
+          70,
+          69
+        ]
+      },
+      {
+        "name": "Leonardo Costagliola",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 22,
+        "attrs": [
+          76,
+          77,
+          78,
+          70,
+          73,
+          70,
+          71,
+          74,
+          75,
+          77,
+          81,
+          82,
+          81,
+          79,
+          77,
+          76,
+          78,
+          77
+        ]
+      },
+      {
+        "name": "Maino Neri",
+        "positions": [
+          "CM!",
+          "CAM:83"
+        ],
+        "shirt": 4,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/Maino_Neri_-_Modena_FC_1946-47.jpg/330px-Maino_Neri_-_Modena_FC_1946-47.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          66,
+          68,
+          67,
+          68,
+          70,
+          66,
+          66,
+          69,
+          67,
+          67,
+          66,
+          61,
+          64,
+          65,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Omero Tognon",
+        "positions": [
+          "CM!",
+          "RM:71",
+          "CDM:87",
+          "CAM:83"
+        ],
+        "shirt": 5,
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Rino Ferrario",
+        "positions": [
+          "CM!",
+          "CAM:86",
+          "RM:77",
+          "LM:72"
+        ],
+        "shirt": 16,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Juventus_FC_-_Rino_Ferrario.jpg/330px-Juventus_FC_-_Rino_Ferrario.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          67,
+          69,
+          68,
+          69,
+          71,
+          67,
+          67,
+          70,
+          68,
+          68,
+          67,
+          62,
+          65,
+          66,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Sergio Cervato",
+        "positions": [
+          "CB!",
+          "LB:78",
+          "CDM:67"
+        ],
+        "shirt": 14,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cb/Serie_A_%28ca._late_1950s%29_-_AC_Fiorentina_captain_Sergio_Cervato.jpg/330px-Serie_A_%28ca._late_1950s%29_-_AC_Fiorentina_captain_Sergio_Cervato.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          66,
+          69,
+          71,
+          63,
+          66,
+          62,
+          72,
+          64,
+          67,
+          67,
+          66,
+          60,
+          62,
+          71,
+          66,
+          66,
+          67,
+          66
+        ]
+      }
+    ],
+    "MEX": [
+      {
+        "name": "Alfredo Torres",
+        "positions": [
+          "ST!",
+          "RW:77",
+          "CAM:72",
+          "CF:93"
+        ],
+        "shirt": 7,
+        "attrs": [
+          60,
+          55,
+          55,
+          59,
+          56,
+          59,
+          52,
+          56,
+          58,
+          55,
+          55,
+          50,
+          52,
+          56,
+          55,
+          54,
+          55,
+          55
+        ]
+      },
+      {
+        "name": "Antonio Carbajal",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "attrs": [
+          61,
+          62,
+          63,
+          55,
+          58,
+          55,
+          56,
+          59,
+          60,
+          62,
+          66,
+          67,
+          66,
+          64,
+          62,
+          61,
+          63,
+          62
+        ]
+      },
+      {
+        "name": "Carlos Blanco",
+        "positions": [
+          "ST!",
+          "LW:74",
+          "CAM:72"
+        ],
+        "shirt": 15,
+        "attrs": [
+          65,
+          60,
+          60,
+          64,
+          61,
+          64,
+          57,
+          61,
+          63,
+          60,
+          60,
+          55,
+          57,
+          61,
+          60,
+          59,
+          60,
+          60
+        ]
+      },
+      {
+        "name": "Carlos Carus",
+        "positions": [
+          "ST!",
+          "LW:78",
+          "CAM:72"
+        ],
+        "shirt": 18,
+        "attrs": [
+          68,
+          63,
+          63,
+          67,
+          64,
+          67,
+          60,
+          64,
+          66,
+          63,
+          63,
+          58,
+          60,
+          64,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "Carlos Septién",
+        "positions": [
+          "ST!",
+          "LW:76",
+          "CAM:75"
+        ],
+        "shirt": 17,
+        "attrs": [
+          70,
+          65,
+          65,
+          69,
+          66,
+          69,
+          62,
+          66,
+          68,
+          65,
+          65,
+          60,
+          62,
+          66,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Jorge Romo",
+        "positions": [
+          "CB!",
+          "LB:80",
+          "CDM:67"
+        ],
+        "shirt": 3,
+        "attrs": [
+          62,
+          65,
+          67,
+          59,
+          62,
+          58,
+          68,
+          60,
+          63,
+          63,
+          62,
+          56,
+          58,
+          67,
+          62,
+          62,
+          63,
+          62
+        ]
+      },
+      {
+        "name": "José Antonio Roca",
+        "positions": [
+          "ST!",
+          "CAM:73",
+          "CF:91"
+        ],
+        "shirt": 20,
+        "attrs": [
+          65,
+          60,
+          60,
+          64,
+          61,
+          64,
+          57,
+          61,
+          63,
+          60,
+          60,
+          55,
+          57,
+          61,
+          60,
+          59,
+          60,
+          60
+        ]
+      },
+      {
+        "name": "José Luis Lamadrid",
+        "positions": [
+          "ST!",
+          "RW:76",
+          "LW:73"
+        ],
+        "shirt": 9,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Exposici%C3%B3n_%E2%80%9C%C2%BFDe_qu%C3%A9_color_pinta_el_verde%3F_-_El_Colegio_Nacional_-_03.jpg/330px-Exposici%C3%B3n_%E2%80%9C%C2%BFDe_qu%C3%A9_color_pinta_el_verde%3F_-_El_Colegio_Nacional_-_03.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          68,
+          63,
+          63,
+          67,
+          64,
+          67,
+          60,
+          64,
+          66,
+          63,
+          63,
+          58,
+          60,
+          64,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "José Naranjo",
+        "positions": [
+          "ST!",
+          "CF:88"
+        ],
+        "shirt": 8,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Jos%C3%A9_Naranjo%2C_Estadio%2C_1952-03-29_%28463%29.jpg/330px-Jos%C3%A9_Naranjo%2C_Estadio%2C_1952-03-29_%28463%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          70,
+          65,
+          65,
+          69,
+          66,
+          69,
+          62,
+          66,
+          68,
+          65,
+          65,
+          60,
+          62,
+          66,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Juan Gómez",
+        "positions": [
+          "CB!",
+          "LB:78"
+        ],
+        "shirt": 14,
+        "attrs": [
+          53,
+          56,
+          58,
+          50,
+          53,
+          49,
+          59,
+          51,
+          54,
+          54,
+          53,
+          47,
+          49,
+          58,
+          53,
+          53,
+          54,
+          53
+        ]
+      },
+      {
+        "name": "Mario Ochoa",
+        "positions": [
+          "CM!",
+          "CAM:83"
+        ],
+        "shirt": 21,
+        "attrs": [
+          56,
+          58,
+          57,
+          58,
+          60,
+          56,
+          56,
+          59,
+          57,
+          57,
+          56,
+          51,
+          54,
+          55,
+          56,
+          55,
+          56,
+          56
+        ]
+      },
+      {
+        "name": "Moises Jinich",
+        "positions": [
+          "ST!",
+          "RW:74"
+        ],
+        "shirt": 19,
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Narciso López",
+        "positions": [
+          "CB!",
+          "RB:80"
+        ],
+        "shirt": 2,
+        "attrs": [
+          55,
+          58,
+          60,
+          52,
+          55,
+          51,
+          61,
+          53,
+          56,
+          56,
+          55,
+          49,
+          51,
+          60,
+          55,
+          55,
+          56,
+          55
+        ]
+      },
+      {
+        "name": "Pedro Nájera",
+        "positions": [
+          "CM!",
+          "CDM:83",
+          "RM:76"
+        ],
+        "shirt": 16,
+        "attrs": [
+          63,
+          65,
+          64,
+          65,
+          67,
+          63,
+          63,
+          66,
+          64,
+          64,
+          63,
+          58,
+          61,
+          62,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "Rafael Ávalos",
+        "positions": [
+          "CM!",
+          "RM:76",
+          "LM:75",
+          "CDM:87"
+        ],
+        "shirt": 6,
+        "attrs": [
+          63,
+          65,
+          64,
+          65,
+          67,
+          63,
+          63,
+          66,
+          64,
+          64,
+          63,
+          58,
+          61,
+          62,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "Ranulfo Cortés",
+        "positions": [
+          "ST!",
+          "CAM:71",
+          "CF:92",
+          "LW:76"
+        ],
+        "shirt": 22,
+        "attrs": [
+          64,
+          59,
+          59,
+          63,
+          60,
+          63,
+          56,
+          60,
+          62,
+          59,
+          59,
+          54,
+          56,
+          60,
+          59,
+          58,
+          59,
+          59
+        ]
+      },
+      {
+        "name": "Raúl Arellano",
+        "positions": [
+          "ST!",
+          "RW:78"
+        ],
+        "shirt": 11,
+        "attrs": [
+          65,
+          60,
+          60,
+          64,
+          61,
+          64,
+          57,
+          61,
+          63,
+          60,
+          60,
+          55,
+          57,
+          61,
+          60,
+          59,
+          60,
+          60
+        ]
+      },
+      {
+        "name": "Raúl Cárdenas",
+        "positions": [
+          "CM!",
+          "LM:72",
+          "CDM:85"
+        ],
+        "shirt": 5,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Ra%C3%BAl_C%C3%A1rdenas_1962.jpg/330px-Ra%C3%BAl_C%C3%A1rdenas_1962.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          55,
+          57,
+          56,
+          57,
+          59,
+          55,
+          55,
+          58,
+          56,
+          56,
+          55,
+          50,
+          53,
+          54,
+          55,
+          54,
+          55,
+          55
+        ]
+      },
+      {
+        "name": "Salvador Mota",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 12,
+        "attrs": [
+          58,
+          59,
+          60,
+          52,
+          55,
+          52,
+          53,
+          56,
+          57,
+          59,
+          63,
+          64,
+          63,
+          61,
+          59,
+          58,
+          60,
+          59
+        ]
+      },
+      {
+        "name": "Saturnino Martínez",
+        "positions": [
+          "CB!",
+          "CDM:65",
+          "RB:79"
+        ],
+        "shirt": 4,
+        "attrs": [
+          60,
+          63,
+          65,
+          57,
+          60,
+          56,
+          66,
+          58,
+          61,
+          61,
+          60,
+          54,
+          56,
+          65,
+          60,
+          60,
+          61,
+          60
+        ]
+      },
+      {
+        "name": "Sergio Bravo",
+        "positions": [
+          "CB!",
+          "RB:78"
+        ],
+        "shirt": 13,
+        "attrs": [
+          60,
+          63,
+          65,
+          57,
+          60,
+          56,
+          66,
+          58,
+          61,
+          61,
+          60,
+          54,
+          56,
+          65,
+          60,
+          60,
+          61,
+          60
+        ]
+      },
+      {
+        "name": "Tomás Balcázar",
+        "positions": [
+          "ST!",
+          "LW:76",
+          "CAM:73"
+        ],
+        "shirt": 10,
+        "attrs": [
+          60,
+          55,
+          55,
+          59,
+          56,
+          59,
+          52,
+          56,
+          58,
+          55,
+          55,
+          50,
+          52,
+          56,
+          55,
+          54,
+          55,
+          55
+        ]
+      }
+    ],
+    "SCO": [
+      {
+        "name": "Alex Wilson",
+        "positions": [
+          "CB!",
+          "CDM:65",
+          "RB:77",
+          "LB:77"
+        ],
+        "shirt": 18,
+        "attrs": [
+          67,
+          70,
+          72,
+          64,
+          67,
+          63,
+          73,
+          65,
+          68,
+          68,
+          67,
+          61,
+          63,
+          72,
+          67,
+          67,
+          68,
+          67
+        ]
+      },
+      {
+        "name": "Allan Brown",
+        "positions": [
+          "ST!",
+          "CAM:70"
+        ],
+        "shirt": 10,
+        "attrs": [
+          79,
+          74,
+          74,
+          78,
+          75,
+          78,
+          71,
+          75,
+          77,
+          74,
+          74,
+          69,
+          71,
+          75,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Bobby Combe",
+        "positions": [
+          "ST!",
+          "RW:79"
+        ],
+        "shirt": 20,
+        "attrs": [
+          70,
+          65,
+          65,
+          69,
+          66,
+          69,
+          62,
+          66,
+          68,
+          65,
+          65,
+          60,
+          62,
+          66,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Bobby Evans",
+        "positions": [
+          "CB!",
+          "RB:77"
+        ],
+        "shirt": 4,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Bobby_Evans_1959.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          61,
+          64,
+          66,
+          58,
+          61,
+          57,
+          67,
+          59,
+          62,
+          62,
+          61,
+          55,
+          57,
+          66,
+          61,
+          61,
+          62,
+          61
+        ]
+      },
+      {
+        "name": "Bobby Johnstone",
+        "positions": [
+          "ST!",
+          "CF:90",
+          "LW:73"
+        ],
+        "shirt": 15,
+        "attrs": [
+          69,
+          64,
+          64,
+          68,
+          65,
+          68,
+          61,
+          65,
+          67,
+          64,
+          64,
+          59,
+          61,
+          65,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "David Mathers",
+        "positions": [
+          "CM!",
+          "CAM:83",
+          "RM:73",
+          "LM:73"
+        ],
+        "shirt": 17,
+        "attrs": [
+          67,
+          69,
+          68,
+          69,
+          71,
+          67,
+          67,
+          70,
+          68,
+          68,
+          67,
+          62,
+          65,
+          66,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Doug Cowie",
+        "positions": [
+          "CM!",
+          "CDM:84",
+          "RM:73",
+          "LM:71"
+        ],
+        "shirt": 7,
+        "attrs": [
+          66,
+          68,
+          67,
+          68,
+          70,
+          66,
+          66,
+          69,
+          67,
+          67,
+          66,
+          61,
+          64,
+          65,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Ernie Copland",
+        "positions": [
+          "ST!",
+          "LW:75"
+        ],
+        "shirt": 21,
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Fred Martin",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "attrs": [
+          72,
+          73,
+          74,
+          66,
+          69,
+          66,
+          67,
+          70,
+          71,
+          73,
+          77,
+          78,
+          77,
+          75,
+          73,
+          72,
+          74,
+          73
+        ]
+      },
+      {
+        "name": "George Hamilton",
+        "positions": [
+          "ST!",
+          "CF:92"
+        ],
+        "shirt": 9,
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Ian McMillan",
+        "positions": [
+          "ST!",
+          "CF:91"
+        ],
+        "shirt": 22,
+        "attrs": [
+          72,
+          67,
+          67,
+          71,
+          68,
+          71,
+          64,
+          68,
+          70,
+          67,
+          67,
+          62,
+          64,
+          68,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Jackie Henderson",
+        "positions": [
+          "ST!",
+          "RW:79",
+          "LW:79"
+        ],
+        "shirt": 16,
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Jimmy Binning",
+        "positions": [
+          "ST!",
+          "LW:78",
+          "CAM:70"
+        ],
+        "shirt": 19,
+        "attrs": [
+          70,
+          65,
+          65,
+          69,
+          66,
+          69,
+          62,
+          66,
+          68,
+          65,
+          65,
+          60,
+          62,
+          66,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Jimmy Davidson",
+        "positions": [
+          "CM!",
+          "CDM:88",
+          "CAM:87"
+        ],
+        "shirt": 6,
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Jock Aird",
+        "positions": [
+          "CB!",
+          "CDM:63",
+          "LB:76"
+        ],
+        "shirt": 3,
+        "attrs": [
+          66,
+          69,
+          71,
+          63,
+          66,
+          62,
+          72,
+          64,
+          67,
+          67,
+          66,
+          60,
+          62,
+          71,
+          66,
+          66,
+          67,
+          66
+        ]
+      },
+      {
+        "name": "John Anderson",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 14,
+        "attrs": [
+          71,
+          72,
+          73,
+          65,
+          68,
+          65,
+          66,
+          69,
+          70,
+          72,
+          76,
+          77,
+          76,
+          74,
+          72,
+          71,
+          73,
+          72
+        ]
+      },
+      {
+        "name": "John Mackenzie",
+        "positions": [
+          "ST!",
+          "CAM:69",
+          "CF:88",
+          "RW:73"
+        ],
+        "shirt": 8,
+        "attrs": [
+          69,
+          64,
+          64,
+          68,
+          65,
+          68,
+          61,
+          65,
+          67,
+          64,
+          64,
+          59,
+          61,
+          65,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Neil Mochan",
+        "positions": [
+          "ST!",
+          "LW:74",
+          "CAM:74",
+          "CF:90"
+        ],
+        "shirt": 11,
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Tommy Docherty",
+        "positions": [
+          "CB!",
+          "RB:77",
+          "LB:80"
+        ],
+        "shirt": 5,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Tommy_Docherty_2017_01.jpg/330px-Tommy_Docherty_2017_01.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Willie Cunningham",
+        "positions": [
+          "CB!",
+          "RB:75",
+          "LB:78"
+        ],
+        "shirt": 2,
+        "attrs": [
+          67,
+          70,
+          72,
+          64,
+          67,
+          63,
+          73,
+          65,
+          68,
+          68,
+          67,
+          61,
+          63,
+          72,
+          67,
+          67,
+          68,
+          67
+        ]
+      },
+      {
+        "name": "Willie Fernie",
+        "positions": [
+          "ST!",
+          "RW:77"
+        ],
+        "shirt": 12,
+        "attrs": [
+          73,
+          68,
+          68,
+          72,
+          69,
+          72,
+          65,
+          69,
+          71,
+          68,
+          68,
+          63,
+          65,
+          69,
+          68,
+          67,
+          68,
+          68
+        ]
+      },
+      {
+        "name": "Willie Ormond",
+        "positions": [
+          "ST!",
+          "RW:73"
+        ],
+        "shirt": 13,
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      }
+    ],
+    "KOR": [
+      {
+        "name": "Choi Chung-min",
+        "positions": [
+          "ST!",
+          "CAM:75",
+          "CF:90",
+          "RW:75"
+        ],
+        "shirt": 8,
+        "attrs": [
+          47,
+          42,
+          42,
+          46,
+          43,
+          46,
+          39,
+          43,
+          45,
+          42,
+          42,
+          37,
+          39,
+          43,
+          42,
+          41,
+          42,
+          42
+        ]
+      },
+      {
+        "name": "Choi Yung-keun",
+        "positions": [
+          "ST!",
+          "LW:73",
+          "CAM:69"
+        ],
+        "shirt": 18,
+        "attrs": [
+          54,
+          49,
+          49,
+          53,
+          50,
+          53,
+          46,
+          50,
+          52,
+          49,
+          49,
+          44,
+          46,
+          50,
+          49,
+          48,
+          49,
+          49
+        ]
+      },
+      {
+        "name": "Chu Yung-kwang",
+        "positions": [
+          "CM!",
+          "RM:72",
+          "LM:73"
+        ],
+        "shirt": 16,
+        "attrs": [
+          41,
+          43,
+          42,
+          43,
+          45,
+          41,
+          41,
+          44,
+          42,
+          42,
+          41,
+          36,
+          39,
+          40,
+          41,
+          40,
+          41,
+          41
+        ]
+      },
+      {
+        "name": "Chung Kook-chin",
+        "positions": [
+          "ST!",
+          "CAM:69"
+        ],
+        "shirt": 20,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/32/Chong_Kook_Chin_%EC%A0%95%EA%B5%AD%EC%A7%84_%28South_Korea%2C_1954_World_Cup%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          58,
+          53,
+          53,
+          57,
+          54,
+          57,
+          50,
+          54,
+          56,
+          53,
+          53,
+          48,
+          50,
+          54,
+          53,
+          52,
+          53,
+          53
+        ]
+      },
+      {
+        "name": "Chung Nam-sik",
+        "positions": [
+          "CM!",
+          "LM:74"
+        ],
+        "shirt": 11,
+        "attrs": [
+          44,
+          46,
+          45,
+          46,
+          48,
+          44,
+          44,
+          47,
+          45,
+          45,
+          44,
+          39,
+          42,
+          43,
+          44,
+          43,
+          44,
+          44
+        ]
+      },
+      {
+        "name": "Ham Heung-chul",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 12,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/d/de/Ham_Heung_Chul_%ED%95%A8%ED%9D%A5%EC%B2%A0_%28South_Korea%2C_1954_World_Cup%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          44,
+          45,
+          46,
+          38,
+          41,
+          38,
+          39,
+          42,
+          43,
+          45,
+          49,
+          50,
+          49,
+          47,
+          45,
+          44,
+          46,
+          45
+        ]
+      },
+      {
+        "name": "Han Chang-wha",
+        "positions": [
+          "CB!",
+          "RB:76",
+          "LB:78",
+          "CDM:63"
+        ],
+        "shirt": 14,
+        "attrs": [
+          46,
+          49,
+          51,
+          43,
+          46,
+          42,
+          52,
+          44,
+          47,
+          47,
+          46,
+          40,
+          42,
+          51,
+          46,
+          46,
+          47,
+          46
+        ]
+      },
+      {
+        "name": "Hong Deok-young",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Hong_Duk_Yung_%ED%99%8D%EB%8D%95%EC%98%81_%28South_Korea%2C_1954_World_Cup%29.jpg/330px-Hong_Duk_Yung_%ED%99%8D%EB%8D%95%EC%98%81_%28South_Korea%2C_1954_World_Cup%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          44,
+          45,
+          46,
+          38,
+          41,
+          38,
+          39,
+          42,
+          43,
+          45,
+          49,
+          50,
+          49,
+          47,
+          45,
+          44,
+          46,
+          45
+        ]
+      },
+      {
+        "name": "Hong Dook Jong",
+        "positions": [
+          "CM!",
+          "CAM:81",
+          "RM:76",
+          "LM:74"
+        ],
+        "attrs": [
+          50,
+          52,
+          51,
+          52,
+          54,
+          50,
+          50,
+          53,
+          51,
+          51,
+          50,
+          45,
+          48,
+          49,
+          50,
+          49,
+          50,
+          50
+        ]
+      },
+      {
+        "name": "Kang Chang-gi",
+        "positions": [
+          "CM!",
+          "CDM:87",
+          "CAM:83"
+        ],
+        "shirt": 4,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Kang_Chang_Gi_%EA%B0%95%EC%B0%BD%EA%B8%B0_%28South_Korea%2C_1954_World_Cup%29.jpg/330px-Kang_Chang_Gi_%EA%B0%95%EC%B0%BD%EA%B8%B0_%28South_Korea%2C_1954_World_Cup%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          52,
+          54,
+          53,
+          54,
+          56,
+          52,
+          52,
+          55,
+          53,
+          53,
+          52,
+          47,
+          50,
+          51,
+          52,
+          51,
+          52,
+          52
+        ]
+      },
+      {
+        "name": "Kim Ji-sung",
+        "positions": [
+          "CM!",
+          "RM:76",
+          "LM:75",
+          "CDM:89"
+        ],
+        "shirt": 15,
+        "attrs": [
+          43,
+          45,
+          44,
+          45,
+          47,
+          43,
+          43,
+          46,
+          44,
+          44,
+          43,
+          38,
+          41,
+          42,
+          43,
+          42,
+          43,
+          43
+        ]
+      },
+      {
+        "name": "Lee Sang-yi",
+        "positions": [
+          "CM!",
+          "CDM:86"
+        ],
+        "shirt": 5,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/b/b6/Lee_Sang_Yi_%EC%9D%B4%EC%83%81%EC%9D%98_%28South_Korea%2C_1954_World_Cup%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          48,
+          50,
+          49,
+          50,
+          52,
+          48,
+          48,
+          51,
+          49,
+          49,
+          48,
+          43,
+          46,
+          47,
+          48,
+          47,
+          48,
+          48
+        ]
+      },
+      {
+        "name": "Lee Soo-nam",
+        "positions": [
+          "ST!",
+          "CF:92",
+          "RW:76",
+          "CAM:74"
+        ],
+        "shirt": 7,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Lee_Soo_Nam_%EC%9D%B4%EC%88%98%EB%82%A8_%28South_Korea%2C_1954_World_Cup%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          49,
+          44,
+          44,
+          48,
+          45,
+          48,
+          41,
+          45,
+          47,
+          44,
+          44,
+          39,
+          41,
+          45,
+          44,
+          43,
+          44,
+          44
+        ]
+      },
+      {
+        "name": "Li Jong-kap",
+        "positions": [
+          "CB!",
+          "LB:75",
+          "CDM:66"
+        ],
+        "shirt": 13,
+        "attrs": [
+          45,
+          48,
+          50,
+          42,
+          45,
+          41,
+          51,
+          43,
+          46,
+          46,
+          45,
+          39,
+          41,
+          50,
+          45,
+          45,
+          46,
+          45
+        ]
+      },
+      {
+        "name": "Li Ki-joo",
+        "positions": [
+          "ST!",
+          "RW:75"
+        ],
+        "shirt": 19,
+        "attrs": [
+          47,
+          42,
+          42,
+          46,
+          43,
+          46,
+          39,
+          43,
+          45,
+          42,
+          42,
+          37,
+          39,
+          43,
+          42,
+          41,
+          42,
+          42
+        ]
+      },
+      {
+        "name": "Min Byung-dae",
+        "positions": [
+          "CB!",
+          "CDM:62",
+          "LB:78"
+        ],
+        "shirt": 6,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/f/f3/Min_Byung_Dae_%EB%AF%BC%EB%B3%91%EB%8C%80_%28South_Korea%2C_1954_World_Cup%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          40,
+          43,
+          45,
+          37,
+          40,
+          36,
+          46,
+          38,
+          41,
+          41,
+          40,
+          34,
+          36,
+          45,
+          40,
+          40,
+          41,
+          40
+        ]
+      },
+      {
+        "name": "Park Il-kap",
+        "positions": [
+          "ST!",
+          "RW:79",
+          "LW:79"
+        ],
+        "shirt": 17,
+        "attrs": [
+          49,
+          44,
+          44,
+          48,
+          45,
+          48,
+          41,
+          45,
+          47,
+          44,
+          44,
+          39,
+          41,
+          45,
+          44,
+          43,
+          44,
+          44
+        ]
+      },
+      {
+        "name": "Park Jae-seung",
+        "positions": [
+          "CB!",
+          "LB:76",
+          "CDM:66"
+        ],
+        "shirt": 3,
+        "attrs": [
+          49,
+          52,
+          54,
+          46,
+          49,
+          45,
+          55,
+          47,
+          50,
+          50,
+          49,
+          43,
+          45,
+          54,
+          49,
+          49,
+          50,
+          49
+        ]
+      },
+      {
+        "name": "Park Kyu Chong",
+        "positions": [
+          "CM!",
+          "RM:72",
+          "LM:73",
+          "CDM:88"
+        ],
+        "attrs": [
+          51,
+          53,
+          52,
+          53,
+          55,
+          51,
+          51,
+          54,
+          52,
+          52,
+          51,
+          46,
+          49,
+          50,
+          51,
+          50,
+          51,
+          51
+        ]
+      },
+      {
+        "name": "Park Kyu-chung",
+        "positions": [
+          "CB!",
+          "RB:76",
+          "LB:78"
+        ],
+        "shirt": 2,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/7/71/Park_Kyu_Chong_%EB%B0%95%EA%B7%9C%EC%A0%95_%28South_Korea%2C_1954_World_Cup%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          42,
+          45,
+          47,
+          39,
+          42,
+          38,
+          48,
+          40,
+          43,
+          43,
+          42,
+          36,
+          38,
+          47,
+          42,
+          42,
+          43,
+          42
+        ]
+      },
+      {
+        "name": "Sung Nak-woon",
+        "positions": [
+          "ST!",
+          "RW:74"
+        ],
+        "shirt": 10,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/0/04/Sung_Nak_Woon_%EC%84%B1%EB%82%99%EC%9A%B4_%28South_Korea%2C_1954_World_Cup%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          59,
+          54,
+          54,
+          58,
+          55,
+          58,
+          51,
+          55,
+          57,
+          54,
+          54,
+          49,
+          51,
+          55,
+          54,
+          53,
+          54,
+          54
+        ]
+      },
+      {
+        "name": "Woo Sang-kwon",
+        "positions": [
+          "ST!",
+          "CF:92",
+          "RW:76",
+          "CAM:74"
+        ],
+        "shirt": 9,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/2/25/Woo_Sang_Gwon_%EC%9A%B0%EC%83%81%EA%B6%8C_%28South_Korea%2C_1954_World_Cup%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          48,
+          43,
+          43,
+          47,
+          44,
+          47,
+          40,
+          44,
+          46,
+          43,
+          43,
+          38,
+          40,
+          44,
+          43,
+          42,
+          43,
+          43
+        ]
+      }
+    ],
+    "SUI": [
+      {
+        "name": "André Neury",
+        "positions": [
+          "CB!",
+          "RB:79"
+        ],
+        "shirt": 7,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1c/Andr%C3%A9_Neury_%281954%29.jpg/330px-Andr%C3%A9_Neury_%281954%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Charles Antenen",
+        "positions": [
+          "ST!",
+          "LW:74"
+        ],
+        "shirt": 15,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/aa/Charles_Antenen_1954.jpg/330px-Charles_Antenen_1954.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Charles Casali",
+        "positions": [
+          "CM!",
+          "CDM:88",
+          "CAM:82"
+        ],
+        "shirt": 9,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1a/Charles_Casali.JPG/330px-Charles_Casali.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          65,
+          67,
+          66,
+          67,
+          69,
+          65,
+          65,
+          68,
+          66,
+          66,
+          65,
+          60,
+          63,
+          64,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Eugen Meier",
+        "positions": [
+          "ST!",
+          "LW:73",
+          "CAM:70",
+          "CF:89"
+        ],
+        "shirt": 20,
+        "attrs": [
+          80,
+          75,
+          75,
+          79,
+          76,
+          79,
+          72,
+          76,
+          78,
+          75,
+          75,
+          70,
+          72,
+          76,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "Eugene Parlier",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 2,
+        "attrs": [
+          74,
+          75,
+          76,
+          68,
+          71,
+          68,
+          69,
+          72,
+          73,
+          75,
+          79,
+          80,
+          79,
+          77,
+          75,
+          74,
+          76,
+          75
+        ]
+      },
+      {
+        "name": "Ferdinando Riva",
+        "positions": [
+          "ST!",
+          "RW:78",
+          "LW:79"
+        ],
+        "shirt": 21,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Riva_Ferdinando.jpg/330px-Riva_Ferdinando.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          73,
+          68,
+          68,
+          72,
+          69,
+          72,
+          65,
+          69,
+          71,
+          68,
+          68,
+          63,
+          65,
+          69,
+          68,
+          67,
+          68,
+          68
+        ]
+      },
+      {
+        "name": "Georges Stuber",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 3,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/2/2c/Georges_Stuber_%281954%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          68,
+          69,
+          70,
+          62,
+          65,
+          62,
+          63,
+          66,
+          67,
+          69,
+          73,
+          74,
+          73,
+          71,
+          69,
+          68,
+          70,
+          69
+        ]
+      },
+      {
+        "name": "Gilbert Fesselet",
+        "positions": [
+          "CM!",
+          "CDM:88",
+          "RM:75",
+          "LM:75"
+        ],
+        "shirt": 12,
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Heinz Bigler",
+        "positions": [
+          "CM!",
+          "CDM:84",
+          "CAM:81",
+          "RM:76"
+        ],
+        "shirt": 8,
+        "attrs": [
+          72,
+          74,
+          73,
+          74,
+          76,
+          72,
+          72,
+          75,
+          73,
+          73,
+          72,
+          67,
+          70,
+          71,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Ivo Frosio",
+        "positions": [
+          "CM!",
+          "CDM:83",
+          "CAM:81"
+        ],
+        "shirt": 13,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Ivo_Frosio_1954.tif/lossy-page1-330px-Ivo_Frosio_1954.tif.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          75,
+          77,
+          76,
+          77,
+          79,
+          75,
+          75,
+          78,
+          76,
+          76,
+          75,
+          70,
+          73,
+          74,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "Jacques Fatton",
+        "positions": [
+          "ST!",
+          "RW:77"
+        ],
+        "shirt": 17,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/Abe_Lenstra_en_Jacques_Fatton_%281953%29.png/330px-Abe_Lenstra_en_Jacques_Fatton_%281953%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Josef Hügi",
+        "positions": [
+          "ST!",
+          "CF:90",
+          "RW:73"
+        ],
+        "shirt": 18,
+        "attrs": [
+          82,
+          77,
+          77,
+          81,
+          78,
+          81,
+          74,
+          78,
+          80,
+          77,
+          77,
+          72,
+          74,
+          78,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Marcel Flückiger",
+        "positions": [
+          "CB!",
+          "CDM:67",
+          "RB:78",
+          "LB:79"
+        ],
+        "shirt": 5,
+        "attrs": [
+          62,
+          65,
+          67,
+          59,
+          62,
+          58,
+          68,
+          60,
+          63,
+          63,
+          62,
+          56,
+          58,
+          67,
+          62,
+          62,
+          63,
+          62
+        ]
+      },
+      {
+        "name": "Marcel Mauron",
+        "positions": [
+          "ST!",
+          "CF:91"
+        ],
+        "shirt": 19,
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Norbert Eschmann",
+        "positions": [
+          "CM!",
+          "LM:77",
+          "CAM:83",
+          "RM:73"
+        ],
+        "shirt": 11,
+        "attrs": [
+          67,
+          69,
+          68,
+          69,
+          71,
+          67,
+          67,
+          70,
+          68,
+          68,
+          67,
+          62,
+          65,
+          66,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Oliver Eggimann",
+        "positions": [
+          "CM!",
+          "RM:73",
+          "LM:71"
+        ],
+        "shirt": 10,
+        "attrs": [
+          69,
+          71,
+          70,
+          71,
+          73,
+          69,
+          69,
+          72,
+          70,
+          70,
+          69,
+          64,
+          67,
+          68,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Robert Ballaman",
+        "positions": [
+          "ST!",
+          "CF:92"
+        ],
+        "shirt": 16,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Com_C08-103-003-003-011_Robert_Ballaman.jpg/330px-Com_C08-103-003-003-011_Robert_Ballaman.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Roger Bocquet",
+        "positions": [
+          "CM!",
+          "CDM:85",
+          "CAM:86"
+        ],
+        "shirt": 4,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/Roger_Bocquet_%281954%29.png/330px-Roger_Bocquet_%281954%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          69,
+          71,
+          70,
+          71,
+          73,
+          69,
+          69,
+          72,
+          70,
+          70,
+          69,
+          64,
+          67,
+          68,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Roger Mathis",
+        "positions": [
+          "CB!",
+          "LB:76",
+          "CDM:61"
+        ],
+        "shirt": 6,
+        "attrs": [
+          64,
+          67,
+          69,
+          61,
+          64,
+          60,
+          70,
+          62,
+          65,
+          65,
+          64,
+          58,
+          60,
+          69,
+          64,
+          64,
+          65,
+          64
+        ]
+      },
+      {
+        "name": "Roger Vonlanthen",
+        "positions": [
+          "ST!",
+          "LW:74"
+        ],
+        "shirt": 22,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/Roger_Vonlanthen_%281954%29.jpg/330px-Roger_Vonlanthen_%281954%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          72,
+          67,
+          67,
+          71,
+          68,
+          71,
+          64,
+          68,
+          70,
+          67,
+          67,
+          62,
+          64,
+          68,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Walter Eich",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "attrs": [
+          65,
+          66,
+          67,
+          59,
+          62,
+          59,
+          60,
+          63,
+          64,
+          66,
+          70,
+          71,
+          70,
+          68,
+          66,
+          65,
+          67,
+          66
+        ]
+      },
+      {
+        "name": "Willy Kernen",
+        "positions": [
+          "CB!",
+          "LB:81"
+        ],
+        "shirt": 14,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Willy_Kernen_%281955%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          74,
+          77,
+          79,
+          71,
+          74,
+          70,
+          80,
+          72,
+          75,
+          75,
+          74,
+          68,
+          70,
+          79,
+          74,
+          74,
+          75,
+          74
+        ]
+      }
+    ],
+    "TUR": [
+      {
+        "name": "Ahmet Berman",
+        "positions": [
+          "CB!",
+          "RB:78",
+          "LB:75"
+        ],
+        "shirt": 19,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/7/74/Ahmet_Berman.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Akgün Kaçmaz",
+        "positions": [
+          "CB!",
+          "CDM:67",
+          "RB:76"
+        ],
+        "shirt": 18,
+        "attrs": [
+          62,
+          65,
+          67,
+          59,
+          62,
+          58,
+          68,
+          60,
+          63,
+          63,
+          62,
+          56,
+          58,
+          67,
+          62,
+          62,
+          63,
+          62
+        ]
+      },
+      {
+        "name": "Ali Beratlıgil",
+        "positions": [
+          "CB!",
+          "RB:80",
+          "LB:81"
+        ],
+        "shirt": 14,
+        "attrs": [
+          61,
+          64,
+          66,
+          58,
+          61,
+          57,
+          67,
+          59,
+          62,
+          62,
+          61,
+          55,
+          57,
+          66,
+          61,
+          61,
+          62,
+          61
+        ]
+      },
+      {
+        "name": "Basri Dirimlili",
+        "positions": [
+          "CB!",
+          "RB:77",
+          "LB:79",
+          "CDM:62"
+        ],
+        "shirt": 3,
+        "attrs": [
+          63,
+          66,
+          68,
+          60,
+          63,
+          59,
+          69,
+          61,
+          64,
+          64,
+          63,
+          57,
+          59,
+          68,
+          63,
+          63,
+          64,
+          63
+        ]
+      },
+      {
+        "name": "Bulent Eken",
+        "positions": [
+          "CB!",
+          "CDM:65",
+          "RB:76"
+        ],
+        "shirt": 13,
+        "attrs": [
+          61,
+          64,
+          66,
+          58,
+          61,
+          57,
+          67,
+          59,
+          62,
+          62,
+          61,
+          55,
+          57,
+          66,
+          61,
+          61,
+          62,
+          61
+        ]
+      },
+      {
+        "name": "Burhan Sargun",
+        "positions": [
+          "ST!",
+          "CF:93"
+        ],
+        "shirt": 10,
+        "attrs": [
+          67,
+          62,
+          62,
+          66,
+          63,
+          66,
+          59,
+          63,
+          65,
+          62,
+          62,
+          57,
+          59,
+          63,
+          62,
+          61,
+          62,
+          62
+        ]
+      },
+      {
+        "name": "Coşkun Taş",
+        "positions": [
+          "ST!",
+          "CF:88",
+          "RW:73",
+          "LW:73"
+        ],
+        "shirt": 22,
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Erol Keskin",
+        "positions": [
+          "ST!",
+          "RW:73",
+          "LW:73"
+        ],
+        "shirt": 7,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/1950_02_19_Yeni_Sabah_Erol_Keskin.jpg/330px-1950_02_19_Yeni_Sabah_Erol_Keskin.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Feridun Buğeker",
+        "positions": [
+          "ST!",
+          "CAM:69",
+          "RW:75"
+        ],
+        "shirt": 9,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Feridun_Bugeker.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          69,
+          64,
+          64,
+          68,
+          65,
+          68,
+          61,
+          65,
+          67,
+          64,
+          64,
+          59,
+          61,
+          65,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Kadri Aytaç",
+        "positions": [
+          "ST!",
+          "RW:78"
+        ],
+        "shirt": 21,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Kadri_Ayta%C3%A7.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          72,
+          67,
+          67,
+          71,
+          68,
+          71,
+          64,
+          68,
+          70,
+          67,
+          67,
+          62,
+          64,
+          68,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Lefter Küçükandonyadis",
+        "positions": [
+          "ST!",
+          "RW:76"
+        ],
+        "shirt": 11,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/Lefter_K%C3%BC%C3%A7%C3%BCkandonyadis%2C_1958.jpg/330px-Lefter_K%C3%BC%C3%A7%C3%BCkandonyadis%2C_1958.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Mehmet Dinçer",
+        "positions": [
+          "CM!",
+          "LM:71",
+          "CDM:83",
+          "CAM:86"
+        ],
+        "shirt": 15,
+        "attrs": [
+          67,
+          69,
+          68,
+          69,
+          71,
+          67,
+          67,
+          70,
+          68,
+          68,
+          67,
+          62,
+          65,
+          66,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Mustafa Ertan",
+        "positions": [
+          "CB!",
+          "CDM:62",
+          "RB:80"
+        ],
+        "shirt": 4,
+        "attrs": [
+          68,
+          71,
+          73,
+          65,
+          68,
+          64,
+          74,
+          66,
+          69,
+          69,
+          68,
+          62,
+          64,
+          73,
+          68,
+          68,
+          69,
+          68
+        ]
+      },
+      {
+        "name": "Naci Erdem",
+        "positions": [
+          "CB!",
+          "RB:79",
+          "LB:77"
+        ],
+        "shirt": 17,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/1/17/Naci_Erdem.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          69,
+          72,
+          74,
+          66,
+          69,
+          65,
+          75,
+          67,
+          70,
+          70,
+          69,
+          63,
+          65,
+          74,
+          69,
+          69,
+          70,
+          69
+        ]
+      },
+      {
+        "name": "Necmi Onarıcı",
+        "positions": [
+          "ST!",
+          "LW:79",
+          "CAM:70",
+          "CF:89"
+        ],
+        "shirt": 20,
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Nedim Günar",
+        "positions": [
+          "CB!",
+          "RB:75"
+        ],
+        "shirt": 16,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/2024_01_15_Karacaahmet_Mezarligi_Nedim_Gunar.jpg/330px-2024_01_15_Karacaahmet_Mezarligi_Nedim_Gunar.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Rober Eryol",
+        "positions": [
+          "CM!",
+          "CAM:84",
+          "RM:77",
+          "LM:72"
+        ],
+        "shirt": 6,
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Rıdvan Bolatlı",
+        "positions": [
+          "CB!",
+          "CDM:67",
+          "RB:76",
+          "LB:77"
+        ],
+        "shirt": 2,
+        "attrs": [
+          62,
+          65,
+          67,
+          59,
+          62,
+          58,
+          68,
+          60,
+          63,
+          63,
+          62,
+          56,
+          58,
+          67,
+          62,
+          62,
+          63,
+          62
+        ]
+      },
+      {
+        "name": "Suat Mamat",
+        "positions": [
+          "ST!",
+          "CF:91"
+        ],
+        "shirt": 8,
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Turgay Şeren",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f0/Turgay_%C5%9Eeren_%28left%29_and_Cor_van_der_Hart_in_4_May_1958.jpg/330px-Turgay_%C5%9Eeren_%28left%29_and_Cor_van_der_Hart_in_4_May_1958.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          66,
+          67,
+          68,
+          60,
+          63,
+          60,
+          61,
+          64,
+          65,
+          67,
+          71,
+          72,
+          71,
+          69,
+          67,
+          66,
+          68,
+          67
+        ]
+      },
+      {
+        "name": "Çetin Zeybek",
+        "positions": [
+          "CM!",
+          "CAM:81"
+        ],
+        "shirt": 5,
+        "attrs": [
+          69,
+          71,
+          70,
+          71,
+          73,
+          69,
+          69,
+          72,
+          70,
+          70,
+          69,
+          64,
+          67,
+          68,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Şükrü Ersoy",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 12,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4e/SukruErsoy.jpg/330px-SukruErsoy.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          70,
+          71,
+          72,
+          64,
+          67,
+          64,
+          65,
+          68,
+          69,
+          71,
+          75,
+          76,
+          75,
+          73,
+          71,
+          70,
+          72,
+          71
+        ]
+      }
+    ],
+    "URU": [
+      {
+        "name": "Carlos Borges",
+        "positions": [
+          "ST!",
+          "LW:76",
+          "CAM:73",
+          "CF:88"
+        ],
+        "shirt": 11,
+        "attrs": [
+          84,
+          79,
+          79,
+          83,
+          80,
+          83,
+          76,
+          80,
+          82,
+          79,
+          79,
+          74,
+          76,
+          80,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "Eusebio Tejera",
+        "positions": [
+          "CB!",
+          "RB:79"
+        ],
+        "shirt": 14,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Eusebio_Tejera%2C_Estadio%2C_1948-02-28_%28250%29.jpg/330px-Eusebio_Tejera%2C_Estadio%2C_1948-02-28_%28250%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          69,
+          72,
+          74,
+          66,
+          69,
+          65,
+          75,
+          67,
+          70,
+          70,
+          69,
+          63,
+          65,
+          74,
+          69,
+          69,
+          70,
+          69
+        ]
+      },
+      {
+        "name": "Javier Ambrois",
+        "positions": [
+          "ST!",
+          "CF:88",
+          "RW:75",
+          "LW:73"
+        ],
+        "shirt": 19,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/0/04/Javier_Ambrois.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "José Santamaría",
+        "positions": [
+          "CB!"
+        ],
+        "shirt": 2,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Jos%C3%A9_Santamar%C3%ADa_1976.jpg/330px-Jos%C3%A9_Santamar%C3%ADa_1976.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          84,
+          85,
+          87,
+          80,
+          86,
+          61,
+          93,
+          84,
+          90,
+          91,
+          76,
+          71,
+          80,
+          90,
+          89,
+          84,
+          89,
+          93
+        ]
+      },
+      {
+        "name": "Juan Alberto Schiaffino",
+        "positions": [
+          "CAM!",
+          "CF:88"
+        ],
+        "shirt": 10,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1d/Schiaffino_%28cropped%29.jpg/330px-Schiaffino_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          88,
+          88,
+          81,
+          92,
+          94,
+          88,
+          79,
+          95,
+          91,
+          92,
+          77,
+          73,
+          84,
+          73,
+          90,
+          79,
+          88,
+          92
+        ]
+      },
+      {
+        "name": "Juan Hohberg",
+        "positions": [
+          "ST!",
+          "CAM:69",
+          "RW:75",
+          "LW:78"
+        ],
+        "shirt": 8,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7f/Juan_Hohberg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Julio Abbadie",
+        "positions": [
+          "ST!",
+          "RW:77",
+          "CAM:73"
+        ],
+        "shirt": 7,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Julio_Abbadie_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          84,
+          79,
+          79,
+          83,
+          80,
+          83,
+          76,
+          80,
+          82,
+          79,
+          79,
+          74,
+          76,
+          80,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "Julio Maceiras",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 12,
+        "attrs": [
+          71,
+          72,
+          73,
+          65,
+          68,
+          65,
+          66,
+          69,
+          70,
+          72,
+          76,
+          77,
+          76,
+          74,
+          72,
+          71,
+          73,
+          72
+        ]
+      },
+      {
+        "name": "Julio Pérez",
+        "positions": [
+          "ST!",
+          "CF:88",
+          "RW:75",
+          "LW:78"
+        ],
+        "shirt": 21,
+        "attrs": [
+          82,
+          77,
+          77,
+          81,
+          78,
+          81,
+          74,
+          78,
+          80,
+          77,
+          77,
+          72,
+          74,
+          78,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Luis Castro",
+        "positions": [
+          "ST!",
+          "CAM:70",
+          "CF:92"
+        ],
+        "shirt": 22,
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Luis Cruz",
+        "positions": [
+          "CM!",
+          "LM:73"
+        ],
+        "shirt": 17,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Luis_Alberto_Cruz%2C_Estadio%2C_1951-02-24_%28406%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          80,
+          82,
+          81,
+          82,
+          84,
+          80,
+          80,
+          83,
+          81,
+          81,
+          80,
+          75,
+          78,
+          79,
+          80,
+          79,
+          80,
+          80
+        ]
+      },
+      {
+        "name": "Mirto Davoine",
+        "positions": [
+          "CB!",
+          "RB:81",
+          "LB:78"
+        ],
+        "shirt": 13,
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Néstor Carballo",
+        "positions": [
+          "CM!",
+          "CDM:85",
+          "CAM:85",
+          "RM:77"
+        ],
+        "shirt": 16,
+        "attrs": [
+          78,
+          80,
+          79,
+          80,
+          82,
+          78,
+          78,
+          81,
+          79,
+          79,
+          78,
+          73,
+          76,
+          77,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Obdulio Varela",
+        "positions": [
+          "CM!",
+          "CDM:85"
+        ],
+        "shirt": 5,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Obdulio_varela_uruguay.jpg/330px-Obdulio_varela_uruguay.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          85,
+          85,
+          78,
+          89,
+          90,
+          85,
+          77,
+          91,
+          88,
+          89,
+          75,
+          72,
+          82,
+          72,
+          87,
+          77,
+          85,
+          89
+        ]
+      },
+      {
+        "name": "Omar Méndez",
+        "positions": [
+          "ST!",
+          "CAM:69",
+          "RW:73",
+          "LW:74"
+        ],
+        "shirt": 20,
+        "attrs": [
+          85,
+          80,
+          80,
+          84,
+          81,
+          84,
+          77,
+          81,
+          83,
+          80,
+          80,
+          75,
+          77,
+          81,
+          80,
+          79,
+          80,
+          80
+        ]
+      },
+      {
+        "name": "Oscar Míguez",
+        "positions": [
+          "ST!",
+          "RW:77",
+          "LW:79"
+        ],
+        "shirt": 9,
+        "attrs": [
+          86,
+          81,
+          81,
+          85,
+          82,
+          85,
+          78,
+          82,
+          84,
+          81,
+          81,
+          76,
+          78,
+          82,
+          81,
+          80,
+          81,
+          81
+        ]
+      },
+      {
+        "name": "Rafael Souto",
+        "positions": [
+          "ST!",
+          "RW:77",
+          "LW:79"
+        ],
+        "shirt": 18,
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Roberto Leopardi",
+        "positions": [
+          "CM!",
+          "CDM:89",
+          "RM:77",
+          "LM:72"
+        ],
+        "shirt": 6,
+        "attrs": [
+          79,
+          81,
+          80,
+          81,
+          83,
+          79,
+          79,
+          82,
+          80,
+          80,
+          79,
+          74,
+          77,
+          78,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "Roque Máspoli",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/Roque_maspoli_posando.jpg/330px-Roque_maspoli_posando.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          73,
+          74,
+          75,
+          67,
+          70,
+          67,
+          68,
+          71,
+          72,
+          74,
+          78,
+          79,
+          78,
+          76,
+          74,
+          73,
+          75,
+          74
+        ]
+      },
+      {
+        "name": "Urbano Rivera",
+        "positions": [
+          "CM!",
+          "CDM:86",
+          "CAM:83",
+          "RM:71"
+        ],
+        "shirt": 15,
+        "attrs": [
+          78,
+          80,
+          79,
+          80,
+          82,
+          78,
+          78,
+          81,
+          79,
+          79,
+          78,
+          73,
+          76,
+          77,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Víctor Rodríguez Andrade",
+        "positions": [
+          "CM!",
+          "RM:71",
+          "LM:72"
+        ],
+        "shirt": 4,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/V%C3%ADctor_Rodr%C3%ADguez_Andrade%2C_Estadio%2C_1952-04-12_%28465%29.jpg/330px-V%C3%ADctor_Rodr%C3%ADguez_Andrade%2C_Estadio%2C_1952-04-12_%28465%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          79,
+          81,
+          80,
+          81,
+          83,
+          79,
+          79,
+          82,
+          80,
+          80,
+          79,
+          74,
+          77,
+          78,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "William Martínez",
+        "positions": [
+          "CB!",
+          "LB:76",
+          "CDM:66",
+          "RB:78"
+        ],
+        "shirt": 3,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/1/14/William_Mart%C3%ADnez%2C_Estadio%2C_1955-03-12_%28617%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          74,
+          77,
+          79,
+          71,
+          74,
+          70,
+          80,
+          72,
+          75,
+          75,
+          74,
+          68,
+          70,
+          79,
+          74,
+          74,
+          75,
+          74
+        ]
+      }
+    ],
+    "FRG": [
+      {
+        "name": "Alfred Pfaff",
+        "positions": [
+          "CM!",
+          "LM:73"
+        ],
+        "shirt": 19,
+        "attrs": [
+          81,
+          83,
+          82,
+          83,
+          85,
+          81,
+          81,
+          84,
+          82,
+          82,
+          81,
+          76,
+          79,
+          80,
+          81,
+          80,
+          81,
+          81
+        ]
+      },
+      {
+        "name": "Bernhard Klodt",
+        "positions": [
+          "ST!",
+          "CAM:70"
+        ],
+        "shirt": 14,
+        "attrs": [
+          80,
+          75,
+          75,
+          79,
+          76,
+          79,
+          72,
+          76,
+          78,
+          75,
+          75,
+          70,
+          72,
+          76,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "Fritz Laband",
+        "positions": [
+          "CB!",
+          "RB:78",
+          "LB:81"
+        ],
+        "shirt": 2,
+        "attrs": [
+          73,
+          76,
+          78,
+          70,
+          73,
+          69,
+          79,
+          71,
+          74,
+          74,
+          73,
+          67,
+          69,
+          78,
+          73,
+          73,
+          74,
+          73
+        ]
+      },
+      {
+        "name": "Fritz Walter",
+        "positions": [
+          "CAM!",
+          "CM:88"
+        ],
+        "shirt": 16,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/a/aa/Fritz_Walter_cropped_2.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          86,
+          86,
+          79,
+          90,
+          92,
+          86,
+          77,
+          93,
+          89,
+          90,
+          76,
+          72,
+          83,
+          72,
+          88,
+          77,
+          86,
+          90
+        ]
+      },
+      {
+        "name": "Hans Bauer",
+        "positions": [
+          "CB!",
+          "CDM:64"
+        ],
+        "shirt": 4,
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Hans Schäfer",
+        "positions": [
+          "LW!",
+          "CM:85"
+        ],
+        "shirt": 20,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Gunnar_Gren_1957.jpg/330px-Gunnar_Gren_1957.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          88,
+          84,
+          81,
+          87,
+          78,
+          91,
+          47,
+          84,
+          89,
+          88,
+          68,
+          61,
+          78,
+          83,
+          84,
+          78,
+          84,
+          84
+        ]
+      },
+      {
+        "name": "Heinz Kubsch",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 21,
+        "attrs": [
+          86,
+          87,
+          88,
+          80,
+          83,
+          80,
+          81,
+          84,
+          85,
+          87,
+          91,
+          92,
+          91,
+          89,
+          87,
+          86,
+          88,
+          87
+        ]
+      },
+      {
+        "name": "Heinz Kwiatkowski",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 22,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Heinz_Kwiatkowski.webp?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          84,
+          85,
+          86,
+          78,
+          81,
+          78,
+          79,
+          82,
+          83,
+          85,
+          89,
+          90,
+          89,
+          87,
+          85,
+          84,
+          86,
+          85
+        ]
+      },
+      {
+        "name": "Helmut Rahn",
+        "positions": [
+          "RW!",
+          "ST:85",
+          "CF:82"
+        ],
+        "shirt": 12,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/Helmut_Rahn.jpg/330px-Helmut_Rahn.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          90,
+          84,
+          82,
+          88,
+          78,
+          92,
+          47,
+          84,
+          90,
+          89,
+          68,
+          61,
+          78,
+          84,
+          85,
+          78,
+          85,
+          85
+        ]
+      },
+      {
+        "name": "Herbert Erhardt",
+        "positions": [
+          "CB!",
+          "RB:79"
+        ],
+        "shirt": 5,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c9/Herbert_Erhardt%2C_Estadio%2C_1961-04-20_%28934%29_%28cropped%29.jpg/330px-Herbert_Erhardt%2C_Estadio%2C_1961-04-20_%28934%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          79,
+          81,
+          73,
+          76,
+          72,
+          82,
+          74,
+          77,
+          77,
+          76,
+          70,
+          72,
+          81,
+          76,
+          76,
+          77,
+          76
+        ]
+      },
+      {
+        "name": "Horst Eckel",
+        "positions": [
+          "CM!",
+          "RM:74",
+          "LM:73",
+          "CDM:87"
+        ],
+        "shirt": 6,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/Horst_Eckel_2014_65_%28cropped%29.jpg/330px-Horst_Eckel_2014_65_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          72,
+          74,
+          73,
+          74,
+          76,
+          72,
+          72,
+          75,
+          73,
+          73,
+          72,
+          67,
+          70,
+          71,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Josef Posipal",
+        "positions": [
+          "CB!",
+          "RB:79",
+          "LB:77"
+        ],
+        "shirt": 7,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Josef_Posipal_1953.jpg/330px-Josef_Posipal_1953.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          81,
+          84,
+          86,
+          78,
+          81,
+          77,
+          87,
+          79,
+          82,
+          82,
+          81,
+          75,
+          77,
+          86,
+          81,
+          81,
+          82,
+          81
+        ]
+      },
+      {
+        "name": "Karl Mai",
+        "positions": [
+          "CM!",
+          "CDM:84",
+          "CAM:83",
+          "RM:76"
+        ],
+        "shirt": 8,
+        "attrs": [
+          74,
+          76,
+          75,
+          76,
+          78,
+          74,
+          74,
+          77,
+          75,
+          75,
+          74,
+          69,
+          72,
+          73,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Karl-Heinz Metzner",
+        "positions": [
+          "CM!",
+          "CAM:87"
+        ],
+        "shirt": 11,
+        "attrs": [
+          83,
+          85,
+          84,
+          85,
+          87,
+          83,
+          83,
+          86,
+          84,
+          84,
+          83,
+          78,
+          81,
+          82,
+          83,
+          82,
+          83,
+          83
+        ]
+      },
+      {
+        "name": "Max Morlock",
+        "positions": [
+          "ST!",
+          "CF:85"
+        ],
+        "shirt": 13,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/Valznerweiher_1961.jpg/330px-Valznerweiher_1961.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          87,
+          82,
+          80,
+          85,
+          77,
+          89,
+          48,
+          82,
+          88,
+          86,
+          67,
+          61,
+          77,
+          81,
+          83,
+          77,
+          83,
+          83
+        ]
+      },
+      {
+        "name": "Ottmar Walter",
+        "positions": [
+          "ST!",
+          "CF:85"
+        ],
+        "shirt": 15,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5d/Ottmar_Walter_Obers%C3%BClzen.jpg/330px-Ottmar_Walter_Obers%C3%BClzen.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          87,
+          83,
+          80,
+          86,
+          77,
+          90,
+          48,
+          83,
+          88,
+          87,
+          67,
+          61,
+          77,
+          82,
+          83,
+          77,
+          83,
+          83
+        ]
+      },
+      {
+        "name": "Paul Mebus",
+        "positions": [
+          "CM!",
+          "LM:74"
+        ],
+        "shirt": 9,
+        "attrs": [
+          84,
+          86,
+          85,
+          86,
+          88,
+          84,
+          84,
+          87,
+          85,
+          85,
+          84,
+          79,
+          82,
+          83,
+          84,
+          83,
+          84,
+          84
+        ]
+      },
+      {
+        "name": "Richard Herrmann",
+        "positions": [
+          "ST!",
+          "LW:73",
+          "CF:87"
+        ],
+        "shirt": 17,
+        "attrs": [
+          84,
+          79,
+          79,
+          83,
+          80,
+          83,
+          76,
+          80,
+          82,
+          79,
+          79,
+          74,
+          76,
+          80,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "Toni Turek",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Toni_Turek%2C_Estadio%2C_1954-07-17_%28583%29.jpg/330px-Toni_Turek%2C_Estadio%2C_1954-07-17_%28583%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          84,
+          85,
+          86,
+          78,
+          81,
+          78,
+          79,
+          82,
+          83,
+          85,
+          89,
+          90,
+          89,
+          87,
+          85,
+          84,
+          86,
+          85
+        ]
+      },
+      {
+        "name": "Ulrich Biesinger",
+        "positions": [
+          "ST!",
+          "LW:78",
+          "CAM:72"
+        ],
+        "shirt": 18,
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Werner Kohlmeyer",
+        "positions": [
+          "CB!",
+          "CDM:63",
+          "RB:77"
+        ],
+        "shirt": 3,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Werner_Kohlmeyer_statue.jpg/330px-Werner_Kohlmeyer_statue.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          81,
+          83,
+          75,
+          78,
+          74,
+          84,
+          76,
+          79,
+          79,
+          78,
+          72,
+          74,
+          83,
+          78,
+          78,
+          79,
+          78
+        ]
+      },
+      {
+        "name": "Werner Liebrich",
+        "positions": [
+          "CB!",
+          "RB:80",
+          "LB:79"
+        ],
+        "shirt": 10,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/Werner_Liebrich_crop_%28Com_M03-0108-005-0011%29.jpg/330px-Werner_Liebrich_crop_%28Com_M03-0108-005-0011%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          81,
+          83,
+          75,
+          78,
+          74,
+          84,
+          76,
+          79,
+          79,
+          78,
+          72,
+          74,
+          83,
+          78,
+          78,
+          79,
+          78
+        ]
+      }
+    ],
+    "YUG": [
+      {
+        "name": "Aleksandar Petaković",
+        "positions": [
+          "ST!",
+          "CAM:71",
+          "CF:87",
+          "RW:78"
+        ],
+        "shirt": 22,
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Bernard Vukas",
+        "positions": [
+          "ST!",
+          "CAM:69"
+        ],
+        "shirt": 9,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/Bernard_Vukas.jpg/330px-Bernard_Vukas.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          85,
+          80,
+          80,
+          84,
+          81,
+          84,
+          77,
+          81,
+          83,
+          80,
+          80,
+          75,
+          77,
+          81,
+          80,
+          79,
+          80,
+          80
+        ]
+      },
+      {
+        "name": "Branko Kralj",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 12,
+        "attrs": [
+          78,
+          79,
+          80,
+          72,
+          75,
+          72,
+          73,
+          76,
+          77,
+          79,
+          83,
+          84,
+          83,
+          81,
+          79,
+          78,
+          80,
+          79
+        ]
+      },
+      {
+        "name": "Branko Stanković",
+        "positions": [
+          "CB!",
+          "CDM:61"
+        ],
+        "shirt": 2,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/31/Stankovic-branko.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          74,
+          77,
+          79,
+          71,
+          74,
+          70,
+          80,
+          72,
+          75,
+          75,
+          74,
+          68,
+          70,
+          79,
+          74,
+          74,
+          75,
+          74
+        ]
+      },
+      {
+        "name": "Branko Zebec",
+        "positions": [
+          "ST!",
+          "LW:73",
+          "CAM:74"
+        ],
+        "shirt": 11,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/Branko_Zebec_1953.jpg/330px-Branko_Zebec_1953.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Bruno Belin",
+        "positions": [
+          "CB!",
+          "LB:77",
+          "CDM:61"
+        ],
+        "shirt": 17,
+        "attrs": [
+          70,
+          73,
+          75,
+          67,
+          70,
+          66,
+          76,
+          68,
+          71,
+          71,
+          70,
+          64,
+          66,
+          75,
+          70,
+          70,
+          71,
+          70
+        ]
+      },
+      {
+        "name": "Dionizije Dvornić",
+        "positions": [
+          "ST!",
+          "CF:92",
+          "RW:74",
+          "CAM:72"
+        ],
+        "shirt": 20,
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Ivan Horvat",
+        "positions": [
+          "CB!",
+          "LB:81",
+          "CDM:64"
+        ],
+        "shirt": 5,
+        "attrs": [
+          76,
+          79,
+          81,
+          73,
+          76,
+          72,
+          82,
+          74,
+          77,
+          77,
+          76,
+          70,
+          72,
+          81,
+          76,
+          76,
+          77,
+          76
+        ]
+      },
+      {
+        "name": "Lav Mantula",
+        "positions": [
+          "CM!",
+          "LM:76",
+          "CDM:89"
+        ],
+        "shirt": 14,
+        "attrs": [
+          69,
+          71,
+          70,
+          71,
+          73,
+          69,
+          69,
+          72,
+          70,
+          70,
+          69,
+          64,
+          67,
+          68,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Ljubiša Spajić",
+        "positions": [
+          "CM!",
+          "LM:71",
+          "CDM:84"
+        ],
+        "shirt": 15,
+        "attrs": [
+          77,
+          79,
+          78,
+          79,
+          81,
+          77,
+          77,
+          80,
+          78,
+          78,
+          77,
+          72,
+          75,
+          76,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Miljan Zeković",
+        "positions": [
+          "CB!",
+          "RB:80",
+          "LB:81"
+        ],
+        "shirt": 13,
+        "attrs": [
+          77,
+          80,
+          82,
+          74,
+          77,
+          73,
+          83,
+          75,
+          78,
+          78,
+          77,
+          71,
+          73,
+          82,
+          77,
+          77,
+          78,
+          77
+        ]
+      },
+      {
+        "name": "Miloš Milutinović",
+        "positions": [
+          "ST!",
+          "CAM:73",
+          "CF:89",
+          "LW:79"
+        ],
+        "shirt": 18,
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Milutinovic.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          79,
+          74,
+          74,
+          78,
+          75,
+          78,
+          71,
+          75,
+          77,
+          74,
+          74,
+          69,
+          71,
+          75,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Rajko Mitić",
+        "positions": [
+          "ST!",
+          "RW:75",
+          "LW:78",
+          "CAM:75"
+        ],
+        "shirt": 8,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Rajko_Miti%C4%87_%281970%29.jpg/330px-Rajko_Miti%C4%87_%281970%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Sima Milovanov",
+        "positions": [
+          "CB!",
+          "LB:80",
+          "CDM:65"
+        ],
+        "shirt": 16,
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Stjepan Bobek",
+        "positions": [
+          "CM!",
+          "LM:73"
+        ],
+        "shirt": 10,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/17/S._Kragujevi%C4%87%2C_Sjepan_Bobek%2C_fudbaler%2C_21._8._1949_%28cropped%29.jpg/330px-S._Kragujevi%C4%87%2C_Sjepan_Bobek%2C_fudbaler%2C_21._8._1949_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          67,
+          69,
+          68,
+          69,
+          71,
+          67,
+          67,
+          70,
+          68,
+          68,
+          67,
+          62,
+          65,
+          66,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Tihomir Ognjanov",
+        "positions": [
+          "ST!",
+          "LW:77"
+        ],
+        "shirt": 7,
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Todor Veselinović",
+        "positions": [
+          "ST!",
+          "CF:91",
+          "LW:76"
+        ],
+        "shirt": 21,
+        "attrs": [
+          81,
+          76,
+          76,
+          80,
+          77,
+          80,
+          73,
+          77,
+          79,
+          76,
+          76,
+          71,
+          73,
+          77,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Tomislav Crnković",
+        "positions": [
+          "CB!",
+          "RB:80"
+        ],
+        "shirt": 3,
+        "attrs": [
+          77,
+          80,
+          82,
+          74,
+          77,
+          73,
+          83,
+          75,
+          78,
+          78,
+          77,
+          71,
+          73,
+          82,
+          77,
+          77,
+          78,
+          77
+        ]
+      },
+      {
+        "name": "Vladimir Beara",
+        "positions": [
+          "GK!"
+        ],
+        "shirt": 1,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Vladimir_Beara_1953.jpg/330px-Vladimir_Beara_1953.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          72,
+          73,
+          65,
+          68,
+          65,
+          66,
+          69,
+          70,
+          72,
+          76,
+          77,
+          76,
+          74,
+          72,
+          71,
+          73,
+          72
+        ]
+      },
+      {
+        "name": "Vujadin Boškov",
+        "positions": [
+          "CB!",
+          "RB:78"
+        ],
+        "shirt": 6,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/Vujadin_Bo%C5%A1kov_%281976%29.jpg/330px-Vujadin_Bo%C5%A1kov_%281976%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          69,
+          72,
+          74,
+          66,
+          69,
+          65,
+          75,
+          67,
+          70,
+          70,
+          69,
+          63,
+          65,
+          74,
+          69,
+          69,
+          70,
+          69
+        ]
+      },
+      {
+        "name": "Zlatko Papec",
+        "positions": [
+          "CM!",
+          "RM:72"
+        ],
+        "shirt": 19,
+        "attrs": [
+          72,
+          74,
+          73,
+          74,
+          76,
+          72,
+          72,
+          75,
+          73,
+          73,
+          72,
+          67,
+          70,
+          71,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Zlatko Čajkovski",
+        "positions": [
+          "CM!",
+          "CDM:85",
+          "CAM:83"
+        ],
+        "shirt": 4,
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Zlatko_%C4%8Cajkovski_1953.jpg/330px-Zlatko_%C4%8Cajkovski_1953.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      }
+    ]
+  },
+  "fixtures": [
+    {
+      "home": "BRA",
+      "away": "MEX",
+      "matchday": 1,
+      "kickoff": "1954-06-16"
+    },
+    {
+      "home": "YUG",
+      "away": "FRA",
+      "matchday": 1,
+      "kickoff": "1954-06-16"
+    },
+    {
+      "home": "FRG",
+      "away": "TUR",
+      "matchday": 1,
+      "kickoff": "1954-06-17"
+    },
+    {
+      "home": "HUN",
+      "away": "KOR",
+      "matchday": 1,
+      "kickoff": "1954-06-17"
+    },
+    {
+      "home": "URU",
+      "away": "TCH",
+      "matchday": 1,
+      "kickoff": "1954-06-16"
+    },
+    {
+      "home": "AUT",
+      "away": "SCO",
+      "matchday": 1,
+      "kickoff": "1954-06-16"
+    },
+    {
+      "home": "ENG",
+      "away": "BEL",
+      "matchday": 1,
+      "kickoff": "1954-06-17"
+    },
+    {
+      "home": "SUI",
+      "away": "ITA",
+      "matchday": 1,
+      "kickoff": "1954-06-17"
+    },
+    {
+      "home": "BRA",
+      "away": "YUG",
+      "matchday": 2,
+      "kickoff": "1954-06-19"
+    },
+    {
+      "home": "FRA",
+      "away": "MEX",
+      "matchday": 2,
+      "kickoff": "1954-06-19"
+    },
+    {
+      "home": "HUN",
+      "away": "FRG",
+      "matchday": 2,
+      "kickoff": "1954-06-20"
+    },
+    {
+      "home": "TUR",
+      "away": "KOR",
+      "matchday": 2,
+      "kickoff": "1954-06-20"
+    },
+    {
+      "home": "AUT",
+      "away": "TCH",
+      "matchday": 2,
+      "kickoff": "1954-06-19"
+    },
+    {
+      "home": "URU",
+      "away": "SCO",
+      "matchday": 2,
+      "kickoff": "1954-06-19"
+    },
+    {
+      "home": "ENG",
+      "away": "SUI",
+      "matchday": 2,
+      "kickoff": "1954-06-20"
+    },
+    {
+      "home": "ITA",
+      "away": "BEL",
+      "matchday": 2,
+      "kickoff": "1954-06-20"
+    }
+  ]
+}

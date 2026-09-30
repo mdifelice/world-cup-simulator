@@ -178,5 +178,10 @@ reproducible from its seed alone.
   formations/strategies/overrides and replay the same seed to compare outcomes.
 - **Editor** (`/editor`) — browser CRUD over tournaments, phases, teams and
   squads through the REST API (sign in with Google first).
+- `server/scripts/export_db_seed.py` — export the current `wcs.sqlite` back into
+  portable, diffable seed files under `data/db-snapshot/` (one JSON per edition,
+  same schema as `data/seed/`). Because the seed files are the source of truth,
+  the binary database never needs to be committed; to restore a snapshot just
+  `cp data/db-snapshot/*.json data/seed/` and restart.
 - `client/scripts/fetch-oracles.mjs` (`npm run fixtures`) — snapshot the real
   oracles into `client/tests/fixtures/` for the engine regression suite.

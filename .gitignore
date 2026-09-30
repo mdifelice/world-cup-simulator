@@ -20,6 +20,11 @@ build/
 data/*
 !data/seed/
 !data/seed/*.json
+# Portable snapshot of the current DB, exported by scripts/export_db_seed.py.
+# Same seed-file schema as data/seed, so it can be restored with
+# `cp data/db-snapshot/*.json data/seed/` — diffable, unlike the SQLite binary.
+!data/db-snapshot/
+!data/db-snapshot/*.json
 
 pwtest-shots/
 *.tmp

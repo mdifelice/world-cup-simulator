@@ -1,0 +1,7383 @@
+{
+  "teams": [
+    {
+      "name": "Argentina",
+      "code": "ARG",
+      "flag": "🇦🇷",
+      "rating": 88,
+      "group": "A"
+    },
+    {
+      "name": "Belgium",
+      "code": "BEL",
+      "flag": "🇧🇪",
+      "rating": 74,
+      "group": "D"
+    },
+    {
+      "name": "Bolivia",
+      "code": "BOL",
+      "flag": "🇧🇴",
+      "rating": 58,
+      "group": "B"
+    },
+    {
+      "name": "Brazil",
+      "code": "BRA",
+      "flag": "🇧🇷",
+      "rating": 78,
+      "group": "B"
+    },
+    {
+      "name": "Chile",
+      "code": "CHI",
+      "flag": "🇨🇱",
+      "rating": 76,
+      "group": "A"
+    },
+    {
+      "name": "France",
+      "code": "FRA",
+      "flag": "🇫🇷",
+      "rating": 72,
+      "group": "A"
+    },
+    {
+      "name": "Mexico",
+      "code": "MEX",
+      "flag": "🇲🇽",
+      "rating": 62,
+      "group": "A"
+    },
+    {
+      "name": "Paraguay",
+      "code": "PAR",
+      "flag": "🇵🇾",
+      "rating": 62,
+      "group": "D"
+    },
+    {
+      "name": "Peru",
+      "code": "PER",
+      "flag": "🇵🇪",
+      "rating": 68,
+      "group": "C"
+    },
+    {
+      "name": "Romania",
+      "code": "ROU",
+      "flag": "🇷🇴",
+      "rating": 70,
+      "group": "C"
+    },
+    {
+      "name": "United States",
+      "code": "USA",
+      "flag": "🇺🇸",
+      "rating": 80,
+      "group": "D"
+    },
+    {
+      "name": "Uruguay",
+      "code": "URU",
+      "flag": "🇺🇾",
+      "rating": 90,
+      "group": "C"
+    },
+    {
+      "name": "Yugoslavia",
+      "code": "YUG",
+      "flag": "🇷🇸",
+      "rating": 82,
+      "group": "B"
+    }
+  ],
+  "squads": {
+    "ARG": [
+      {
+        "name": "Adolfo Zumelzú",
+        "positions": [
+          "CM!",
+          "LM:75",
+          "CDM:89"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Zumelzu_1929.jpg/330px-Zumelzu_1929.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          78,
+          80,
+          79,
+          80,
+          82,
+          78,
+          78,
+          81,
+          79,
+          79,
+          78,
+          73,
+          76,
+          77,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Alberto Chividini",
+        "positions": [
+          "CB!",
+          "RB:78",
+          "LB:75"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Rivarola_y_Chividini_%28Selecci%C3%B3n_argentina%29_-_El_Gr%C3%A1fico_541.jpg/330px-Rivarola_y_Chividini_%28Selecci%C3%B3n_argentina%29_-_El_Gr%C3%A1fico_541.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          77,
+          80,
+          82,
+          74,
+          77,
+          73,
+          83,
+          75,
+          78,
+          78,
+          77,
+          71,
+          73,
+          82,
+          77,
+          77,
+          78,
+          77
+        ]
+      },
+      {
+        "name": "Alejandro Scopelli",
+        "positions": [
+          "ST!",
+          "CAM:71",
+          "CF:92"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d6/Alejandro_scopelli_retrato_1931.jpg/330px-Alejandro_scopelli_retrato_1931.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          84,
+          79,
+          79,
+          83,
+          80,
+          83,
+          76,
+          80,
+          82,
+          79,
+          79,
+          74,
+          76,
+          80,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "Arico Suárez",
+        "positions": [
+          "CM!",
+          "LM:75"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/9/90/Arico_Su%C3%A1rez.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          77,
+          79,
+          78,
+          79,
+          81,
+          77,
+          77,
+          80,
+          78,
+          78,
+          77,
+          72,
+          75,
+          76,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Attilio Demaría",
+        "positions": [
+          "ST!",
+          "CAM:69",
+          "RW:73",
+          "LW:78"
+        ],
+        "attrs": [
+          92,
+          87,
+          87,
+          91,
+          88,
+          91,
+          84,
+          88,
+          90,
+          87,
+          87,
+          82,
+          84,
+          88,
+          87,
+          86,
+          87,
+          87
+        ]
+      },
+      {
+        "name": "Carlos Peucelle",
+        "positions": [
+          "ST!",
+          "CF:92"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Peucelle_1929.jpg/330px-Peucelle_1929.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Carlos Spadaro",
+        "positions": [
+          "ST!",
+          "CAM:74",
+          "CF:88",
+          "RW:76"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e7/Carlos_spadaro_retrato.jpg/330px-Carlos_spadaro_retrato.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          87,
+          82,
+          82,
+          86,
+          83,
+          86,
+          79,
+          83,
+          85,
+          82,
+          82,
+          77,
+          79,
+          83,
+          82,
+          81,
+          82,
+          82
+        ]
+      },
+      {
+        "name": "Edmundo Piaggio",
+        "positions": [
+          "CB!",
+          "LB:79",
+          "CDM:62",
+          "RB:80"
+        ],
+        "attrs": [
+          83,
+          86,
+          88,
+          80,
+          83,
+          79,
+          89,
+          81,
+          84,
+          84,
+          83,
+          77,
+          79,
+          88,
+          83,
+          83,
+          84,
+          83
+        ]
+      },
+      {
+        "name": "Fernando Paternoster",
+        "positions": [
+          "CB!",
+          "CDM:64",
+          "RB:77"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Fernando_paternoster.jpg/330px-Fernando_paternoster.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          86,
+          88,
+          80,
+          83,
+          79,
+          89,
+          81,
+          84,
+          84,
+          83,
+          77,
+          79,
+          88,
+          83,
+          83,
+          84,
+          83
+        ]
+      },
+      {
+        "name": "Francisco Varallo",
+        "positions": [
+          "ST!",
+          "LW:76"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Varallo_boca_portrait.jpg/330px-Varallo_boca_portrait.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Guillermo Stábile",
+        "positions": [
+          "ST!",
+          "CF:88"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/51/Guillermo_stabile_hincado.jpg/330px-Guillermo_stabile_hincado.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          93,
+          87,
+          84,
+          91,
+          81,
+          96,
+          45,
+          87,
+          94,
+          92,
+          69,
+          61,
+          81,
+          86,
+          88,
+          81,
+          88,
+          88
+        ]
+      },
+      {
+        "name": "José Della Torre",
+        "positions": [
+          "CB!",
+          "CDM:66",
+          "RB:78"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Jose_Della_Torre_1936.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          82,
+          85,
+          87,
+          79,
+          82,
+          78,
+          88,
+          80,
+          83,
+          83,
+          82,
+          76,
+          78,
+          87,
+          82,
+          82,
+          83,
+          82
+        ]
+      },
+      {
+        "name": "Juan Botasso",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/5/58/Juan_Botasso.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          81,
+          82,
+          83,
+          75,
+          78,
+          75,
+          76,
+          79,
+          80,
+          82,
+          86,
+          87,
+          86,
+          84,
+          82,
+          81,
+          83,
+          82
+        ]
+      },
+      {
+        "name": "Juan Evaristo",
+        "positions": [
+          "CM!",
+          "LM:74",
+          "CDM:85"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Juan_Evaristo_-_El_Gr%C3%A1fico_573.jpg/330px-Juan_Evaristo_-_El_Gr%C3%A1fico_573.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          77,
+          79,
+          78,
+          79,
+          81,
+          77,
+          77,
+          80,
+          78,
+          78,
+          77,
+          72,
+          75,
+          76,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Luis Monti",
+        "positions": [
+          "CM!",
+          "CDM:85"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0b/Luis_Monti_1934.jpg/330px-Luis_Monti_1934.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          85,
+          85,
+          78,
+          89,
+          90,
+          85,
+          77,
+          91,
+          88,
+          89,
+          75,
+          72,
+          82,
+          72,
+          87,
+          77,
+          85,
+          89
+        ]
+      },
+      {
+        "name": "Manuel Ferreira",
+        "positions": [
+          "ST!",
+          "RW:75",
+          "LW:78",
+          "CF:87"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/0/02/Manuel-ferreira.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          86,
+          81,
+          81,
+          85,
+          82,
+          85,
+          78,
+          82,
+          84,
+          81,
+          81,
+          76,
+          78,
+          82,
+          81,
+          80,
+          81,
+          81
+        ]
+      },
+      {
+        "name": "Mario Evaristo",
+        "positions": [
+          "ST!",
+          "CAM:70",
+          "CF:90"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/en/c/c2/MarioEvaristo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Ramón Muttis",
+        "positions": [
+          "CB!",
+          "CDM:65"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/9/94/Ramon_muttis.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          84,
+          87,
+          89,
+          81,
+          84,
+          80,
+          90,
+          82,
+          85,
+          85,
+          84,
+          78,
+          80,
+          89,
+          84,
+          84,
+          85,
+          84
+        ]
+      },
+      {
+        "name": "Roberto Cherro",
+        "positions": [
+          "ST!",
+          "LW:76",
+          "CAM:73"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Roberto_cherro_elgrafico_1933.jpg/330px-Roberto_cherro_elgrafico_1933.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          84,
+          79,
+          79,
+          83,
+          80,
+          83,
+          76,
+          80,
+          82,
+          79,
+          79,
+          74,
+          76,
+          80,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "Rodolfo Orlandini",
+        "positions": [
+          "CM!",
+          "CAM:87",
+          "RM:76"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/en/e/e0/Rodolfo_Orlandini.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          82,
+          84,
+          83,
+          84,
+          86,
+          82,
+          82,
+          85,
+          83,
+          83,
+          82,
+          77,
+          80,
+          81,
+          82,
+          81,
+          82,
+          82
+        ]
+      },
+      {
+        "name": "Ángel Bossio",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/AngelBossio-2.jpg/330px-AngelBossio-2.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          86,
+          87,
+          88,
+          80,
+          83,
+          80,
+          81,
+          84,
+          85,
+          87,
+          91,
+          92,
+          91,
+          89,
+          87,
+          86,
+          88,
+          87
+        ]
+      }
+    ],
+    "BEL": [
+      {
+        "name": "Alexis Chantraine",
+        "positions": [
+          "CM!",
+          "LM:77"
+        ],
+        "attrs": [
+          63,
+          65,
+          64,
+          65,
+          67,
+          63,
+          63,
+          66,
+          64,
+          64,
+          63,
+          58,
+          61,
+          62,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "André Saeys",
+        "positions": [
+          "ST!",
+          "RW:76",
+          "LW:79"
+        ],
+        "attrs": [
+          69,
+          64,
+          64,
+          68,
+          65,
+          68,
+          61,
+          65,
+          67,
+          64,
+          64,
+          59,
+          61,
+          65,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Arnold Badjou",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/Bakhuys_in_de_aanval_-_Dutch_soccer_player_Bep_Bakhuys_on_the_offensive_%284681460963%29.jpg/330px-Bakhuys_in_de_aanval_-_Dutch_soccer_player_Bep_Bakhuys_on_the_offensive_%284681460963%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          77,
+          78,
+          70,
+          73,
+          70,
+          71,
+          74,
+          75,
+          77,
+          81,
+          82,
+          81,
+          79,
+          77,
+          76,
+          78,
+          77
+        ]
+      },
+      {
+        "name": "August Hellemans",
+        "positions": [
+          "CM!",
+          "RM:73"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/August_Hellemans.jpg/330px-August_Hellemans.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Bernard Voorhoof",
+        "positions": [
+          "ST!",
+          "LW:73",
+          "CAM:70",
+          "CF:90"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Le_Belge_Bernard_Voorhoof_%28sombre%29_sautant_plus_haut_que_tout_le_monde%2C_lors_du_8e_de_finale_de_Coupe_du_monde_1938%2C_perdu_face_%C3%A0_la_France_%C3%A0_Colombes.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Ferdinand Adams",
+        "positions": [
+          "ST!",
+          "CF:89"
+        ],
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Gérard Delbeke",
+        "positions": [
+          "CM!",
+          "CAM:87",
+          "RM:74"
+        ],
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Henri De Deken",
+        "positions": [
+          "CB!",
+          "RB:78",
+          "LB:81"
+        ],
+        "attrs": [
+          69,
+          72,
+          74,
+          66,
+          69,
+          65,
+          75,
+          67,
+          70,
+          70,
+          69,
+          63,
+          65,
+          74,
+          69,
+          69,
+          70,
+          69
+        ]
+      },
+      {
+        "name": "Jacques Moeschal",
+        "positions": [
+          "ST!",
+          "CF:91",
+          "RW:79",
+          "LW:74"
+        ],
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Jan Diddens",
+        "positions": [
+          "ST!",
+          "RW:79",
+          "LW:74",
+          "CAM:71"
+        ],
+        "attrs": [
+          69,
+          64,
+          64,
+          68,
+          65,
+          68,
+          61,
+          65,
+          67,
+          64,
+          64,
+          59,
+          61,
+          65,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Jean De Bie",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/0/0a/JeanDeBie.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          68,
+          69,
+          70,
+          62,
+          65,
+          62,
+          63,
+          66,
+          67,
+          69,
+          73,
+          74,
+          73,
+          71,
+          69,
+          68,
+          70,
+          69
+        ]
+      },
+      {
+        "name": "Jean De Clercq",
+        "positions": [
+          "CM!",
+          "RM:77",
+          "LM:72"
+        ],
+        "attrs": [
+          72,
+          74,
+          73,
+          74,
+          76,
+          72,
+          72,
+          75,
+          73,
+          73,
+          72,
+          67,
+          70,
+          71,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Jean De Clerq",
+        "positions": [
+          "CM!",
+          "LM:76",
+          "CDM:89"
+        ],
+        "attrs": [
+          74,
+          76,
+          75,
+          76,
+          78,
+          74,
+          74,
+          77,
+          75,
+          75,
+          74,
+          69,
+          72,
+          73,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Louis Versyp",
+        "positions": [
+          "ST!",
+          "RW:74",
+          "LW:73",
+          "CAM:70"
+        ],
+        "attrs": [
+          79,
+          74,
+          74,
+          78,
+          75,
+          78,
+          71,
+          75,
+          77,
+          74,
+          74,
+          69,
+          71,
+          75,
+          74,
+          73,
+          74,
+          74
+        ]
+      },
+      {
+        "name": "Nicolas Hoydonckx",
+        "positions": [
+          "CB!",
+          "CDM:61",
+          "RB:75",
+          "LB:76"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Nicolas_Hoydonckx.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          69,
+          72,
+          74,
+          66,
+          69,
+          65,
+          75,
+          67,
+          70,
+          70,
+          69,
+          63,
+          65,
+          74,
+          69,
+          69,
+          70,
+          69
+        ]
+      },
+      {
+        "name": "Nikolaas Hoydonckx",
+        "positions": [
+          "CM!",
+          "LM:76"
+        ],
+        "attrs": [
+          65,
+          67,
+          66,
+          67,
+          69,
+          65,
+          65,
+          68,
+          66,
+          66,
+          65,
+          60,
+          63,
+          64,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Pierre Braine",
+        "positions": [
+          "CM!",
+          "LM:73",
+          "CDM:83"
+        ],
+        "attrs": [
+          66,
+          68,
+          67,
+          68,
+          70,
+          66,
+          66,
+          69,
+          67,
+          67,
+          66,
+          61,
+          64,
+          65,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Théodore Nouwens",
+        "positions": [
+          "CB!",
+          "LB:76",
+          "CDM:61"
+        ],
+        "attrs": [
+          68,
+          71,
+          73,
+          65,
+          68,
+          64,
+          74,
+          66,
+          69,
+          69,
+          68,
+          62,
+          64,
+          73,
+          68,
+          68,
+          69,
+          68
+        ]
+      }
+    ],
+    "BOL": [
+      {
+        "name": "Casiano Chavarría",
+        "positions": [
+          "CB!",
+          "RB:80"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ab/Casiano_Chavarr%C3%ADa.png/330px-Casiano_Chavarr%C3%ADa.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          51,
+          54,
+          56,
+          48,
+          51,
+          47,
+          57,
+          49,
+          52,
+          52,
+          51,
+          45,
+          47,
+          56,
+          51,
+          51,
+          52,
+          51
+        ]
+      },
+      {
+        "name": "Constantino Noya",
+        "positions": [
+          "CM!",
+          "CDM:89",
+          "CAM:82",
+          "RM:73"
+        ],
+        "attrs": [
+          58,
+          60,
+          59,
+          60,
+          62,
+          58,
+          58,
+          61,
+          59,
+          59,
+          58,
+          53,
+          56,
+          57,
+          58,
+          57,
+          58,
+          58
+        ]
+      },
+      {
+        "name": "Diógenes Lara",
+        "positions": [
+          "CM!",
+          "LM:73",
+          "CAM:82"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/Di%C3%B3genes_Lara%2C_Estadio%2C_1946-02-02_%28142%29.jpg/330px-Di%C3%B3genes_Lara%2C_Estadio%2C_1946-02-02_%28142%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          58,
+          60,
+          59,
+          60,
+          62,
+          58,
+          58,
+          61,
+          59,
+          59,
+          58,
+          53,
+          56,
+          57,
+          58,
+          57,
+          58,
+          58
+        ]
+      },
+      {
+        "name": "Eduardo Reyes Ortiz",
+        "positions": [
+          "ST!",
+          "RW:75",
+          "LW:77",
+          "CF:88"
+        ],
+        "attrs": [
+          55,
+          50,
+          50,
+          54,
+          51,
+          54,
+          47,
+          51,
+          53,
+          50,
+          50,
+          45,
+          47,
+          51,
+          50,
+          49,
+          50,
+          50
+        ]
+      },
+      {
+        "name": "Gumercindo Gómez",
+        "positions": [
+          "ST!",
+          "LW:73"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          66,
+          61,
+          61,
+          65,
+          62,
+          65,
+          58,
+          62,
+          64,
+          61,
+          61,
+          56,
+          58,
+          62,
+          61,
+          60,
+          61,
+          61
+        ]
+      },
+      {
+        "name": "Jesús Bermúdez",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Jes%C3%BAs_Berm%C3%BAdez.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          54,
+          55,
+          56,
+          48,
+          51,
+          48,
+          49,
+          52,
+          53,
+          55,
+          59,
+          60,
+          59,
+          57,
+          55,
+          54,
+          56,
+          55
+        ]
+      },
+      {
+        "name": "Jorge Argote",
+        "positions": [
+          "CM!",
+          "RM:74"
+        ],
+        "attrs": [
+          56,
+          58,
+          57,
+          58,
+          60,
+          56,
+          56,
+          59,
+          57,
+          57,
+          56,
+          51,
+          54,
+          55,
+          56,
+          55,
+          56,
+          56
+        ]
+      },
+      {
+        "name": "Jorge Balderrama",
+        "positions": [
+          "CM!",
+          "LM:77",
+          "CAM:86",
+          "RM:77"
+        ],
+        "attrs": [
+          59,
+          61,
+          60,
+          61,
+          63,
+          59,
+          59,
+          62,
+          60,
+          60,
+          59,
+          54,
+          57,
+          58,
+          59,
+          58,
+          59,
+          59
+        ]
+      },
+      {
+        "name": "Jorge Valderrama",
+        "positions": [
+          "CM!",
+          "RM:77",
+          "LM:74",
+          "CDM:85"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          55,
+          57,
+          56,
+          57,
+          59,
+          55,
+          55,
+          58,
+          56,
+          56,
+          55,
+          50,
+          53,
+          54,
+          55,
+          54,
+          55,
+          55
+        ]
+      },
+      {
+        "name": "José Bustamante",
+        "positions": [
+          "ST!",
+          "LW:74"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          63,
+          58,
+          58,
+          62,
+          59,
+          62,
+          55,
+          59,
+          61,
+          58,
+          58,
+          53,
+          55,
+          59,
+          58,
+          57,
+          58,
+          58
+        ]
+      },
+      {
+        "name": "Juan Argote",
+        "positions": [
+          "CM!",
+          "RM:76",
+          "LM:75"
+        ],
+        "attrs": [
+          54,
+          56,
+          55,
+          56,
+          58,
+          54,
+          54,
+          57,
+          55,
+          55,
+          54,
+          49,
+          52,
+          53,
+          54,
+          53,
+          54,
+          54
+        ]
+      },
+      {
+        "name": "Luis Reyes",
+        "positions": [
+          "CB!",
+          "LB:76",
+          "CDM:61"
+        ],
+        "attrs": [
+          58,
+          61,
+          63,
+          55,
+          58,
+          54,
+          64,
+          56,
+          59,
+          59,
+          58,
+          52,
+          54,
+          63,
+          58,
+          58,
+          59,
+          58
+        ]
+      },
+      {
+        "name": "Mario Alborta",
+        "positions": [
+          "ST!",
+          "RW:73"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          66,
+          61,
+          61,
+          65,
+          62,
+          65,
+          58,
+          62,
+          64,
+          61,
+          61,
+          56,
+          58,
+          62,
+          61,
+          60,
+          61,
+          61
+        ]
+      },
+      {
+        "name": "Miguel Brito",
+        "positions": [
+          "CM!",
+          "LM:72"
+        ],
+        "attrs": [
+          57,
+          59,
+          58,
+          59,
+          61,
+          57,
+          57,
+          60,
+          58,
+          58,
+          57,
+          52,
+          55,
+          56,
+          57,
+          56,
+          57,
+          57
+        ]
+      },
+      {
+        "name": "Miguel Murillo",
+        "positions": [
+          "GK!"
+        ],
+        "attrs": [
+          63,
+          64,
+          65,
+          57,
+          60,
+          57,
+          58,
+          61,
+          62,
+          64,
+          68,
+          69,
+          68,
+          66,
+          64,
+          63,
+          65,
+          64
+        ]
+      },
+      {
+        "name": "Rafael Méndez",
+        "positions": [
+          "ST!",
+          "CF:87",
+          "RW:74"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          55,
+          50,
+          50,
+          54,
+          51,
+          54,
+          47,
+          51,
+          53,
+          50,
+          50,
+          45,
+          47,
+          51,
+          50,
+          49,
+          50,
+          50
+        ]
+      },
+      {
+        "name": "Renato Sáinz",
+        "positions": [
+          "CM!",
+          "RM:74"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Renato_sainz_loza.jpg/330px-Renato_sainz_loza.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          50,
+          52,
+          51,
+          52,
+          54,
+          50,
+          50,
+          53,
+          51,
+          51,
+          50,
+          45,
+          48,
+          49,
+          50,
+          49,
+          50,
+          50
+        ]
+      },
+      {
+        "name": "René Fernández",
+        "positions": [
+          "ST!",
+          "CF:93",
+          "RW:78"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Bolivia_1930.jpg/330px-Bolivia_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          63,
+          58,
+          58,
+          62,
+          59,
+          62,
+          55,
+          59,
+          61,
+          58,
+          58,
+          53,
+          55,
+          59,
+          58,
+          57,
+          58,
+          58
+        ]
+      },
+      {
+        "name": "Segundo Durandal",
+        "positions": [
+          "CB!",
+          "LB:81"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Segundo_Durandal.png/330px-Segundo_Durandal.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          57,
+          60,
+          62,
+          54,
+          57,
+          53,
+          63,
+          55,
+          58,
+          58,
+          57,
+          51,
+          53,
+          62,
+          57,
+          57,
+          58,
+          57
+        ]
+      }
+    ],
+    "BRA": [
+      {
+        "name": "Araken",
+        "positions": [
+          "ST!",
+          "CAM:71",
+          "CF:89",
+          "RW:73"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/1/15/Araken_Patusca_%281933%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Benedicto",
+        "positions": [
+          "ST!",
+          "CF:88",
+          "RW:73"
+        ],
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Brilhante",
+        "positions": [
+          "CB!",
+          "LB:75",
+          "CDM:62"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/Brasil_-_Mundial_-_1930.jpg/330px-Brasil_-_Mundial_-_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          68,
+          71,
+          73,
+          65,
+          68,
+          64,
+          74,
+          66,
+          69,
+          69,
+          68,
+          62,
+          64,
+          73,
+          68,
+          68,
+          69,
+          68
+        ]
+      },
+      {
+        "name": "Carvalho Leite",
+        "positions": [
+          "ST!",
+          "LW:78",
+          "CAM:73",
+          "CF:89"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/39/Carvalho_Leite.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Fausto",
+        "positions": [
+          "CB!",
+          "CDM:66",
+          "RB:81",
+          "LB:78"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/CR_Vasco_da_Gama_1929.jpg/330px-CR_Vasco_da_Gama_1929.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          79,
+          81,
+          73,
+          76,
+          72,
+          82,
+          74,
+          77,
+          77,
+          76,
+          70,
+          72,
+          81,
+          76,
+          76,
+          77,
+          76
+        ]
+      },
+      {
+        "name": "Fernando",
+        "positions": [
+          "CM!",
+          "LM:73"
+        ],
+        "attrs": [
+          66,
+          68,
+          67,
+          68,
+          70,
+          66,
+          66,
+          69,
+          67,
+          67,
+          66,
+          61,
+          64,
+          65,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Fortes",
+        "positions": [
+          "CM!",
+          "LM:73"
+        ],
+        "attrs": [
+          78,
+          80,
+          79,
+          80,
+          82,
+          78,
+          78,
+          81,
+          79,
+          79,
+          78,
+          73,
+          76,
+          77,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Hermógenes",
+        "positions": [
+          "CB!",
+          "LB:80"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/Brasil_-_Mundial_-_1930.jpg/330px-Brasil_-_Mundial_-_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          73,
+          76,
+          78,
+          70,
+          73,
+          69,
+          79,
+          71,
+          74,
+          74,
+          73,
+          67,
+          69,
+          78,
+          73,
+          73,
+          74,
+          73
+        ]
+      },
+      {
+        "name": "Itália",
+        "positions": [
+          "CB!",
+          "LB:75",
+          "CDM:66"
+        ],
+        "attrs": [
+          72,
+          75,
+          77,
+          69,
+          72,
+          68,
+          78,
+          70,
+          73,
+          73,
+          72,
+          66,
+          68,
+          77,
+          72,
+          72,
+          73,
+          72
+        ]
+      },
+      {
+        "name": "Ivan Mariz",
+        "positions": [
+          "CM!",
+          "LM:73",
+          "CAM:84"
+        ],
+        "attrs": [
+          78,
+          80,
+          79,
+          80,
+          82,
+          78,
+          78,
+          81,
+          79,
+          79,
+          78,
+          73,
+          76,
+          77,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Joel",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Joel%2C_Los_Sports%2C_1930-08-01_%28386%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          79,
+          80,
+          81,
+          73,
+          76,
+          73,
+          74,
+          77,
+          78,
+          80,
+          84,
+          85,
+          84,
+          82,
+          80,
+          79,
+          81,
+          80
+        ]
+      },
+      {
+        "name": "Manoelzinho",
+        "positions": [
+          "ST!",
+          "CAM:73",
+          "CF:91"
+        ],
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Moderato",
+        "positions": [
+          "ST!",
+          "LW:77"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Moderato_Wisintainer_-_1931.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Nilo",
+        "positions": [
+          "ST!",
+          "CF:88"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Nilo_Murtinho_Braga_1929.jpg/330px-Nilo_Murtinho_Braga_1929.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Oscarino",
+        "positions": [
+          "CM!",
+          "LM:71",
+          "CDM:88"
+        ],
+        "attrs": [
+          71,
+          73,
+          72,
+          73,
+          75,
+          71,
+          71,
+          74,
+          72,
+          72,
+          71,
+          66,
+          69,
+          70,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Pamplona",
+        "positions": [
+          "CM!",
+          "RM:72",
+          "CDM:87"
+        ],
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Poly",
+        "positions": [
+          "ST!",
+          "CAM:70"
+        ],
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Preguinho",
+        "positions": [
+          "ST!",
+          "CAM:75"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/25/Ef_preguinho.jpg/330px-Ef_preguinho.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Russinho",
+        "positions": [
+          "ST!",
+          "LW:77"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Russinho_%28DdN%2C_19350524-6%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Teóphilo",
+        "positions": [
+          "ST!",
+          "CAM:71"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/Jaksic_Mihajlovic_Theophilo.jpg/330px-Jaksic_Mihajlovic_Theophilo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Velloso",
+        "positions": [
+          "GK!"
+        ],
+        "attrs": [
+          73,
+          74,
+          75,
+          67,
+          70,
+          67,
+          68,
+          71,
+          72,
+          74,
+          78,
+          79,
+          78,
+          76,
+          74,
+          73,
+          75,
+          74
+        ]
+      },
+      {
+        "name": "Zé Luiz",
+        "positions": [
+          "CB!",
+          "RB:78",
+          "LB:81",
+          "CDM:67"
+        ],
+        "attrs": [
+          69,
+          72,
+          74,
+          66,
+          69,
+          65,
+          75,
+          67,
+          70,
+          70,
+          69,
+          63,
+          65,
+          74,
+          69,
+          69,
+          70,
+          69
+        ]
+      }
+    ],
+    "CHI": [
+      {
+        "name": "Arturo Coddou",
+        "positions": [
+          "CM!",
+          "CDM:86"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7d/Arturo_Coddou%2C_Los_Sports%2C_1930-06-20_%28378%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          65,
+          67,
+          66,
+          67,
+          69,
+          65,
+          65,
+          68,
+          66,
+          66,
+          65,
+          60,
+          63,
+          64,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Arturo Torres",
+        "positions": [
+          "CM!",
+          "LM:71",
+          "CDM:83",
+          "CAM:82"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/5/52/Arturo_Torres%2C_Los_Sports%2C_1928-06-01_%28273%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          66,
+          68,
+          67,
+          68,
+          70,
+          66,
+          66,
+          69,
+          67,
+          67,
+          66,
+          61,
+          64,
+          65,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Carlos Schneberger",
+        "positions": [
+          "CM!",
+          "CDM:87"
+        ],
+        "attrs": [
+          70,
+          72,
+          71,
+          72,
+          74,
+          70,
+          70,
+          73,
+          71,
+          71,
+          70,
+          65,
+          68,
+          69,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Carlos Schneeberger",
+        "positions": [
+          "ST!",
+          "CF:91",
+          "RW:79"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Carlos_Schneeberger%2C_Los_Sports%2C_1927-01-07_%28200%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Carlos Vidal",
+        "positions": [
+          "ST!",
+          "CF:89"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Carlos_Vidal%2C_Estadio%2C_1944-04-21_%2868%29_01.jpg/330px-Carlos_Vidal%2C_Estadio%2C_1944-04-21_%2868%29_01.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Casimiro Torres",
+        "positions": [
+          "CM!",
+          "CDM:88",
+          "CAM:85"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Casimiro_Torres%2C_Estadio%2C_1950-02-11_%28352%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          66,
+          68,
+          67,
+          68,
+          70,
+          66,
+          66,
+          69,
+          67,
+          67,
+          66,
+          61,
+          64,
+          65,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "César Espinoza",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/C%C3%A9sar_Espinoza%2C_Los_Sports%2C_1929-11-01_%28347%29.jpg/330px-C%C3%A9sar_Espinoza%2C_Los_Sports%2C_1929-11-01_%28347%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          74,
+          75,
+          76,
+          68,
+          71,
+          68,
+          69,
+          72,
+          73,
+          75,
+          79,
+          80,
+          79,
+          77,
+          75,
+          74,
+          76,
+          75
+        ]
+      },
+      {
+        "name": "Eberardo Villalobos",
+        "positions": [
+          "ST!",
+          "LW:78",
+          "CF:87",
+          "RW:76"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Eberardo_Villalobos%2C_Los_Sports%2C_1930-06-20_%28378%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Ernesto Chaparro",
+        "positions": [
+          "CB!",
+          "RB:76",
+          "LB:77"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a4/Ernesto_Chaparro_%281928%29.png/330px-Ernesto_Chaparro_%281928%29.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          69,
+          72,
+          74,
+          66,
+          69,
+          65,
+          75,
+          67,
+          70,
+          70,
+          69,
+          63,
+          65,
+          74,
+          69,
+          69,
+          70,
+          69
+        ]
+      },
+      {
+        "name": "Guillermo Arellano",
+        "positions": [
+          "ST!",
+          "RW:74"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/5/5b/Guillermo_Arellano%2C_Los_Sports%2C_1930-06-20_%28378%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Guillermo Riveros",
+        "positions": [
+          "CB!",
+          "CDM:63"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Guillermo_Riveros%2C_Estadio%2C_1943-06-18_%2846%29.jpg/330px-Guillermo_Riveros%2C_Estadio%2C_1943-06-18_%2846%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          66,
+          69,
+          71,
+          63,
+          66,
+          62,
+          72,
+          64,
+          67,
+          67,
+          66,
+          60,
+          62,
+          71,
+          66,
+          66,
+          67,
+          66
+        ]
+      },
+      {
+        "name": "Guillermo Saavedra",
+        "positions": [
+          "CM!",
+          "CDM:88",
+          "CAM:87"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Guillermo_Saavedra%2C_Los_Sports%2C_1927-07-29_%28229%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          64,
+          66,
+          65,
+          66,
+          68,
+          64,
+          64,
+          67,
+          65,
+          65,
+          64,
+          59,
+          62,
+          63,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Guillermo Subiabre",
+        "positions": [
+          "ST!",
+          "RW:78",
+          "LW:77"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Guillermo_Subiabre%2C_Los_Sports%2C_1928-06-01_%28273%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Horacio Muñoz",
+        "positions": [
+          "CB!",
+          "RB:77"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Horacio_Mu%C3%B1oz%2C_Los_Sports%2C_1925-05-29_%28116%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          64,
+          67,
+          69,
+          61,
+          64,
+          60,
+          70,
+          62,
+          65,
+          65,
+          64,
+          58,
+          60,
+          69,
+          64,
+          64,
+          65,
+          64
+        ]
+      },
+      {
+        "name": "Humberto Elgueta",
+        "positions": [
+          "CM!",
+          "CDM:86",
+          "CAM:81"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Humberto_Elgueta%2C_Los_Sports%2C_1925-06-05_%28117%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          70,
+          72,
+          71,
+          72,
+          74,
+          70,
+          70,
+          73,
+          71,
+          71,
+          70,
+          65,
+          68,
+          69,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Juan Aguilera",
+        "positions": [
+          "ST!",
+          "CF:90",
+          "RW:73"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/2/27/Juan-aguilera-chile-1930.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Roberto Cortés",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Viejito_Cort%C3%A9s_-_1934.jpg/330px-Viejito_Cort%C3%A9s_-_1934.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          72,
+          73,
+          65,
+          68,
+          65,
+          66,
+          69,
+          70,
+          72,
+          76,
+          77,
+          76,
+          74,
+          72,
+          71,
+          73,
+          72
+        ]
+      },
+      {
+        "name": "Tomás Ojeda",
+        "positions": [
+          "ST!",
+          "LW:79"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/37/Tom%C3%A1s_Ojeda%2C_Los_Sports%2C_1930-06-20_%28378%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          72,
+          67,
+          67,
+          71,
+          68,
+          71,
+          64,
+          68,
+          70,
+          67,
+          67,
+          62,
+          64,
+          68,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Ulises Poirier",
+        "positions": [
+          "CB!",
+          "LB:81",
+          "RB:79"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/0/0b/Ulises_Poirier%2C_Estadio%2C_1948-05-22_%28262%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          70,
+          73,
+          75,
+          67,
+          70,
+          66,
+          76,
+          68,
+          71,
+          71,
+          70,
+          64,
+          66,
+          75,
+          70,
+          70,
+          71,
+          70
+        ]
+      },
+      {
+        "name": "Víctor Morales",
+        "positions": [
+          "CB!",
+          "RB:81",
+          "LB:81"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/9/9d/V%C3%ADctor_Morales%2C_Los_Sports%2C_1928-06-01_%28273%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          62,
+          65,
+          67,
+          59,
+          62,
+          58,
+          68,
+          60,
+          63,
+          63,
+          62,
+          56,
+          58,
+          67,
+          62,
+          62,
+          63,
+          62
+        ]
+      }
+    ],
+    "FRA": [
+      {
+        "name": "Alex Thépot",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Alex_Th%C3%A9pot_en_f%C3%A9vrier_1941.jpg/330px-Alex_Th%C3%A9pot_en_f%C3%A9vrier_1941.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          74,
+          75,
+          76,
+          68,
+          71,
+          68,
+          69,
+          72,
+          73,
+          75,
+          79,
+          80,
+          79,
+          77,
+          75,
+          74,
+          76,
+          75
+        ]
+      },
+      {
+        "name": "Alexandre Villaplane",
+        "positions": [
+          "CM!",
+          "CDM:89"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/1/19/AlexVillaplane_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          63,
+          65,
+          64,
+          65,
+          67,
+          63,
+          63,
+          66,
+          64,
+          64,
+          63,
+          58,
+          61,
+          62,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "André Maschinot",
+        "positions": [
+          "ST!",
+          "RW:79",
+          "CAM:70",
+          "CF:87"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/6/63/Andr%C3%A9_Maschinot.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "André Tassin",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Andr%C3%A9_Tassin_1930.jpg/330px-Andr%C3%A9_Tassin_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          70,
+          71,
+          72,
+          64,
+          67,
+          64,
+          65,
+          68,
+          69,
+          71,
+          75,
+          76,
+          75,
+          73,
+          71,
+          70,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Augustin Chantrel",
+        "positions": [
+          "CM!",
+          "CDM:89",
+          "CAM:87"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Augustin_Chantrel_1925.jpg/330px-Augustin_Chantrel_1925.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          62,
+          64,
+          63,
+          64,
+          66,
+          62,
+          62,
+          65,
+          63,
+          63,
+          62,
+          57,
+          60,
+          61,
+          62,
+          61,
+          62,
+          62
+        ]
+      },
+      {
+        "name": "Célestin Delmer",
+        "positions": [
+          "CM!",
+          "CAM:82"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Chile_v_Francia%2C_Los_Sports%2C_1930-08-01_%28386%29_02.jpg/330px-Chile_v_Francia%2C_Los_Sports%2C_1930-08-01_%28386%29_02.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          62,
+          64,
+          63,
+          64,
+          66,
+          62,
+          62,
+          65,
+          63,
+          63,
+          62,
+          57,
+          60,
+          61,
+          62,
+          61,
+          62,
+          62
+        ]
+      },
+      {
+        "name": "Edmond Delfour",
+        "positions": [
+          "CM!",
+          "CDM:84"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/37/Edmond_Delfour_en_mai_1936.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          64,
+          66,
+          65,
+          66,
+          68,
+          64,
+          64,
+          67,
+          65,
+          65,
+          64,
+          59,
+          62,
+          63,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Ernest Libérati",
+        "positions": [
+          "ST!",
+          "CF:93",
+          "LW:78"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Ernest_Lib%C3%A9rati_1930_Colombes.jpg/330px-Ernest_Lib%C3%A9rati_1930_Colombes.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Jean Laurent",
+        "positions": [
+          "CB!",
+          "CDM:66",
+          "RB:81",
+          "LB:80"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Jean_Laurent_1935.jpg/330px-Jean_Laurent_1935.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          65,
+          68,
+          70,
+          62,
+          65,
+          61,
+          71,
+          63,
+          66,
+          66,
+          65,
+          59,
+          61,
+          70,
+          65,
+          65,
+          66,
+          65
+        ]
+      },
+      {
+        "name": "Lucien Laurent",
+        "positions": [
+          "ST!",
+          "LW:79"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Lucien_Laurent.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          70,
+          65,
+          65,
+          69,
+          66,
+          69,
+          62,
+          66,
+          68,
+          65,
+          65,
+          60,
+          62,
+          66,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Marcel Capelle",
+        "positions": [
+          "CB!",
+          "RB:79",
+          "LB:76"
+        ],
+        "attrs": [
+          70,
+          73,
+          75,
+          67,
+          70,
+          66,
+          76,
+          68,
+          71,
+          71,
+          70,
+          64,
+          66,
+          75,
+          70,
+          70,
+          71,
+          70
+        ]
+      },
+      {
+        "name": "Marcel Langiller",
+        "positions": [
+          "ST!",
+          "LW:74",
+          "CAM:74"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Lucien_Laurent%2C_Marcel_Langiller%2C_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Marcel Pinel",
+        "positions": [
+          "ST!",
+          "CF:93",
+          "RW:76"
+        ],
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Numa Andoire",
+        "positions": [
+          "CB!",
+          "LB:76",
+          "CDM:64"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/Numa_Andoire_1931.jpg/330px-Numa_Andoire_1931.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          65,
+          68,
+          70,
+          62,
+          65,
+          61,
+          71,
+          63,
+          66,
+          66,
+          65,
+          59,
+          61,
+          70,
+          65,
+          65,
+          66,
+          65
+        ]
+      },
+      {
+        "name": "Émile Veinante",
+        "positions": [
+          "ST!",
+          "CAM:74",
+          "CF:88"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d7/%C3%89mile_Veinante_en_octobre_1937.jpg/330px-%C3%89mile_Veinante_en_octobre_1937.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          72,
+          67,
+          67,
+          71,
+          68,
+          71,
+          64,
+          68,
+          70,
+          67,
+          67,
+          62,
+          64,
+          68,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Étienne Mattler",
+        "positions": [
+          "CB!",
+          "CDM:66",
+          "RB:79",
+          "LB:79"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/%C3%89tienne_Mattler_en_octobre_1937.jpg/330px-%C3%89tienne_Mattler_en_octobre_1937.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          63,
+          66,
+          68,
+          60,
+          63,
+          59,
+          69,
+          61,
+          64,
+          64,
+          63,
+          57,
+          59,
+          68,
+          63,
+          63,
+          64,
+          63
+        ]
+      }
+    ],
+    "MEX": [
+      {
+        "name": "Alfredo Sánchez",
+        "positions": [
+          "CM!",
+          "LM:77",
+          "CDM:89",
+          "RM:76"
+        ],
+        "attrs": [
+          54,
+          56,
+          55,
+          56,
+          58,
+          54,
+          54,
+          57,
+          55,
+          55,
+          54,
+          49,
+          52,
+          53,
+          54,
+          53,
+          54,
+          54
+        ]
+      },
+      {
+        "name": "Dionisio Mejía",
+        "positions": [
+          "ST!",
+          "CAM:73",
+          "RW:78"
+        ],
+        "attrs": [
+          66,
+          61,
+          61,
+          65,
+          62,
+          65,
+          58,
+          62,
+          64,
+          61,
+          61,
+          56,
+          58,
+          62,
+          61,
+          60,
+          61,
+          61
+        ]
+      },
+      {
+        "name": "Efraín Amézcua",
+        "positions": [
+          "CM!",
+          "CDM:86"
+        ],
+        "attrs": [
+          62,
+          64,
+          63,
+          64,
+          66,
+          62,
+          62,
+          65,
+          63,
+          63,
+          62,
+          57,
+          60,
+          61,
+          62,
+          61,
+          62,
+          62
+        ]
+      },
+      {
+        "name": "Felipe Olivares",
+        "positions": [
+          "ST!",
+          "RW:76"
+        ],
+        "attrs": [
+          62,
+          57,
+          57,
+          61,
+          58,
+          61,
+          54,
+          58,
+          60,
+          57,
+          57,
+          52,
+          54,
+          58,
+          57,
+          56,
+          57,
+          57
+        ]
+      },
+      {
+        "name": "Felipe Rosas",
+        "positions": [
+          "CM!",
+          "CAM:87",
+          "LM:74",
+          "CDM:83"
+        ],
+        "attrs": [
+          64,
+          66,
+          65,
+          66,
+          68,
+          64,
+          64,
+          67,
+          65,
+          65,
+          64,
+          59,
+          62,
+          63,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Francisco Garza",
+        "positions": [
+          "CB!",
+          "CDM:61",
+          "LB:80"
+        ],
+        "attrs": [
+          61,
+          64,
+          66,
+          58,
+          61,
+          57,
+          67,
+          59,
+          62,
+          62,
+          61,
+          55,
+          57,
+          66,
+          61,
+          61,
+          62,
+          61
+        ]
+      },
+      {
+        "name": "Francisco Garza Gutierrez",
+        "positions": [
+          "CM!",
+          "RM:71"
+        ],
+        "attrs": [
+          56,
+          58,
+          57,
+          58,
+          60,
+          56,
+          56,
+          59,
+          57,
+          57,
+          56,
+          51,
+          54,
+          55,
+          56,
+          55,
+          56,
+          56
+        ]
+      },
+      {
+        "name": "Hilario López",
+        "positions": [
+          "ST!",
+          "LW:78",
+          "CAM:70",
+          "CF:87"
+        ],
+        "attrs": [
+          69,
+          64,
+          64,
+          68,
+          65,
+          68,
+          61,
+          65,
+          67,
+          64,
+          64,
+          59,
+          61,
+          65,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Isidoro Sota",
+        "positions": [
+          "GK!"
+        ],
+        "attrs": [
+          65,
+          66,
+          67,
+          59,
+          62,
+          59,
+          60,
+          63,
+          64,
+          66,
+          70,
+          71,
+          70,
+          68,
+          66,
+          65,
+          67,
+          66
+        ]
+      },
+      {
+        "name": "Jesús Castro",
+        "positions": [
+          "ST!",
+          "LW:77",
+          "CAM:71"
+        ],
+        "attrs": [
+          68,
+          63,
+          63,
+          67,
+          64,
+          67,
+          60,
+          64,
+          66,
+          63,
+          63,
+          58,
+          60,
+          64,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "José Ruíz",
+        "positions": [
+          "ST!",
+          "LW:79",
+          "CAM:74",
+          "CF:91"
+        ],
+        "attrs": [
+          61,
+          56,
+          56,
+          60,
+          57,
+          60,
+          53,
+          57,
+          59,
+          56,
+          56,
+          51,
+          53,
+          57,
+          56,
+          55,
+          56,
+          56
+        ]
+      },
+      {
+        "name": "Juan Carreño",
+        "positions": [
+          "ST!",
+          "CAM:71",
+          "CF:87"
+        ],
+        "attrs": [
+          68,
+          63,
+          63,
+          67,
+          64,
+          67,
+          60,
+          64,
+          66,
+          63,
+          63,
+          58,
+          60,
+          64,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "Luis Pérez",
+        "positions": [
+          "ST!",
+          "CAM:70"
+        ],
+        "attrs": [
+          66,
+          61,
+          61,
+          65,
+          62,
+          65,
+          58,
+          62,
+          64,
+          61,
+          61,
+          56,
+          58,
+          62,
+          61,
+          60,
+          61,
+          61
+        ]
+      },
+      {
+        "name": "Manuel Rosas",
+        "positions": [
+          "CB!",
+          "CDM:65"
+        ],
+        "attrs": [
+          63,
+          66,
+          68,
+          60,
+          63,
+          59,
+          69,
+          61,
+          64,
+          64,
+          63,
+          57,
+          59,
+          68,
+          63,
+          63,
+          64,
+          63
+        ]
+      },
+      {
+        "name": "Rafael Garza",
+        "positions": [
+          "CB!",
+          "CDM:61"
+        ],
+        "attrs": [
+          58,
+          61,
+          63,
+          55,
+          58,
+          54,
+          64,
+          56,
+          59,
+          59,
+          58,
+          52,
+          54,
+          63,
+          58,
+          58,
+          59,
+          58
+        ]
+      },
+      {
+        "name": "Raimundo Rodriguez",
+        "positions": [
+          "CM!",
+          "CAM:86",
+          "RM:77",
+          "CDM:83"
+        ],
+        "attrs": [
+          57,
+          59,
+          58,
+          59,
+          61,
+          57,
+          57,
+          60,
+          58,
+          58,
+          57,
+          52,
+          55,
+          56,
+          57,
+          56,
+          57,
+          57
+        ]
+      },
+      {
+        "name": "Raymundo Rodríguez",
+        "positions": [
+          "CM!",
+          "LM:73",
+          "CAM:87"
+        ],
+        "attrs": [
+          55,
+          57,
+          56,
+          57,
+          59,
+          55,
+          55,
+          58,
+          56,
+          56,
+          55,
+          50,
+          53,
+          54,
+          55,
+          54,
+          55,
+          55
+        ]
+      },
+      {
+        "name": "Roberto Gayón",
+        "positions": [
+          "ST!",
+          "CAM:74"
+        ],
+        "attrs": [
+          65,
+          60,
+          60,
+          64,
+          61,
+          64,
+          57,
+          61,
+          63,
+          60,
+          60,
+          55,
+          57,
+          61,
+          60,
+          59,
+          60,
+          60
+        ]
+      },
+      {
+        "name": "Óscar Bonfiglio",
+        "positions": [
+          "GK!"
+        ],
+        "attrs": [
+          62,
+          63,
+          64,
+          56,
+          59,
+          56,
+          57,
+          60,
+          61,
+          63,
+          67,
+          68,
+          67,
+          65,
+          63,
+          62,
+          64,
+          63
+        ]
+      }
+    ],
+    "PAR": [
+      {
+        "name": "Amadeo Ortega",
+        "positions": [
+          "ST!",
+          "CF:93"
+        ],
+        "attrs": [
+          69,
+          64,
+          64,
+          68,
+          65,
+          68,
+          61,
+          65,
+          67,
+          64,
+          64,
+          59,
+          61,
+          65,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Aurelio González",
+        "positions": [
+          "ST!",
+          "RW:77",
+          "LW:74",
+          "CF:91"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/18/Gonz%C3%A1lez_%28selecci%C3%B3n_paraguaya%29_-_El_Gr%C3%A1fico_540.jpg/330px-Gonz%C3%A1lez_%28selecci%C3%B3n_paraguaya%29_-_El_Gr%C3%A1fico_540.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          61,
+          56,
+          56,
+          60,
+          57,
+          60,
+          53,
+          57,
+          59,
+          56,
+          56,
+          51,
+          53,
+          57,
+          56,
+          55,
+          56,
+          56
+        ]
+      },
+      {
+        "name": "Bernabé Rivera",
+        "positions": [
+          "ST!",
+          "CF:90"
+        ],
+        "attrs": [
+          59,
+          54,
+          54,
+          58,
+          55,
+          58,
+          51,
+          55,
+          57,
+          54,
+          54,
+          49,
+          51,
+          55,
+          54,
+          53,
+          54,
+          54
+        ]
+      },
+      {
+        "name": "Delfín Benítez Cáceres",
+        "positions": [
+          "ST!",
+          "LW:78",
+          "CAM:72"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/70/Benitez_caceres_Boca.jpg/330px-Benitez_caceres_Boca.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          63,
+          58,
+          58,
+          62,
+          59,
+          62,
+          55,
+          59,
+          61,
+          58,
+          58,
+          53,
+          55,
+          59,
+          58,
+          57,
+          58,
+          58
+        ]
+      },
+      {
+        "name": "Diego Florentín",
+        "positions": [
+          "CM!",
+          "CAM:83",
+          "RM:71",
+          "LM:72"
+        ],
+        "attrs": [
+          58,
+          60,
+          59,
+          60,
+          62,
+          58,
+          58,
+          61,
+          59,
+          59,
+          58,
+          53,
+          56,
+          57,
+          58,
+          57,
+          58,
+          58
+        ]
+      },
+      {
+        "name": "Diógenes Domínguez",
+        "positions": [
+          "ST!",
+          "RW:73",
+          "LW:78"
+        ],
+        "attrs": [
+          61,
+          56,
+          56,
+          60,
+          57,
+          60,
+          53,
+          57,
+          59,
+          56,
+          56,
+          51,
+          53,
+          57,
+          56,
+          55,
+          56,
+          56
+        ]
+      },
+      {
+        "name": "Eusebio Díaz",
+        "positions": [
+          "CM!",
+          "LM:73",
+          "CDM:87",
+          "RM:76"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Eusebio_D%C3%ADaz%2C_Los_Sports%2C_1924-11-07_%2887%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          63,
+          65,
+          64,
+          65,
+          67,
+          63,
+          63,
+          66,
+          64,
+          64,
+          63,
+          58,
+          61,
+          62,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "Eustacio Chamorro",
+        "positions": [
+          "CB!",
+          "LB:78",
+          "RB:80"
+        ],
+        "attrs": [
+          59,
+          62,
+          64,
+          56,
+          59,
+          55,
+          65,
+          57,
+          60,
+          60,
+          59,
+          53,
+          55,
+          64,
+          59,
+          59,
+          60,
+          59
+        ]
+      },
+      {
+        "name": "Francisco Aguirre",
+        "positions": [
+          "CM!",
+          "CDM:84",
+          "CAM:86"
+        ],
+        "attrs": [
+          60,
+          62,
+          61,
+          62,
+          64,
+          60,
+          60,
+          63,
+          61,
+          61,
+          60,
+          55,
+          58,
+          59,
+          60,
+          59,
+          60,
+          60
+        ]
+      },
+      {
+        "name": "Gerardo Romero",
+        "positions": [
+          "ST!",
+          "RW:78",
+          "CAM:70"
+        ],
+        "attrs": [
+          64,
+          59,
+          59,
+          63,
+          60,
+          63,
+          56,
+          60,
+          62,
+          59,
+          59,
+          54,
+          56,
+          60,
+          59,
+          58,
+          59,
+          59
+        ]
+      },
+      {
+        "name": "Jacinto Villalba",
+        "positions": [
+          "ST!",
+          "CAM:73",
+          "CF:88"
+        ],
+        "attrs": [
+          70,
+          65,
+          65,
+          69,
+          66,
+          69,
+          62,
+          66,
+          68,
+          65,
+          65,
+          60,
+          62,
+          66,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "José Miracca",
+        "positions": [
+          "CB!",
+          "CDM:66",
+          "RB:81"
+        ],
+        "attrs": [
+          55,
+          58,
+          60,
+          52,
+          55,
+          51,
+          61,
+          53,
+          56,
+          56,
+          55,
+          49,
+          51,
+          60,
+          55,
+          55,
+          56,
+          55
+        ]
+      },
+      {
+        "name": "Lino Nessi",
+        "positions": [
+          "ST!",
+          "RW:76",
+          "CAM:69",
+          "CF:87"
+        ],
+        "attrs": [
+          68,
+          63,
+          63,
+          67,
+          64,
+          67,
+          60,
+          64,
+          66,
+          63,
+          63,
+          58,
+          60,
+          64,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "Luis Vargas Peña",
+        "positions": [
+          "ST!",
+          "LW:77",
+          "CAM:70",
+          "CF:87"
+        ],
+        "attrs": [
+          59,
+          54,
+          54,
+          58,
+          55,
+          58,
+          51,
+          55,
+          57,
+          54,
+          54,
+          49,
+          51,
+          55,
+          54,
+          53,
+          54,
+          54
+        ]
+      },
+      {
+        "name": "Modesto Denis",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Modesto_Denis%2C_Los_Sports%2C_1924-11-07_%2887%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          58,
+          59,
+          60,
+          52,
+          55,
+          52,
+          53,
+          56,
+          57,
+          59,
+          63,
+          64,
+          63,
+          61,
+          59,
+          58,
+          60,
+          59
+        ]
+      },
+      {
+        "name": "Pedro Benítez",
+        "positions": [
+          "GK!"
+        ],
+        "attrs": [
+          66,
+          67,
+          68,
+          60,
+          63,
+          60,
+          61,
+          64,
+          65,
+          67,
+          71,
+          72,
+          71,
+          69,
+          67,
+          66,
+          68,
+          67
+        ]
+      },
+      {
+        "name": "Quiterio Olmedo",
+        "positions": [
+          "CB!",
+          "CDM:67",
+          "RB:80",
+          "LB:76"
+        ],
+        "attrs": [
+          61,
+          64,
+          66,
+          58,
+          61,
+          57,
+          67,
+          59,
+          62,
+          62,
+          61,
+          55,
+          57,
+          66,
+          61,
+          61,
+          62,
+          61
+        ]
+      },
+      {
+        "name": "Romildo Etcheverry",
+        "positions": [
+          "CM!",
+          "CAM:83"
+        ],
+        "attrs": [
+          62,
+          64,
+          63,
+          64,
+          66,
+          62,
+          62,
+          65,
+          63,
+          63,
+          62,
+          57,
+          60,
+          61,
+          62,
+          61,
+          62,
+          62
+        ]
+      },
+      {
+        "name": "Saguier Carreras",
+        "positions": [
+          "ST!",
+          "LW:74",
+          "CAM:71"
+        ],
+        "attrs": [
+          68,
+          63,
+          63,
+          67,
+          64,
+          67,
+          60,
+          64,
+          66,
+          63,
+          63,
+          58,
+          60,
+          64,
+          63,
+          62,
+          63,
+          63
+        ]
+      },
+      {
+        "name": "Salvador Flores",
+        "positions": [
+          "CB!",
+          "CDM:66"
+        ],
+        "attrs": [
+          53,
+          56,
+          58,
+          50,
+          53,
+          49,
+          59,
+          51,
+          54,
+          54,
+          53,
+          47,
+          49,
+          58,
+          53,
+          53,
+          54,
+          53
+        ]
+      },
+      {
+        "name": "Santiago Benítez",
+        "positions": [
+          "CM!",
+          "LM:75"
+        ],
+        "attrs": [
+          54,
+          56,
+          55,
+          56,
+          58,
+          54,
+          54,
+          57,
+          55,
+          55,
+          54,
+          49,
+          52,
+          53,
+          54,
+          53,
+          54,
+          54
+        ]
+      },
+      {
+        "name": "Tranquilino Garcete",
+        "positions": [
+          "CM!",
+          "CAM:85"
+        ],
+        "attrs": [
+          55,
+          57,
+          56,
+          57,
+          59,
+          55,
+          55,
+          58,
+          56,
+          56,
+          55,
+          50,
+          53,
+          54,
+          55,
+          54,
+          55,
+          55
+        ]
+      }
+    ],
+    "PER": [
+      {
+        "name": "Alberto Denegri",
+        "positions": [
+          "CM!",
+          "RM:74",
+          "LM:77",
+          "CDM:86"
+        ],
+        "attrs": [
+          57,
+          59,
+          58,
+          59,
+          61,
+          57,
+          57,
+          60,
+          58,
+          58,
+          57,
+          52,
+          55,
+          56,
+          57,
+          56,
+          57,
+          57
+        ]
+      },
+      {
+        "name": "Alberto Soria",
+        "positions": [
+          "CB!",
+          "LB:76",
+          "RB:76"
+        ],
+        "attrs": [
+          58,
+          61,
+          63,
+          55,
+          58,
+          54,
+          64,
+          56,
+          59,
+          59,
+          58,
+          52,
+          54,
+          63,
+          58,
+          58,
+          59,
+          58
+        ]
+      },
+      {
+        "name": "Alejandro Villanueva",
+        "positions": [
+          "ST!",
+          "CF:93",
+          "LW:75",
+          "CAM:71"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/Alejandro_Manguera_Villanueva.png/330px-Alejandro_Manguera_Villanueva.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          72,
+          67,
+          67,
+          71,
+          68,
+          71,
+          64,
+          68,
+          70,
+          67,
+          67,
+          62,
+          64,
+          68,
+          67,
+          66,
+          67,
+          67
+        ]
+      },
+      {
+        "name": "Antonio Maquilón",
+        "positions": [
+          "CB!",
+          "LB:75",
+          "RB:75"
+        ],
+        "attrs": [
+          60,
+          63,
+          65,
+          57,
+          60,
+          56,
+          66,
+          58,
+          61,
+          61,
+          60,
+          54,
+          56,
+          65,
+          60,
+          60,
+          61,
+          60
+        ]
+      },
+      {
+        "name": "Arturo Fernández",
+        "positions": [
+          "CB!",
+          "RB:76",
+          "LB:78"
+        ],
+        "attrs": [
+          65,
+          68,
+          70,
+          62,
+          65,
+          61,
+          71,
+          63,
+          66,
+          66,
+          65,
+          59,
+          61,
+          70,
+          65,
+          65,
+          66,
+          65
+        ]
+      },
+      {
+        "name": "Carlos Cillóniz",
+        "positions": [
+          "CM!",
+          "RM:76",
+          "LM:74",
+          "CDM:85"
+        ],
+        "attrs": [
+          61,
+          63,
+          62,
+          63,
+          65,
+          61,
+          61,
+          64,
+          62,
+          62,
+          61,
+          56,
+          59,
+          60,
+          61,
+          60,
+          61,
+          61
+        ]
+      },
+      {
+        "name": "Demetrio Neyra",
+        "positions": [
+          "ST!",
+          "RW:75",
+          "LW:78",
+          "CAM:70"
+        ],
+        "attrs": [
+          70,
+          65,
+          65,
+          69,
+          66,
+          69,
+          62,
+          66,
+          68,
+          65,
+          65,
+          60,
+          62,
+          66,
+          65,
+          64,
+          65,
+          65
+        ]
+      },
+      {
+        "name": "Domingo García",
+        "positions": [
+          "CM!",
+          "RM:73",
+          "CDM:86"
+        ],
+        "attrs": [
+          62,
+          64,
+          63,
+          64,
+          66,
+          62,
+          62,
+          65,
+          63,
+          63,
+          62,
+          57,
+          60,
+          61,
+          62,
+          61,
+          62,
+          62
+        ]
+      },
+      {
+        "name": "Eduardo Astengo",
+        "positions": [
+          "CM!",
+          "CAM:83"
+        ],
+        "attrs": [
+          64,
+          66,
+          65,
+          66,
+          68,
+          64,
+          64,
+          67,
+          65,
+          65,
+          64,
+          59,
+          62,
+          63,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Jorge Pardon",
+        "positions": [
+          "GK!"
+        ],
+        "attrs": [
+          59,
+          60,
+          61,
+          53,
+          56,
+          53,
+          54,
+          57,
+          58,
+          60,
+          64,
+          65,
+          64,
+          62,
+          60,
+          59,
+          61,
+          60
+        ]
+      },
+      {
+        "name": "Jorge Sarmiento",
+        "positions": [
+          "ST!",
+          "RW:77"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e2/JorgeKooChoiSarmiento1928.png/330px-JorgeKooChoiSarmiento1928.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "José María Lavalle",
+        "positions": [
+          "ST!",
+          "RW:74",
+          "LW:76"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Peru_football_team_1927.jpg/330px-Peru_football_team_1927.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          73,
+          68,
+          68,
+          72,
+          69,
+          72,
+          65,
+          69,
+          71,
+          68,
+          68,
+          63,
+          65,
+          69,
+          68,
+          67,
+          68,
+          68
+        ]
+      },
+      {
+        "name": "Juan Valdivieso",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/31/JuanValdiviesoPadilla-08.12.1935.png/330px-JuanValdiviesoPadilla-08.12.1935.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          66,
+          67,
+          68,
+          60,
+          63,
+          60,
+          61,
+          64,
+          65,
+          67,
+          71,
+          72,
+          71,
+          69,
+          67,
+          66,
+          68,
+          67
+        ]
+      },
+      {
+        "name": "Julio Lores",
+        "positions": [
+          "ST!",
+          "LW:78"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Rumania_v_Per%C3%BA%2C_Los_Sports%2C_1930-07-25_%28385%29_02.jpg/330px-Rumania_v_Per%C3%BA%2C_Los_Sports%2C_1930-07-25_%28385%29_02.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          69,
+          64,
+          64,
+          68,
+          65,
+          68,
+          61,
+          65,
+          67,
+          64,
+          64,
+          59,
+          61,
+          65,
+          64,
+          63,
+          64,
+          64
+        ]
+      },
+      {
+        "name": "Julio Quintana",
+        "positions": [
+          "CM!",
+          "CAM:86",
+          "RM:75"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Julio_Quintana_Calmet.png/330px-Julio_Quintana_Calmet.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          66,
+          68,
+          67,
+          68,
+          70,
+          66,
+          66,
+          69,
+          67,
+          67,
+          66,
+          61,
+          64,
+          65,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Lizardo Rodríguez Nue",
+        "positions": [
+          "ST!",
+          "CF:90"
+        ],
+        "attrs": [
+          73,
+          68,
+          68,
+          72,
+          69,
+          72,
+          65,
+          69,
+          71,
+          68,
+          68,
+          63,
+          65,
+          69,
+          68,
+          67,
+          68,
+          68
+        ]
+      },
+      {
+        "name": "Luis de Souza",
+        "positions": [
+          "ST!",
+          "CF:93",
+          "RW:79"
+        ],
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Mario de las Casas",
+        "positions": [
+          "CB!",
+          "CDM:67",
+          "RB:81"
+        ],
+        "attrs": [
+          63,
+          66,
+          68,
+          60,
+          63,
+          59,
+          69,
+          61,
+          64,
+          64,
+          63,
+          57,
+          59,
+          68,
+          63,
+          63,
+          64,
+          63
+        ]
+      },
+      {
+        "name": "Pablo Pacheco",
+        "positions": [
+          "ST!",
+          "CF:87",
+          "RW:78",
+          "LW:79"
+        ],
+        "attrs": [
+          67,
+          62,
+          62,
+          66,
+          63,
+          66,
+          59,
+          63,
+          65,
+          62,
+          62,
+          57,
+          59,
+          63,
+          62,
+          61,
+          62,
+          62
+        ]
+      },
+      {
+        "name": "Plácido Galindo",
+        "positions": [
+          "CM!",
+          "RM:77",
+          "LM:74",
+          "CAM:85"
+        ],
+        "attrs": [
+          68,
+          70,
+          69,
+          70,
+          72,
+          68,
+          68,
+          71,
+          69,
+          69,
+          68,
+          63,
+          66,
+          67,
+          68,
+          67,
+          68,
+          68
+        ]
+      }
+    ],
+    "ROU": [
+      {
+        "name": "Adalbert Deșu",
+        "positions": [
+          "ST!",
+          "RW:78",
+          "CAM:73",
+          "CF:89"
+        ],
+        "attrs": [
+          73,
+          68,
+          68,
+          72,
+          69,
+          72,
+          65,
+          69,
+          71,
+          68,
+          68,
+          63,
+          65,
+          69,
+          68,
+          67,
+          68,
+          68
+        ]
+      },
+      {
+        "name": "Adalbert Steiner",
+        "positions": [
+          "CB!",
+          "CDM:65"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/4/4f/Adalbert_Steiner_1966_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          60,
+          63,
+          65,
+          57,
+          60,
+          56,
+          66,
+          58,
+          61,
+          61,
+          60,
+          54,
+          56,
+          65,
+          60,
+          60,
+          61,
+          60
+        ]
+      },
+      {
+        "name": "Alfred Eisenbeisser",
+        "positions": [
+          "CM!",
+          "RM:71",
+          "CDM:86",
+          "CAM:85"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Alfred_Fieraru_1966.jpg/330px-Alfred_Fieraru_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          61,
+          63,
+          62,
+          63,
+          65,
+          61,
+          61,
+          64,
+          62,
+          62,
+          61,
+          56,
+          59,
+          60,
+          61,
+          60,
+          61,
+          61
+        ]
+      },
+      {
+        "name": "Constantin Stanciu",
+        "positions": [
+          "ST!",
+          "CF:93"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Constantin_Stanciu_1966_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          67,
+          62,
+          62,
+          66,
+          63,
+          66,
+          59,
+          63,
+          65,
+          62,
+          62,
+          57,
+          59,
+          63,
+          62,
+          61,
+          62,
+          62
+        ]
+      },
+      {
+        "name": "Corneliu Robe",
+        "positions": [
+          "CM!",
+          "CDM:86",
+          "RM:72"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Corneliu_Robe_1966.jpg/330px-Corneliu_Robe_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          62,
+          64,
+          63,
+          64,
+          66,
+          62,
+          62,
+          65,
+          63,
+          63,
+          62,
+          57,
+          60,
+          61,
+          62,
+          61,
+          62,
+          62
+        ]
+      },
+      {
+        "name": "Emerich Vogl",
+        "positions": [
+          "CB!",
+          "LB:76"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/Emerich_Vogl.jpg/330px-Emerich_Vogl.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          60,
+          63,
+          65,
+          57,
+          60,
+          56,
+          66,
+          58,
+          61,
+          61,
+          60,
+          54,
+          56,
+          65,
+          60,
+          60,
+          61,
+          60
+        ]
+      },
+      {
+        "name": "Ilie Subășeanu",
+        "positions": [
+          "ST!",
+          "RW:74",
+          "LW:75"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c3/Ilie_Sub%C4%83%C8%99eanu_1966.jpg/330px-Ilie_Sub%C4%83%C8%99eanu_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Ion Lăpușneanu",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/Jean_L%C4%83pu%C8%99neanu_1966.jpg/330px-Jean_L%C4%83pu%C8%99neanu_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          69,
+          70,
+          71,
+          63,
+          66,
+          63,
+          64,
+          67,
+          68,
+          70,
+          74,
+          75,
+          74,
+          72,
+          70,
+          69,
+          71,
+          70
+        ]
+      },
+      {
+        "name": "Iosif Czako",
+        "positions": [
+          "CB!",
+          "CDM:67"
+        ],
+        "attrs": [
+          60,
+          63,
+          65,
+          57,
+          60,
+          56,
+          66,
+          58,
+          61,
+          61,
+          60,
+          54,
+          56,
+          65,
+          60,
+          60,
+          61,
+          60
+        ]
+      },
+      {
+        "name": "Ladislau Raffinsky",
+        "positions": [
+          "CM!",
+          "CDM:88",
+          "RM:77"
+        ],
+        "attrs": [
+          71,
+          73,
+          72,
+          73,
+          75,
+          71,
+          71,
+          74,
+          72,
+          72,
+          71,
+          66,
+          69,
+          70,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "László Raffinsky",
+        "positions": [
+          "CM!",
+          "CDM:85",
+          "CAM:85"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/4/40/Raffinsky_Laszlo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          60,
+          62,
+          61,
+          62,
+          64,
+          60,
+          60,
+          63,
+          61,
+          61,
+          60,
+          55,
+          58,
+          59,
+          60,
+          59,
+          60,
+          60
+        ]
+      },
+      {
+        "name": "Nicolae Kovács",
+        "positions": [
+          "ST!",
+          "LW:76",
+          "CAM:71"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Nicolae_Kov%C3%A1cs%2C_interna%C8%9Bional_timi%C8%99orean%2C_world_cups_1930%2C_1934%2C_1938.jpg/330px-Nicolae_Kov%C3%A1cs%2C_interna%C8%9Bional_timi%C8%99orean%2C_world_cups_1930%2C_1934%2C_1938.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      },
+      {
+        "name": "Rudolf Buerger",
+        "positions": [
+          "CM!",
+          "CDM:83"
+        ],
+        "attrs": [
+          60,
+          62,
+          61,
+          62,
+          64,
+          60,
+          60,
+          63,
+          61,
+          61,
+          60,
+          55,
+          58,
+          59,
+          60,
+          59,
+          60,
+          60
+        ]
+      },
+      {
+        "name": "Rudolf Bürger",
+        "positions": [
+          "CB!",
+          "LB:80",
+          "CDM:67"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/6/65/Rudolf_B%C3%BCrger.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          64,
+          67,
+          69,
+          61,
+          64,
+          60,
+          70,
+          62,
+          65,
+          65,
+          64,
+          58,
+          60,
+          69,
+          64,
+          64,
+          65,
+          64
+        ]
+      },
+      {
+        "name": "Rudolf Wetzer",
+        "positions": [
+          "ST!",
+          "LW:78"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Rudy_Wetzer_1966.jpg/330px-Rudy_Wetzer_1966.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          66,
+          66,
+          70,
+          67,
+          70,
+          63,
+          67,
+          69,
+          66,
+          66,
+          61,
+          63,
+          67,
+          66,
+          65,
+          66,
+          66
+        ]
+      },
+      {
+        "name": "Samuel Zauber",
+        "positions": [
+          "GK!"
+        ],
+        "attrs": [
+          62,
+          63,
+          64,
+          56,
+          59,
+          56,
+          57,
+          60,
+          61,
+          63,
+          67,
+          68,
+          67,
+          65,
+          63,
+          62,
+          64,
+          63
+        ]
+      },
+      {
+        "name": "Ștefan Barbu",
+        "positions": [
+          "ST!",
+          "RW:79",
+          "LW:78"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/0/03/%C8%98tefan_Barbu_1966_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          77,
+          72,
+          72,
+          76,
+          73,
+          76,
+          69,
+          73,
+          75,
+          72,
+          72,
+          67,
+          69,
+          73,
+          72,
+          71,
+          72,
+          72
+        ]
+      }
+    ],
+    "USA": [
+      {
+        "name": "Alexander Wood",
+        "positions": [
+          "CB!",
+          "CDM:63",
+          "RB:77"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/Alexander_Wood_US_Soccer_Team_1930.png/330px-Alexander_Wood_US_Soccer_Team_1930.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          75,
+          78,
+          80,
+          72,
+          75,
+          71,
+          81,
+          73,
+          76,
+          76,
+          75,
+          69,
+          71,
+          80,
+          75,
+          75,
+          76,
+          75
+        ]
+      },
+      {
+        "name": "Andrew Auld",
+        "positions": [
+          "CM!",
+          "LM:72",
+          "CDM:88"
+        ],
+        "attrs": [
+          69,
+          71,
+          70,
+          71,
+          73,
+          69,
+          69,
+          72,
+          70,
+          70,
+          69,
+          64,
+          67,
+          68,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Andy Auld",
+        "positions": [
+          "CM!",
+          "CAM:86"
+        ],
+        "attrs": [
+          78,
+          80,
+          79,
+          80,
+          82,
+          78,
+          78,
+          81,
+          79,
+          79,
+          78,
+          73,
+          76,
+          77,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Arnie Oliver",
+        "positions": [
+          "ST!",
+          "RW:78"
+        ],
+        "attrs": [
+          80,
+          75,
+          75,
+          79,
+          76,
+          79,
+          72,
+          76,
+          78,
+          75,
+          75,
+          70,
+          72,
+          76,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "Bart McGhee",
+        "positions": [
+          "ST!",
+          "CAM:74"
+        ],
+        "attrs": [
+          78,
+          73,
+          73,
+          77,
+          74,
+          77,
+          70,
+          74,
+          76,
+          73,
+          73,
+          68,
+          70,
+          74,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Bert Patenaude",
+        "positions": [
+          "ST!",
+          "LW:74",
+          "CAM:69"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Bert_Patenaude.jpg/330px-Bert_Patenaude.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          81,
+          76,
+          76,
+          80,
+          77,
+          80,
+          73,
+          77,
+          79,
+          76,
+          76,
+          71,
+          73,
+          77,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Billy Gonsalves",
+        "positions": [
+          "ST!",
+          "RW:76"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Billy_gonsalves_in_1930.jpg/330px-Billy_gonsalves_in_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Frank Vaughn",
+        "positions": [
+          "CB!",
+          "LB:79",
+          "CDM:65"
+        ],
+        "attrs": [
+          75,
+          78,
+          80,
+          72,
+          75,
+          71,
+          81,
+          73,
+          76,
+          76,
+          75,
+          69,
+          71,
+          80,
+          75,
+          75,
+          76,
+          75
+        ]
+      },
+      {
+        "name": "George Moorhouse",
+        "positions": [
+          "CB!",
+          "CDM:65",
+          "RB:79"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/George_Moorhouse_USA.jpg/330px-George_Moorhouse_USA.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          70,
+          73,
+          75,
+          67,
+          70,
+          66,
+          76,
+          68,
+          71,
+          71,
+          70,
+          64,
+          66,
+          75,
+          70,
+          70,
+          71,
+          70
+        ]
+      },
+      {
+        "name": "James Gentle",
+        "positions": [
+          "ST!",
+          "CAM:69"
+        ],
+        "attrs": [
+          73,
+          68,
+          68,
+          72,
+          69,
+          72,
+          65,
+          69,
+          71,
+          68,
+          68,
+          63,
+          65,
+          69,
+          68,
+          67,
+          68,
+          68
+        ]
+      },
+      {
+        "name": "Jim Brown",
+        "positions": [
+          "ST!",
+          "LW:73",
+          "CAM:74"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/9/9c/USA_team_line_up_13_July.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Jimmy Douglas",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/4/46/Jimmy_douglas_us_goalkeeper.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          81,
+          82,
+          83,
+          75,
+          78,
+          75,
+          76,
+          79,
+          80,
+          82,
+          86,
+          87,
+          86,
+          84,
+          82,
+          81,
+          83,
+          82
+        ]
+      },
+      {
+        "name": "Jimmy Gallagher",
+        "positions": [
+          "CM!",
+          "RM:75",
+          "LM:73"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2f/Jimmy_Gallagher_US_Soccer_Team_1930.png/330px-Jimmy_Gallagher_US_Soccer_Team_1930.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          70,
+          72,
+          71,
+          72,
+          74,
+          70,
+          70,
+          73,
+          71,
+          71,
+          70,
+          65,
+          68,
+          69,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Mike Bookie",
+        "positions": [
+          "ST!",
+          "RW:75",
+          "CAM:73"
+        ],
+        "attrs": [
+          74,
+          69,
+          69,
+          73,
+          70,
+          73,
+          66,
+          70,
+          72,
+          69,
+          69,
+          64,
+          66,
+          70,
+          69,
+          68,
+          69,
+          69
+        ]
+      },
+      {
+        "name": "Philip Slone",
+        "positions": [
+          "CM!",
+          "CAM:87",
+          "LM:77"
+        ],
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Ralph Tracy",
+        "positions": [
+          "CM!",
+          "CDM:84"
+        ],
+        "attrs": [
+          77,
+          79,
+          78,
+          79,
+          81,
+          77,
+          77,
+          80,
+          78,
+          78,
+          77,
+          72,
+          75,
+          76,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Raphael Tracey",
+        "positions": [
+          "ST!",
+          "LW:75",
+          "CAM:74",
+          "CF:90"
+        ],
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Tom Florie",
+        "positions": [
+          "ST!",
+          "RW:79",
+          "CAM:74"
+        ],
+        "attrs": [
+          84,
+          79,
+          79,
+          83,
+          80,
+          83,
+          76,
+          80,
+          82,
+          79,
+          79,
+          74,
+          76,
+          80,
+          79,
+          78,
+          79,
+          79
+        ]
+      }
+    ],
+    "URU": [
+      {
+        "name": "Carlos Riolfo",
+        "positions": [
+          "CM!",
+          "CDM:84",
+          "CAM:84",
+          "RM:75"
+        ],
+        "attrs": [
+          86,
+          88,
+          87,
+          88,
+          90,
+          86,
+          86,
+          89,
+          87,
+          87,
+          86,
+          81,
+          84,
+          85,
+          86,
+          85,
+          86,
+          86
+        ]
+      },
+      {
+        "name": "Conduelo Píriz",
+        "positions": [
+          "CM!",
+          "LM:77",
+          "CAM:83"
+        ],
+        "attrs": [
+          87,
+          89,
+          88,
+          89,
+          91,
+          87,
+          87,
+          90,
+          88,
+          88,
+          87,
+          82,
+          85,
+          86,
+          87,
+          86,
+          87,
+          87
+        ]
+      },
+      {
+        "name": "Domingo Tejera",
+        "positions": [
+          "CB!",
+          "CDM:63",
+          "RB:79",
+          "LB:77"
+        ],
+        "attrs": [
+          74,
+          77,
+          79,
+          71,
+          74,
+          70,
+          80,
+          72,
+          75,
+          75,
+          74,
+          68,
+          70,
+          79,
+          74,
+          74,
+          75,
+          74
+        ]
+      },
+      {
+        "name": "Emilio Recoba",
+        "positions": [
+          "CB!",
+          "RB:79",
+          "LB:77"
+        ],
+        "attrs": [
+          74,
+          77,
+          79,
+          71,
+          74,
+          70,
+          80,
+          72,
+          75,
+          75,
+          74,
+          68,
+          70,
+          79,
+          74,
+          74,
+          75,
+          74
+        ]
+      },
+      {
+        "name": "Enrique Ballestrero",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Uruguay_en_el_Mundial_1930%2C_Los_Sports%2C_1930-08-08_%28387%29.jpg/330px-Uruguay_en_el_Mundial_1930%2C_Los_Sports%2C_1930-08-08_%28387%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          79,
+          80,
+          81,
+          73,
+          76,
+          73,
+          74,
+          77,
+          78,
+          80,
+          84,
+          85,
+          84,
+          82,
+          80,
+          79,
+          81,
+          80
+        ]
+      },
+      {
+        "name": "Ernesto Mascheroni",
+        "positions": [
+          "CB!",
+          "LB:78",
+          "CDM:67"
+        ],
+        "attrs": [
+          76,
+          79,
+          81,
+          73,
+          76,
+          72,
+          82,
+          74,
+          77,
+          77,
+          76,
+          70,
+          72,
+          81,
+          76,
+          76,
+          77,
+          76
+        ]
+      },
+      {
+        "name": "Héctor Castro",
+        "positions": [
+          "ST!",
+          "CF:88"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/H%C3%A9ctor_Castro_%281928%29.jpg/330px-H%C3%A9ctor_Castro_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          87,
+          83,
+          80,
+          86,
+          77,
+          90,
+          48,
+          83,
+          88,
+          87,
+          67,
+          61,
+          77,
+          82,
+          83,
+          77,
+          83,
+          83
+        ]
+      },
+      {
+        "name": "Héctor Scarone",
+        "positions": [
+          "CAM!",
+          "CF:88"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/20/Hector_scarone_nacional.jpg/330px-Hector_scarone_nacional.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          88,
+          88,
+          81,
+          92,
+          94,
+          88,
+          79,
+          95,
+          91,
+          92,
+          77,
+          73,
+          84,
+          73,
+          90,
+          79,
+          88,
+          92
+        ]
+      },
+      {
+        "name": "José Leandro Andrade",
+        "positions": [
+          "CM!",
+          "CDM:88"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Andrade_urug.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          85,
+          85,
+          78,
+          89,
+          90,
+          85,
+          77,
+          91,
+          88,
+          89,
+          75,
+          72,
+          82,
+          72,
+          87,
+          77,
+          85,
+          89
+        ]
+      },
+      {
+        "name": "José Nasazzi",
+        "positions": [
+          "CB!"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/1/16/Jose_nasazzi_urug.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          84,
+          85,
+          88,
+          81,
+          87,
+          61,
+          94,
+          84,
+          91,
+          92,
+          77,
+          71,
+          81,
+          91,
+          90,
+          84,
+          90,
+          94
+        ]
+      },
+      {
+        "name": "Juan Carlos Calvo",
+        "positions": [
+          "ST!",
+          "CAM:69"
+        ],
+        "attrs": [
+          89,
+          84,
+          84,
+          88,
+          85,
+          88,
+          81,
+          85,
+          87,
+          84,
+          84,
+          79,
+          81,
+          85,
+          84,
+          83,
+          84,
+          84
+        ]
+      },
+      {
+        "name": "Lorenzo Fernández",
+        "positions": [
+          "CM!",
+          "CDM:83",
+          "CAM:82"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Lorenzo_Fern%C3%A1ndez_%281928%29.jpg/330px-Lorenzo_Fern%C3%A1ndez_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          85,
+          84,
+          85,
+          87,
+          83,
+          83,
+          86,
+          84,
+          84,
+          83,
+          78,
+          81,
+          82,
+          83,
+          82,
+          83,
+          83
+        ]
+      },
+      {
+        "name": "Miguel Capuccini",
+        "positions": [
+          "GK!"
+        ],
+        "attrs": [
+          89,
+          90,
+          91,
+          83,
+          86,
+          83,
+          84,
+          87,
+          88,
+          90,
+          94,
+          95,
+          94,
+          92,
+          90,
+          89,
+          91,
+          90
+        ]
+      },
+      {
+        "name": "Pablo Dorado",
+        "positions": [
+          "ST!",
+          "CF:88",
+          "RW:78"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/31/Pablo_Dorado_%28cropped%29.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Pedro Cea",
+        "positions": [
+          "CAM!",
+          "CM:85"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Pedro_Cea_%281928%29.jpg/330px-Pedro_Cea_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          83,
+          77,
+          87,
+          88,
+          83,
+          75,
+          89,
+          86,
+          87,
+          74,
+          71,
+          80,
+          71,
+          85,
+          75,
+          83,
+          87
+        ]
+      },
+      {
+        "name": "Pedro Petrone",
+        "positions": [
+          "ST!",
+          "LW:77",
+          "CAM:71"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Pedro_Petrone_%281928%29.jpg/330px-Pedro_Petrone_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Peregrino Anselmo",
+        "positions": [
+          "ST!",
+          "LW:74",
+          "CAM:71",
+          "CF:92"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/0/01/Juan_Anselmo.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          89,
+          84,
+          84,
+          88,
+          85,
+          88,
+          81,
+          85,
+          87,
+          84,
+          84,
+          79,
+          81,
+          85,
+          84,
+          83,
+          84,
+          84
+        ]
+      },
+      {
+        "name": "Santos Iriarte",
+        "positions": [
+          "ST!",
+          "LW:78"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/37/Santos_Iriarte_%28cropped%29.JPG?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          84,
+          79,
+          79,
+          83,
+          80,
+          83,
+          76,
+          80,
+          82,
+          79,
+          79,
+          74,
+          76,
+          80,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "Santos Urdinarán",
+        "positions": [
+          "ST!",
+          "RW:75",
+          "LW:73",
+          "CAM:74"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c2/Santos_Urdinar%C3%A1n_%281928%29.jpg/330px-Santos_Urdinar%C3%A1n_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          82,
+          77,
+          77,
+          81,
+          78,
+          81,
+          74,
+          78,
+          80,
+          77,
+          77,
+          72,
+          74,
+          78,
+          77,
+          76,
+          77,
+          77
+        ]
+      },
+      {
+        "name": "Zoilo Saldombide",
+        "positions": [
+          "ST!",
+          "LW:73",
+          "CF:87"
+        ],
+        "attrs": [
+          83,
+          78,
+          78,
+          82,
+          79,
+          82,
+          75,
+          79,
+          81,
+          78,
+          78,
+          73,
+          75,
+          79,
+          78,
+          77,
+          78,
+          78
+        ]
+      },
+      {
+        "name": "Álvaro Gestido",
+        "positions": [
+          "CM!",
+          "RM:74",
+          "LM:75"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/%C3%81lvaro_Gestido_%281928%29.jpg/330px-%C3%81lvaro_Gestido_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          82,
+          84,
+          83,
+          84,
+          86,
+          82,
+          82,
+          85,
+          83,
+          83,
+          82,
+          77,
+          80,
+          81,
+          82,
+          81,
+          82,
+          82
+        ]
+      },
+      {
+        "name": "Ángel Melogno",
+        "positions": [
+          "CM!",
+          "LM:77",
+          "CDM:89",
+          "CAM:84"
+        ],
+        "attrs": [
+          77,
+          79,
+          78,
+          79,
+          81,
+          77,
+          77,
+          80,
+          78,
+          78,
+          77,
+          72,
+          75,
+          76,
+          77,
+          76,
+          77,
+          77
+        ]
+      }
+    ],
+    "YUG": [
+      {
+        "name": "Aleksandar Tirnanić",
+        "positions": [
+          "ST!",
+          "CF:93",
+          "RW:76",
+          "LW:77"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/6/69/Aleksandar_Tirnani%C4%87.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          81,
+          76,
+          76,
+          80,
+          77,
+          80,
+          73,
+          77,
+          79,
+          76,
+          76,
+          71,
+          73,
+          77,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Blagoje Marjanović",
+        "positions": [
+          "ST!",
+          "CAM:70",
+          "CF:90"
+        ],
+        "attrs": [
+          75,
+          70,
+          70,
+          74,
+          71,
+          74,
+          67,
+          71,
+          73,
+          70,
+          70,
+          65,
+          67,
+          71,
+          70,
+          69,
+          70,
+          70
+        ]
+      },
+      {
+        "name": "Božidar Marković",
+        "positions": [
+          "ST!",
+          "CAM:72",
+          "CF:87",
+          "RW:74"
+        ],
+        "attrs": [
+          76,
+          71,
+          71,
+          75,
+          72,
+          75,
+          68,
+          72,
+          74,
+          71,
+          71,
+          66,
+          68,
+          72,
+          71,
+          70,
+          71,
+          71
+        ]
+      },
+      {
+        "name": "Branislav Hrnjiček",
+        "positions": [
+          "CM!",
+          "LM:76"
+        ],
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Branislav Sekulić",
+        "positions": [
+          "ST!",
+          "CAM:73",
+          "CF:88",
+          "RW:76"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Yugoslavia_nationalteam_1930.jpg/330px-Yugoslavia_nationalteam_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          85,
+          80,
+          80,
+          84,
+          81,
+          84,
+          77,
+          81,
+          83,
+          80,
+          80,
+          75,
+          77,
+          81,
+          80,
+          79,
+          80,
+          80
+        ]
+      },
+      {
+        "name": "Dragan Mihajlovic",
+        "positions": [
+          "CM!",
+          "CAM:84"
+        ],
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Dragomir Tošić",
+        "positions": [
+          "CB!",
+          "RB:79",
+          "LB:79"
+        ],
+        "attrs": [
+          70,
+          73,
+          75,
+          67,
+          70,
+          66,
+          76,
+          68,
+          71,
+          71,
+          70,
+          64,
+          66,
+          75,
+          70,
+          70,
+          71,
+          70
+        ]
+      },
+      {
+        "name": "Dragoslav Mihajlović",
+        "positions": [
+          "CB!",
+          "LB:77",
+          "RB:76"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Jaksic_Mihajlovic_Theophilo_%28Dragoslav%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          75,
+          78,
+          80,
+          72,
+          75,
+          71,
+          81,
+          73,
+          76,
+          76,
+          75,
+          69,
+          71,
+          80,
+          75,
+          75,
+          76,
+          75
+        ]
+      },
+      {
+        "name": "Dragutin Najdanović",
+        "positions": [
+          "ST!",
+          "CAM:74",
+          "RW:75",
+          "LW:77"
+        ],
+        "attrs": [
+          86,
+          81,
+          81,
+          85,
+          82,
+          85,
+          78,
+          82,
+          84,
+          81,
+          81,
+          76,
+          78,
+          82,
+          81,
+          80,
+          81,
+          81
+        ]
+      },
+      {
+        "name": "Ivan Bek",
+        "positions": [
+          "ST!",
+          "CF:88",
+          "RW:76"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f4/Ivan_Bek_%281928%29.jpg/330px-Ivan_Bek_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          81,
+          76,
+          76,
+          80,
+          77,
+          80,
+          73,
+          77,
+          79,
+          76,
+          76,
+          71,
+          73,
+          77,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Ivica Bek",
+        "positions": [
+          "CM!",
+          "RM:75",
+          "LM:73"
+        ],
+        "attrs": [
+          73,
+          75,
+          74,
+          75,
+          77,
+          73,
+          73,
+          76,
+          74,
+          74,
+          73,
+          68,
+          71,
+          72,
+          73,
+          72,
+          73,
+          73
+        ]
+      },
+      {
+        "name": "Ljubiša Stefanović",
+        "positions": [
+          "CM!",
+          "CAM:84",
+          "RM:77",
+          "LM:76"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Yugoslavia_nationalteam_1930.jpg/330px-Yugoslavia_nationalteam_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          75,
+          77,
+          76,
+          77,
+          79,
+          75,
+          75,
+          78,
+          76,
+          76,
+          75,
+          70,
+          73,
+          74,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "Milan Stojanović",
+        "positions": [
+          "GK!"
+        ],
+        "attrs": [
+          79,
+          80,
+          81,
+          73,
+          76,
+          73,
+          74,
+          77,
+          78,
+          80,
+          84,
+          85,
+          84,
+          82,
+          80,
+          79,
+          81,
+          80
+        ]
+      },
+      {
+        "name": "Milorad Arsenijević",
+        "positions": [
+          "CM!",
+          "CAM:83",
+          "LM:71",
+          "CDM:88"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Milorad_Arsenijevi%C4%87_%281928%29.jpg/330px-Milorad_Arsenijevi%C4%87_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          76,
+          78,
+          77,
+          78,
+          80,
+          76,
+          76,
+          79,
+          77,
+          77,
+          76,
+          71,
+          74,
+          75,
+          76,
+          75,
+          76,
+          76
+        ]
+      },
+      {
+        "name": "Milovan Jakšić",
+        "positions": [
+          "GK!"
+        ],
+        "photo": "https://upload.wikimedia.org/wikipedia/commons/3/39/Jaksic_Mihajlovic_Theophilo_%28Milovan%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+        "attrs": [
+          76,
+          77,
+          78,
+          70,
+          73,
+          70,
+          71,
+          74,
+          75,
+          77,
+          81,
+          82,
+          81,
+          79,
+          77,
+          76,
+          78,
+          77
+        ]
+      },
+      {
+        "name": "Milutin Ivković",
+        "positions": [
+          "CB!",
+          "CDM:63",
+          "RB:77"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Milutin_Ivkovi%C4%87_%281928%29.jpg/330px-Milutin_Ivkovi%C4%87_%281928%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          71,
+          74,
+          76,
+          68,
+          71,
+          67,
+          77,
+          69,
+          72,
+          72,
+          71,
+          65,
+          67,
+          76,
+          71,
+          71,
+          72,
+          71
+        ]
+      },
+      {
+        "name": "Momcilo Djokic",
+        "positions": [
+          "CM!",
+          "LM:73"
+        ],
+        "attrs": [
+          79,
+          81,
+          80,
+          81,
+          83,
+          79,
+          79,
+          82,
+          80,
+          80,
+          79,
+          74,
+          77,
+          78,
+          79,
+          78,
+          79,
+          79
+        ]
+      },
+      {
+        "name": "Momčilo Đokić",
+        "positions": [
+          "CM!",
+          "CDM:86"
+        ],
+        "attrs": [
+          81,
+          83,
+          82,
+          83,
+          85,
+          81,
+          81,
+          84,
+          82,
+          82,
+          81,
+          76,
+          79,
+          80,
+          81,
+          80,
+          81,
+          81
+        ]
+      },
+      {
+        "name": "Teofilo Spasojević",
+        "positions": [
+          "CM!",
+          "CDM:84",
+          "CAM:86",
+          "LM:76"
+        ],
+        "attrs": [
+          75,
+          77,
+          76,
+          77,
+          79,
+          75,
+          75,
+          78,
+          76,
+          76,
+          75,
+          70,
+          73,
+          74,
+          75,
+          74,
+          75,
+          75
+        ]
+      },
+      {
+        "name": "Đorđe Vujadinović",
+        "positions": [
+          "ST!",
+          "CAM:71",
+          "RW:77",
+          "LW:79"
+        ],
+        "photo": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/85/Yugoslavia_nationalteam_1930.jpg/330px-Yugoslavia_nationalteam_1930.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+        "attrs": [
+          86,
+          81,
+          81,
+          85,
+          82,
+          85,
+          78,
+          82,
+          84,
+          81,
+          81,
+          76,
+          78,
+          82,
+          81,
+          80,
+          81,
+          81
+        ]
+      }
+    ]
+  },
+  "fixtures": [
+    {
+      "home": "FRA",
+      "away": "MEX",
+      "matchday": 1,
+      "kickoff": "1930-07-13"
+    },
+    {
+      "home": "ARG",
+      "away": "FRA",
+      "matchday": 1,
+      "kickoff": "1930-07-15"
+    },
+    {
+      "home": "YUG",
+      "away": "BRA",
+      "matchday": 1,
+      "kickoff": "1930-07-14"
+    },
+    {
+      "home": "ROU",
+      "away": "PER",
+      "matchday": 1,
+      "kickoff": "1930-07-14"
+    },
+    {
+      "home": "USA",
+      "away": "BEL",
+      "matchday": 1,
+      "kickoff": "1930-07-13"
+    },
+    {
+      "home": "CHI",
+      "away": "MEX",
+      "matchday": 2,
+      "kickoff": "1930-07-16"
+    },
+    {
+      "home": "CHI",
+      "away": "FRA",
+      "matchday": 2,
+      "kickoff": "1930-07-19"
+    },
+    {
+      "home": "YUG",
+      "away": "BOL",
+      "matchday": 2,
+      "kickoff": "1930-07-17"
+    },
+    {
+      "home": "URU",
+      "away": "PER",
+      "matchday": 2,
+      "kickoff": "1930-07-18"
+    },
+    {
+      "home": "USA",
+      "away": "PAR",
+      "matchday": 2,
+      "kickoff": "1930-07-17"
+    },
+    {
+      "home": "ARG",
+      "away": "MEX",
+      "matchday": 3,
+      "kickoff": "1930-07-19"
+    },
+    {
+      "home": "ARG",
+      "away": "CHI",
+      "matchday": 3,
+      "kickoff": "1930-07-22"
+    },
+    {
+      "home": "BRA",
+      "away": "BOL",
+      "matchday": 3,
+      "kickoff": "1930-07-20"
+    },
+    {
+      "home": "URU",
+      "away": "ROU",
+      "matchday": 3,
+      "kickoff": "1930-07-21"
+    },
+    {
+      "home": "PAR",
+      "away": "BEL",
+      "matchday": 3,
+      "kickoff": "1930-07-20"
+    }
+  ]
+}
