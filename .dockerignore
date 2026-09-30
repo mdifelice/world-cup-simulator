@@ -2,6 +2,12 @@
 **/target/
 **/dist/
 **/*.sqlite*
+# Only the real seed JSONs are needed in the build context (they get baked
+# into the image at /app/seed). Skip the db-snapshot, raw CSVs and any local
+# photos so the context stays small.
+data/*
+!data/seed/
+!data/seed/*.json
 server/data/
 client/data/
 .git/

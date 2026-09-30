@@ -24,6 +24,11 @@ RUN apt-get update \
 WORKDIR /app
 COPY --from=backend /app/target/release/wcs-server /usr/local/bin/wcs-server
 COPY --from=frontend /app/dist /app/static
+# Bake the real seed data into the image so ANY deployment (docker run, Render,
+# ECS …) boots with real squads even without a compose bind mount. It lives at
+# /app/seed, outside /app/data, so a persistent disk mounted at /app/data
+# can't shadow it; the server checks $WCS_DATA_DIR/seed first, then /app/seed.
+COPY data/seed/ /app/seed/
 
 ENV WCS_ADDR=0.0.0.0:8080 \
     WCS_DATA_DIR=/app/data \
@@ -32,6 +37,6 @@ ENV WCS_ADDR=0.0.0.0:8080 \
 EXPOSE 8080
 
 # Stateless runner: every container start discards the previous SQLite database
-# and rebuilds it from `data/seed/` (bind-mounted read-only at /app/data/seed),
-# so a fresh deploy always boots with the current real seed data.
-CMD ["sh", "-c", "rm -f /app/data/wcs.sqlite* && exec wcs-server"]
+# (in $WCS_DATA_DIR, so a mounted persistent disk is reset too) and rebuilds it
+# from the seed files, so a fresh deploy always boots with the current real data.
+CMD ["sh", "-c", "rm -f \"${WCS_DATA_DIR:-/app/data}\"/wcs.sqlite* && exec wcs-server"]

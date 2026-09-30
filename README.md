@@ -111,6 +111,20 @@ the `photos/` output. It is resolved, in order:
 Runtime artifacts (the `.sqlite*` database and raw CSV sources) are gitignored;
 only `data/seed/*.json` is committed.
 
+### Seed data in the container / cloud deploys
+
+The real seed files are baked into the Docker image at `/app/seed`, so any
+deployment that runs the image (plain `docker run`, Render, ECS …) boots with
+real data even without the compose bind mount. At startup the server looks for
+`{year}.json` in `$WCS_DATA_DIR/seed` first and then `/app/seed`; the Docker
+`CMD` wipes `$WCS_DATA_DIR/wcs.sqlite*` before launch so a persistent disk is
+reset and the database is rebuilt from the current seeds every start.
+
+When deploying to a host that keeps a persistent disk (e.g. a Render disk), make
+sure the seed files can be found — the baked `/app/seed` copy handles this
+automatically, so nothing extra is required as long as you run the published
+image.
+
 ## API overview (server, base `/api`)
 
 Reads are public. Writes (creating/editing tournaments, teams, players —

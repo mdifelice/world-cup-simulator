@@ -1,5 +1,5 @@
 use std::collections::{HashMap, HashSet};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use rusqlite::Connection;
 use serde::Deserialize;
@@ -647,13 +647,40 @@ fn base64_decode(s: &str) -> Result<Vec<u8>, ()> {
     Ok(out)
 }
 
+/// Candidate directories holding `seed/{year}.json`, in priority order:
+///   1. `$WCS_DATA_DIR/seed` (env override, or the repo `data/seed` found by
+///      walking up while developing);
+///   2. `/app/seed` — the seed files baked into the Docker image, outside
+///      `/app/data` so a persistent disk mounted there can't shadow them.
+///
+/// This is what lets a plain `docker run` / Render deploy (no compose bind
+/// mount) still boot with the real data.
+fn seed_search_dirs() -> Vec<PathBuf> {
+    let mut dirs = vec![Path::new(&data_dir()).join("seed")];
+    let baked = PathBuf::from("/app/seed");
+    if !dirs.contains(&baked) {
+        dirs.push(baked);
+    }
+    dirs
+}
+
+/// Resolve the seed file for an edition, returning the first match across
+/// [`seed_search_dirs`]. `None` means no seed file exists for that year.
+fn seed_path(year: i32) -> Option<PathBuf> {
+    let file = format!("{year}.json");
+    seed_search_dirs()
+        .into_iter()
+        .map(|d| d.join(&file))
+        .find(|p| p.is_file())
+}
+
 /// Seeds one edition from `seed/{year}.json`, falling back to demo rosters.
 fn seed_edition(conn: &Connection, year: i32) -> rusqlite::Result<()> {
-    let path = Path::new(&data_dir()).join("seed").join(format!("{year}.json"));
-    let text = match std::fs::read_to_string(&path) {
-        Ok(t) => t,
-        Err(_) => return seed_demo(conn, year),
+    let Some(path) = seed_path(year) else {
+        return seed_demo(conn, year);
     };
+    let text = std::fs::read_to_string(&path)
+        .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
     let file: SeedFile = serde_json::from_str(&text)
         .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
 
