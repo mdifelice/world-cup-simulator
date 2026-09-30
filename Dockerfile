@@ -29,7 +29,9 @@ ENV WCS_ADDR=0.0.0.0:8080 \
     WCS_DATA_DIR=/app/data \
     WCS_STATIC_DIR=/app/static
 
-VOLUME ["/app/data"]
 EXPOSE 8080
 
-CMD ["wcs-server"]
+# Stateless runner: every container start discards the previous SQLite database
+# and rebuilds it from `data/seed/` (bind-mounted read-only at /app/data/seed),
+# so a fresh deploy always boots with the current real seed data.
+CMD ["sh", "-c", "rm -f /app/data/wcs.sqlite* && exec wcs-server"]

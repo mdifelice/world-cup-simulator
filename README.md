@@ -66,8 +66,10 @@ docker compose up --build -d      # → http://localhost:8080
 ```
 
 The multi-stage `Dockerfile` builds the React frontend + Rust backend into one
-image serving both the SPA and the API. Data persists in a named volume, and
-`data/seed/` is bind-mounted so the container always seeds real data on boot.
+image serving both the SPA and the API. The container is **stateless**: each time
+it starts it discards the previous SQLite database and rebuilds it from the
+seed files in `data/seed/` (bind-mounted read-only), so a fresh deploy always
+boots with the current real data.
 
 ### 1. Backend (`server/`)
 

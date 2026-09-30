@@ -12,9 +12,5 @@ services:
       WCS_GOOGLE_CLIENT_SECRET: "${WCS_GOOGLE_CLIENT_SECRET:-}"
       WCS_ADDR: "0.0.0.0:8080"
     volumes:
-      - wcs-data:/app/data
       - ./data/seed:/app/data/seed:ro
     restart: unless-stopped
-
-volumes:
-  wcs-data:
