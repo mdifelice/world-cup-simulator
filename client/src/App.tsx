@@ -81,7 +81,8 @@ export default function App() {
   const [scrollToMatch, setScrollToMatch] = useState<number | null>(null);
   const [liveMatch, setLiveMatch] = useState<RunMatch | null>(null);
   const [matchDetail, setMatchDetail] = useState<RunMatch | null>(null);
-  const [draft, setDraft] = useState<LineupConfig | null>(null);
+  /** In-progress lineup edit for one match, kept while its dialog is closed. */
+  const [draft, setDraft] = useState<{ id: number; cfg: LineupConfig } | null>(null);
   /** Last committed XI, reused (prefilled) for following matches. */
   const [lastLineup, setLastLineup] = useState<LineupConfig | null>(null);
   const [ffRunning, setFfRunning] = useState(false);
@@ -135,14 +136,6 @@ export default function App() {
   const panelMatch =
     inlineMatch ?? (focusConfigured ? focusMatches[focusMatches.length - 1] ?? null : null);
   const panelDisabled = inlineMatch == null && panelMatch != null;
-
-  // Players banned for the panel's match (server-computed: red cards from the
-  // previous match AND longer injury bans, each with a match count).
-  const panelUnavailable = (() => {
-    if (!panelMatch) return [] as number[];
-    return panelMatch.unavailable ?? [];
-  })();
-  const panelBans = panelMatch?.bans ?? [];
 
   /** Match helpers used by the match-by-match fast-forward. */
   const isFocusMatch = (run: RunPayload, id: number) => {
@@ -233,27 +226,21 @@ export default function App() {
     saveToHistory(flow.run);
   };
 
-  /** Commit a drafted lineup and re-run the (deterministic) sim so only the
-   *  configured match changes, revealing up to that match day; `open` also
-   *  opens the live match popup once the run returns. */
-  const commitLineup = (cfg: LineupConfig, open: boolean) => {
-    if (!flow.run || !inlineMatch) return;
-    const key = matchKey(inlineMatch);
+  /** Commit a lineup for `m` from the hub's lineup dialog and open the live
+   *  match once the (deterministic) re-sim returns. */
+  const saveAndPlay = (m: RunMatch, cfg: LineupConfig) => {
+    if (!flow.run) return;
+    const key = matchKey(m);
     const newConfigs = { ...configs, [key]: cfg };
     setConfigs(newConfigs);
     setLastLineup(cfg);
     setDraft(null);
     const remaining = focusMatches.filter((x) => !newConfigs[matchKey(x)]);
-    postRun(remaining.length === 0, { matchId: inlineMatch.id, open }, newConfigs);
+    postRun(remaining.length === 0, { matchId: m.id, open: true }, newConfigs);
   };
 
   const replayMatch = (m: RunMatch) => {
     stopFF();
-    const key = matchKey(m);
-    if (!configs[key] && draft && inlineMatch?.id === m.id) {
-      commitLineup(draft, true);
-      return;
-    }
     setScrollToMatch(m.id);
     setLiveMatch(m);
   };
@@ -341,6 +328,7 @@ export default function App() {
     setFlow({ ...emptyFlow, tournament: t });
     setConfigs({});
     setLastLineup(null);
+    setDraft(null);
     setSeed(null);
     setInteractive(false);
     setLiveMatch(null);
@@ -358,6 +346,7 @@ export default function App() {
     setInteractive(true);
     setConfigs({});
     setLastLineup(null);
+    setDraft(null);
     setSeed(null);
     postRun(false, null, {});
     setStep("overview");
@@ -371,6 +360,7 @@ export default function App() {
     setInteractive(true);
     setConfigs({});
     setLastLineup(null);
+    setDraft(null);
     setSeed(null);
     postRun(true, null, {}, null);
     setStep("overview");
@@ -391,6 +381,7 @@ export default function App() {
     setInteractive(false);
     setConfigs({});
     setLastLineup(null);
+    setDraft(null);
     setSeed(run.seed);
     setFlow((f) => ({ ...f, tournament: t, run, revealed: new Set<number>() }));
     setStep("overview");
@@ -400,6 +391,7 @@ export default function App() {
     setFlow(emptyFlow);
     setConfigs({});
     setLastLineup(null);
+    setDraft(null);
     setSeed(null);
     setInteractive(false);
     setLiveMatch(null);
@@ -572,16 +564,15 @@ export default function App() {
             onOpenDetail={setMatchDetail}
             isConfigured={(m) => !!configs[matchKey(m)]}
             formationMatch={panelMatch}
-            formationInitial={
-              panelMatch
-                ? configs[matchKey(panelMatch)] ?? lastLineup ?? undefined
-                : undefined
-            }
             formationDisabled={panelDisabled}
-            formationUnavailable={panelUnavailable}
-            formationBans={panelBans}
-            draftReady={inlineMatch ? !configs[matchKey(inlineMatch)] && !!draft : false}
-            onDraft={setDraft}
+            lineupInitial={(m) =>
+              draft && draft.id === m.id
+                ? draft.cfg
+                : configs[matchKey(m)] ?? lastLineup ?? undefined
+            }
+            draft={draft}
+            onDraft={(m, cfg) => setDraft(cfg ? { id: m.id, cfg } : null)}
+            onSavePlay={saveAndPlay}
             onStart={() => postRun(false, null, configs)}
             onShare={openShare}
           />

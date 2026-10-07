@@ -29,6 +29,10 @@ data/*
 pwtest-shots/
 *.tmp
 
+# Local UI mockups + generated shots (reference design only, never committed)
+mockups/
+mockups-src.json
+
 # TS build info
 *.tsbuildinfo
 

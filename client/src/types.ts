@@ -464,6 +464,19 @@ export interface Momentum {
   away: number[];
 }
 
+/** Per-minute team stats recorded during the simulation (focus matches only).
+ *  All arrays are in walk order: index i holds minute i+1, matching Momentum.
+ *  `possH`/`possA` hold the territory gained that minute (0 when the minute had
+ *  no advancing possession); `shotsH`/`shotsA` and `onH`/`onA` count attempts. */
+export interface MatchStats {
+  possH: number[];
+  possA: number[];
+  shotsH: number[];
+  shotsA: number[];
+  onH: number[];
+  onA: number[];
+}
+
 export interface RedCard {
   minute: number;
   extra_time: boolean;
@@ -518,6 +531,10 @@ export interface RunMatch {
   /** Real fixture date (group stage only; knockouts have none). */
   date?: string | null;
   momentum: Momentum | null;
+  /** Per-walk-minute team stats for the live dialog (focus matches only).
+   *  Every array is in clock order, one entry per walked minute, so index i
+   *  holds minute i+1 — exactly like the momentum series. */
+  stats?: MatchStats | null;
   /** The focus team's banned players for this match, with match counts. */
   bans?: MatchBan[];
   /** Automatic live feed for the user's team's matches. */

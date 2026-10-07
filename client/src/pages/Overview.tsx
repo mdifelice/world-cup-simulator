@@ -1,10 +1,11 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useI18n, flagFor } from "../i18n";
+import { api } from "../api";
 import PlayerCard from "../components/PlayerCard";
 import FormationPanel from "../components/FormationPanel";
 import Bracket from "../components/Bracket";
 import { computeOverallStandings, finalPositionOf } from "../sim/standings";
-import type { LineupConfig, MatchBan, RunMatch, RunPayload } from "../types";
+import type { LineupConfig, Player, RunMatch, RunPayload } from "../types";
 
 /** Row used by the "Player Stats" table (engine stats or revealed-match fallback). */
 interface Entry {
@@ -32,17 +33,17 @@ interface Props {
   onReplay: (m: RunMatch) => void;
   onOpenDetail: (m: RunMatch) => void;
   isConfigured: (m: RunMatch) => boolean;
+  /** Match whose XI can still be viewed once nothing is left to play. */
   formationMatch: RunMatch | null;
-  formationInitial?: LineupConfig;
-  /** Read-only formation (team eliminated or cup finished). */
+  /** Read-only lineup (team eliminated or cup finished). */
   formationDisabled?: boolean;
-  /** Player ids suspended for the formation panel's match. */
-  formationUnavailable?: number[];
-  /** Match bans with reason and match counts for the formation panel's match. */
-  formationBans?: MatchBan[];
-  /** True when the inline editor's XI is complete and ready to play. */
-  draftReady: boolean;
-  onDraft?: (cfg: LineupConfig | null) => void;
+  /** Saved/drafted lineup for a match: the draft (if it belongs to that match)
+   *  wins over the committed config, which falls back to the last played XI. */
+  lineupInitial: (m: RunMatch) => LineupConfig | undefined;
+  draft: { id: number; cfg: LineupConfig } | null;
+  onDraft: (m: RunMatch, cfg: LineupConfig | null) => void;
+  /** Commit the dialog's XI and start the live match. */
+  onSavePlay: (m: RunMatch, cfg: LineupConfig) => void;
   onStart: () => void;
   onShare: () => void;
 }
@@ -88,12 +89,11 @@ export default function Overview({
   onOpenDetail,
   isConfigured,
   formationMatch,
-  formationInitial,
   formationDisabled = false,
-  formationUnavailable,
-  formationBans,
-  draftReady,
+  lineupInitial,
+  draft,
   onDraft,
+  onSavePlay,
   onStart,
   onShare,
 }: Props) {
@@ -104,6 +104,11 @@ export default function Overview({
   const [scorersOpen, setScorersOpen] = useState(false);
   const [standingsOpen, setStandingsOpen] = useState(false);
   const [countryFilter, setCountryFilter] = useState("");
+
+  // Lineup dialog (hub level): which match is being edited, plus the focus
+  // squad for the hero's XI chips.
+  const [lineupTarget, setLineupTarget] = useState<RunMatch | null>(null);
+  const [heroSquad, setHeroSquad] = useState<Player[] | null>(null);
 
   // Scroll a row into view inside the matches list only, never the page.
   const matchScrollRef = useRef<HTMLDivElement>(null);
@@ -483,6 +488,167 @@ export default function Overview({
     return firstUnrevealed(run, revealedIds)?.day ?? null;
   })();
   const nextMatch = run ? firstUnrevealed(run, revealedIds) : null;
+  const order = run?.order ?? [];
+
+  /** Focus-team fixtures in chronological order (hero + feed sections). */
+  const focusMatchList: RunMatch[] = [];
+  if (run) {
+    const byId = new Map(run.matches.map((m) => [m.id, m]));
+    for (const id of run.order) {
+      const m = byId.get(id);
+      if (m && isMine(m)) focusMatchList.push(m);
+    }
+  }
+
+  /** Hero: the focus team's next fixture, while any is left to play. */
+  const heroMatch = interactive
+    ? focusMatchList.find((m) => !revealedIds.has(m.id)) ?? null
+    : null;
+  const heroCfg = heroMatch
+    ? draft?.id === heroMatch.id
+      ? draft.cfg
+      : lineupInitial(heroMatch)
+    : undefined;
+  const heroXI: Player[] = [];
+  if (heroCfg && heroSquad) {
+    const byPlayer = new Map(heroSquad.map((p) => [p.id, p]));
+    for (const id of Object.values(heroCfg.starting).flat()) {
+      const p = byPlayer.get(id);
+      if (p) heroXI.push(p);
+    }
+  }
+
+  const allPreviousDone = (m: RunMatch) => {
+    const i = order.indexOf(m.id);
+    return order.slice(0, i).every((id) => revealedIds.has(id));
+  };
+
+  /** The dialog's Save & play: a complete XI exists (draft or saved). */
+  const dialogReady = lineupTarget
+    ? (draft?.id === lineupTarget.id
+        ? draft.cfg
+        : lineupInitial(lineupTarget)) != null
+    : false;
+
+  // The hero's XI chips come from the focus squad (fetched once a hero exists).
+  useEffect(() => {
+    let live = true;
+    if (!heroMatch || focusId == null || !run) {
+      setHeroSquad(null);
+      return;
+    }
+    api.players(focusId, run.tournament_id).then(
+      (p) => {
+        if (live) setHeroSquad(p);
+      },
+      () => {
+        if (live) setHeroSquad(null);
+      },
+    );
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [heroMatch?.id, focusId, run?.tournament_id]);
+
+  const renderRow = (m: RunMatch) => {
+    const done = revealedIds.has(m.id);
+    const isNext = m.id === nextMatch?.id;
+    const mine = isMine(m);
+    const prevDone = allPreviousDone(m);
+    return (
+      <div
+        key={m.id}
+        data-id={m.id}
+        className={
+          "match-row" +
+          (done ? " done" : "") +
+          (isNext ? " next" : "") +
+          (mine ? " mine" : "") +
+          (m.id === scrollToId ? " ff-target" : "")
+        }
+        onClick={done ? () => onOpenDetail(m) : undefined}
+        title={done ? t("hub.viewResult") : undefined}
+        role={done ? "button" : undefined}
+      >
+        <span className="mr-round">
+          <span className="mr-stage">{stage(m.stage_name)}</span>
+          {m.date && <span className="mr-date">{shortDate(m.date)}</span>}
+        </span>
+        <span className={"mr-team home" + (m.home_team_id === focusId ? " focus-tag" : "")}>
+          {flagFor(m.home_team_name)} {country(m.home_team_name)}
+        </span>
+        <span className="mr-score">
+          {done ? (
+            <>
+              <span className="mr-score-main">
+                {m.home_score}–{m.away_score}
+                {(m.reds?.length ?? 0) > 0 && (
+                  <span className="red-card tiny" aria-hidden />
+                )}
+              </span>
+              {m.penalties && (
+                <span className="pens">
+                  {t("match.pensScore", {
+                    home: m.penalties.home_score,
+                    away: m.penalties.away_score,
+                  })}
+                </span>
+              )}
+            </>
+          ) : (
+            "–"
+          )}
+        </span>
+        <span className={"mr-team away" + (m.away_team_id === focusId ? " focus-tag" : "")}>
+          {flagFor(m.away_team_name)} {country(m.away_team_name)}
+        </span>
+        <span className="mr-action">
+          {!done && mine && interactive && prevDone && (
+            <button
+              className="btn play msg"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isConfigured(m)) onReplay(m);
+                else setLineupTarget(m);
+              }}
+              title={isConfigured(m) ? undefined : t("hub.editLineup")}
+            >
+              ▶ {t("hub.play")}
+            </button>
+          )}
+          {!done && !mine && prevDone && (
+            <button className="btn sim msg" onClick={() => onSimulate(m)}>
+              {t("hub.simulate")}
+            </button>
+          )}
+          {done && <span className="mr-done">✓</span>}
+        </span>
+      </div>
+    );
+  };
+
+  /** Single auto-scrolling match list: current matchday plus earlier results
+   *  (group fixtures stay visible for context). */
+  const feedRows = (run?.matches ?? [])
+    .filter(
+      (m) =>
+        currentDay == null ||
+        m.day <= currentDay ||
+        m.stage_key === "GROUP",
+    )
+    .slice()
+    .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? "") || a.id - b.id);
+
+  /** Commit the dialog's XI and start the live match. */
+  const savePlay = () => {
+    if (!lineupTarget) return;
+    const cfg =
+      draft?.id === lineupTarget.id ? draft.cfg : lineupInitial(lineupTarget);
+    if (!cfg) return;
+    onSavePlay(lineupTarget, cfg);
+    setLineupTarget(null);
+  };
 
   return (
     <section>
@@ -542,128 +708,97 @@ export default function Overview({
         <>
           <div className="hub-grid">
             <div className="hub-main">
+              {heroMatch && (
+                <section className="hero">
+                  <div className="hero-top">
+                    <span className="stage-pill">🏆 {stage(heroMatch.stage_name)}</span>
+                    <span className="hero-when">
+                      {t("match.day", { day: heroMatch.day })}
+                      {heroMatch.date ? ` · ${shortDate(heroMatch.date)}` : ""}
+                    </span>
+                  </div>
+                  <div className="hero-teams">
+                    <span className="hero-side">
+                      <span className="hero-flag">{flagFor(heroMatch.home_team_name)}</span>
+                      <span className="hero-name">{country(heroMatch.home_team_name)}</span>
+                    </span>
+                    <span className="hero-vs">–</span>
+                    <span className="hero-side away">
+                      <span className="hero-flag">{flagFor(heroMatch.away_team_name)}</span>
+                      <span className="hero-name">{country(heroMatch.away_team_name)}</span>
+                    </span>
+                  </div>
+                  <div className="hero-line">
+                    {heroCfg ? (
+                      <>
+                        <span className="hero-chip">{heroCfg.formation}</span>
+                        <span className="hero-chip">{heroCfg.strategy}</span>
+                        <span className="mini-xi">
+                          {heroXI.map((p) => (
+                            <span
+                              key={p.id}
+                              className={"ava t" + (p.id % 4)}
+                              data-i={initials(p.name)}
+                            >
+                              {p.photo_url ? (
+                                <img
+                                  src={p.photo_url}
+                                  alt=""
+                                  onError={(e) => e.currentTarget.remove()}
+                                />
+                              ) : null}
+                            </span>
+                          ))}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="hero-chip">{t("hub.noLineup")}</span>
+                    )}
+                  </div>
+                  <div className="hero-cta">
+                    <button
+                      className="btn gold big"
+                      disabled={!allPreviousDone(heroMatch)}
+                      onClick={() => {
+                        if (isConfigured(heroMatch)) onReplay(heroMatch);
+                        else setLineupTarget(heroMatch);
+                      }}
+                      title={
+                        !allPreviousDone(heroMatch)
+                          ? t("hub.playDisabled")
+                          : isConfigured(heroMatch)
+                            ? undefined
+                            : t("hub.editLineup")
+                      }
+                    >
+                      ▶ {t("hub.play")}
+                    </button>
+                    <button
+                      className="btn ghost"
+                      onClick={() => setLineupTarget(heroMatch)}
+                    >
+                      {t("hub.editLineup")}
+                    </button>
+                  </div>
+                </section>
+              )}
+
+              {interactive &&
+                focusId != null &&
+                formationMatch &&
+                !heroMatch && (
+                  <button
+                    className="btn ghost hero-strip"
+                    onClick={() => setLineupTarget(formationMatch)}
+                  >
+                    {t("hub.formation")}
+                  </button>
+                )}
+
               <div className="match-scroll" ref={matchScrollRef}>
                 {run.matches.length === 0 && <p className="hint">{t("cup.noMatches")}</p>}
-                {run.matches
-                  .filter(
-                    (m) =>
-                      currentDay == null ||
-                      m.day <= currentDay ||
-                      m.stage_key === "GROUP",
-                  )
-                  .slice()
-                  .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? "") || a.id - b.id)
-                  .map((m) => {
-                  const done = revealedIds.has(m.id);
-                  const isNext = m.id === nextMatch?.id;
-                  const mine = isMine(m);
-                  // Play button only enabled if all previous matches in chronological order are done
-                  const idx = run.order.indexOf(m.id);
-                  const allPreviousDone = run.order.slice(0, idx).every((id) => revealedIds.has(id));
-                  return (
-                    <div
-                      key={m.id}
-                      data-id={m.id}
-                      className={
-                        "match-row" +
-                        (done ? " done" : "") +
-                        (isNext ? " next" : "") +
-                        (mine ? " mine" : "") +
-                        (m.id === scrollToId ? " ff-target" : "")
-                      }
-                      onClick={done ? () => onOpenDetail(m) : undefined}
-                      title={done ? t("hub.viewResult") : undefined}
-                      role={done ? "button" : undefined}
-                    >
-                      <span className="mr-round">
-                        <span className="mr-stage">{stage(m.stage_name)}</span>
-                        {m.date && <span className="mr-date">{shortDate(m.date)}</span>}
-                      </span>
-                      <span className={"mr-team home" + (m.home_team_id === focusId ? " focus-tag" : "")}>
-                        {flagFor(m.home_team_name)} {country(m.home_team_name)}
-                      </span>
-                      <span className="mr-score">
-                        {done ? (
-                          <>
-                            <span className="mr-score-main">
-                              {m.home_score}–{m.away_score}
-                              {(m.reds?.length ?? 0) > 0 && (
-                                <span className="red-card tiny" aria-hidden />
-                              )}
-                            </span>
-                            {m.penalties && (
-                              <span className="pens">
-                                {t("match.pensScore", {
-                                  home: m.penalties.home_score,
-                                  away: m.penalties.away_score,
-                                })}
-                              </span>
-                            )}
-                          </>
-                        ) : (
-                          "–"
-                        )}
-                      </span>
-                      <span className={"mr-team away" + (m.away_team_id === focusId ? " focus-tag" : "")}>
-                        {flagFor(m.away_team_name)} {country(m.away_team_name)}
-                      </span>
-                      <span className="mr-action">
-                        {!done && mine && interactive && allPreviousDone && (
-                          <button
-                            className="btn play msg"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onReplay(m);
-                            }}
-                            disabled={
-                              !isConfigured(m) &&
-                              !(formationMatch?.id === m.id && draftReady)
-                            }
-                            title={
-                              isConfigured(m) ||
-                              (formationMatch?.id === m.id && draftReady)
-                                ? undefined
-                                : t("hub.playDisabled")
-                            }
-                          >
-                            ▶ {t("hub.play")}
-                          </button>
-                        )}
-                        {!done && !mine && allPreviousDone && (
-                          <button className="btn sim msg" onClick={() => onSimulate(m)}>
-                            {t("hub.simulate")}
-                          </button>
-                        )}
-                        {done && <span className="mr-done">✓</span>}
-                      </span>
-                    </div>
-                  );
-                })}
+                {feedRows.map(renderRow)}
               </div>
-
-              {interactive && focusId != null && formationMatch && run && (
-                <div>
-                  <FormationPanel
-                    key={formationMatch.id}
-                    tournamentId={run.tournament_id}
-                    teamId={focusId}
-                    teamName={
-                      formationMatch.home_team_id === focusId
-                        ? formationMatch.home_team_name
-                        : formationMatch.away_team_name
-                    }
-                    match={formationMatch}
-                    shirtNumbers={run.shirt_numbers}
-                    initial={formationInitial}
-                    year={run.year}
-                    disabled={formationDisabled}
-                    unavailable={formationUnavailable}
-                    bans={formationBans}
-                    onReady={onDraft}
-                    finalPosition={formationDisabled ? focusFinalPosition : null}
-                  />
-                </div>
-              )}
             </div>
 
             <aside className="hub-side">
@@ -782,6 +917,77 @@ export default function Overview({
             </aside>
           </div>
         </>
+      )}
+
+      {lineupTarget && run && focusId != null && (
+        <div className="modal-backdrop" onClick={() => setLineupTarget(null)}>
+          <div className="lineup-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <div className="modal-heading">
+                <div className="modal-title">{t("lineup.dialogTitle")}</div>
+                <div className="modal-sub">
+                  {t("lineup.subtitle", {
+                    day: lineupTarget.day,
+                    stage: stage(lineupTarget.stage_name),
+                    opponent: country(
+                      lineupTarget.home_team_id === focusId
+                        ? lineupTarget.away_team_name
+                        : lineupTarget.home_team_name,
+                    ),
+                  })}
+                </div>
+              </div>
+              <button
+                className="live-x"
+                onClick={() => setLineupTarget(null)}
+                aria-label={t("match.close")}
+                title={t("match.close")}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="modal-body">
+              <FormationPanel
+                key={lineupTarget.id}
+                tournamentId={run.tournament_id}
+                teamId={focusId}
+                teamName={
+                  lineupTarget.home_team_id === focusId
+                    ? lineupTarget.home_team_name
+                    : lineupTarget.away_team_name
+                }
+                match={lineupTarget}
+                shirtNumbers={run.shirt_numbers}
+                initial={lineupInitial(lineupTarget)}
+                year={run.year}
+                disabled={formationDisabled}
+                unavailable={lineupTarget.unavailable}
+                bans={lineupTarget.bans}
+                onReady={(cfg) => onDraft(lineupTarget, cfg)}
+                finalPosition={formationDisabled ? focusFinalPosition : null}
+                hideHead
+              />
+            </div>
+            <div className="modal-foot">
+              {formationDisabled ? (
+                <button
+                  className="btn ghost"
+                  onClick={() => setLineupTarget(null)}
+                >
+                  {t("match.close")}
+                </button>
+              ) : (
+                <button
+                  className="btn gold"
+                  disabled={!dialogReady}
+                  onClick={savePlay}
+                >
+                  {t("lineup.confirm")}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
       {bracketOpen && run && hasKnockout && (

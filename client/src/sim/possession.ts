@@ -199,6 +199,15 @@ export interface MinuteResult {
   /** Cumulative minute scoring rate for home (above 0.5 favours home). */
   homePts: number;
   awayPts: number;
+  /** Territory gained by home/away this minute (zone advances, no shot/goal bonus). */
+  terrH: number;
+  terrA: number;
+  /** Shots taken by home/away this minute. */
+  shotsH: number;
+  shotsA: number;
+  /** Shots on target by home/away (drawn from the optional stats stream). */
+  onH: number;
+  onA: number;
 }
 
 const pick = (unit: () => number, rows: PlayerRow[], skip?: number): PlayerRow | null => {
@@ -278,17 +287,28 @@ const markerFor = (unit: () => number, s: PlayShape, z: number): PlayerRow | nul
  *  the zones and, when the attacking side breaks into the box, ends in a shot.
  *  Losing a duel turns the ball over and the possession ends (no shot), which
  *  keeps shot counts and strike rates close to real football while the per-player
- *  duels still drive timing, momentum and sendings-off effects. */
+ *  duels still drive timing, momentum and sendings-off effects.
+ *
+ *  `statsUnit` (optional) feeds a *separate* RNG stream used only for the
+ *  display-only on-target bookkeeping, so recording stats never advances the
+ *  main stream and the scoreline is bit-for-bit unchanged. */
 export function simulateMinute(
   unit: () => number,
   home: PlayShape,
   away: PlayShape,
   minute: number,
   goals: number = 1,
+  statsUnit?: () => number,
 ): MinuteResult {
   let homePts = 0;
   let awayPts = 0;
   let shots = 0;
+  let terrH = 0;
+  let terrA = 0;
+  let shotsH = 0;
+  let shotsA = 0;
+  let onH = 0;
+  let onA = 0;
   let goal: MinuteResult["goal"] = null;
   const order = unit() < 0.5 ? [home, away] : [away, home];
 
@@ -296,7 +316,9 @@ export function simulateMinute(
     if (goal) break;
     const def = atk.id === home.id ? away : home;
     const atkId = atk.id;
+    const isHome = atkId === home.id;
     const scoring = atkId === home.id ? (v: number) => (homePts += v) : (v: number) => (awayPts += v);
+    const terr = isHome ? (v: number) => (terrH += v) : (v: number) => (terrA += v);
     const shortDef = def.redMinute != null && minute > def.redMinute;
 
     let z = 0;
@@ -317,12 +339,14 @@ export function simulateMinute(
         const jump = unit() < 0.14 + atk.risk * 0.06 ? 2 : 1;
         z = Math.min(4, z + jump);
         scoring(z);
+        terr(z);
         if (z >= 4) inBox = true;
       } else {
         // Turnover: a pressing side can win it straight back high in the box.
         if (z >= 2 && def.press > 0.45 && unit() < (def.press - 0.45) * 0.8) {
           z = 3;
           scoring(3);
+          terr(3);
           inBox = true;
         }
         break;
@@ -335,6 +359,8 @@ export function simulateMinute(
     const shooter = finisherFor(unit, atk);
     if (!shooter) continue;
     shots += 1;
+    if (isHome) shotsH += 1;
+    else shotsA += 1;
     const gkOverall = def.gk ? def.gk.overall : def.gkAv;
     const fromRange = def.deep > 0.65 ? 1 : 0;
     const cap = goals <= 1 ? 0.30 : Math.min(0.45, 0.30 * (1 + 0.12 * (goals - 1)));
@@ -351,14 +377,25 @@ export function simulateMinute(
       ),
     );
     scoring(3);
-    if (unit() < pGoal) {
+    const scored = unit() < pGoal;
+    // On-target: every goal counts, the rest come from the separate stats
+    // stream (≈1.6× the goal chance, clamped so the aggregate lands near the
+    // real-world ≈30% of shots on target).
+    const onTarget =
+      scored ||
+      (statsUnit != null && statsUnit() < clampN(pGoal * 1.6, 0.12, 0.5));
+    if (onTarget) {
+      if (isHome) onH += 1;
+      else onA += 1;
+    }
+    if (scored) {
       goal = { teamId: atkId, scorer: shooter };
       scoring(8);
       break;
     }
   }
 
-  return { goal, shots, homePts, awayPts };
+  return { goal, shots, homePts, awayPts, terrH, terrA, shotsH, shotsA, onH, onA };
 }
 
 /** Momentum sample (0..1; above 0.5 favours home) for a minute. */

@@ -198,6 +198,33 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
     [m.reds, min],
   );
 
+  // Team stats (possession by territory, shots, on target) summed up to the
+  // walked minute the clock is showing — the arrays are precomputed full
+  // length by the sim, so this is a cheap prefix sum per render.
+  const statsUpTo = useMemo(() => {
+    const s = m.stats;
+    if (!s) return null;
+    const n = Math.max(0, Math.min(min, totalLength));
+    const sum = (a: number[]) => {
+      let v = 0;
+      const end = Math.min(n, a.length);
+      for (let i = 0; i < end; i++) v += a[i];
+      return v;
+    };
+    const ph = sum(s.possH);
+    const pa = sum(s.possA);
+    const total = ph + pa;
+    const possH = total > 0 ? Math.round((100 * ph) / total) : 50;
+    return {
+      possH,
+      possA: 100 - possH,
+      shotsH: sum(s.shotsH),
+      shotsA: sum(s.shotsA),
+      onH: sum(s.onH),
+      onA: sum(s.onA),
+    };
+  }, [m.stats, min, totalLength]);
+
   // Goals, cards and events share one timeline, newest first, ties by extra time then
   // goals before cards before events. Penalty shootout kicks are appended in a later
   // lane (130+) so they always sort on top once revealed. Photos and shirt numbers ride
@@ -506,6 +533,23 @@ export const LiveMatch = forwardRef<LiveMatchControls, Props>(({
           <span className="match-clock">{labelOf(clock, min)}</span>
         )}
       </p>
+
+      {statsUpTo && (
+        <div className="lv-stats" aria-label={t("match.teamStats")}>
+          <div className="lv-stat">
+            <div className="s-v">{statsUpTo.possH}%–{statsUpTo.possA}%</div>
+            <div className="s-l">{t("match.possession")}</div>
+          </div>
+          <div className="lv-stat">
+            <div className="s-v">{statsUpTo.shotsH}–{statsUpTo.shotsA}</div>
+            <div className="s-l">{t("match.shots")}</div>
+          </div>
+          <div className="lv-stat">
+            <div className="s-v">{statsUpTo.onH}–{statsUpTo.onA}</div>
+            <div className="s-l">{t("match.onTarget")}</div>
+          </div>
+        </div>
+      )}
 
       {momentum && series && series.length > 0 && (
         <div className="chart-card">

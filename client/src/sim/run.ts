@@ -36,6 +36,7 @@ import {
   type Momentum,
   type RedCard,
   type MatchBan,
+  type MatchStats,
   type LiveEvent,
   type PenKick,
   type PenResult,
@@ -1340,6 +1341,11 @@ class Engine {
     this.rng = Rng.from_seed(
       match_seed(this.runSeed, key, this.day, BigInt(home), BigInt(away), knockout),
     );
+    // Display-only stats stream (shots on target): a separate seed so the
+    // bookkeeping never advances the main RNG — scores stay bit-identical.
+    const statsRng = Rng.from_seed(
+      match_seed(this.runSeed, `${key}#stats`, this.day, BigInt(home), BigInt(away), knockout),
+    );
 
     const cfg = this.lineups[key] ?? null;
     const focus = this.focus;
@@ -1438,7 +1444,13 @@ class Engine {
     // same order (the RNG sequence is untouched) while the final series reads
     // naturally: 1..45, HT stoppage, 46..90, FT stoppage, ET…
     const momentumRecs: Array<[number, number]> = [];
-    const rec = (mm: number, r: MinuteResult) => momentumRecs.push([mm, momentumOf(r)]);
+    // Parallel per-minute team stats (territory / shots / on target), recorded
+    // as (walked minute, [terrH, terrA, shotsH, shotsA, onH, onA]) pairs.
+    const statRecs: Array<[number, number[]]> = [];
+    const rec = (mm: number, r: MinuteResult) => {
+      momentumRecs.push([mm, momentumOf(r)]);
+      statRecs.push([mm, [r.terrH, r.terrA, r.shotsH, r.shotsA, r.onH, r.onA]]);
+    };
 
     // Simulate from minute to minute (regulation, stoppage or extra time).
     // Every minute is a sequence of possession duels; AI coaches retune their
@@ -1451,7 +1463,14 @@ class Engine {
         retune(aShape, aiStrategy(aw - hs, minute, awayRed != null), awayRed ? awayRed[0] : null);
       applyKeeper(hShape, homePlan, minute);
       applyKeeper(aShape, awayPlan, minute);
-      const r = simulateMinute(() => this.rng.unit(), hShape, aShape, minute, ERA_GOALS[this.year] ?? 1);
+      const r = simulateMinute(
+        () => this.rng.unit(),
+        hShape,
+        aShape,
+        minute,
+        ERA_GOALS[this.year] ?? 1,
+        () => statsRng.unit(),
+      );
       if (r.goal) {
         const team = r.goal.teamId;
         const [xi, opp, red] = team === home ? [homeXi, awayXi, homeRed] : [awayXi, homeXi, awayRed];
@@ -1516,6 +1535,7 @@ class Engine {
     }
 
     const momentumSeries = momentumRecs.sort((a, b) => a[0] - b[0]).map(([, v]) => v);
+    const statsSeries = statRecs.sort((a, b) => a[0] - b[0]).map(([, v]) => v);
 
     if (usePens && winner == null) {
       const p = this.playPenalties(home, homeXi, away, awayXi);
@@ -1597,6 +1617,18 @@ class Engine {
         ? { home: momentumSeries, away: momentumSeries.map((v) => 1 - v) }
         : null;
 
+    const stats: MatchStats | null =
+      this.focus === home || this.focus === away
+        ? {
+            possH: statsSeries.map((v) => v[0]),
+            possA: statsSeries.map((v) => v[1]),
+            shotsH: statsSeries.map((v) => v[2]),
+            shotsA: statsSeries.map((v) => v[3]),
+            onH: statsSeries.map((v) => v[4]),
+            onA: statsSeries.map((v) => v[5]),
+          }
+        : null;
+
     const resultLabel = this.resultLabel(hs, aw, extraTime, penalties);
     const matchId = this.nextId;
     this.nextId += 1;
@@ -1637,6 +1669,7 @@ class Engine {
       unavailable,
       date,
       momentum,
+      stats,
       bans,
       events,
       added_time_ht: addedHt,

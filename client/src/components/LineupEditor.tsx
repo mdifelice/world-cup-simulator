@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent,
+} from "react";
 import { canonSlot, useI18n } from "../i18n";
 import type { LineupConfig, MatchBan, Player, Strategy } from "../types";
 import {

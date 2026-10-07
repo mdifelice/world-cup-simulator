@@ -18,6 +18,8 @@ interface Props {
   onReady?: (cfg: LineupConfig | null) => void;
   /** Final rank shown next to the title when the team is out of the cup. */
   finalPosition?: number | null;
+  /** Hide the built-in head (the lineup dialog renders its own). */
+  hideHead?: boolean;
 }
 
 export default function FormationPanel({
@@ -33,6 +35,7 @@ export default function FormationPanel({
   bans,
   onReady,
   finalPosition = null,
+  hideHead = false,
 }: Props) {
   const { t, stage, country } = useI18n();
   const [squad, setSquad] = useState<Player[] | null>(null);
@@ -52,23 +55,25 @@ export default function FormationPanel({
 
   return (
     <div className="form-panel form-wrap">
-      <div className="form-head">
-        <h2 className="sec-title">
-          {t("hub.formation")}
-          {disabled && finalPosition != null && (
-            <span className="form-final-pos">
-              {t("hub.finalPos", { n: finalPosition })}
-            </span>
-          )}
-        </h2>
-        <p className="hint">
-          {country(teamName)} · {t("lineup.subtitle", {
-            day: match.day,
-            stage: stage(match.stage_name),
-            opponent: country(opponent),
-          })}
-        </p>
-      </div>
+      {!hideHead && (
+        <div className="form-head">
+          <h2 className="sec-title">
+            {t("hub.formation")}
+            {disabled && finalPosition != null && (
+              <span className="form-final-pos">
+                {t("hub.finalPos", { n: finalPosition })}
+              </span>
+            )}
+          </h2>
+          <p className="hint">
+            {country(teamName)} · {t("lineup.subtitle", {
+              day: match.day,
+              stage: stage(match.stage_name),
+              opponent: country(opponent),
+            })}
+          </p>
+        </div>
+      )}
       {error && <p className="error">{error}</p>}
       {!squad && !error && <p className="hint">{t("squad.loading")}</p>}
       {squad && (
